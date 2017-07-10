@@ -60,6 +60,7 @@ object LoaderSpec : SubjectSpek<Loader>({
         }
         on("load from HTTP URL") {
             Spark.get("/source") { _, _ -> "type = http" }
+            Thread.sleep(10000)
             val config = subject.url(URL("http://localhost:4567/source"))
             it("should return a config which contains value in URL") {
                 assertThat(config[SourceType.type], equalTo("http"))

@@ -10,6 +10,7 @@ import org.jetbrains.spek.api.dsl.it
 import org.jetbrains.spek.api.dsl.on
 import org.jetbrains.spek.subject.SubjectSpek
 import spark.Spark.get
+import spark.Spark.init
 import spark.Spark.stop
 import java.net.URL
 
@@ -70,6 +71,7 @@ object SourceProviderSpec : SubjectSpek<SourceProvider>({
         }
         on("create source from HTTP URL") {
             get("/source") { _, _ -> "type = http" }
+            init()
             val url = "http://localhost:4567/source"
             val source = subject.fromUrl(URL(url))
             it("should create from the specified URL") {
