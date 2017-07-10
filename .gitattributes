@@ -1,0 +1,19 @@
+# text stuff
+* text=lf
+*.bat text eol=crlf
+*.cmd text eol=crlf
+*.java text eol=lf
+*.kt text eol=lf
+*.md text
+*.properties text eol=lf
+*.scala text eol=lf
+*.sh text eol=lf
+.gitattributes text eol=lf
+.gitignore text eol=lf
+build.gradle text eol=lf
+gradlew text eol=lf
+gradlew.bat text eol=crlf
+gradle/wrapper/gradle-wrapper.properties text eol=lf
+
+#binary
+*.jar binary
