@@ -72,23 +72,22 @@ object SourceProviderSpec : SubjectSpek<SourceProvider>({
         on("create source from HTTP URL") {
             get("/source") { _, _ -> "type = http" }
             val urlPath = "http://localhost:4567/source"
-            var url: URL? = null
+            var source: Source? = null
             // wait until server ready
             for (x in 1..10000) {
                 try {
-                    url = URL(urlPath)
+                    source = subject.fromUrl(URL(urlPath))
                     break
                 } catch (e: ConnectException) {
                     Thread.sleep(1)
                     continue
                 }
             }
-            val source = subject.fromUrl(url!!)
             it("should create from the specified URL") {
-                assertThat(source.context["url"], equalTo(urlPath))
+                assertThat(source!!.context["url"], equalTo(urlPath))
             }
             it("should return a source which contains value in URL") {
-                assertThat(source.get("type").toText(), equalTo("http"))
+                assertThat(source!!.get("type").toText(), equalTo("http"))
             }
             stop()
         }
