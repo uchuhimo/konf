@@ -10,8 +10,8 @@ import org.jetbrains.spek.api.dsl.it
 import org.jetbrains.spek.api.dsl.on
 import org.jetbrains.spek.subject.SubjectSpek
 import spark.Spark.get
-import spark.Spark.init
 import spark.Spark.stop
+import java.net.ConnectException
 import java.net.URL
 
 object SourceProviderSpec : SubjectSpek<SourceProvider>({
@@ -71,11 +71,21 @@ object SourceProviderSpec : SubjectSpek<SourceProvider>({
         }
         on("create source from HTTP URL") {
             get("/source") { _, _ -> "type = http" }
-            init()
-            val url = "http://localhost:4567/source"
-            val source = subject.fromUrl(URL(url))
+            val urlPath = "http://localhost:4567/source"
+            var url: URL? = null
+            // wait until server ready
+            for (x in 1..10000) {
+                try {
+                    url = URL(urlPath)
+                    break
+                } catch (e: ConnectException) {
+                    Thread.sleep(1)
+                    continue
+                }
+            }
+            val source = subject.fromUrl(url!!)
             it("should create from the specified URL") {
-                assertThat(source.context["url"], equalTo(url))
+                assertThat(source.context["url"], equalTo(urlPath))
             }
             it("should return a source which contains value in URL") {
                 assertThat(source.get("type").toText(), equalTo("http"))
