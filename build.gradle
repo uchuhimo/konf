@@ -106,6 +106,7 @@ tasks.withType(JavaCompile) {
 afterEvaluate {
     junitPlatformTest {
         environment "source.test.type", "env"
+        jvmArgs "-Djava.net.preferIPv4Stack=true"
     }
 }
 
