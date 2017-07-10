@@ -77,6 +77,7 @@ object SourceProviderSpec : SubjectSpek<SourceProvider>({
             for (x in 1..10000) {
                 try {
                     source = subject.fromUrl(URL(urlPath))
+                    println("wait for $x ms when testing source provider")
                     break
                 } catch (e: ConnectException) {
                     Thread.sleep(1)

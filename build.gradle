@@ -106,7 +106,6 @@ tasks.withType(JavaCompile) {
 afterEvaluate {
     junitPlatformTest {
         environment "source.test.type", "env"
-        jvmArgs "-Djava.net.preferIPv4Stack=true"
     }
 }
 
@@ -132,7 +131,8 @@ allOpen {
 jmh {
     iterations = 10 // Number of measurement iterations to do.
     //benchmarkMode = ["thrpt"] // Benchmark mode. Available modes are: [Throughput/thrpt, AverageTime/avgt, SampleTime/sample, SingleShotTime/ss, All/all]
-    batchSize = 1 // Batch size: number of benchmark method calls per operation. (some benchmark modes can ignore this setting)
+    batchSize = 1
+    // Batch size: number of benchmark method calls per operation. (some benchmark modes can ignore this setting)
     fork = 1 // How many times to forks a single benchmark. Use 0 to disable forking altogether
     //operationsPerInvocation = 1 // Operations per invocation.
     timeOnIteration = "1s" // Time to spend at each measurement iteration.

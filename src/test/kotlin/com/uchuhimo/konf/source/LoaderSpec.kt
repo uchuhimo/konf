@@ -66,6 +66,7 @@ object LoaderSpec : SubjectSpek<Loader>({
             for (x in 1..10000) {
                 try {
                     config = subject.url(URL("http://localhost:4567/source"))
+                    println("wait for $x ms when testing loader")
                     break
                 } catch (e: ConnectException) {
                     Thread.sleep(1)
