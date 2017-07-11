@@ -31,8 +31,6 @@ plugins {
     id "org.jetbrains.kotlin.plugin.allopen" version "1.1.3-2"
     id "me.champeau.gradle.jmh" version "0.4.4"
     id "com.diffplug.gradle.spotless" version "3.4.0"
-    id "nebula.javadoc-jar" version "5.1.0"
-    id "nebula.source-jar" version "5.1.0"
     id "io.spring.dependency-management" version "1.0.3.RELEASE"
 }
 
@@ -207,8 +205,6 @@ dokka {
     outputDirectory = javadoc.destinationDir
 }
 
-javadoc.dependsOn dokka
-
 publish {
     userOrg = "uchuhimo"
     groupId = project.group
@@ -225,14 +221,17 @@ publish {
 }
 
 afterEvaluate {
-    mavenJavadocJar.dependsOn javadocJar
-    mavenSourcesJar.dependsOn sourceJar
+    mavenJavadocJar.dependsOn dokka
     bintrayUpload.dependsOn(jar, mavenJavadocJar, mavenSourcesJar, check)
 }
+
+task install
 
 tasks.whenTaskAdded { task ->
     if (task.name == "generatePomFileForMavenPublication") {
         bintrayUpload.dependsOn task
+    } else if (task.name == "publishToMavenLocal") {
+        install.dependsOn task
     }
 }
 
