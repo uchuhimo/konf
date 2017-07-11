@@ -1,11 +1,7 @@
 buildscript {
     ext {
         aliyunMavenUrl = "http://maven.aliyun.com/nexus/content/groups/public"
-        jacksonVersion = "2.8.9"
-        junitJupiterVersion = "5.0.0-M4"
         junitPlatformVersion = "1.0.0-M4"
-        kotlinVersion = "1.1.3"
-        spekVersion = "1.1.2"
 
         if (project.rootProject.file("private.properties").exists()) {
             Properties properties = new Properties()
@@ -36,6 +32,7 @@ plugins {
     id "com.diffplug.gradle.spotless" version "3.4.0"
     id "nebula.javadoc-jar" version "5.1.0"
     id "nebula.source-jar" version "5.1.0"
+    id "io.spring.dependency-management" version "1.0.3.RELEASE"
 }
 
 apply plugin: "java"
@@ -56,36 +53,80 @@ task wrapper(type: Wrapper) {
     distributionType = Wrapper.DistributionType.ALL
 }
 
-dependencies {
-    compile "org.jetbrains.kotlin:kotlin-stdlib-jre8:$kotlinVersion"
-    compile "org.jetbrains.kotlin:kotlin-reflect:$kotlinVersion"
-    compile "com.uchuhimo:kotlinx-bimap:0.2"
-    compile "com.typesafe:config:1.3.1"
-    compile "com.fasterxml.jackson.core:jackson-core:$jacksonVersion"
-    compile "com.fasterxml.jackson.core:jackson-annotations:$jacksonVersion"
-    compile "com.fasterxml.jackson.core:jackson-databind:$jacksonVersion"
-    compile "com.fasterxml.jackson.module:jackson-module-kotlin:$jacksonVersion"
-    compile "com.fasterxml.jackson.datatype:jackson-datatype-jsr310:$jacksonVersion"
-    compile "org.yaml:snakeyaml:1.18"
-    compile "com.moandjiezana.toml:toml4j:0.7.1"
-    compile "org.dom4j:dom4j:2.0.1"
+dependencyManagement {
+    dependencies {
+        dependency "com.uchuhimo:kotlinx-bimap:0.2"
+        dependency "com.typesafe:config:1.2.1"
+        dependency "org.yaml:snakeyaml:1.18"
+        dependency "com.moandjiezana.toml:toml4j:0.7.1"
+        dependency "org.dom4j:dom4j:2.0.1"
 
-    testCompile "com.natpryce:hamkrest:1.4.0.0"
-    testCompile "org.hamcrest:hamcrest-all:1.3"
-    testRuntime "org.junit.platform:junit-platform-launcher:$junitPlatformVersion"
-    testCompile "org.junit.jupiter:junit-jupiter-api:$junitJupiterVersion"
-    testRuntime "org.junit.jupiter:junit-jupiter-engine:$junitJupiterVersion"
-    ["spek-api", "spek-data-driven-extension", "spek-subject-extension"].each {
-        testCompile("org.jetbrains.spek:$it:$spekVersion") {
-            exclude group: "org.jetbrains.kotlin"
+        dependencySet(group: "org.jetbrains.kotlin", version: "1.1.3") {
+            entry "kotlin-stdlib"
+            entry "kotlin-reflect"
+            entry "kotlin-stdlib-jre8"
+            entry "kotlin-test"
+        }
+
+        def jacksonVersion = "2.8.9"
+        dependencySet(group: "com.fasterxml.jackson.core", version: jacksonVersion) {
+            entry "jackson-core"
+            entry "jackson-annotations"
+            entry "jackson-databind"
+        }
+        dependency "com.fasterxml.jackson.module:jackson-module-kotlin:$jacksonVersion"
+        dependency "com.fasterxml.jackson.datatype:jackson-datatype-jsr310:$jacksonVersion"
+    }
+
+    testImplementation {
+        dependencies {
+            dependency "com.natpryce:hamkrest:1.4.1.0"
+            dependency "org.hamcrest:hamcrest-all:1.3"
+            dependency "com.sparkjava:spark-core:2.6.0"
+            dependency "org.slf4j:slf4j-simple:1.7.25"
+
+            dependency "org.junit.platform:junit-platform-launcher:$junitPlatformVersion"
+            dependencySet(group: "org.junit.jupiter", version: "5.0.0-M4") {
+                entry "junit-jupiter-api"
+                entry "junit-jupiter-engine"
+            }
+
+            dependencySet(group: "org.jetbrains.spek", version: "1.1.2") {
+                entry "spek-api"
+                entry "spek-data-driven-extension"
+                entry "spek-subject-extension"
+                entry "spek-junit-platform-engine"
+            }
         }
     }
-    testCompile("org.jetbrains.spek:spek-junit-platform-engine:$spekVersion") {
-        exclude group: "org.junit.platform"
-        exclude group: "org.jetbrains.kotlin"
-    }
-    testCompile "com.sparkjava:spark-core:2.6.0"
-    testCompile "org.slf4j:slf4j-simple:1.7.25"
+}
+
+dependencies {
+    implementation "org.jetbrains.kotlin:kotlin-stdlib-jre8"
+    implementation "org.jetbrains.kotlin:kotlin-reflect"
+    implementation "com.uchuhimo:kotlinx-bimap"
+    implementation "com.typesafe:config"
+    implementation "com.fasterxml.jackson.core:jackson-core"
+    implementation "com.fasterxml.jackson.core:jackson-annotations"
+    implementation "com.fasterxml.jackson.core:jackson-databind"
+    implementation "com.fasterxml.jackson.module:jackson-module-kotlin"
+    implementation "com.fasterxml.jackson.datatype:jackson-datatype-jsr310"
+    implementation "org.yaml:snakeyaml"
+    implementation "com.moandjiezana.toml:toml4j"
+    implementation "org.dom4j:dom4j"
+
+    testImplementation "com.natpryce:hamkrest"
+    testImplementation "org.hamcrest:hamcrest-all"
+    testImplementation "org.junit.jupiter:junit-jupiter-api"
+    testImplementation "org.jetbrains.spek:spek-api"
+    testImplementation "org.jetbrains.spek:spek-data-driven-extension"
+    testImplementation "org.jetbrains.spek:spek-subject-extension"
+    testImplementation "com.sparkjava:spark-core"
+
+    testRuntimeOnly "org.junit.platform:junit-platform-launcher"
+    testRuntimeOnly "org.junit.jupiter:junit-jupiter-engine"
+    testRuntimeOnly "org.jetbrains.spek:spek-junit-platform-engine"
+    testRuntimeOnly "org.slf4j:slf4j-simple"
 }
 
 sourceCompatibility = JavaVersion.VERSION_1_8
