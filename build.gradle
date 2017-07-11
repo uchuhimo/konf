@@ -181,3 +181,15 @@ publish {
     bintrayKey = bintrayKeyProperty
     dryRun = false
 }
+
+afterEvaluate {
+    mavenJavadocJar.dependsOn javadocJar
+    mavenSourcesJar.dependsOn sourceJar
+    bintrayUpload.dependsOn(jar, mavenJavadocJar, mavenSourcesJar, check)
+}
+
+tasks.whenTaskAdded { task ->
+    if (task.name == "generatePomFileForMavenPublication") {
+        bintrayUpload.dependsOn task
+    }
+}
