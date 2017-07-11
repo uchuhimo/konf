@@ -18,7 +18,7 @@ object LoaderSpec : SubjectSpek<Loader>({
     subject {
         Config {
             addSpec(SourceType)
-        }.loadFrom.hocon
+        }.loadFrom.properties
     }
 
     given("a loader") {
@@ -86,14 +86,14 @@ object LoaderSpec : SubjectSpek<Loader>({
             }
         }
         on("load from resource") {
-            val config = subject.resource("source/provider.conf")
+            val config = subject.resource("source/provider.properties")
             it("should return a config which contains value in resource") {
                 assertThat(config[SourceType.type], equalTo("resource"))
             }
         }
         on("load from non-existed resource") {
             it("should throw SourceNotFoundException") {
-                assertThat({ subject.resource("source/no-provider.conf") },
+                assertThat({ subject.resource("source/no-provider.properties") },
                         throws<SourceNotFoundException>())
             }
         }

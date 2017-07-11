@@ -3,7 +3,7 @@ package com.uchuhimo.konf.source
 import com.natpryce.hamkrest.assertion.assertThat
 import com.natpryce.hamkrest.equalTo
 import com.natpryce.hamkrest.throws
-import com.uchuhimo.konf.source.hocon.HoconProvider
+import com.uchuhimo.konf.source.properties.PropertiesProvider
 import com.uchuhimo.konf.tempFileOf
 import org.jetbrains.spek.api.dsl.given
 import org.jetbrains.spek.api.dsl.it
@@ -15,14 +15,11 @@ import java.net.ConnectException
 import java.net.URL
 
 object SourceProviderSpec : SubjectSpek<SourceProvider>({
-    subject { HoconProvider }
+    subject { PropertiesProvider }
 
     given("a source provider") {
         on("create source from reader") {
             val source = subject.fromReader("type = reader".reader())
-            it("should have correct type") {
-                assertThat(source.info["type"], equalTo("HOCON"))
-            }
             it("should return a source which contains value from reader") {
                 assertThat(source.get("type").toText(), equalTo("reader"))
             }
@@ -30,9 +27,6 @@ object SourceProviderSpec : SubjectSpek<SourceProvider>({
         on("create source from input stream") {
             val source = subject.fromInputStream(
                     tempFileOf("type = inputStream").inputStream())
-            it("should have correct type") {
-                assertThat(source.info["type"], equalTo("HOCON"))
-            }
             it("should return a source which contains value from input stream") {
                 assertThat(source.get("type").toText(), equalTo("inputStream"))
             }
@@ -104,7 +98,7 @@ object SourceProviderSpec : SubjectSpek<SourceProvider>({
             }
         }
         on("create source from resource") {
-            val resource = "source/provider.conf"
+            val resource = "source/provider.properties"
             val source = subject.fromResource(resource)
             it("should create from the specified resource") {
                 assertThat(source.context["resource"], equalTo(resource))
@@ -115,7 +109,7 @@ object SourceProviderSpec : SubjectSpek<SourceProvider>({
         }
         on("create source from non-existed resource") {
             it("should throw SourceNotFoundException") {
-                assertThat({ subject.fromResource("source/no-provider.conf") },
+                assertThat({ subject.fromResource("source/no-provider.properties") },
                         throws<SourceNotFoundException>())
             }
         }
