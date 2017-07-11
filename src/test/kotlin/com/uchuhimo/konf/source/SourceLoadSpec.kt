@@ -136,7 +136,6 @@ object SourceLoadSpec : SubjectSpek<Config>({
                 assertTrue(Arrays.equals(subject[ConfigForLoad.nestedItem],
                         arrayOf(listOf(setOf(mapOf("a" to 1))))))
 
-                val x = subject
                 assertThat(subject[ConfigForLoad.pairItem], equalTo(1 to 2))
 
                 val classForLoad = ClassForLoad(

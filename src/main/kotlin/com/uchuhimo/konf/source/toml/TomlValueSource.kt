@@ -24,6 +24,7 @@ fun Any.asTomlSource(context: Map<String, String> = mapOf()): Source =
             this
         } else if (this is Map<*, *>) {
             try {
+                @Suppress("UNCHECKED_CAST")
                 TomlMapSource(this as Map<String, Any>, context)
             } catch (e: ClassCastException) {
                 TomlValueSource(this, context)

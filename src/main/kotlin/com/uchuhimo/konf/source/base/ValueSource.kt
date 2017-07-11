@@ -303,6 +303,7 @@ fun Any.asSource(type: String = "", context: Map<String, String> = mapOf()): Sou
             this
         } else if (this is Map<*, *>) {
             try {
+                @Suppress("UNCHECKED_CAST")
                 MapSource(this as Map<String, Any>, type, context)
             } catch (e: ClassCastException) {
                 ValueSource(this, type, context)
