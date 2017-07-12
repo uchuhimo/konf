@@ -13,15 +13,18 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-@file:JvmName("Configs")
+package com.uchuhimo.konf;
 
-package com.uchuhimo.konf
+import java.util.function.Consumer;
 
-import com.uchuhimo.konf.annotation.JavaApi
-import java.util.function.Consumer
+public class Configs {
+  public static Config create() {
+    return Config.Companion.invoke();
+  }
 
-@JavaApi
-fun create(): Config = Config()
-
-@JavaApi
-fun create(init: Consumer<Config>): Config = Config { init.accept(this) }
+  public static Config create(Consumer<Config> init) {
+    final Config config = create();
+    init.accept(config);
+    return config;
+  }
+}
