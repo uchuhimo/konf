@@ -1,5 +1,6 @@
 # Konf
 
+[![Java 8+](https://img.shields.io/badge/Java-8+-4c7e9f.svg)](http://java.oracle.com)
 [![Bintray](https://api.bintray.com/packages/uchuhimo/maven/konf/images/download.svg)](https://bintray.com/uchuhimo/maven/konf/_latestVersion)
 [![JitPack](https://jitpack.io/v/uchuhimo/konf.svg)](https://jitpack.io/#uchuhimo/konf)
 [![Build Status](https://travis-ci.org/uchuhimo/konf.svg?branch=master)](https://travis-ci.org/uchuhimo/konf)
