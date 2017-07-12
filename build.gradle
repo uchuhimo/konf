@@ -193,11 +193,13 @@ spotless {
         googleJavaFormat("1.3")
         trimTrailingWhitespace()
         endWithNewline()
+        licenseHeaderFile rootProject.file("config/spotless/apache-license-2.0.java")
     }
     kotlin {
         ktlint("0.8.3")
         trimTrailingWhitespace()
         endWithNewline()
+        licenseHeaderFile rootProject.file("config/spotless/apache-license-2.0.kt")
     }
 }
 
