@@ -35,6 +35,7 @@ plugins {
 }
 
 apply plugin: "java"
+apply plugin: "jacoco"
 apply plugin: "org.junit.platform.gradle.plugin"
 apply plugin: "com.novoda.bintray-release"
 apply plugin: "org.jetbrains.dokka"
@@ -198,6 +199,26 @@ spotless {
         trimTrailingWhitespace()
         endWithNewline()
     }
+}
+
+afterEvaluate {
+    jacoco {
+        toolVersion = "0.7.9"
+        applyTo junitPlatformTest
+    }
+
+    task jacocoJunitPlatformReport(type: JacocoReport) {
+        executionData junitPlatformTest
+        sourceSets sourceSets.main
+        sourceDirectories = files(project.sourceSets.main.allSource.srcDirs)
+        classDirectories = files(project.sourceSets.main.output)
+        reports {
+            xml.enabled = true
+            html.enabled = true
+        }
+    }
+
+    check.dependsOn jacocoJunitPlatformReport
 }
 
 dokka {
