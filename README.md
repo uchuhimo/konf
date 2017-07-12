@@ -1,8 +1,9 @@
 # Konf
 
-[ ![Bintray](https://api.bintray.com/packages/uchuhimo/maven/konf/images/download.svg) ](https://bintray.com/uchuhimo/maven/konf/_latestVersion)
-[ ![JitPack](https://jitpack.io/v/uchuhimo/konf.svg) ](https://jitpack.io/#uchuhimo/konf)
-[ ![Build Status](https://travis-ci.org/uchuhimo/konf.svg?branch=master) ](https://travis-ci.org/uchuhimo/konf)
+[![Bintray](https://api.bintray.com/packages/uchuhimo/maven/konf/images/download.svg)](https://bintray.com/uchuhimo/maven/konf/_latestVersion)
+[![JitPack](https://jitpack.io/v/uchuhimo/konf.svg)](https://jitpack.io/#uchuhimo/konf)
+[![Build Status](https://travis-ci.org/uchuhimo/konf.svg?branch=master)](https://travis-ci.org/uchuhimo/konf)
+[![codecov](https://codecov.io/gh/uchuhimo/konf/branch/master/graph/badge.svg)](https://codecov.io/gh/uchuhimo/konf)
 
 A type safe configuration library for Kotlin, support to load from JSON, XML, YAML, HOCON, TOML, properties, map, command line and environment variables.
 
