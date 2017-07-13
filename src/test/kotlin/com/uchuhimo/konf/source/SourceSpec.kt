@@ -21,7 +21,6 @@ import com.natpryce.hamkrest.assertion.assertThat
 import com.natpryce.hamkrest.equalTo
 import com.natpryce.hamkrest.has
 import com.natpryce.hamkrest.throws
-import com.uchuhimo.konf.assertTrue
 import com.uchuhimo.konf.name
 import com.uchuhimo.konf.source.base.ValueSource
 import com.uchuhimo.konf.source.base.asKVSource
@@ -43,6 +42,7 @@ import java.time.OffsetTime
 import java.time.Year
 import java.time.YearMonth
 import java.time.ZonedDateTime
+import kotlin.test.assertTrue
 
 object SourceSpec : Spek({
     given("a source") {

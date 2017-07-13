@@ -20,7 +20,6 @@ import com.natpryce.hamkrest.assertion.assertThat
 import com.natpryce.hamkrest.equalTo
 import com.uchuhimo.konf.Config
 import com.uchuhimo.konf.SizeInBytes
-import com.uchuhimo.konf.assertTrue
 import com.uchuhimo.konf.toSizeInBytes
 import org.jetbrains.spek.api.dsl.given
 import org.jetbrains.spek.api.dsl.it
@@ -41,6 +40,7 @@ import java.time.ZonedDateTime
 import java.util.Arrays
 import java.util.Date
 import java.util.SortedSet
+import kotlin.test.assertTrue
 
 object SourceLoadSpec : SubjectSpek<Config>({
 

@@ -24,9 +24,9 @@ sealed class ConfigTree {
     abstract val isItem: Boolean
 
     fun visit(
-            onEnterPath: (ConfigPathNode) -> Unit = { _ -> },
-            onLeavePath: (ConfigPathNode) -> Unit = { _ -> },
-            onEnterItem: (ConfigItemNode<*>) -> Unit = { _ -> }) {
+            onEnterPath: (node: ConfigPathNode) -> Unit = { _ -> },
+            onLeavePath: (node: ConfigPathNode) -> Unit = { _ -> },
+            onEnterItem: (node: ConfigItemNode<*>) -> Unit = { _ -> }) {
         when (this) {
             is ConfigPathNode -> {
                 onEnterPath(this)
@@ -43,10 +43,7 @@ sealed class ConfigTree {
 
     val items: Iterable<Item<*>> get() {
         val items = mutableListOf<Item<*>>()
-        visit(
-                onEnterItem = { leaf ->
-                    items += leaf.item
-                })
+        visit(onEnterItem = { node -> items += node.item })
         return items
     }
 }
