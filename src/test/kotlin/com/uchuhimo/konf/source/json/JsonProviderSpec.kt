@@ -13,6 +13,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+
 package com.uchuhimo.konf.source.json
 
 import com.natpryce.hamkrest.assertion.assertThat
