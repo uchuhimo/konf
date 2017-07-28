@@ -21,11 +21,13 @@ import com.natpryce.hamkrest.assertion.assertThat
 import com.natpryce.hamkrest.equalTo
 import com.natpryce.hamkrest.has
 import com.natpryce.hamkrest.throws
+import com.uchuhimo.konf.Path
 import com.uchuhimo.konf.name
 import com.uchuhimo.konf.source.base.ValueSource
 import com.uchuhimo.konf.source.base.asKVSource
 import com.uchuhimo.konf.source.base.asSource
 import com.uchuhimo.konf.toPath
+import com.uchuhimo.konf.unsupported
 import org.jetbrains.spek.api.Spek
 import org.jetbrains.spek.api.dsl.given
 import org.jetbrains.spek.api.dsl.it
@@ -41,7 +43,10 @@ import java.time.OffsetDateTime
 import java.time.OffsetTime
 import java.time.Year
 import java.time.YearMonth
+import java.time.ZoneOffset
 import java.time.ZonedDateTime
+import java.util.Date
+import kotlin.test.assertFalse
 import kotlin.test.assertTrue
 
 object SourceSpec : Spek({
@@ -269,6 +274,32 @@ object SourceSpec : Spek({
                 }
             }
 
+            on("cast string to Date") {
+                val text = "2007-12-03T10:15:30.00Z"
+                val source = text.asSource()
+                it("should succeed") {
+                    assertThat(source.toDate(), equalTo(Date.from(Instant.parse(text))))
+                }
+            }
+
+            on("cast LocalDateTime string to Date") {
+                val text = "2007-12-03T10:15:30"
+                val source = text.asSource()
+                it("should succeed") {
+                    assertThat(source.toDate(),
+                            equalTo(Date.from(LocalDateTime.parse(text).toInstant(ZoneOffset.UTC))))
+                }
+            }
+
+            on("cast LocalDate string to Date") {
+                val text = "2007-12-03"
+                val source = text.asSource()
+                it("should succeed") {
+                    assertThat(source.toDate(),
+                            equalTo(Date.from(LocalDate.parse(text).atStartOfDay().toInstant(ZoneOffset.UTC))))
+                }
+            }
+
             on("cast string to Duration") {
                 val text = "P2DT3H4M"
                 val source = text.asSource()
@@ -305,6 +336,57 @@ object SourceSpec : Spek({
                 it("should throw ParseException") {
                     assertThat({ source.toSizeInBytes() }, throws<ParseException>())
                 }
+            }
+        }
+        group("default implementations") {
+            val source: Source = object : Source {
+                override val context: Map<String, String> get() = unsupported()
+
+                override fun addContext(name: String, value: String) = unsupported()
+
+                override val info: Map<String, String> get() = unsupported()
+
+                override fun addInfo(name: String, value: String) = unsupported()
+
+                override fun contains(path: Path): Boolean = unsupported()
+
+                override fun getOrNull(path: Path): Source? = unsupported()
+            }
+            it("returns `false` for all `is` operation") {
+                assertFalse(source.isBigDecimal())
+                assertFalse(source.isBigInteger())
+                assertFalse(source.isBoolean())
+                assertFalse(source.isByte())
+                assertFalse(source.isChar())
+                assertFalse(source.isDate())
+                assertFalse(source.isDouble())
+                assertFalse(source.isDuration())
+                assertFalse(source.isFloat())
+                assertFalse(source.isInstant())
+                assertFalse(source.isInt())
+                assertFalse(source.isList())
+                assertFalse(source.isLocalDate())
+                assertFalse(source.isLocalDateTime())
+                assertFalse(source.isLocalTime())
+                assertFalse(source.isLong())
+                assertFalse(source.isMap())
+                assertFalse(source.isOffsetDateTime())
+                assertFalse(source.isOffsetTime())
+                assertFalse(source.isShort())
+                assertFalse(source.isSizeInBytes())
+                assertFalse(source.isText())
+                assertFalse(source.isYear())
+                assertFalse(source.isYearMonth())
+                assertFalse(source.isZonedDateTime())
+            }
+            it("throws UnsupportedOperationException for all cast operation") {
+                assertThat({ source.toList() }, throws<UnsupportedOperationException>())
+                assertThat({ source.toMap() }, throws<UnsupportedOperationException>())
+                assertThat({ source.toText() }, throws<UnsupportedOperationException>())
+                assertThat({ source.toBoolean() }, throws<UnsupportedOperationException>())
+                assertThat({ source.toLong() }, throws<UnsupportedOperationException>())
+                assertThat({ source.toDouble() }, throws<UnsupportedOperationException>())
+                assertThat({ source.toInt() }, throws<UnsupportedOperationException>())
             }
         }
     }

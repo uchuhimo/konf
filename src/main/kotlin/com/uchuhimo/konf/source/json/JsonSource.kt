@@ -29,7 +29,7 @@ class JsonSource(
         val node: JsonNode,
         context: Map<String, String> = mapOf()
 ) : Source {
-    val _info = mutableMapOf("type" to "JSON")
+    private val _info = mutableMapOf("type" to "JSON")
 
     override val info: Map<String, String> get() = _info
 
@@ -37,7 +37,7 @@ class JsonSource(
         _info.put(name, value)
     }
 
-    val _context: MutableMap<String, String> = context.toMutableMap()
+    private val _context: MutableMap<String, String> = context.toMutableMap()
 
     override val context: Map<String, String> get() = _context
 

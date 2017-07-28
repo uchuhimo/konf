@@ -30,7 +30,7 @@ class HoconValueSource(
         val value: ConfigValue,
         context: Map<String, String> = mapOf()
 ) : Source {
-    val _info = mutableMapOf("type" to "HOCON-value")
+    private val _info = mutableMapOf("type" to "HOCON-value")
 
     override val info: Map<String, String> get() = _info
 
@@ -38,7 +38,7 @@ class HoconValueSource(
         _info.put(name, value)
     }
 
-    val _context: MutableMap<String, String> = context.toMutableMap()
+    private val _context: MutableMap<String, String> = context.toMutableMap()
 
     override val context: Map<String, String> get() = _context
 

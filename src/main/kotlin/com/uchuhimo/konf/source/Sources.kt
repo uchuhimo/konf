@@ -80,12 +80,11 @@ fun String.toDuration(): Duration {
  *
  * @return duration in nanoseconds
  */
-private fun parseDuration(input: String): Long {
+internal fun parseDuration(input: String): Long {
     val s = ConfigImplUtil.unicodeTrim(input)
     val originalUnitString = getUnits(s)
     var unitString = originalUnitString
     val numberString = ConfigImplUtil.unicodeTrim(s.substring(0, s.length - unitString.length))
-    val units: TimeUnit?
 
     // this would be caught later anyway, but the error message
     // is more helpful if we check it here.
@@ -96,21 +95,21 @@ private fun parseDuration(input: String): Long {
         unitString += "s"
 
     // note that this is deliberately case-sensitive
-    if (unitString == "" || unitString == "ms" || unitString == "millis"
+    val units = if (unitString == "" || unitString == "ms" || unitString == "millis"
             || unitString == "milliseconds") {
-        units = TimeUnit.MILLISECONDS
+        TimeUnit.MILLISECONDS
     } else if (unitString == "us" || unitString == "micros" || unitString == "microseconds") {
-        units = TimeUnit.MICROSECONDS
+        TimeUnit.MICROSECONDS
     } else if (unitString == "ns" || unitString == "nanos" || unitString == "nanoseconds") {
-        units = TimeUnit.NANOSECONDS
+        TimeUnit.NANOSECONDS
     } else if (unitString == "d" || unitString == "days") {
-        units = TimeUnit.DAYS
+        TimeUnit.DAYS
     } else if (unitString == "h" || unitString == "hours") {
-        units = TimeUnit.HOURS
+        TimeUnit.HOURS
     } else if (unitString == "s" || unitString == "seconds") {
-        units = TimeUnit.SECONDS
+        TimeUnit.SECONDS
     } else if (unitString == "m" || unitString == "minutes") {
-        units = TimeUnit.MINUTES
+        TimeUnit.MINUTES
     } else {
         throw ParseException("Could not parse time unit '$originalUnitString' (try ns, us, ms, s, m, h, d)")
     }

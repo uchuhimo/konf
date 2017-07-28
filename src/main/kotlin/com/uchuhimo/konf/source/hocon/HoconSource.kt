@@ -25,7 +25,7 @@ import com.uchuhimo.konf.unsupported
 class HoconSource(
         val config: Config,
         context: Map<String, String> = mapOf()) : Source {
-    val _info = mutableMapOf("type" to "HOCON")
+    private val _info = mutableMapOf("type" to "HOCON")
 
     override val info: Map<String, String> get() = _info
 
@@ -33,7 +33,7 @@ class HoconSource(
         _info.put(name, value)
     }
 
-    val _context: MutableMap<String, String> = context.toMutableMap()
+    private val _context: MutableMap<String, String> = context.toMutableMap()
 
     override val context: Map<String, String> get() = _context
 
@@ -52,17 +52,5 @@ class HoconSource(
         }
     }
 
-    override fun toInt(): Int = unsupported()
-
-    override fun toList(): List<Source> = unsupported()
-
-    override fun toMap(): Map<String, Source> = unsupported()
-
-    override fun toText(): String = unsupported()
-
-    override fun toBoolean(): Boolean = unsupported()
-
     override fun toLong(): Long = unsupported()
-
-    override fun toDouble(): Double = unsupported()
 }

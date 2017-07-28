@@ -42,6 +42,7 @@ import com.uchuhimo.konf.Path
 import com.uchuhimo.konf.SizeInBytes
 import com.uchuhimo.konf.source.json.JsonSource
 import com.uchuhimo.konf.toPath
+import com.uchuhimo.konf.unsupported
 import java.math.BigDecimal
 import java.math.BigInteger
 import java.time.Duration
@@ -95,19 +96,19 @@ interface Source {
 
     fun isList(): Boolean = false
 
-    fun toList(): List<Source>
+    fun toList(): List<Source> = unsupported()
 
     fun isMap(): Boolean = false
 
-    fun toMap(): Map<String, Source>
+    fun toMap(): Map<String, Source> = unsupported()
 
     fun isText(): Boolean = false
 
-    fun toText(): String
+    fun toText(): String = unsupported()
 
     fun isBoolean(): Boolean = false
 
-    fun toBoolean(): Boolean
+    fun toBoolean(): Boolean = unsupported()
 
     fun isLong(): Boolean = false
 
@@ -115,11 +116,11 @@ interface Source {
 
     fun isDouble(): Boolean = false
 
-    fun toDouble(): Double
+    fun toDouble(): Double = unsupported()
 
     fun isInt(): Boolean = false
 
-    fun toInt(): Int
+    fun toInt(): Int = unsupported()
 
     fun isShort(): Boolean = false
 

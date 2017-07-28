@@ -23,7 +23,6 @@ import com.uchuhimo.konf.source.NoSuchPathException
 import com.uchuhimo.konf.source.Source
 import com.uchuhimo.konf.source.WrongTypeException
 import com.uchuhimo.konf.source.toDescription
-import com.uchuhimo.konf.unsupported
 import java.math.BigDecimal
 import java.math.BigInteger
 import java.time.Duration
@@ -44,7 +43,7 @@ open class ValueSource(
         type: String = "",
         context: Map<String, String> = mapOf()
 ) : Source {
-    val _info = mutableMapOf(
+    private val _info = mutableMapOf(
             "type" to type.notEmptyOr("value"))
 
     override val info: Map<String, String> get() = _info
@@ -53,7 +52,7 @@ open class ValueSource(
         _info.put(name, value)
     }
 
-    val _context: MutableMap<String, String> = context.toMutableMap()
+    private val _context: MutableMap<String, String> = context.toMutableMap()
 
     override val context: Map<String, String> get() = _context
 
@@ -86,8 +85,6 @@ open class ValueSource(
     override fun toList(): List<Source> = cast<List<Any>>().map {
         it.castToSource(context).apply { addInfo("inList", this@ValueSource.info.toDescription()) }
     }
-
-    override fun toMap(): Map<String, Source> = unsupported()
 
     override fun isText(): Boolean = value is String
 
