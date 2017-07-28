@@ -231,6 +231,18 @@ afterEvaluate {
 dokka {
     outputFormat = "html"
     outputDirectory = javadoc.destinationDir
+    jdkVersion = 8
+    kotlinTasks {
+        [compileKotlin]
+    }
+    linkMapping {
+        dir = project.rootDir.toPath().resolve("src/main/kotlin").toFile().path
+        url = "https://github.com/uchuhimo/konf/blob/v${project.version}/src/main/kotlin"
+        suffix = "#L"
+    }
+    externalDocumentationLink {
+        url = new URL("http://fasterxml.github.io/jackson-databind/javadoc/2.8/")
+    }
 }
 
 publish {
