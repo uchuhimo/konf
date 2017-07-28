@@ -100,8 +100,8 @@ private class ConfigImpl constructor(
     private val lock = ReentrantReadWriteLock()
 
     override fun iterator(): Iterator<Item<*>> = object : Iterator<Item<*>> {
-        var currentConfig = this@ConfigImpl
-        var current = currentConfig.nameByItem.keys.iterator()
+        private var currentConfig = this@ConfigImpl
+        private var current = currentConfig.nameByItem.keys.iterator()
 
         tailrec override fun hasNext(): Boolean {
             if (current.hasNext()) {
@@ -337,20 +337,16 @@ private class ConfigImpl constructor(
                 }
             }
             is ConfigItemNode<*> -> {
-                if (path.isEmpty()) {
-                    throw NameConflictException("item ${item.name} has been added")
-                } else {
-                    throw NameConflictException("${item.name} cannot be added" +
-                            " since item ${tree.item.name} has been added to config")
-                }
+                throw NameConflictException("${item.name} cannot be added" +
+                        " since item ${tree.item.name} has been added to config")
             }
         }
     }
 
     override val specs: List<ConfigSpec> get() = mutableListOf<ConfigSpec>().apply {
         addAll(object : Iterator<ConfigSpec> {
-            var currentConfig = this@ConfigImpl
-            var current = currentConfig.specsInLayer.iterator()
+            private var currentConfig = this@ConfigImpl
+            private var current = currentConfig.specsInLayer.iterator()
 
             tailrec override fun hasNext(): Boolean {
                 if (current.hasNext()) {

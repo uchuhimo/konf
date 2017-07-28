@@ -54,7 +54,7 @@ class ConfigItemNode<T : Any>(
 ) : ConfigTree() {
     override fun deepCopy(): ConfigItemNode<T> = ConfigItemNode(path, item)
 
-    override val isItem: Boolean = false
+    override val isItem: Boolean = true
 }
 
 class ConfigPathNode(
@@ -64,5 +64,5 @@ class ConfigPathNode(
     override fun deepCopy(): ConfigPathNode =
             ConfigPathNode(path, children.mapTo(mutableListOf(), ConfigTree::deepCopy))
 
-    override val isItem: Boolean = true
+    override val isItem: Boolean = false
 }
