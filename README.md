@@ -8,6 +8,10 @@
 
 A type safe configuration library for Kotlin, support to load from JSON, XML, YAML, HOCON, TOML, properties, map, command line and environment variables.
 
+## Prerequisites
+
+- JDK 1.8 or higher
+
 ## Using in your projects
 
 This library are published to [JCenter](https://bintray.com/uchuhimo/maven/konf) and [JitPack](https://jitpack.io/#uchuhimo/konf).
