@@ -113,6 +113,7 @@ object ConfigSpecSpek : Spek({
                 }
                 it("should contain the specified placeholder") {
                     assertThat(specForLazy.item.placeholder, equalTo("placeholder"))
+                    assertThat(LazyItem(ConfigSpec(), "lazy", { 1 }).placeholder, equalTo(""))
                 }
                 it("should contain the specified thunk") {
                     assertThat(specForLazy.item.thunk(config), equalTo(2))

@@ -24,7 +24,7 @@ import java.math.BigInteger
 
 data class SizeInBytes(val bytes: Long) {
     init {
-        check(bytes >= 0)
+        require(bytes >= 0)
     }
 
     companion object {
@@ -72,67 +72,75 @@ data class SizeInBytes(val bytes: Long) {
             }
         }
 
-        private enum class MemoryUnit constructor(
-                internal val prefix: String,
-                internal val powerOf: Int,
-                internal val power: Int
+        private enum class Radix {
+            KILO {
+                override fun toInt(): Int = 1000
+            },
+            KIBI {
+                override fun toInt(): Int = 1024
+            };
+
+            abstract fun toInt(): Int
+        }
+
+        private enum class MemoryUnit(
+                private val prefix: String,
+                private val radix: Radix,
+                private val power: Int
         ) {
-            BYTES("", 1024, 0),
+            BYTES("", Radix.KIBI, 0),
 
-            KILOBYTES("kilo", 1000, 1),
-            MEGABYTES("mega", 1000, 2),
-            GIGABYTES("giga", 1000, 3),
-            TERABYTES("tera", 1000, 4),
-            PETABYTES("peta", 1000, 5),
-            EXABYTES("exa", 1000, 6),
-            ZETTABYTES("zetta", 1000, 7),
-            YOTTABYTES("yotta", 1000, 8),
+            KILOBYTES("kilo", Radix.KILO, 1),
+            MEGABYTES("mega", Radix.KILO, 2),
+            GIGABYTES("giga", Radix.KILO, 3),
+            TERABYTES("tera", Radix.KILO, 4),
+            PETABYTES("peta", Radix.KILO, 5),
+            EXABYTES("exa", Radix.KILO, 6),
+            ZETTABYTES("zetta", Radix.KILO, 7),
+            YOTTABYTES("yotta", Radix.KILO, 8),
 
-            KIBIBYTES("kibi", 1024, 1),
-            MEBIBYTES("mebi", 1024, 2),
-            GIBIBYTES("gibi", 1024, 3),
-            TEBIBYTES("tebi", 1024, 4),
-            PEBIBYTES("pebi", 1024, 5),
-            EXBIBYTES("exbi", 1024, 6),
-            ZEBIBYTES("zebi", 1024, 7),
-            YOBIBYTES("yobi", 1024, 8);
+            KIBIBYTES("kibi", Radix.KIBI, 1),
+            MEBIBYTES("mebi", Radix.KIBI, 2),
+            GIBIBYTES("gibi", Radix.KIBI, 3),
+            TEBIBYTES("tebi", Radix.KIBI, 4),
+            PEBIBYTES("pebi", Radix.KIBI, 5),
+            EXBIBYTES("exbi", Radix.KIBI, 6),
+            ZEBIBYTES("zebi", Radix.KIBI, 7),
+            YOBIBYTES("yobi", Radix.KIBI, 8);
 
-            internal val bytes: BigInteger = BigInteger.valueOf(powerOf.toLong()).pow(power)
+            internal val bytes: BigInteger = BigInteger.valueOf(radix.toInt().toLong()).pow(power)
 
             companion object {
 
-                private fun makeUnitsMap(): Map<String, MemoryUnit> {
-                    val map = java.util.HashMap<String, MemoryUnit>()
+                private val unitsMap = mutableMapOf<String, MemoryUnit>().apply {
                     for (unit in MemoryUnit.values()) {
-                        map.put(unit.prefix + "byte", unit)
-                        map.put(unit.prefix + "bytes", unit)
+                        put(unit.prefix + "byte", unit)
+                        put(unit.prefix + "bytes", unit)
                         if (unit.prefix.isEmpty()) {
-                            map.put("b", unit)
-                            map.put("B", unit)
-                            map.put("", unit) // no unit specified means bytes
+                            put("b", unit)
+                            put("B", unit)
+                            put("", unit) // no unit specified means bytes
                         } else {
                             val first = unit.prefix.substring(0, 1)
                             val firstUpper = first.toUpperCase()
-                            if (unit.powerOf == 1024) {
-                                map.put(first, unit)             // 512m
-                                map.put(firstUpper, unit)        // 512M
-                                map.put(firstUpper + "i", unit)  // 512Mi
-                                map.put(firstUpper + "iB", unit) // 512MiB
-                            } else if (unit.powerOf == 1000) {
-                                if (unit.power == 1) {
-                                    map.put(first + "B", unit) // 512kB
-                                } else {
-                                    map.put(firstUpper + "B", unit) // 512MB
+                            when (unit.radix) {
+                                Radix.KILO -> {
+                                    if (unit.power == 1) {
+                                        put(first + "B", unit) // 512kB
+                                    } else {
+                                        put(firstUpper + "B", unit) // 512MB
+                                    }
                                 }
-                            } else {
-                                throw RuntimeException("broken MemoryUnit enum")
+                                Radix.KIBI -> {
+                                    put(first, unit)             // 512m
+                                    put(firstUpper, unit)        // 512M
+                                    put(firstUpper + "i", unit)  // 512Mi
+                                    put(firstUpper + "iB", unit) // 512MiB
+                                }
                             }
                         }
                     }
-                    return map
                 }
-
-                private val unitsMap = makeUnitsMap()
 
                 internal fun parseUnit(unit: String): MemoryUnit? {
                     return unitsMap[unit]
