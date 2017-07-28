@@ -55,7 +55,7 @@ task wrapper(type: Wrapper) {
 
 dependencyManagement {
     dependencies {
-        dependency "com.uchuhimo:kotlinx-bimap:0.3.1"
+        dependency "com.uchuhimo:kotlinx-bimap:1.0"
         dependency "com.typesafe:config:1.2.1"
         dependency "org.yaml:snakeyaml:1.18"
         dependency "com.moandjiezana.toml:toml4j:0.7.1"
