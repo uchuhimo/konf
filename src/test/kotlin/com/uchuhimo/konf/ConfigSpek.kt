@@ -99,14 +99,18 @@ object ConfigSpek : SubjectSpek<Config>({
                 val bufferLevelNodes = networkLevelNode.children[0] as ConfigPathNode
                 assertThat(bufferLevelNodes.path, equalTo(listOf("network", "buffer")))
                 assertFalse(bufferLevelNodes.isItem)
+                @Suppress("UNCHECKED_CAST")
                 val sizeItemNode = bufferLevelNodes.children[0] as ConfigItemNode<Int>
                 assertThat(sizeItemNode.path, equalTo(spec.size.path))
                 assertTrue(sizeItemNode.isItem)
                 assertThat(sizeItemNode.item, equalTo<Item<Int>>(spec.size))
+                @Suppress("UNCHECKED_CAST")
                 val maxSizeItemNode = bufferLevelNodes.children[1] as ConfigItemNode<Int>
                 assertThat(maxSizeItemNode.item, equalTo<Item<Int>>(spec.maxSize))
+                @Suppress("UNCHECKED_CAST")
                 val nameItemNode = bufferLevelNodes.children[2] as ConfigItemNode<String>
                 assertThat(nameItemNode.item, equalTo<Item<String>>(spec.name))
+                @Suppress("UNCHECKED_CAST")
                 val typeItemNode = bufferLevelNodes.children[3] as ConfigItemNode<NetworkBuffer.Type>
                 assertThat(typeItemNode.item, equalTo<Item<NetworkBuffer.Type>>(spec.type))
             }
@@ -190,7 +194,7 @@ object ConfigSpek : SubjectSpek<Config>({
             }
             on("set with invalid name") {
                 it("should throw NoSuchItemException") {
-                    assertThat({ subject.set(invalidItem.name, 1024) },
+                    assertThat({ subject[invalidItem.name] = 1024 },
                             throws(has(NoSuchItemException::name, equalTo(invalidItem.name))))
                 }
             }
@@ -270,6 +274,7 @@ object ConfigSpek : SubjectSpek<Config>({
             on("declare a property by invalid item") {
                 it("should throw NoSuchItemException") {
                     assertThat({
+                        @Suppress("UNUSED_VARIABLE")
                         var nameProperty by subject.property(invalidItem)
                     }, throws(has(NoSuchItemException::name, equalTo(invalidItem.name))))
                 }
@@ -287,6 +292,7 @@ object ConfigSpek : SubjectSpek<Config>({
             on("declare a property by invalid name") {
                 it("should throw NoSuchItemException") {
                     assertThat({
+                        @Suppress("UNUSED_VARIABLE")
                         var nameProperty by subject.property<Int>(invalidItem.name)
                     }, throws(has(NoSuchItemException::name, equalTo(invalidItem.name))))
                 }

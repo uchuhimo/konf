@@ -51,10 +51,7 @@ class UnsupportedMapKeyException(val clazz: Class<*>) : SourceException(
 class LoadException(val path: Path, cause: Throwable) :
         SourceException("fail to load ${path.name}", cause)
 
-class SourceNotFoundException : SourceException {
-    constructor(message: String) : super(message)
-    constructor(message: String, cause: Throwable) : super(message, cause)
-}
+class SourceNotFoundException(message: String) : SourceException(message)
 
 class UnsupportedExtensionException(file: File) : SourceException(
         "cannot detect supported extension for \"${file.name}\"," +

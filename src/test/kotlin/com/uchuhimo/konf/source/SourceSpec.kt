@@ -16,11 +16,16 @@
 
 package com.uchuhimo.konf.source
 
+import com.natpryce.hamkrest.Matcher
 import com.natpryce.hamkrest.absent
 import com.natpryce.hamkrest.assertion.assertThat
 import com.natpryce.hamkrest.equalTo
 import com.natpryce.hamkrest.has
+import com.natpryce.hamkrest.isA
 import com.natpryce.hamkrest.throws
+import com.uchuhimo.konf.Config
+import com.uchuhimo.konf.ConfigSpec
+import com.uchuhimo.konf.NetworkBuffer
 import com.uchuhimo.konf.Path
 import com.uchuhimo.konf.name
 import com.uchuhimo.konf.source.base.ValueSource
@@ -46,6 +51,7 @@ import java.time.YearMonth
 import java.time.ZoneOffset
 import java.time.ZonedDateTime
 import java.util.Date
+import java.util.concurrent.ConcurrentHashMap
 import kotlin.test.assertFalse
 import kotlin.test.assertTrue
 
@@ -338,6 +344,48 @@ object SourceSpec : Spek({
                 }
             }
         }
+        group("load operation") {
+            on("load from valid source") {
+                it("should load successfully") {
+                    val config = load<Int>(1)
+                    assertThat(config<Int>("item"), equalTo(1))
+                }
+            }
+            on("load concrete map type") {
+                it("should load successfully") {
+                    val config = load<ConcurrentHashMap<String, Int>>(mapOf("1" to 1))
+                    assertThat(config<ConcurrentHashMap<String, Int>>("item"), equalTo(mapOf("1" to 1)))
+                }
+            }
+            on("load invalid enum value") {
+                it("should throw LoadException caused by ParseException") {
+                    assertCausedBy<ParseException> {
+                        load<NetworkBuffer.Type>("NO_HEAP")
+                    }
+                }
+            }
+            on("load unsupported simple type value") {
+                it("should throw LoadException caused by UnsupportedTypeException") {
+                    assertCausedBy<UnsupportedTypeException> {
+                        load<Person>(mapOf("invalid" to "anon"))
+                    }
+                }
+            }
+            on("load map with unsupported key type") {
+                it("should throw LoadException caused by UnsupportedMapKeyException") {
+                    assertCausedBy<UnsupportedMapKeyException> {
+                        load<Map<Int, String>>(mapOf(1 to "1"))
+                    }
+                }
+            }
+            on("load invalid enum value") {
+                it("should throw LoadException caused by ParseException") {
+                    assertCausedBy<ParseException> {
+                        load<NetworkBuffer.Type>("NO_HEAP")
+                    }
+                }
+            }
+        }
         group("default implementations") {
             val source: Source = object : Source {
                 override val context: Map<String, String> get() = unsupported()
@@ -391,3 +439,22 @@ object SourceSpec : Spek({
         }
     }
 })
+
+private inline fun <reified T : Any> load(value: Any): Config =
+        Config().apply {
+            addSpec(object : ConfigSpec() {
+                init {
+                    required<T>("item")
+                }
+            })
+        }.load(mapOf("item" to value).asSource())
+
+private inline fun <reified T : Any> assertCausedBy(noinline block: () -> Unit) {
+    @Suppress("UNCHECKED_CAST")
+    assertThat(block,
+            throws(has(
+                    LoadException::cause,
+                    isA<T>() as Matcher<Throwable?>)))
+}
+
+private data class Person(val name: String)

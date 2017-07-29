@@ -43,6 +43,7 @@ import com.uchuhimo.konf.SizeInBytes
 import com.uchuhimo.konf.source.json.JsonSource
 import com.uchuhimo.konf.toPath
 import com.uchuhimo.konf.unsupported
+import java.lang.reflect.InvocationTargetException
 import java.math.BigDecimal
 import java.math.BigInteger
 import java.time.Duration
@@ -255,7 +256,7 @@ private fun Source.toValue(type: JavaType, mapper: ObjectMapper): Any {
                 val name = toText()
                 try {
                     return valueOfMethod.invoke(null, name)
-                } catch (cause: IllegalArgumentException) {
+                } catch (cause: InvocationTargetException) {
                     throw ParseException(
                             "enum type $clazz has no constant with name $name", cause)
                 }

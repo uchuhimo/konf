@@ -18,7 +18,9 @@ package com.uchuhimo.konf;
 
 import java.util.function.Consumer;
 
-public class Configs {
+public final class Configs {
+  private Configs() {}
+
   public static Config create() {
     return Config.Companion.invoke();
   }

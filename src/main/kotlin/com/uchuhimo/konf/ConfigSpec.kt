@@ -21,16 +21,14 @@ open class ConfigSpec(val prefix: String = "") {
 
     val items: List<Item<*>> = _items
 
-    @Suppress("NOTHING_TO_INLINE")
-    inline fun <T : Any> required(name: String, description: String = "") =
+    inline fun <reified T : Any> required(name: String, description: String = "") =
             object : RequiredItem<T>(
                     spec = this,
                     name = name,
                     description = description
             ) {}
 
-    @Suppress("NOTHING_TO_INLINE")
-    inline fun <T : Any> optional(name: String, default: T, description: String = "") =
+    inline fun <reified T : Any> optional(name: String, default: T, description: String = "") =
             object : OptionalItem<T>(
                     spec = this,
                     name = name,
@@ -38,8 +36,7 @@ open class ConfigSpec(val prefix: String = "") {
                     description = description
             ) {}
 
-    @Suppress("NOTHING_TO_INLINE")
-    inline fun <T : Any> lazy(
+    inline fun <reified T : Any> lazy(
             name: String,
             description: String = "",
             placeholder: String = "",
