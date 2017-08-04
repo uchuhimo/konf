@@ -281,7 +281,7 @@ private fun Source.toValue(type: JavaType, mapper: ObjectMapper): Any {
                                     TreeTraversingParser(toJsonNode(), mapper),
                                     type)
                         } catch (cause: JsonProcessingException) {
-                            throw UnsupportedTypeException(this, clazz, cause)
+                            throw ObjectMappingException(this, clazz, cause)
                         }
                     }
                 }

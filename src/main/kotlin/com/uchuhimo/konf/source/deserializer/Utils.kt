@@ -25,18 +25,19 @@ import java.time.format.DateTimeParseException
 
 @Throws(JsonMappingException::class)
 internal fun <BOGUS> JsonDeserializer<*>.rethrowDateTimeException(
-        p: JsonParser,
+        parser: JsonParser,
         context: DeserializationContext,
-        e0: DateTimeException, value: String
+        exception: DateTimeException,
+        value: String
 ): BOGUS {
-    val e: JsonMappingException
-    if (e0 is DateTimeParseException) {
-        e = context.weirdStringException(value, handledType(), e0.message)
-        e.initCause(e0)
+    throw if (exception is DateTimeParseException) {
+        context.weirdStringException(value, handledType(), exception.message).apply {
+            initCause(exception)
+        }
     } else {
-        e = JsonMappingException.from(p,
-                String.format("Failed to deserialize %s: (%s) %s",
-                        handledType().name, e0.javaClass.name, e0.message), e0)
+        JsonMappingException.from(
+                parser,
+                "Failed to deserialize ${handledType().name}: (${exception.javaClass.name}) ${exception.message}",
+                exception)
     }
-    throw e
 }

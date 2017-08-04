@@ -16,12 +16,10 @@
 
 package com.uchuhimo.konf.source
 
-import com.natpryce.hamkrest.Matcher
 import com.natpryce.hamkrest.absent
 import com.natpryce.hamkrest.assertion.assertThat
 import com.natpryce.hamkrest.equalTo
 import com.natpryce.hamkrest.has
-import com.natpryce.hamkrest.isA
 import com.natpryce.hamkrest.throws
 import com.uchuhimo.konf.Config
 import com.uchuhimo.konf.ConfigSpec
@@ -364,8 +362,8 @@ object SourceSpec : Spek({
                 }
             }
             on("load unsupported simple type value") {
-                it("should throw LoadException caused by UnsupportedTypeException") {
-                    assertCausedBy<UnsupportedTypeException> {
+                it("should throw LoadException caused by ObjectMappingException") {
+                    assertCausedBy<ObjectMappingException> {
                         load<Person>(mapOf("invalid" to "anon"))
                     }
                 }
@@ -439,13 +437,5 @@ private inline fun <reified T : Any> load(value: Any): Config =
                 }
             })
         }.load(mapOf("item" to value).asSource())
-
-private inline fun <reified T : Any> assertCausedBy(noinline block: () -> Unit) {
-    @Suppress("UNCHECKED_CAST")
-    assertThat(block,
-            throws(has(
-                    LoadException::cause,
-                    isA<T>() as Matcher<Throwable?>)))
-}
 
 private data class Person(val name: String)

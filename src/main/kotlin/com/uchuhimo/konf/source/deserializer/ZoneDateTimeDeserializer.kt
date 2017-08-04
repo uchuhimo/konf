@@ -19,11 +19,11 @@ package com.uchuhimo.konf.source.deserializer
 import com.fasterxml.jackson.core.JsonParser
 import com.fasterxml.jackson.core.JsonTokenId
 import com.fasterxml.jackson.databind.DeserializationContext
-import com.fasterxml.jackson.databind.JsonDeserializer
+import com.fasterxml.jackson.databind.deser.std.StdDeserializer
 import java.time.DateTimeException
 import java.time.ZonedDateTime
 
-object ZoneDateTimeDeserializer : JsonDeserializer<ZonedDateTime>() {
+object ZoneDateTimeDeserializer : StdDeserializer<ZonedDateTime>(ZonedDateTime::class.java) {
     override fun deserialize(parser: JsonParser, context: DeserializationContext): ZonedDateTime? {
         when (parser.currentTokenId) {
             JsonTokenId.ID_STRING -> {
@@ -37,7 +37,6 @@ object ZoneDateTimeDeserializer : JsonDeserializer<ZonedDateTime>() {
                     return rethrowDateTimeException<ZonedDateTime>(parser, context, e, string)
                 }
             }
-            JsonTokenId.ID_EMBEDDED_OBJECT -> return parser.embeddedObject as ZonedDateTime
         }
         throw context.mappingException("Expected type string.")
     }

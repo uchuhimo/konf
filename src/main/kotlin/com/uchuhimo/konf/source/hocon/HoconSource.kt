@@ -21,7 +21,6 @@ import com.uchuhimo.konf.Path
 import com.uchuhimo.konf.name
 import com.uchuhimo.konf.source.Source
 import com.uchuhimo.konf.source.SourceInfo
-import com.uchuhimo.konf.unsupported
 
 class HoconSource(
         val config: Config,
@@ -41,6 +40,4 @@ class HoconSource(
             return null
         }
     }
-
-    override fun toLong(): Long = unsupported()
 }
