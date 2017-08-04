@@ -20,6 +20,7 @@ import com.fasterxml.jackson.databind.JsonNode
 import com.fasterxml.jackson.databind.node.JsonNodeType
 import com.uchuhimo.konf.Path
 import com.uchuhimo.konf.source.Source
+import com.uchuhimo.konf.source.SourceInfo
 import com.uchuhimo.konf.source.WrongTypeException
 import com.uchuhimo.konf.source.toDescription
 import java.math.BigDecimal
@@ -28,21 +29,9 @@ import java.math.BigInteger
 class JsonSource(
         val node: JsonNode,
         context: Map<String, String> = mapOf()
-) : Source {
-    private val _info = mutableMapOf("type" to "JSON")
-
-    override val info: Map<String, String> get() = _info
-
-    override fun addInfo(name: String, value: String) {
-        _info.put(name, value)
-    }
-
-    private val _context: MutableMap<String, String> = context.toMutableMap()
-
-    override val context: Map<String, String> get() = _context
-
-    override fun addContext(name: String, value: String) {
-        _context.put(name, value)
+) : Source, SourceInfo by SourceInfo.with(context) {
+    init {
+        addInfo("type", "JSON")
     }
 
     override fun contains(path: Path): Boolean {

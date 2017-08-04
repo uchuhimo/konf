@@ -140,7 +140,6 @@ object SourceSpec : Spek({
                     assertThat(source.toLong(), equalTo(1L))
                 }
             }
-
             on("cast int in range of short to short") {
                 val source = 1.asSource()
                 it("should succeed") {
@@ -387,15 +386,7 @@ object SourceSpec : Spek({
             }
         }
         group("default implementations") {
-            val source: Source = object : Source {
-                override val context: Map<String, String> get() = unsupported()
-
-                override fun addContext(name: String, value: String) = unsupported()
-
-                override val info: Map<String, String> get() = unsupported()
-
-                override fun addInfo(name: String, value: String) = unsupported()
-
+            val source: Source = object : Source, SourceInfo by SourceInfo.default() {
                 override fun contains(path: Path): Boolean = unsupported()
 
                 override fun getOrNull(path: Path): Source? = unsupported()

@@ -21,6 +21,7 @@ import com.uchuhimo.konf.SizeInBytes
 import com.uchuhimo.konf.notEmptyOr
 import com.uchuhimo.konf.source.NoSuchPathException
 import com.uchuhimo.konf.source.Source
+import com.uchuhimo.konf.source.SourceInfo
 import com.uchuhimo.konf.source.WrongTypeException
 import com.uchuhimo.konf.source.toDescription
 import java.math.BigDecimal
@@ -42,22 +43,10 @@ open class ValueSource(
         val value: Any,
         type: String = "",
         context: Map<String, String> = mapOf()
-) : Source {
-    private val _info = mutableMapOf(
-            "type" to type.notEmptyOr("value"))
-
-    override val info: Map<String, String> get() = _info
-
-    override fun addInfo(name: String, value: String) {
-        _info.put(name, value)
-    }
-
-    private val _context: MutableMap<String, String> = context.toMutableMap()
-
-    override val context: Map<String, String> get() = _context
-
-    override fun addContext(name: String, value: String) {
-        _context.put(name, value)
+) : Source, SourceInfo by SourceInfo.with(context) {
+    init {
+        @Suppress("LeakingThis")
+        addInfo("type", type.notEmptyOr("value"))
     }
 
     override fun contains(path: Path): Boolean = path.isEmpty()

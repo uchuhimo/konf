@@ -72,17 +72,7 @@ import kotlin.Long
 import kotlin.Short
 import kotlin.String
 
-interface Source {
-    val description: String get() = (info + context).toDescription()
-
-    val context: Map<String, String>
-
-    fun addContext(name: String, value: String)
-
-    val info: Map<String, String>
-
-    fun addInfo(name: String, value: String)
-
+interface Source : SourceInfo {
     fun contains(path: Path): Boolean
 
     fun getOrNull(path: Path): Source?

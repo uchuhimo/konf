@@ -23,27 +23,16 @@ import com.typesafe.config.ConfigValueType
 import com.uchuhimo.konf.Path
 import com.uchuhimo.konf.source.ParseException
 import com.uchuhimo.konf.source.Source
+import com.uchuhimo.konf.source.SourceInfo
 import com.uchuhimo.konf.source.WrongTypeException
 import com.uchuhimo.konf.source.toDescription
 
 class HoconValueSource(
         val value: ConfigValue,
         context: Map<String, String> = mapOf()
-) : Source {
-    private val _info = mutableMapOf("type" to "HOCON-value")
-
-    override val info: Map<String, String> get() = _info
-
-    override fun addInfo(name: String, value: String) {
-        _info.put(name, value)
-    }
-
-    private val _context: MutableMap<String, String> = context.toMutableMap()
-
-    override val context: Map<String, String> get() = _context
-
-    override fun addContext(name: String, value: String) {
-        _context.put(name, value)
+) : Source, SourceInfo by SourceInfo.with(context) {
+    init {
+        addInfo("type", "HOCON-value")
     }
 
     private val type = value.valueType()

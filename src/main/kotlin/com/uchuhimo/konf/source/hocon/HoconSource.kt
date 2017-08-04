@@ -20,25 +20,15 @@ import com.typesafe.config.Config
 import com.uchuhimo.konf.Path
 import com.uchuhimo.konf.name
 import com.uchuhimo.konf.source.Source
+import com.uchuhimo.konf.source.SourceInfo
 import com.uchuhimo.konf.unsupported
 
 class HoconSource(
         val config: Config,
-        context: Map<String, String> = mapOf()) : Source {
-    private val _info = mutableMapOf("type" to "HOCON")
-
-    override val info: Map<String, String> get() = _info
-
-    override fun addInfo(name: String, value: String) {
-        _info.put(name, value)
-    }
-
-    private val _context: MutableMap<String, String> = context.toMutableMap()
-
-    override val context: Map<String, String> get() = _context
-
-    override fun addContext(name: String, value: String) {
-        _context.put(name, value)
+        context: Map<String, String> = mapOf()
+) : Source, SourceInfo by SourceInfo.with(context) {
+    init {
+        addInfo("type", "HOCON")
     }
 
     override fun contains(path: Path): Boolean = config.hasPath(path.name)
