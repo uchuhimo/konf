@@ -18,6 +18,7 @@ package com.uchuhimo.konf.source.env
 
 import com.natpryce.hamkrest.assertion.assertThat
 import com.natpryce.hamkrest.equalTo
+import com.uchuhimo.konf.toPath
 import org.jetbrains.spek.api.dsl.given
 import org.jetbrains.spek.api.dsl.it
 import org.jetbrains.spek.api.dsl.on
@@ -33,7 +34,7 @@ object EnvProviderSpec : SubjectSpek<EnvProvider>({
                 assertThat(source.info["type"], equalTo("system-environment"))
             }
             it("should return a source which contains value from system environment") {
-                assertThat(source.get(listOf("source", "test", "type")).toText(), equalTo("env"))
+                assertThat(source["source.test.type".toPath()].toText(), equalTo("env"))
             }
         }
     }

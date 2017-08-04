@@ -57,20 +57,20 @@ object SourceSpec : Spek({
     given("a source") {
         group("get operation") {
             val value: Source = ValueSource(Unit)
-            val validPath = listOf("a", "b")
-            val invalidPath = listOf("a", "c")
+            val validPath = "a.b".toPath()
+            val invalidPath = "a.c".toPath()
             val validKey = "a"
             val invalidKey = "b"
             val sourceForPath by memoized { mapOf(validPath.name to value).asKVSource() }
             val sourceForKey by memoized { mapOf(validKey to value).asSource() }
             on("find a valid path") {
                 it("should contain the value") {
-                    assertTrue(sourceForPath.contains(validPath))
+                    assertTrue(validPath in sourceForPath)
                 }
             }
             on("find an invalid path") {
                 it("should not contain the value") {
-                    assertTrue(!sourceForPath.contains(invalidPath))
+                    assertTrue(invalidPath !in sourceForPath)
                 }
             }
 
@@ -87,24 +87,24 @@ object SourceSpec : Spek({
 
             on("get by a valid path using `get`") {
                 it("should return the corresponding value") {
-                    assertThat(sourceForPath.get(validPath), equalTo(value))
+                    assertThat(sourceForPath[validPath], equalTo(value))
                 }
             }
             on("get by an invalid path using `get`") {
                 it("should throw NoSuchPathException") {
-                    assertThat({ sourceForPath.get(invalidPath) },
+                    assertThat({ sourceForPath[invalidPath] },
                             throws(has(NoSuchPathException::path, equalTo(invalidPath))))
                 }
             }
 
             on("find a valid key") {
                 it("should contain the value") {
-                    assertTrue(sourceForKey.contains(validKey))
+                    assertTrue(validKey in sourceForKey)
                 }
             }
             on("find an invalid key") {
                 it("should not contain the value") {
-                    assertTrue(!sourceForKey.contains(invalidKey))
+                    assertTrue(invalidKey !in sourceForKey)
                 }
             }
 
@@ -121,12 +121,12 @@ object SourceSpec : Spek({
 
             on("get by a valid key using `get`") {
                 it("should return the corresponding value") {
-                    assertThat(sourceForKey.get(validKey), equalTo(value))
+                    assertThat(sourceForKey[validKey], equalTo(value))
                 }
             }
             on("get by an invalid key using `get`") {
                 it("should throw NoSuchPathException") {
-                    assertThat({ sourceForKey.get(invalidKey) },
+                    assertThat({ sourceForKey[invalidKey] },
                             throws(has(NoSuchPathException::path, equalTo(invalidKey.toPath()))))
                 }
             }

@@ -73,17 +73,17 @@ import kotlin.Short
 import kotlin.String
 
 interface Source : SourceInfo {
-    fun contains(path: Path): Boolean
+    operator fun contains(path: Path): Boolean
 
     fun getOrNull(path: Path): Source?
 
-    fun get(path: Path): Source = getOrNull(path) ?: throw NoSuchPathException(this, path)
+    operator fun get(path: Path): Source = getOrNull(path) ?: throw NoSuchPathException(this, path)
 
-    fun contains(key: String): Boolean = contains(key.toPath())
+    operator fun contains(key: String): Boolean = contains(key.toPath())
 
     fun getOrNull(key: String): Source? = getOrNull(key.toPath())
 
-    fun get(key: String): Source = get(key.toPath())
+    operator fun get(key: String): Source = get(key.toPath())
 
     fun isList(): Boolean = false
 
@@ -226,9 +226,9 @@ internal fun Config.loadFromSource(source: Source): Config {
     return withLayer("source: ${source.description}").apply {
         for (item in this) {
             val path = item.path
-            if (source.contains(path)) {
+            if (path in source) {
                 try {
-                    rawSet(item, source.get(path).toValue(item.type, mapper))
+                    rawSet(item, source[path].toValue(item.type, mapper))
                 } catch (cause: SourceException) {
                     throw LoadException(path, cause)
                 }

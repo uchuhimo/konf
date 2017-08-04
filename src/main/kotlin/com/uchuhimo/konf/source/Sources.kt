@@ -39,7 +39,7 @@ fun Source.withFallback(fallback: Source): Source = object : Source by this {
             this@withFallback.contains(path) || fallback.contains(path)
 
     override fun get(path: List<String>): Source =
-            this@withFallback.getOrNull(path) ?: fallback.get(path)
+            this@withFallback.getOrNull(path) ?: fallback[path]
 
     override fun getOrNull(path: List<String>): Source? =
             this@withFallback.getOrNull(path) ?: fallback.getOrNull(path)
@@ -48,7 +48,7 @@ fun Source.withFallback(fallback: Source): Source = object : Source by this {
             this@withFallback.contains(key) || fallback.contains(key)
 
     override fun get(key: String): Source =
-            this@withFallback.getOrNull(key) ?: fallback.get(key)
+            this@withFallback.getOrNull(key) ?: fallback[key]
 
     override fun getOrNull(key: String): Source? =
             this@withFallback.getOrNull(key) ?: fallback.getOrNull(key)

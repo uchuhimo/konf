@@ -34,7 +34,7 @@ object JsonProviderSpec : SubjectSpek<JsonProvider>({
                 assertThat(source.info["type"], equalTo("JSON"))
             }
             it("should return a source which contains value from reader") {
-                assertThat(source.get("type").toText(), equalTo("reader"))
+                assertThat(source["type"].toText(), equalTo("reader"))
             }
         }
         on("create source from input stream") {
@@ -44,7 +44,7 @@ object JsonProviderSpec : SubjectSpek<JsonProvider>({
                 assertThat(source.info["type"], equalTo("JSON"))
             }
             it("should return a source which contains value from input stream") {
-                assertThat(source.get("type").toText(), equalTo("inputStream"))
+                assertThat(source["type"].toText(), equalTo("inputStream"))
             }
         }
     }

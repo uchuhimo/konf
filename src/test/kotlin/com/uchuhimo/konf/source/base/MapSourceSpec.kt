@@ -45,7 +45,7 @@ object MapSourceSpec : SubjectSpek<MapSource>({
         }
         on("get an existed key") {
             it("should contain the key") {
-                assertTrue(subject.contains("1".toPath()))
+                assertTrue("1".toPath() in subject)
             }
             it("should contain the corresponding value") {
                 assertThat((subject.getOrNull("1".toPath()) as ValueSource).value, equalTo(1 as Any))
@@ -53,7 +53,7 @@ object MapSourceSpec : SubjectSpek<MapSource>({
         }
         on("get an non-existed key") {
             it("should not contain the key") {
-                assertFalse(subject.contains("2".toPath()))
+                assertFalse("2".toPath() in subject)
             }
             it("should not contain the corresponding value") {
                 assertNull(subject.getOrNull("2".toPath()))

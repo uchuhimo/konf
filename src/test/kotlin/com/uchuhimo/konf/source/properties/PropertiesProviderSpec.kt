@@ -34,7 +34,7 @@ object PropertiesProviderSpec : SubjectSpek<PropertiesProvider>({
                 assertThat(source.info["type"], equalTo("properties"))
             }
             it("should return a source which contains value from reader") {
-                assertThat(source.get("type").toText(), equalTo("reader"))
+                assertThat(source["type"].toText(), equalTo("reader"))
             }
         }
         on("create source from input stream") {
@@ -44,7 +44,7 @@ object PropertiesProviderSpec : SubjectSpek<PropertiesProvider>({
                 assertThat(source.info["type"], equalTo("properties"))
             }
             it("should return a source which contains value from input stream") {
-                assertThat(source.get("type").toText(), equalTo("inputStream"))
+                assertThat(source["type"].toText(), equalTo("inputStream"))
             }
         }
         on("create source from system properties") {
@@ -54,7 +54,7 @@ object PropertiesProviderSpec : SubjectSpek<PropertiesProvider>({
                 assertThat(source.info["type"], equalTo("system-properties"))
             }
             it("should return a source which contains value from system properties") {
-                assertThat(source.get("type").toText(), equalTo("system"))
+                assertThat(source["type"].toText(), equalTo("system"))
             }
         }
     }

@@ -23,7 +23,6 @@ import org.jetbrains.spek.api.dsl.given
 import org.jetbrains.spek.api.dsl.it
 import org.jetbrains.spek.api.dsl.on
 import org.jetbrains.spek.subject.SubjectSpek
-import kotlin.test.assertFalse
 import kotlin.test.assertNull
 import kotlin.test.assertTrue
 
@@ -39,15 +38,15 @@ object HoconSourceSpec : SubjectSpek<HoconSource>({
         }
         on("get an existed key") {
             it("should contain the key") {
-                assertTrue(subject.contains("key".toPath()))
+                assertTrue("key".toPath() in subject)
             }
             it("should contain the corresponding value") {
-                assertThat((subject.getOrNull("key".toPath()) as HoconValueSource).toInt(), equalTo(1))
+                assertThat((subject["key".toPath()] as HoconValueSource).toInt(), equalTo(1))
             }
         }
         on("get an non-existed key") {
             it("should not contain the key") {
-                assertFalse(subject.contains("invalid".toPath()))
+                assertTrue("invalid".toPath() !in subject)
             }
             it("should not contain the corresponding value") {
                 assertNull(subject.getOrNull("invalid".toPath()))

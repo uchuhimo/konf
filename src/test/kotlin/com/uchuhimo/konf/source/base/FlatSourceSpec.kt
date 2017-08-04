@@ -22,6 +22,7 @@ import com.natpryce.hamkrest.throws
 import com.uchuhimo.konf.source.NoSuchPathException
 import com.uchuhimo.konf.source.ParseException
 import com.uchuhimo.konf.source.Source
+import com.uchuhimo.konf.toPath
 import org.jetbrains.spek.api.dsl.given
 import org.jetbrains.spek.api.dsl.it
 import org.jetbrains.spek.api.dsl.on
@@ -47,10 +48,10 @@ object FlatSourceSpec : SubjectSpek<FlatSource>({
             }
             on("access with empty path") {
                 it("should contain the path") {
-                    assertTrue(source.contains(listOf()))
+                    assertTrue("".toPath() in source)
                 }
                 it("should return itself in `getOrNull`") {
-                    assertThat(source.getOrNull(listOf()), equalTo(source as Source))
+                    assertThat(source.getOrNull("".toPath()), equalTo(source as Source))
                 }
             }
         }
@@ -59,7 +60,7 @@ object FlatSourceSpec : SubjectSpek<FlatSource>({
                     map = mapOf("level1.level2.key." to "value"),
                     prefix = "level1.level2")
             it("should not contain any path") {
-                assertFalse(source.contains("key"))
+                assertFalse("key" in source)
             }
         }
         on("underlying map's key prefix mismatches with prefix") {

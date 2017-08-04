@@ -52,9 +52,13 @@ typealias Path = List<String>
 val Path.name: String get() = joinToString(".")
 
 fun String.toPath(): Path {
-    val path = this.split('.')
-    check("" !in path) { "${this} is not a valid path" }
-    return path
+    if (isEmpty()) {
+        return listOf()
+    } else {
+        val path = this.split('.')
+        check("" !in path) { "${this} is not a valid path" }
+        return path
+    }
 }
 
 open class RequiredItem<T : Any>(

@@ -21,6 +21,7 @@ import com.natpryce.hamkrest.equalTo
 import com.uchuhimo.konf.name
 import com.uchuhimo.konf.source.base.asKVSource
 import com.uchuhimo.konf.source.base.asSource
+import com.uchuhimo.konf.toPath
 import org.jetbrains.spek.api.Spek
 import org.jetbrains.spek.api.dsl.given
 import org.jetbrains.spek.api.dsl.it
@@ -42,10 +43,10 @@ object FallbackSourceSpec : Spek({
             val facadeSource = mapOf(key to "facade").asKVSource()
             val source = facadeSource.withFallback(fallbackSource)
             it("gets value from facade source") {
-                assertTrue(source.contains(path))
-                assertTrue(source.contains(key))
-                assertThat(source.get(path).toText(), equalTo(facadeSource.get(path).toText()))
-                assertThat(source.get(key).toText(), equalTo(facadeSource.get(key).toText()))
+                assertTrue(path in source)
+                assertTrue(key in source)
+                assertThat(source[path].toText(), equalTo(facadeSource[path].toText()))
+                assertThat(source[key].toText(), equalTo(facadeSource[key].toText()))
                 assertThat(source.getOrNull(path)?.toText(),
                         equalTo(facadeSource.getOrNull(path)?.toText()))
                 assertThat(source.getOrNull(key)?.toText(),
@@ -61,22 +62,22 @@ object FallbackSourceSpec : Spek({
             val facadeSource = mapOf(facadeKey to "facade").asKVSource()
             val source = facadeSource.withFallback(fallbackSource)
             it("gets value from fallback source") {
-                assertTrue(source.contains(path))
-                assertTrue(source.contains(key))
-                assertThat(source.get(path).toText(), equalTo(fallbackSource.get(path).toText()))
-                assertThat(source.get(key).toText(), equalTo(fallbackSource.get(key).toText()))
+                assertTrue(path in source)
+                assertTrue(key in source)
+                assertThat(source[path].toText(), equalTo(fallbackSource[path].toText()))
+                assertThat(source[key].toText(), equalTo(fallbackSource[key].toText()))
                 assertThat(source.getOrNull(path)?.toText(),
                         equalTo(fallbackSource.getOrNull(path)?.toText()))
                 assertThat(source.getOrNull(key)?.toText(),
                         equalTo(fallbackSource.getOrNull(key)?.toText()))
             }
             it("contains value in facade source") {
-                assertTrue(source.contains(facadePath))
-                assertTrue(source.contains(facadeKey))
+                assertTrue(facadePath in source)
+                assertTrue(facadeKey in source)
             }
             it("does not contain value which is not existed in both facade source and fallback source") {
-                assertFalse(source.contains(listOf("a", "d")))
-                assertFalse(source.contains("a.d"))
+                assertFalse("a.d".toPath() in source)
+                assertFalse("a.d" in source)
             }
         }
     }

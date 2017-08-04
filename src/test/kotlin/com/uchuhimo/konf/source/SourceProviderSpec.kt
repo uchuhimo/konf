@@ -37,14 +37,14 @@ object SourceProviderSpec : SubjectSpek<SourceProvider>({
         on("create source from reader") {
             val source = subject.fromReader("type = reader".reader())
             it("should return a source which contains value from reader") {
-                assertThat(source.get("type").toText(), equalTo("reader"))
+                assertThat(source["type"].toText(), equalTo("reader"))
             }
         }
         on("create source from input stream") {
             val source = subject.fromInputStream(
                     tempFileOf("type = inputStream").inputStream())
             it("should return a source which contains value from input stream") {
-                assertThat(source.get("type").toText(), equalTo("inputStream"))
+                assertThat(source["type"].toText(), equalTo("inputStream"))
             }
         }
         on("create source from file") {
@@ -54,7 +54,7 @@ object SourceProviderSpec : SubjectSpek<SourceProvider>({
                 assertThat(source.context["file"], equalTo(file.toString()))
             }
             it("should return a source which contains value in file") {
-                assertThat(source.get("type").toText(), equalTo("file"))
+                assertThat(source["type"].toText(), equalTo("file"))
             }
         }
         on("create source from string") {
@@ -64,19 +64,19 @@ object SourceProviderSpec : SubjectSpek<SourceProvider>({
                 assertThat(source.context["content"], equalTo("\"\n$content\n\""))
             }
             it("should return a source which contains value in string") {
-                assertThat(source.get("type").toText(), equalTo("string"))
+                assertThat(source["type"].toText(), equalTo("string"))
             }
         }
         on("create source from byte array") {
             val source = subject.fromBytes("type = bytes".toByteArray())
             it("should return a source which contains value in byte array") {
-                assertThat(source.get("type").toText(), equalTo("bytes"))
+                assertThat(source["type"].toText(), equalTo("bytes"))
             }
         }
         on("create source from byte array slice") {
             val source = subject.fromBytes("|type = slice|".toByteArray(), 1, 12)
             it("should return a source which contains value in byte array slice") {
-                assertThat(source.get("type").toText(), equalTo("slice"))
+                assertThat(source["type"].toText(), equalTo("slice"))
             }
         }
         on("create source from HTTP URL") {
@@ -98,7 +98,7 @@ object SourceProviderSpec : SubjectSpek<SourceProvider>({
                 assertThat(source!!.context["url"], equalTo(urlPath))
             }
             it("should return a source which contains value in URL") {
-                assertThat(source!!.get("type").toText(), equalTo("http"))
+                assertThat(source!!["type"].toText(), equalTo("http"))
             }
             stop()
         }
@@ -110,7 +110,7 @@ object SourceProviderSpec : SubjectSpek<SourceProvider>({
                 assertThat(source.context["url"], equalTo(url.toString()))
             }
             it("should return a source which contains value in URL") {
-                assertThat(source.get("type").toText(), equalTo("fileUrl"))
+                assertThat(source["type"].toText(), equalTo("fileUrl"))
             }
         }
         on("create source from resource") {
@@ -120,7 +120,7 @@ object SourceProviderSpec : SubjectSpek<SourceProvider>({
                 assertThat(source.context["resource"], equalTo(resource))
             }
             it("should return a source which contains value in resource") {
-                assertThat(source.get("type").toText(), equalTo("resource"))
+                assertThat(source["type"].toText(), equalTo("resource"))
             }
         }
         on("create source from non-existed resource") {
