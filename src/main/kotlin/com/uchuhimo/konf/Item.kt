@@ -29,11 +29,7 @@ sealed class Item<T : Any>(
 
     val name: String = spec.qualify(name)
 
-    val path: Path = run {
-        val path = this.name.split('.')
-        check("" !in path) { "${this.name} is invalid name for item" }
-        path
-    }
+    val path: Path = this.name.toPath()
 
     val type: JavaType = TypeFactory.defaultInstance().constructType(this::class.java)
             .findSuperType(Item::class.java).bindings.typeParameters[0]
@@ -55,7 +51,11 @@ typealias Path = List<String>
 
 val Path.name: String get() = joinToString(".")
 
-fun String.toPath(): Path = listOf(this)
+fun String.toPath(): Path {
+    val path = this.split('.')
+    check("" !in path) { "${this} is not a valid path" }
+    return path
+}
 
 open class RequiredItem<T : Any>(
         spec: ConfigSpec,

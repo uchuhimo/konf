@@ -112,10 +112,12 @@ open class FlatSource(
 
     override fun toBoolean(): Boolean {
         val value = getValue()
-        try {
-            return value.toBoolean()
-        } catch (cause: NumberFormatException) {
-            throw ParseException("$value cannot be parsed to a boolean", cause)
+        if (value.toLowerCase() == "true") {
+            return true
+        } else if (value.toLowerCase() == "false") {
+            return false
+        } else {
+            throw ParseException("$value cannot be parsed to a boolean")
         }
     }
 
