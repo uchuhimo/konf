@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-package com.uchuhimo.konf.source.map
+package com.uchuhimo.konf.source.base
 
 import com.uchuhimo.konf.Config
 import com.uchuhimo.konf.source.ConfigForLoad

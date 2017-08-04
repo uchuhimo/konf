@@ -39,12 +39,10 @@ fun Any.asTomlSource(context: Map<String, String> = mapOf()): Source =
         if (this is Source) {
             this
         } else if (this is Map<*, *>) {
-            try {
-                @Suppress("UNCHECKED_CAST")
-                TomlMapSource(this as Map<String, Any>, context)
-            } catch (e: ClassCastException) {
-                TomlValueSource(this, context)
-            }
+            // assume that only `Map<String, Any>` is provided,
+            // key type mismatch will be detected when loaded into Config
+            @Suppress("UNCHECKED_CAST")
+            TomlMapSource(this as Map<String, Any>, context)
         } else {
             TomlValueSource(this, context)
         }

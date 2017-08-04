@@ -20,121 +20,121 @@ import com.natpryce.hamkrest.assertion.assertThat
 import com.natpryce.hamkrest.equalTo
 import com.natpryce.hamkrest.throws
 import com.uchuhimo.konf.source.ParseException
-import com.uchuhimo.konf.source.parseDuration
+import com.uchuhimo.konf.source.toDuration
 import org.jetbrains.spek.api.Spek
 import org.jetbrains.spek.api.dsl.it
 import org.jetbrains.spek.api.dsl.on
-import java.util.concurrent.TimeUnit
+import java.time.Duration
 
 object ParseDurationSpec : Spek({
     on("parse empty string") {
         it("throws ParseException") {
-            assertThat({ parseDuration("") }, throws<ParseException>())
+            assertThat({ "".toDuration() }, throws<ParseException>())
         }
     }
     on("parse string without unit") {
         it("parse as milliseconds") {
-            assertThat(parseDuration("1"), equalTo(TimeUnit.MILLISECONDS.toNanos(1)))
+            assertThat("1".toDuration(), equalTo(Duration.ofMillis(1)))
         }
     }
     on("parse string with unit 'ms'") {
         it("parse as milliseconds") {
-            assertThat(parseDuration("1ms"), equalTo(TimeUnit.MILLISECONDS.toNanos(1)))
+            assertThat("1ms".toDuration(), equalTo(Duration.ofMillis(1)))
         }
     }
     on("parse string with unit 'millis'") {
         it("parse as milliseconds") {
-            assertThat(parseDuration("1 millis"), equalTo(TimeUnit.MILLISECONDS.toNanos(1)))
+            assertThat("1 millis".toDuration(), equalTo(Duration.ofMillis(1)))
         }
     }
     on("parse string with unit 'milliseconds'") {
         it("parse as milliseconds") {
-            assertThat(parseDuration("1 milliseconds"), equalTo(TimeUnit.MILLISECONDS.toNanos(1)))
+            assertThat("1 milliseconds".toDuration(), equalTo(Duration.ofMillis(1)))
         }
     }
     on("parse string with unit 'us'") {
         it("parse as microseconds") {
-            assertThat(parseDuration("1us"), equalTo(TimeUnit.MICROSECONDS.toNanos(1)))
+            assertThat("1us".toDuration(), equalTo(Duration.ofNanos(1000)))
         }
     }
     on("parse string with unit 'micros'") {
         it("parse as microseconds") {
-            assertThat(parseDuration("1 micros"), equalTo(TimeUnit.MICROSECONDS.toNanos(1)))
+            assertThat("1 micros".toDuration(), equalTo(Duration.ofNanos(1000)))
         }
     }
     on("parse string with unit 'microseconds'") {
         it("parse as microseconds") {
-            assertThat(parseDuration("1 microseconds"), equalTo(TimeUnit.MICROSECONDS.toNanos(1)))
+            assertThat("1 microseconds".toDuration(), equalTo(Duration.ofNanos(1000)))
         }
     }
     on("parse string with unit 'ns'") {
         it("parse as nanoseconds") {
-            assertThat(parseDuration("1ns"), equalTo(TimeUnit.NANOSECONDS.toNanos(1)))
+            assertThat("1ns".toDuration(), equalTo(Duration.ofNanos(1)))
         }
     }
     on("parse string with unit 'nanos'") {
         it("parse as nanoseconds") {
-            assertThat(parseDuration("1 nanos"), equalTo(TimeUnit.NANOSECONDS.toNanos(1)))
+            assertThat("1 nanos".toDuration(), equalTo(Duration.ofNanos(1)))
         }
     }
     on("parse string with unit 'nanoseconds'") {
         it("parse as nanoseconds") {
-            assertThat(parseDuration("1 nanoseconds"), equalTo(TimeUnit.NANOSECONDS.toNanos(1)))
+            assertThat("1 nanoseconds".toDuration(), equalTo(Duration.ofNanos(1)))
         }
     }
     on("parse string with unit 'd'") {
         it("parse as days") {
-            assertThat(parseDuration("1d"), equalTo(TimeUnit.DAYS.toNanos(1)))
+            assertThat("1d".toDuration(), equalTo(Duration.ofDays(1)))
         }
     }
     on("parse string with unit 'days'") {
         it("parse as days") {
-            assertThat(parseDuration("1 days"), equalTo(TimeUnit.DAYS.toNanos(1)))
+            assertThat("1 days".toDuration(), equalTo(Duration.ofDays(1)))
         }
     }
     on("parse string with unit 'h'") {
         it("parse as hours") {
-            assertThat(parseDuration("1h"), equalTo(TimeUnit.HOURS.toNanos(1)))
+            assertThat("1h".toDuration(), equalTo(Duration.ofHours(1)))
         }
     }
     on("parse string with unit 'hours'") {
         it("parse as hours") {
-            assertThat(parseDuration("1 hours"), equalTo(TimeUnit.HOURS.toNanos(1)))
+            assertThat("1 hours".toDuration(), equalTo(Duration.ofHours(1)))
         }
     }
     on("parse string with unit 's'") {
         it("parse as seconds") {
-            assertThat(parseDuration("1s"), equalTo(TimeUnit.SECONDS.toNanos(1)))
+            assertThat("1s".toDuration(), equalTo(Duration.ofSeconds(1)))
         }
     }
     on("parse string with unit 'seconds'") {
         it("parse as seconds") {
-            assertThat(parseDuration("1 seconds"), equalTo(TimeUnit.SECONDS.toNanos(1)))
+            assertThat("1 seconds".toDuration(), equalTo(Duration.ofSeconds(1)))
         }
     }
     on("parse string with unit 'm'") {
         it("parse as minutes") {
-            assertThat(parseDuration("1m"), equalTo(TimeUnit.MINUTES.toNanos(1)))
+            assertThat("1m".toDuration(), equalTo(Duration.ofMinutes(1)))
         }
     }
     on("parse string with unit 'minutes'") {
         it("parse as minutes") {
-            assertThat(parseDuration("1 minutes"), equalTo(TimeUnit.MINUTES.toNanos(1)))
+            assertThat("1 minutes".toDuration(), equalTo(Duration.ofMinutes(1)))
         }
     }
     on("parse string with float number") {
         it("parse and convert from double to long") {
-            assertThat(parseDuration("1.5ms"), equalTo(TimeUnit.MICROSECONDS.toNanos(1500)))
+            assertThat("1.5ms".toDuration(), equalTo(Duration.ofNanos(1_500_000)))
         }
     }
     on("parse string with invalid unit") {
         it("throws ParseException") {
-            assertThat({ parseDuration("1x") }, throws<ParseException>())
+            assertThat({ "1x".toDuration() }, throws<ParseException>())
         }
     }
     on("parse string with invalid number") {
         it("throws ParseException") {
-            assertThat({ parseDuration("*1s") }, throws<ParseException>())
+            assertThat({ "*1s".toDuration() }, throws<ParseException>())
         }
     }
 })

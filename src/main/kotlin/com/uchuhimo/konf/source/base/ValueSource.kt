@@ -304,12 +304,10 @@ fun Any.asSource(type: String = "", context: Map<String, String> = mapOf()): Sou
         if (this is Source) {
             this
         } else if (this is Map<*, *>) {
-            try {
-                @Suppress("UNCHECKED_CAST")
-                MapSource(this as Map<String, Any>, type, context)
-            } catch (e: ClassCastException) {
-                ValueSource(this, type, context)
-            }
+            // assume that only `Map<String, Any>` is provided,
+            // key type mismatch will be detected when loaded into Config
+            @Suppress("UNCHECKED_CAST")
+            MapSource(this as Map<String, Any>, type, context)
         } else {
             ValueSource(this, type, context)
         }

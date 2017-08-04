@@ -49,7 +49,7 @@ open class ConfigSpec(val prefix: String = "") {
                     description = description
             ) {}
 
-    internal fun qualify(name: String) = if (prefix.isEmpty()) name else "$prefix.$name"
+    fun qualify(name: String): String = if (prefix.isEmpty()) name else "$prefix.$name"
 
     internal fun addItem(item: Item<*>) {
         _items += item
