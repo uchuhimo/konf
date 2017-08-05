@@ -39,13 +39,11 @@ open class ConfigSpec(val prefix: String = "") {
     inline fun <reified T : Any> lazy(
             name: String,
             description: String = "",
-            placeholder: String = "",
             noinline default: (ConfigGetter) -> T) =
             object : LazyItem<T>(
                     spec = this,
                     name = name,
                     thunk = default,
-                    placeholder = placeholder,
                     description = description
             ) {}
 

@@ -24,11 +24,7 @@ public class NetworkBufferInJava {
 
   public static final LazyItem<Integer> maxSize =
       new LazyItem<Integer>(
-          spec,
-          "maxSize",
-          config -> config.get(size) * 2,
-          "${size.name} * 2",
-          "max size of buffer in KB") {};
+          spec, "maxSize", config -> config.get(size) * 2, "max size of buffer in KB") {};
 
   public static final OptionalItem<String> name =
       new OptionalItem<String>(spec, "name", "buffer", "name of buffer") {};

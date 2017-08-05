@@ -27,7 +27,7 @@ class NameConflictException(message: String) : ConfigException(message)
 
 class InvalidLazySetException(message: String) : ConfigException(message)
 
-class UnsetValueException(val name: String) : ConfigException("${name} is unset")
+class UnsetValueException(val name: String) : ConfigException("$name is unset")
 
 class NoSuchItemException(val name: String) : ConfigException("cannot find $name in config")
 

@@ -32,7 +32,9 @@ object ConfigGenerateDocSpec : SubjectSpek<Config>({
             val complexConfig by memoized {
                 subject.apply {
                     addSpec(object : ConfigSpec("disk.file") {
-                        val size = optional("size", 1024, description = "size of disk file")
+                        init {
+                            optional("size", 1024, description = "size of disk file")
+                        }
                     })
                 }
             }
@@ -74,9 +76,6 @@ private fun generateItemDoc(
         StringBuilder().apply {
             item.description.lines().forEach { line ->
                 appendln("# $line")
-            }
-            if (item is LazyItem) {
-                appendln("# default: ${item.placeholder}")
             }
             append(key)
             append(separator)
@@ -140,7 +139,7 @@ fun Config.generateYamlDoc(): String =
             toTree.visit(
                     onEnterPath = { node ->
                         val path = node.path
-                        if (path.size >= 1) {
+                        if (path.isNotEmpty()) {
                             append(" ".repeat(4 * (path.size - 1)))
                             appendln("${path.last()}:")
                         }
@@ -183,8 +182,6 @@ fun Config.generateXmlDoc(): String =
                 append("    <value>")
                 if (item is OptionalItem) {
                     append(item.default.toString())
-                } else if (item is LazyItem) {
-                    append("<!-- ${item.placeholder} -->")
                 }
                 appendln("</value>")
                 appendln("    <description>")

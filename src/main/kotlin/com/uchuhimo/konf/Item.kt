@@ -24,6 +24,7 @@ sealed class Item<T : Any>(
         name: String,
         val description: String = "") {
     init {
+        @Suppress("LeakingThis")
         spec.addItem(this)
     }
 
@@ -31,6 +32,7 @@ sealed class Item<T : Any>(
 
     val path: Path = this.name.toPath()
 
+    @Suppress("LeakingThis")
     val type: JavaType = TypeFactory.defaultInstance().constructType(this::class.java)
             .findSuperType(Item::class.java).bindings.typeParameters[0]
 
@@ -61,7 +63,7 @@ fun String.toPath(): Path {
     }
 }
 
-open class RequiredItem<T : Any>(
+open class RequiredItem<T : Any> @JvmOverloads constructor(
         spec: ConfigSpec,
         name: String,
         description: String = ""
@@ -69,7 +71,7 @@ open class RequiredItem<T : Any>(
     override val isRequired: Boolean = true
 }
 
-open class OptionalItem<T : Any>(
+open class OptionalItem<T : Any> @JvmOverloads constructor(
         spec: ConfigSpec,
         name: String,
         val default: T,
@@ -78,11 +80,10 @@ open class OptionalItem<T : Any>(
     override val isOptional: Boolean = true
 }
 
-open class LazyItem<T : Any>(
+open class LazyItem<T : Any> @JvmOverloads constructor(
         spec: ConfigSpec,
         name: String,
         val thunk: (ConfigGetter) -> T,
-        val placeholder: String = "",
         description: String = ""
 ) : Item<T>(spec, name, description) {
     override val isLazy: Boolean = true

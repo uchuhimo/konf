@@ -96,7 +96,7 @@ object ConfigSpecSpek : Spek({
             }
         }
         val specForLazy = object : ConfigSpec("a.b") {
-            val item = lazy("int", "description", "placeholder") { 2 }
+            val item = lazy("int", "description") { 2 }
         }
         val config = Config { addSpec(specForLazy) }
         testItem(specForLazy, specForLazy.item, "a lazy item")
@@ -110,10 +110,6 @@ object ConfigSpecSpek : Spek({
                     assertThat({ spec.item.asRequiredItem }, throws<ClassCastException>())
                     assertThat({ spec.item.asOptionalItem }, throws<ClassCastException>())
                     assertThat(spec.item.asLazyItem, sameInstance(spec.item))
-                }
-                it("should contain the specified placeholder") {
-                    assertThat(specForLazy.item.placeholder, equalTo("placeholder"))
-                    assertThat(LazyItem(ConfigSpec(), "lazy", { 1 }).placeholder, equalTo(""))
                 }
                 it("should contain the specified thunk") {
                     assertThat(specForLazy.item.thunk(config), equalTo(2))

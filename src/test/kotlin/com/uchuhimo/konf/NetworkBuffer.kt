@@ -24,8 +24,7 @@ class NetworkBuffer {
         @JvmField
         val maxSize = lazy(
                 name = "maxSize",
-                description = "max size of buffer in KB",
-                placeholder = "${size.name} * 2"
+                description = "max size of buffer in KB"
         ) { it[size] * 2 }
 
         @JvmField
