@@ -14,28 +14,35 @@
  * limitations under the License.
  */
 
-package com.uchuhimo.konf.source.base
+package com.uchuhimo.konf.source.toml
 
 import com.natpryce.hamkrest.assertion.assertThat
+import com.natpryce.hamkrest.equalTo
 import com.natpryce.hamkrest.sameInstance
 import com.natpryce.hamkrest.throws
-import com.uchuhimo.konf.source.NoSuchPathException
+import com.uchuhimo.konf.source.ParseException
 import org.jetbrains.spek.api.Spek
 import org.jetbrains.spek.api.dsl.given
 import org.jetbrains.spek.api.dsl.it
 import org.jetbrains.spek.api.dsl.on
 
-object ValueSourceSpec : Spek({
-    given("a value source") {
-        on("get with non-empty path") {
-            it("should throw NoSuchPathException") {
-                assertThat({ 1.asSource().getOrNull("a") }, throws<NoSuchPathException>())
+object TomlValueSourceSpec : Spek({
+    given("a TOML source") {
+        on("get integer from long source") {
+            it("should succeed") {
+                assertThat(1L.asTomlSource().toInt(), equalTo(1))
             }
         }
-        on("invoke `asSource`") {
-            val source = 1.asSource()
+        on("get integer from long source whose value is out of range of integer") {
+            it("should throw ParseException") {
+                assertThat({ 12345678900L.asTomlSource().toInt() }, throws<ParseException>())
+                assertThat({ -12345678900L.asTomlSource().toInt() }, throws<ParseException>())
+            }
+        }
+        on("invoke `asTomlSource`") {
+            val source = 1.asTomlSource()
             it("should return itself") {
-                assertThat(source.asSource(), sameInstance(source))
+                assertThat(source.asTomlSource(), sameInstance(source))
             }
         }
     }

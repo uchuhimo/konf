@@ -92,7 +92,7 @@ object JsonSourceSpec : Spek({
                     assertThat({ JsonSource(IntNode.valueOf(1)).toDouble() }, throws<WrongTypeException>())
                 }
             }
-            on("get int from other source") {
+            on("get integer from other source") {
                 it("should throw WrongTypeException") {
                     assertThat({ JsonSource(DoubleNode.valueOf(1.0)).toInt() }, throws<WrongTypeException>())
                 }
@@ -102,7 +102,7 @@ object JsonSourceSpec : Spek({
                     assertThat(JsonSource(LongNode.valueOf(1L)).toLong(), equalTo(1L))
                 }
             }
-            on("get long from int source") {
+            on("get long from integer source") {
                 it("should succeed") {
                     assertThat(JsonSource(IntNode.valueOf(1)).toLong(), equalTo(1L))
                 }
@@ -112,7 +112,7 @@ object JsonSourceSpec : Spek({
                     assertThat(JsonSource(ShortNode.valueOf(1)).toShort(), equalTo(1.toShort()))
                 }
             }
-            on("get short from int source") {
+            on("get short from integer source") {
                 it("should succeed") {
                     assertThat(JsonSource(IntNode.valueOf(1)).toShort(), equalTo(1.toShort()))
                 }
