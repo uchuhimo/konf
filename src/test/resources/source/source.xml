@@ -221,6 +221,30 @@
         <value>false</value>
     </property>
     <property>
+        <name>level1.level2.array.byte.0</name>
+        <value>1</value>
+    </property>
+    <property>
+        <name>level1.level2.array.byte.1</name>
+        <value>2</value>
+    </property>
+    <property>
+        <name>level1.level2.array.byte.2</name>
+        <value>3</value>
+    </property>
+    <property>
+        <name>level1.level2.array.short.0</name>
+        <value>1</value>
+    </property>
+    <property>
+        <name>level1.level2.array.short.1</name>
+        <value>2</value>
+    </property>
+    <property>
+        <name>level1.level2.array.short.2</name>
+        <value>3</value>
+    </property>
+    <property>
         <name>level1.level2.array.int.0</name>
         <value>1</value>
     </property>
@@ -243,6 +267,18 @@
     <property>
         <name>level1.level2.array.long.2</name>
         <value>6</value>
+    </property>
+    <property>
+        <name>level1.level2.array.float.0</name>
+        <value>-1</value>
+    </property>
+    <property>
+        <name>level1.level2.array.float.1</name>
+        <value>0.0</value>
+    </property>
+    <property>
+        <name>level1.level2.array.float.2</name>
+        <value>1</value>
     </property>
     <property>
         <name>level1.level2.array.double.0</name>

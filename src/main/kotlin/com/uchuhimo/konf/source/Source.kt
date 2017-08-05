@@ -388,10 +388,10 @@ private fun Source.toJsonNode(): JsonNode {
 
 private fun implOf(clazz: Class<*>): Class<*> =
         when (clazz) {
-            List::class.java, MutableList::class.java -> ArrayList::class.java
-            Set::class.java, MutableSet::class.java -> HashSet::class.java
+            List::class.java -> ArrayList::class.java
+            Set::class.java -> HashSet::class.java
             SortedSet::class.java -> TreeSet::class.java
-            Map::class.java, MutableMap::class.java -> HashMap::class.java
+            Map::class.java -> HashMap::class.java
             SortedMap::class.java -> TreeMap::class.java
             else -> clazz
         }

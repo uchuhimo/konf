@@ -35,8 +35,8 @@ object TomlValueSourceSpec : Spek({
         }
         on("get integer from long source whose value is out of range of integer") {
             it("should throw ParseException") {
-                assertThat({ 12345678900L.asTomlSource().toInt() }, throws<ParseException>())
-                assertThat({ -12345678900L.asTomlSource().toInt() }, throws<ParseException>())
+                assertThat({ Long.MAX_VALUE.asTomlSource().toInt() }, throws<ParseException>())
+                assertThat({ Long.MIN_VALUE.asTomlSource().toInt() }, throws<ParseException>())
             }
         }
         on("invoke `asTomlSource`") {

@@ -24,6 +24,7 @@ import org.jetbrains.spek.api.Spek
 import org.jetbrains.spek.api.dsl.given
 import org.jetbrains.spek.api.dsl.it
 import org.jetbrains.spek.api.dsl.on
+import kotlin.test.assertFalse
 import kotlin.test.assertTrue
 
 object HoconValueSourceSpec : Spek({
@@ -52,28 +53,38 @@ object HoconValueSourceSpec : Spek({
             }
         }
         on("get long from long value source") {
+            val source = "123456789000".toHoconValueSource()
             it("should succeed") {
-                assertThat("123456789000".toHoconValueSource().toLong(), equalTo(123_456_789_000L))
+                assertTrue(source.isLong())
+                assertThat(source.toLong(), equalTo(123_456_789_000L))
             }
         }
         on("get long from integer value source") {
+            val source = "1".toHoconValueSource()
             it("should succeed") {
-                assertThat("1".toHoconValueSource().toLong(), equalTo(1L))
+                assertFalse(source.isLong())
+                assertThat(source.toLong(), equalTo(1L))
             }
         }
         on("get double from double value source") {
+            val source = "1.5".toHoconValueSource()
             it("should succeed") {
-                assertThat("1.0".toHoconValueSource().toDouble(), equalTo(1.0))
+                assertTrue(source.isDouble())
+                assertThat(source.toDouble(), equalTo(1.5))
             }
         }
         on("get double from int value source") {
+            val source = "1".toHoconValueSource()
             it("should succeed") {
-                assertThat("1".toHoconValueSource().toDouble(), equalTo(1.0))
+                assertFalse(source.isDouble())
+                assertThat(source.toDouble(), equalTo(1.0))
             }
         }
         on("get double from long value source") {
+            val source = "123456789000".toHoconValueSource()
             it("should succeed") {
-                assertThat("123456789000".toHoconValueSource().toDouble(), equalTo(123456789000.0))
+                assertFalse(source.isDouble())
+                assertThat(source.toDouble(), equalTo(123456789000.0))
             }
         }
     }

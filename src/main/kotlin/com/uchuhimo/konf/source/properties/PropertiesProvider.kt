@@ -24,13 +24,8 @@ import java.io.Reader
 import java.util.Properties
 
 object PropertiesProvider : SourceProvider {
-    private fun Properties.toMap(): Map<String, String> {
-        return mapKeys {
-            it.key as String
-        }.mapValues {
-            it.value as String
-        }
-    }
+    @Suppress("UNCHECKED_CAST")
+    private fun Properties.toMap(): Map<String, String> = this as Map<String, String>
 
     override fun fromReader(reader: Reader): Source =
             FlatSource(Properties().apply { load(reader) }.toMap(), type = "properties")

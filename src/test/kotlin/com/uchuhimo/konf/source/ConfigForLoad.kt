@@ -68,8 +68,11 @@ object ConfigForLoad : ConfigSpec("level1.level2") {
 
     // array items
     val booleanArrayItem = required<BooleanArray>("array.boolean")
+    val byteArrayItem = required<ByteArray>("array.byte")
+    val shortArrayItem = required<ShortArray>("array.short")
     val intArrayItem = required<IntArray>("array.int")
     val longArrayItem = required<LongArray>("array.long")
+    val floatArrayItem = required<FloatArray>("array.float")
     val doubleArrayItem = required<DoubleArray>("array.double")
     val charArrayItem = required<CharArray>("array.char")
 

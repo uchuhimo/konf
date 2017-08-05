@@ -100,11 +100,20 @@ object SourceLoadSpec : SubjectSpek<Config>({
                         subject[ConfigForLoad.booleanArrayItem],
                         booleanArrayOf(true, false)))
                 assertTrue(Arrays.equals(
+                        subject[ConfigForLoad.byteArrayItem],
+                        byteArrayOf(1, 2, 3)))
+                assertTrue(Arrays.equals(
+                        subject[ConfigForLoad.shortArrayItem],
+                        shortArrayOf(1, 2, 3)))
+                assertTrue(Arrays.equals(
                         subject[ConfigForLoad.intArrayItem],
                         intArrayOf(1, 2, 3)))
                 assertTrue(Arrays.equals(
                         subject[ConfigForLoad.longArrayItem],
                         longArrayOf(4, 5, 6)))
+                assertTrue(Arrays.equals(
+                        subject[ConfigForLoad.floatArrayItem],
+                        floatArrayOf(-1.0F, 0.0F, 1.0F)))
                 assertTrue(Arrays.equals(
                         subject[ConfigForLoad.doubleArrayItem],
                         doubleArrayOf(-1.0, 0.0, 1.0)))
@@ -247,8 +256,11 @@ private val loadContent = mapOf<String, Any>(
         "enum" to "LABEL2",
 
         "array.boolean" to listOf(true, false),
+        "array.byte" to listOf<Byte>(1, 2, 3),
+        "array.short" to listOf<Short>(1, 2, 3),
         "array.int" to listOf(1, 2, 3),
         "array.long" to listOf(4L, 5L, 6L),
+        "array.float" to listOf(-1.0F, 0.0F, 1.0F),
         "array.double" to listOf(-1.0, 0.0, 1.0),
         "array.char" to listOf('a', 'b', 'c'),
 

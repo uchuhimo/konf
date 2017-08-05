@@ -82,8 +82,11 @@ private val loadContent = mapOf("level1" to mapOf("level2" to
 
                 "array" to mapOf(
                         "boolean" to listOf(true, false),
+                        "byte" to listOf<Byte>(1, 2, 3),
+                        "short" to listOf<Short>(1, 2, 3),
                         "int" to listOf(1, 2, 3),
                         "long" to listOf(4L, 5L, 6L),
+                        "float" to listOf(-1.0F, 0.0F, 1.0F),
                         "double" to listOf(-1.0, 0.0, 1.0),
                         "char" to listOf('a', 'b', 'c'),
 

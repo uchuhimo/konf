@@ -37,6 +37,9 @@ class HoconValueSource(
 
     private val type = value.valueType()
 
+    @Suppress("UNCHECKED_CAST")
+    private fun <T> ConfigValue.cast(): T = unwrapped() as T
+
     private fun checkType(actual: ConfigValueType, expected: ConfigValueType) {
         if (actual != expected) {
             throw WrongTypeException(this, "HOCON(${actual.name})", "HOCON(${expected.name})")
@@ -101,14 +104,14 @@ class HoconValueSource(
 
     override fun toText(): String {
         checkType(type, ConfigValueType.STRING)
-        return value.unwrapped() as String
+        return value.cast()
     }
 
     override fun isBoolean(): Boolean = type == ConfigValueType.BOOLEAN
 
     override fun toBoolean(): Boolean {
         checkType(type, ConfigValueType.BOOLEAN)
-        return value.unwrapped() as Boolean
+        return value.cast()
     }
 
     override fun isDouble(): Boolean = type == ConfigValueType.NUMBER && value.unwrapped() is Double
@@ -117,14 +120,14 @@ class HoconValueSource(
         try {
             checkType(type, ConfigValueType.NUMBER)
             checkNumType(NumType.Double)
-            return value.unwrapped() as Double
+            return value.cast()
         } catch (e: WrongTypeException) {
             try {
                 checkNumType(NumType.Long)
-                return (value.unwrapped() as Long).toDouble()
+                return (value.cast<Long>()).toDouble()
             } catch (e: WrongTypeException) {
                 checkNumType(NumType.Int)
-                return (value.unwrapped() as Int).toDouble()
+                return (value.cast<Int>()).toDouble()
             }
         }
     }
@@ -135,10 +138,10 @@ class HoconValueSource(
         try {
             checkType(type, ConfigValueType.NUMBER)
             checkNumType(NumType.Long)
-            return value.unwrapped() as Long
+            return value.cast()
         } catch (e: WrongTypeException) {
             checkNumType(NumType.Int)
-            return (value.unwrapped() as Int).toLong()
+            return (value.cast<Int>()).toLong()
         }
     }
 
@@ -147,6 +150,6 @@ class HoconValueSource(
     override fun toInt(): Int {
         checkType(type, ConfigValueType.NUMBER)
         checkNumType(NumType.Int)
-        return value.unwrapped() as Int
+        return value.cast()
     }
 }

@@ -24,13 +24,11 @@ import com.natpryce.hamkrest.throws
 import com.uchuhimo.konf.Config
 import com.uchuhimo.konf.ConfigSpec
 import com.uchuhimo.konf.NetworkBuffer
-import com.uchuhimo.konf.Path
 import com.uchuhimo.konf.name
 import com.uchuhimo.konf.source.base.ValueSource
 import com.uchuhimo.konf.source.base.asKVSource
 import com.uchuhimo.konf.source.base.asSource
 import com.uchuhimo.konf.toPath
-import com.uchuhimo.konf.unsupported
 import org.jetbrains.spek.api.Spek
 import org.jetbrains.spek.api.dsl.given
 import org.jetbrains.spek.api.dsl.it
@@ -145,9 +143,9 @@ object SourceSpec : Spek({
                 }
             }
             on("cast int out of range of short to short") {
-                val source = Int.MAX_VALUE.asSource()
                 it("should throw ParseException") {
-                    assertThat({ source.toShort() }, throws<ParseException>())
+                    assertThat({ Int.MAX_VALUE.asSource().toShort() }, throws<ParseException>())
+                    assertThat({ Int.MIN_VALUE.asSource().toShort() }, throws<ParseException>())
                 }
             }
 
@@ -158,9 +156,9 @@ object SourceSpec : Spek({
                 }
             }
             on("cast int out of range of byte to byte") {
-                val source = Int.MAX_VALUE.asSource()
                 it("should throw ParseException") {
-                    assertThat({ source.toByte() }, throws<ParseException>())
+                    assertThat({ Int.MAX_VALUE.asSource().toByte() }, throws<ParseException>())
+                    assertThat({ Int.MIN_VALUE.asSource().toByte() }, throws<ParseException>())
                 }
             }
 
@@ -382,13 +380,16 @@ object SourceSpec : Spek({
                     }
                 }
             }
+            on("load invalid POJO value") {
+                it("should throw LoadException caused by ParseException") {
+                    assertCausedBy<ParseException> {
+                        load<Person>(mapOf("name" to DumbSource()))
+                    }
+                }
+            }
         }
         group("default implementations") {
-            val source: Source = object : Source, SourceInfo by SourceInfo.default() {
-                override fun contains(path: Path): Boolean = unsupported()
-
-                override fun getOrNull(path: Path): Source? = unsupported()
-            }
+            val source = DumbSource()
             it("returns `false` for all `is` operation") {
                 assertFalse(source.isBigDecimal())
                 assertFalse(source.isBigInteger())
