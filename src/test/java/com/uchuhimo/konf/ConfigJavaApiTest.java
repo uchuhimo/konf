@@ -53,7 +53,7 @@ class ConfigJavaApiTest {
   void loadFromMap() {
     final HashMap<String, Integer> map = new HashMap<>();
     map.put(NetworkBufferInJava.size.getName(), 1024);
-    final Config newConfig = config.loadFrom().map.kv(map);
+    final Config newConfig = config.withSourceFrom().map.kv(map);
     assertThat(newConfig.get(NetworkBufferInJava.size), equalTo(1024));
   }
 
@@ -61,7 +61,7 @@ class ConfigJavaApiTest {
   @DisplayName("test fluent API to load from loader")
   void loadFromLoader() {
     final Config newConfig =
-        config.loadFrom().hocon.string(NetworkBufferInJava.size.getName() + " = 1024");
+        config.withSourceFrom().hocon.string(NetworkBufferInJava.size.getName() + " = 1024");
     assertThat(newConfig.get(NetworkBufferInJava.size), equalTo(1024));
   }
 
@@ -69,7 +69,7 @@ class ConfigJavaApiTest {
   @DisplayName("test fluent API to load from system properties")
   void loadFromSystem() {
     System.setProperty(NetworkBufferInJava.size.getName(), "1024");
-    final Config newConfig = config.loadFrom().systemProperties();
+    final Config newConfig = config.withSourceFrom().systemProperties();
     assertThat(newConfig.get(NetworkBufferInJava.size), equalTo(1024));
   }
 
@@ -102,7 +102,7 @@ class ConfigJavaApiTest {
   }
 
   @Test
-  @DisplayName("test `lazySet(Item<T>, Function1<ConfigGetter, T>)`")
+  @DisplayName("test `lazySet(Item<T>, Function1<ItemGetter, T>)`")
   void lazySetWithItem() {
     config.lazySet(NetworkBufferInJava.maxSize, it -> it.get(NetworkBufferInJava.size) * 4);
     config.set(NetworkBufferInJava.size, 1024);
@@ -110,7 +110,7 @@ class ConfigJavaApiTest {
   }
 
   @Test
-  @DisplayName("test `lazySet(String, Function1<ConfigGetter, T>)`")
+  @DisplayName("test `lazySet(String, Function1<ItemGetter, T>)`")
   void lazySetWithName() {
     config.lazySet(
         NetworkBufferInJava.maxSize.getName(), it -> it.get(NetworkBufferInJava.size) * 4);

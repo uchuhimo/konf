@@ -437,6 +437,6 @@ private inline fun <reified T : Any> load(value: Any): Config =
                     required<T>("item")
                 }
             })
-        }.load(mapOf("item" to value).asSource())
+        }.withSource(mapOf("item" to value).asSource())
 
 private data class Person(val name: String)

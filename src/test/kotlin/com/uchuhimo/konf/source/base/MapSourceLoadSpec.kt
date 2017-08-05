@@ -41,7 +41,7 @@ object MapSourceLoadSpec : SubjectSpek<Config>({
     subject {
         Config {
             addSpec(ConfigForLoad)
-        }.loadFrom.map.hierarchical(loadContent)
+        }.withSourceFrom.map.hierarchical(loadContent)
     }
 
     itBehavesLike(SourceLoadSpec)

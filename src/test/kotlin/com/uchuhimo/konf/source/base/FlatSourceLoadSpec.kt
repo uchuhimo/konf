@@ -27,7 +27,7 @@ object FlatSourceLoadSpec : SubjectSpek<Config>({
     subject {
         Config {
             addSpec(ConfigForLoad)
-        }.loadFrom.map.flat(loadContent)
+        }.withSourceFrom.map.flat(loadContent)
     }
 
     itBehavesLike(SourceLoadSpec)

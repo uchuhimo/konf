@@ -51,9 +51,9 @@ class DefaultLoaders(val config: Config) {
     @JvmField
     val map = MapLoader(config)
 
-    fun env(): Config = config.load(EnvProvider.fromEnv())
+    fun env(): Config = config.withSource(EnvProvider.fromEnv())
 
-    fun systemProperties(): Config = config.load(PropertiesProvider.fromSystem())
+    fun systemProperties(): Config = config.withSource(PropertiesProvider.fromSystem())
 
     fun file(file: File): Config {
         return when (file.extension) {
@@ -69,9 +69,9 @@ class DefaultLoaders(val config: Config) {
 }
 
 class MapLoader(val config: Config) {
-    fun hierarchical(map: Map<String, Any>): Config = config.load(MapSource(map))
+    fun hierarchical(map: Map<String, Any>): Config = config.withSource(MapSource(map))
 
-    fun kv(map: Map<String, Any>): Config = config.load(KVSource(map))
+    fun kv(map: Map<String, Any>): Config = config.withSource(KVSource(map))
 
-    fun flat(map: Map<String, String>): Config = config.load(FlatSource(map))
+    fun flat(map: Map<String, String>): Config = config.withSource(FlatSource(map))
 }

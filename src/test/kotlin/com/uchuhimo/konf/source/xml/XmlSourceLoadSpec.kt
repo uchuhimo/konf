@@ -27,7 +27,7 @@ object XmlSourceLoadSpec : SubjectSpek<Config>({
     subject {
         Config {
             addSpec(ConfigForLoad)
-        }.loadFrom.xml.resource("source/source.xml")
+        }.withSourceFrom.xml.resource("source/source.xml")
     }
 
     itBehavesLike(SourceLoadSpec)

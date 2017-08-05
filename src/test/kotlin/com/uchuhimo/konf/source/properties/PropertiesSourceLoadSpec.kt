@@ -27,7 +27,7 @@ object PropertiesSourceLoadSpec : SubjectSpek<Config>({
     subject {
         Config {
             addSpec(ConfigForLoad)
-        }.loadFrom.properties.resource("source/source.properties")
+        }.withSourceFrom.properties.resource("source/source.properties")
     }
 
     itBehavesLike(SourceLoadSpec)

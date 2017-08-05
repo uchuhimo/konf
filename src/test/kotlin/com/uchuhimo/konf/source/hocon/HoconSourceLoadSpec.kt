@@ -27,7 +27,7 @@ object HoconSourceLoadSpec : SubjectSpek<Config>({
     subject {
         Config {
             addSpec(ConfigForLoad)
-        }.loadFrom.hocon.resource("source/source.conf")
+        }.withSourceFrom.hocon.resource("source/source.conf")
     }
 
     itBehavesLike(SourceLoadSpec)

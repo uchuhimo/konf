@@ -41,7 +41,7 @@ object DurationDeserializerSpec : Spek({
 
     given("a duration deserializer") {
         on("deserialize valid string") {
-            config.loadFrom.map.kv(mapOf("item" to mapOf("duration" to "P2DT3H4M"))).apply {
+            config.withSourceFrom.map.kv(mapOf("item" to mapOf("duration" to "P2DT3H4M"))).apply {
                 it("should succeed") {
                     assertThat(this@apply<DurationWrapper>("item").duration,
                             equalTo(Duration.parse("P2DT3H4M")))
@@ -51,21 +51,21 @@ object DurationDeserializerSpec : Spek({
         on("deserialize empty string") {
             it("should throw LoadException caused by ObjectMappingException") {
                 assertCausedBy<ObjectMappingException> {
-                    config.loadFrom.map.kv(mapOf("item" to mapOf("duration" to "  ")))
+                    config.withSourceFrom.map.kv(mapOf("item" to mapOf("duration" to "  ")))
                 }
             }
         }
         on("deserialize value with invalid type") {
             it("should throw LoadException caused by ObjectMappingException") {
                 assertCausedBy<ObjectMappingException> {
-                    config.loadFrom.map.kv(mapOf("item" to mapOf("duration" to 1)))
+                    config.withSourceFrom.map.kv(mapOf("item" to mapOf("duration" to 1)))
                 }
             }
         }
         on("deserialize value with invalid format") {
             it("should throw LoadException caused by ObjectMappingException") {
                 assertCausedBy<ObjectMappingException> {
-                    config.loadFrom.map.kv(mapOf("item" to mapOf("duration" to "*1s")))
+                    config.withSourceFrom.map.kv(mapOf("item" to mapOf("duration" to "*1s")))
                 }
             }
         }

@@ -31,7 +31,7 @@ object DefaultLoadersSpec : SubjectSpek<DefaultLoaders>({
     subject {
         Config {
             addSpec(DefaultLoadersConfig)
-        }.loadFrom
+        }.withSourceFrom
     }
 
     val item = DefaultLoadersConfig.type
@@ -106,25 +106,25 @@ object DefaultLoadersSpec : SubjectSpek<DefaultLoaders>({
         on("load from multiple sources") {
             val afterLoadEnv = subject.env()
             System.setProperty(DefaultLoadersConfig.qualify("type"), "system")
-            val afterLoadSystemProperties = afterLoadEnv.loadFrom
+            val afterLoadSystemProperties = afterLoadEnv.withSourceFrom
                     .systemProperties()
-            val afterLoadHocon = afterLoadSystemProperties.loadFrom
+            val afterLoadHocon = afterLoadSystemProperties.withSourceFrom
                     .hocon.string("source.test.type = hocon")
-            val afterLoadJson = afterLoadHocon.loadFrom
+            val afterLoadJson = afterLoadHocon.withSourceFrom
                     .json.string(jsonContent)
-            val afterLoadProperties = afterLoadJson.loadFrom
+            val afterLoadProperties = afterLoadJson.withSourceFrom
                     .properties.string("source.test.type = properties")
-            val afterLoadToml = afterLoadProperties.loadFrom
+            val afterLoadToml = afterLoadProperties.withSourceFrom
                     .toml.string(tomlContent)
-            val afterLoadXml = afterLoadToml.loadFrom.
+            val afterLoadXml = afterLoadToml.withSourceFrom.
                     xml.string(xmlContent)
-            val afterLoadYaml = afterLoadXml.loadFrom
+            val afterLoadYaml = afterLoadXml.withSourceFrom
                     .yaml.string(yamlContent)
-            val afterLoadFlat = afterLoadYaml.loadFrom
+            val afterLoadFlat = afterLoadYaml.withSourceFrom
                     .map.flat(mapOf("source.test.type" to "flat"))
-            val afterLoadKv = afterLoadFlat.loadFrom.map
+            val afterLoadKv = afterLoadFlat.withSourceFrom.map
                     .kv(mapOf("source.test.type" to "kv"))
-            val afterLoadHierarchical = afterLoadKv.loadFrom.map
+            val afterLoadHierarchical = afterLoadKv.withSourceFrom.map
                     .hierarchical(
                             mapOf("source" to
                                     mapOf("test" to

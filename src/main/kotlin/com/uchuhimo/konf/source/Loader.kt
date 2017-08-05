@@ -24,26 +24,26 @@ import java.net.URL
 
 class Loader(val config: Config, val provider: SourceProvider) {
     fun reader(reader: Reader): Config =
-            config.load(provider.fromReader(reader))
+            config.withSource(provider.fromReader(reader))
 
     fun inputStream(inputStream: InputStream): Config =
-            config.load(provider.fromInputStream(inputStream))
+            config.withSource(provider.fromInputStream(inputStream))
 
     fun file(file: File): Config =
-            config.load(provider.fromFile(file))
+            config.withSource(provider.fromFile(file))
 
     fun string(content: String): Config =
-            config.load(provider.fromString(content))
+            config.withSource(provider.fromString(content))
 
     fun bytes(content: ByteArray): Config =
-            config.load(provider.fromBytes(content))
+            config.withSource(provider.fromBytes(content))
 
     fun bytes(content: ByteArray, offset: Int, length: Int): Config =
-            config.load(provider.fromBytes(content, offset, length))
+            config.withSource(provider.fromBytes(content, offset, length))
 
     fun url(url: URL): Config =
-            config.load(provider.fromUrl(url))
+            config.withSource(provider.fromUrl(url))
 
     fun resource(resource: String): Config =
-            config.load(provider.fromResource(resource))
+            config.withSource(provider.fromResource(resource))
 }

@@ -47,7 +47,7 @@ object SourceLoadSpec : SubjectSpek<Config>({
     subject {
         Config {
             addSpec(ConfigForLoad)
-        }.loadFrom.map.kv(loadContent)
+        }.withSourceFrom.map.kv(loadContent)
     }
     given("a source") {
         on("load the source into config") {

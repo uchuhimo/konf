@@ -29,7 +29,7 @@ import kotlin.concurrent.write
 import kotlin.properties.ReadWriteProperty
 import kotlin.reflect.KProperty
 
-interface ConfigGetter {
+interface ItemGetter {
     operator fun <T : Any> get(item: Item<T>): T
     operator fun <T : Any> get(name: String): T
     fun <T : Any> getOrNull(item: Item<T>): T?
@@ -37,15 +37,15 @@ interface ConfigGetter {
     operator fun <T : Any> invoke(name: String): T = get(name)
 }
 
-interface Config : ConfigGetter {
+interface Config : ItemGetter {
     operator fun iterator(): Iterator<Item<*>>
     operator fun contains(item: Item<*>): Boolean
     operator fun contains(name: String): Boolean
     fun rawSet(item: Item<*>, value: Any)
     operator fun <T : Any> set(item: Item<T>, value: T)
     operator fun <T : Any> set(name: String, value: T)
-    fun <T : Any> lazySet(item: Item<T>, lazyThunk: (ConfigGetter) -> T)
-    fun <T : Any> lazySet(name: String, lazyThunk: (ConfigGetter) -> T)
+    fun <T : Any> lazySet(item: Item<T>, lazyThunk: (ItemGetter) -> T)
+    fun <T : Any> lazySet(name: String, lazyThunk: (ItemGetter) -> T)
     fun unset(item: Item<*>)
     fun unset(name: String)
 
@@ -62,12 +62,12 @@ interface Config : ConfigGetter {
     fun addSpec(spec: ConfigSpec)
     fun withLayer(name: String = ""): Config
 
-    fun load(source: Source): Config = loadFromSource(source)
+    fun withSource(source: Source): Config = loadFromSource(source)
 
     @JavaApi
-    fun loadFrom(): DefaultLoaders = loadFrom
+    fun withSourceFrom(): DefaultLoaders = withSourceFrom
 
-    val loadFrom: DefaultLoaders get() = DefaultLoaders(this)
+    val withSourceFrom: DefaultLoaders get() = DefaultLoaders(this)
 
     val toTree: ConfigTree
 
@@ -135,7 +135,7 @@ private class ConfigImpl constructor(
     private fun <T : Any> getOrNull(
             item: Item<T>,
             errorWhenUnset: Boolean,
-            lazyContext: ConfigGetter = this
+            lazyContext: ItemGetter = this
     ): T? {
         val valueState = lock.read { valueByItem[item] }
         if (valueState != null) {
@@ -248,7 +248,7 @@ private class ConfigImpl constructor(
         }
     }
 
-    override fun <T : Any> lazySet(item: Item<T>, lazyThunk: (ConfigGetter) -> T) {
+    override fun <T : Any> lazySet(item: Item<T>, lazyThunk: (ItemGetter) -> T) {
         if (item in this) {
             lock.write {
                 val valueState = valueByItem[item]
@@ -264,7 +264,7 @@ private class ConfigImpl constructor(
         }
     }
 
-    override fun <T : Any> lazySet(name: String, lazyThunk: (ConfigGetter) -> T) {
+    override fun <T : Any> lazySet(name: String, lazyThunk: (ItemGetter) -> T) {
         val item = getItemOrNull(name)
         if (item != null) {
             @Suppress("UNCHECKED_CAST")
@@ -401,7 +401,7 @@ private class ConfigImpl constructor(
 
     private sealed class ValueState {
         object Unset : ValueState()
-        data class Lazy<T>(var thunk: (ConfigGetter) -> T) : ValueState()
+        data class Lazy<T>(var thunk: (ItemGetter) -> T) : ValueState()
         data class Value(var value: Any) : ValueState()
     }
 }

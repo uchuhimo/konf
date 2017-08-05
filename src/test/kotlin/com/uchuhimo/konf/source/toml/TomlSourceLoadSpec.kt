@@ -27,7 +27,7 @@ object TomlSourceLoadSpec : SubjectSpek<Config>({
     subject {
         Config {
             addSpec(ConfigForLoad)
-        }.loadFrom.toml.resource("source/source.toml")
+        }.withSourceFrom.toml.resource("source/source.toml")
     }
 
     itBehavesLike(SourceLoadSpec)

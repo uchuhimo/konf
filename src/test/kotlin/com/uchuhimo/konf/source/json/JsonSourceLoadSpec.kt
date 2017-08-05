@@ -27,7 +27,7 @@ object JsonSourceLoadSpec : SubjectSpek<Config>({
     subject {
         Config {
             addSpec(ConfigForLoad)
-        }.loadFrom.json.resource("source/source.json")
+        }.withSourceFrom.json.resource("source/source.json")
     }
 
     itBehavesLike(SourceLoadSpec)

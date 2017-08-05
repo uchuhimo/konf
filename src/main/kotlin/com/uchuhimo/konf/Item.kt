@@ -83,7 +83,7 @@ open class OptionalItem<T : Any> @JvmOverloads constructor(
 open class LazyItem<T : Any> @JvmOverloads constructor(
         spec: ConfigSpec,
         name: String,
-        val thunk: (ConfigGetter) -> T,
+        val thunk: (ItemGetter) -> T,
         description: String = ""
 ) : Item<T>(spec, name, description) {
     override val isLazy: Boolean = true
