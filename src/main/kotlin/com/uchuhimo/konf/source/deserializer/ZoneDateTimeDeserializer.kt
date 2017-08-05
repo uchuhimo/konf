@@ -17,6 +17,7 @@
 package com.uchuhimo.konf.source.deserializer
 
 import com.fasterxml.jackson.core.JsonParser
+import com.fasterxml.jackson.core.JsonToken
 import com.fasterxml.jackson.core.JsonTokenId
 import com.fasterxml.jackson.databind.DeserializationContext
 import com.fasterxml.jackson.databind.deser.std.StdDeserializer
@@ -34,10 +35,10 @@ object ZoneDateTimeDeserializer : StdDeserializer<ZonedDateTime>(ZonedDateTime::
                 try {
                     return ZonedDateTime.parse(string)
                 } catch (e: DateTimeException) {
-                    return rethrowDateTimeException<ZonedDateTime>(parser, context, e, string)
+                    return rethrowDateTimeException<ZonedDateTime>(context, e, string)
                 }
             }
         }
-        throw context.mappingException("Expected type string.")
+        return reportWrongToken(parser, context, JsonToken.VALUE_STRING)
     }
 }

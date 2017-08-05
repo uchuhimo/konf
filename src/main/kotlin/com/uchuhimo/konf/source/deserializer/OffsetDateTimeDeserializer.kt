@@ -17,6 +17,7 @@
 package com.uchuhimo.konf.source.deserializer
 
 import com.fasterxml.jackson.core.JsonParser
+import com.fasterxml.jackson.core.JsonToken
 import com.fasterxml.jackson.core.JsonTokenId
 import com.fasterxml.jackson.databind.DeserializationContext
 import com.fasterxml.jackson.databind.deser.std.StdDeserializer
@@ -34,10 +35,10 @@ object OffsetDateTimeDeserializer : StdDeserializer<OffsetDateTime>(OffsetDateTi
                 try {
                     return OffsetDateTime.parse(string)
                 } catch (e: DateTimeException) {
-                    return rethrowDateTimeException<OffsetDateTime>(parser, context, e, string)
+                    return rethrowDateTimeException<OffsetDateTime>(context, e, string)
                 }
             }
         }
-        throw context.mappingException("Expected type string.")
+        return reportWrongToken(parser, context, JsonToken.VALUE_STRING)
     }
 }

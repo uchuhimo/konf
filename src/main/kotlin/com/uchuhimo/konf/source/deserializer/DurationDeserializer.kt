@@ -17,6 +17,7 @@
 package com.uchuhimo.konf.source.deserializer
 
 import com.fasterxml.jackson.core.JsonParser
+import com.fasterxml.jackson.core.JsonToken
 import com.fasterxml.jackson.core.JsonTokenId
 import com.fasterxml.jackson.databind.DeserializationContext
 import com.fasterxml.jackson.databind.deser.std.StdDeserializer
@@ -39,11 +40,11 @@ object DurationDeserializer : StdDeserializer<Duration>(Duration::class.java) {
                     try {
                         return string.toDuration()
                     } catch (_: SourceException) {
-                        return rethrowDateTimeException<Duration>(parser, context, e, string)
+                        return rethrowDateTimeException<Duration>(context, e, string)
                     }
                 }
             }
         }
-        throw context.mappingException("Expected type string.")
+        return reportWrongToken(parser, context, JsonToken.VALUE_STRING)
     }
 }

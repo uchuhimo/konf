@@ -17,27 +17,46 @@
 package com.uchuhimo.konf.source.deserializer
 
 import com.fasterxml.jackson.core.JsonParser
+import com.fasterxml.jackson.core.JsonToken
 import com.fasterxml.jackson.databind.DeserializationContext
 import com.fasterxml.jackson.databind.JsonDeserializer
 import com.fasterxml.jackson.databind.JsonMappingException
+import java.io.IOException
 import java.time.DateTimeException
 import java.time.format.DateTimeParseException
+import java.util.Arrays
 
 @Throws(JsonMappingException::class)
 internal fun <BOGUS> JsonDeserializer<*>.rethrowDateTimeException(
-        parser: JsonParser,
         context: DeserializationContext,
-        exception: DateTimeException,
-        value: String
-): BOGUS {
-    throw if (exception is DateTimeParseException) {
-        context.weirdStringException(value, handledType(), exception.message).apply {
+        exception: DateTimeException, value: String): BOGUS {
+    if (exception is DateTimeParseException) {
+        throw context.weirdStringException(value, handledType(), exception.message).apply {
             initCause(exception)
         }
-    } else {
-        JsonMappingException.from(
-                parser,
-                "Failed to deserialize ${handledType().name}: (${exception.javaClass.name}) ${exception.message}",
-                exception)
     }
+    if (exception is DateTimeException) {
+        val message = exception.message
+        if (message != null && message.contains("invalid format")) {
+            throw context.weirdStringException(value, handledType(), exception.message).apply {
+                initCause(exception)
+            }
+        }
+    }
+    return context.reportInputMismatch<BOGUS>(handledType(),
+            "Failed to deserialize %s: (%s) %s",
+            handledType().name, exception.javaClass.name, exception.message)
+}
+
+@Throws(IOException::class)
+internal fun <BOGUS> JsonDeserializer<*>.reportWrongToken(
+        parser: JsonParser,
+        context: DeserializationContext,
+        vararg expTypes: JsonToken
+): BOGUS {
+    return context.reportInputMismatch<BOGUS>(handledType(),
+            "Unexpected token (%s), expected one of %s for %s value",
+            parser.currentToken,
+            Arrays.asList(*expTypes).toString(),
+            handledType().name)
 }
