@@ -29,20 +29,6 @@ import kotlin.concurrent.write
 import kotlin.properties.ReadWriteProperty
 import kotlin.reflect.KProperty
 
-interface ItemContainer {
-    operator fun <T : Any> get(item: Item<T>): T
-    operator fun <T : Any> get(name: String): T
-    fun <T : Any> getOrNull(item: Item<T>): T?
-    fun <T : Any> getOrNull(name: String): T?
-    operator fun <T : Any> invoke(name: String): T = get(name)
-    operator fun iterator(): Iterator<Item<*>>
-    operator fun contains(item: Item<*>): Boolean
-    operator fun contains(name: String): Boolean
-    val items: List<Item<*>> get() = mutableListOf<Item<*>>().apply {
-        addAll(this@ItemContainer.iterator().asSequence())
-    }
-}
-
 interface Config : ItemContainer {
     fun rawSet(item: Item<*>, value: Any)
     operator fun <T : Any> set(item: Item<T>, value: T)
