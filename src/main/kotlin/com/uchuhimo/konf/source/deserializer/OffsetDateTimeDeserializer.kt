@@ -16,29 +16,8 @@
 
 package com.uchuhimo.konf.source.deserializer
 
-import com.fasterxml.jackson.core.JsonParser
-import com.fasterxml.jackson.core.JsonToken
-import com.fasterxml.jackson.core.JsonTokenId
-import com.fasterxml.jackson.databind.DeserializationContext
-import com.fasterxml.jackson.databind.deser.std.StdDeserializer
-import java.time.DateTimeException
 import java.time.OffsetDateTime
 
-object OffsetDateTimeDeserializer : StdDeserializer<OffsetDateTime>(OffsetDateTime::class.java) {
-    override fun deserialize(parser: JsonParser, context: DeserializationContext): OffsetDateTime? {
-        when (parser.currentTokenId) {
-            JsonTokenId.ID_STRING -> {
-                val string = parser.text.trim({ it <= ' ' })
-                if (string.isEmpty()) {
-                    return null
-                }
-                try {
-                    return OffsetDateTime.parse(string)
-                } catch (e: DateTimeException) {
-                    return rethrowDateTimeException<OffsetDateTime>(context, e, string)
-                }
-            }
-        }
-        return reportWrongToken(parser, context, JsonToken.VALUE_STRING)
-    }
+object OffsetDateTimeDeserializer : JSR310Deserializer<OffsetDateTime>(OffsetDateTime::class.java) {
+    override fun parse(string: String): OffsetDateTime = OffsetDateTime.parse(string)
 }

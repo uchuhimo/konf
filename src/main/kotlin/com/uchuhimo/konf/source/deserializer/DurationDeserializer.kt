@@ -16,35 +16,21 @@
 
 package com.uchuhimo.konf.source.deserializer
 
-import com.fasterxml.jackson.core.JsonParser
-import com.fasterxml.jackson.core.JsonToken
-import com.fasterxml.jackson.core.JsonTokenId
-import com.fasterxml.jackson.databind.DeserializationContext
-import com.fasterxml.jackson.databind.deser.std.StdDeserializer
 import com.uchuhimo.konf.source.SourceException
 import com.uchuhimo.konf.source.toDuration
-import java.time.DateTimeException
 import java.time.Duration
+import java.time.format.DateTimeParseException
 
-object DurationDeserializer : StdDeserializer<Duration>(Duration::class.java) {
-    override fun deserialize(parser: JsonParser, context: DeserializationContext): Duration? {
-        when (parser.currentTokenId) {
-            JsonTokenId.ID_STRING -> {
-                val string = parser.text.trim({ it <= ' ' })
-                if (string.isEmpty()) {
-                    return null
-                }
-                try {
-                    return Duration.parse(string)
-                } catch (e: DateTimeException) {
-                    try {
-                        return string.toDuration()
-                    } catch (_: SourceException) {
-                        return rethrowDateTimeException<Duration>(context, e, string)
-                    }
-                }
+object DurationDeserializer : JSR310Deserializer<Duration>(Duration::class.java) {
+    override fun parse(string: String): Duration {
+        try {
+            return Duration.parse(string)
+        } catch (exception: DateTimeParseException) {
+            try {
+                return string.toDuration()
+            } catch (_: SourceException) {
+                throw exception
             }
         }
-        return reportWrongToken(parser, context, JsonToken.VALUE_STRING)
     }
 }

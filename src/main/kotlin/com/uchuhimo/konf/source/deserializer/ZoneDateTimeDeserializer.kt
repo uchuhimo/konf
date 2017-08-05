@@ -16,29 +16,8 @@
 
 package com.uchuhimo.konf.source.deserializer
 
-import com.fasterxml.jackson.core.JsonParser
-import com.fasterxml.jackson.core.JsonToken
-import com.fasterxml.jackson.core.JsonTokenId
-import com.fasterxml.jackson.databind.DeserializationContext
-import com.fasterxml.jackson.databind.deser.std.StdDeserializer
-import java.time.DateTimeException
 import java.time.ZonedDateTime
 
-object ZoneDateTimeDeserializer : StdDeserializer<ZonedDateTime>(ZonedDateTime::class.java) {
-    override fun deserialize(parser: JsonParser, context: DeserializationContext): ZonedDateTime? {
-        when (parser.currentTokenId) {
-            JsonTokenId.ID_STRING -> {
-                val string = parser.text.trim({ it <= ' ' })
-                if (string.isEmpty()) {
-                    return null
-                }
-                try {
-                    return ZonedDateTime.parse(string)
-                } catch (e: DateTimeException) {
-                    return rethrowDateTimeException<ZonedDateTime>(context, e, string)
-                }
-            }
-        }
-        return reportWrongToken(parser, context, JsonToken.VALUE_STRING)
-    }
+object ZoneDateTimeDeserializer : JSR310Deserializer<ZonedDateTime>(ZonedDateTime::class.java) {
+    override fun parse(string: String): ZonedDateTime = ZonedDateTime.parse(string)
 }
