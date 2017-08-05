@@ -32,7 +32,7 @@ import kotlin.test.assertTrue
 object ConfigSpecSpek : Spek({
     given("a configSpec") {
         fun testItem(spec: ConfigSpec, item: Item<Int>, description: String) {
-            group("for $description") {
+            group("for $description, as an item") {
                 on("add to a configSpec") {
                     it("should be in the spec") {
                         assertThat(item, isIn(spec.items))
