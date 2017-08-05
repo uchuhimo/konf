@@ -22,30 +22,16 @@ open class ConfigSpec(val prefix: String = "") {
     val items: List<Item<*>> = _items
 
     inline fun <reified T : Any> required(name: String, description: String = "") =
-            object : RequiredItem<T>(
-                    spec = this,
-                    name = name,
-                    description = description
-            ) {}
+            object : RequiredItem<T>(this, name, description) {}
 
     inline fun <reified T : Any> optional(name: String, default: T, description: String = "") =
-            object : OptionalItem<T>(
-                    spec = this,
-                    name = name,
-                    default = default,
-                    description = description
-            ) {}
+            object : OptionalItem<T>(this, name, default, description) {}
 
     inline fun <reified T : Any> lazy(
             name: String,
             description: String = "",
             noinline default: (config: ItemContainer) -> T) =
-            object : LazyItem<T>(
-                    spec = this,
-                    name = name,
-                    thunk = default,
-                    description = description
-            ) {}
+            object : LazyItem<T>(this, name, default, description) {}
 
     fun qualify(name: String): String = if (prefix.isEmpty()) name else "$prefix.$name"
 
