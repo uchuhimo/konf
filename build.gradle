@@ -41,7 +41,7 @@ apply plugin: "com.novoda.bintray-release"
 apply plugin: "org.jetbrains.dokka"
 
 group "com.uchuhimo"
-version "0.3"
+version "0.4"
 
 repositories {
     //maven { url aliyunMavenUrl }
