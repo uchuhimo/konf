@@ -29,23 +29,26 @@ import kotlin.concurrent.write
 import kotlin.properties.ReadWriteProperty
 import kotlin.reflect.KProperty
 
-interface ItemGetter {
+interface ItemContainer {
     operator fun <T : Any> get(item: Item<T>): T
     operator fun <T : Any> get(name: String): T
     fun <T : Any> getOrNull(item: Item<T>): T?
     fun <T : Any> getOrNull(name: String): T?
     operator fun <T : Any> invoke(name: String): T = get(name)
-}
-
-interface Config : ItemGetter {
     operator fun iterator(): Iterator<Item<*>>
     operator fun contains(item: Item<*>): Boolean
     operator fun contains(name: String): Boolean
+    val items: List<Item<*>> get() = mutableListOf<Item<*>>().apply {
+        addAll(this@ItemContainer.iterator().asSequence())
+    }
+}
+
+interface Config : ItemContainer {
     fun rawSet(item: Item<*>, value: Any)
     operator fun <T : Any> set(item: Item<T>, value: T)
     operator fun <T : Any> set(name: String, value: T)
-    fun <T : Any> lazySet(item: Item<T>, lazyThunk: (ItemGetter) -> T)
-    fun <T : Any> lazySet(name: String, lazyThunk: (ItemGetter) -> T)
+    fun <T : Any> lazySet(item: Item<T>, lazyThunk: (config: ItemContainer) -> T)
+    fun <T : Any> lazySet(name: String, lazyThunk: (config: ItemContainer) -> T)
     fun unset(item: Item<*>)
     fun unset(name: String)
 
@@ -54,9 +57,6 @@ interface Config : ItemGetter {
 
     val name: String
     val parent: Config?
-    val items: List<Item<*>> get() = mutableListOf<Item<*>>().apply {
-        addAll(this@Config.iterator().asSequence())
-    }
 
     val specs: List<ConfigSpec>
     fun addSpec(spec: ConfigSpec)
@@ -135,7 +135,7 @@ private class ConfigImpl constructor(
     private fun <T : Any> getOrNull(
             item: Item<T>,
             errorWhenUnset: Boolean,
-            lazyContext: ItemGetter = this
+            lazyContext: ItemContainer = this
     ): T? {
         val valueState = lock.read { valueByItem[item] }
         if (valueState != null) {
@@ -248,7 +248,7 @@ private class ConfigImpl constructor(
         }
     }
 
-    override fun <T : Any> lazySet(item: Item<T>, lazyThunk: (ItemGetter) -> T) {
+    override fun <T : Any> lazySet(item: Item<T>, lazyThunk: (config: ItemContainer) -> T) {
         if (item in this) {
             lock.write {
                 val valueState = valueByItem[item]
@@ -264,7 +264,7 @@ private class ConfigImpl constructor(
         }
     }
 
-    override fun <T : Any> lazySet(name: String, lazyThunk: (ItemGetter) -> T) {
+    override fun <T : Any> lazySet(name: String, lazyThunk: (config: ItemContainer) -> T) {
         val item = getItemOrNull(name)
         if (item != null) {
             @Suppress("UNCHECKED_CAST")
@@ -401,7 +401,7 @@ private class ConfigImpl constructor(
 
     private sealed class ValueState {
         object Unset : ValueState()
-        data class Lazy<T>(var thunk: (ItemGetter) -> T) : ValueState()
+        data class Lazy<T>(var thunk: (config: ItemContainer) -> T) : ValueState()
         data class Value(var value: Any) : ValueState()
     }
 }

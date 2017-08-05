@@ -102,7 +102,7 @@ class ConfigJavaApiTest {
   }
 
   @Test
-  @DisplayName("test `lazySet(Item<T>, Function1<ItemGetter, T>)`")
+  @DisplayName("test `lazySet(Item<T>, Function1<ItemContainer, T>)`")
   void lazySetWithItem() {
     config.lazySet(NetworkBufferInJava.maxSize, it -> it.get(NetworkBufferInJava.size) * 4);
     config.set(NetworkBufferInJava.size, 1024);
@@ -110,7 +110,7 @@ class ConfigJavaApiTest {
   }
 
   @Test
-  @DisplayName("test `lazySet(String, Function1<ItemGetter, T>)`")
+  @DisplayName("test `lazySet(String, Function1<ItemContainer, T>)`")
   void lazySetWithName() {
     config.lazySet(
         NetworkBufferInJava.maxSize.getName(), it -> it.get(NetworkBufferInJava.size) * 4);
