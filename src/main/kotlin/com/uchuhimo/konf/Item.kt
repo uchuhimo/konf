@@ -19,40 +19,102 @@ package com.uchuhimo.konf
 import com.fasterxml.jackson.databind.JavaType
 import com.fasterxml.jackson.databind.type.TypeFactory
 
+/**
+ * Item that can be contained by config.
+ *
+ * Item can be associated with value in config, containing metadata for the value.
+ * The metadata for value includes name, path, type, description and so on.
+ * Item can be used as key to operate value in config, guaranteeing type safety.
+ * There are three kinds of item: required item ([RequiredItem]),
+ * optional item ([OptionalItem]) and lazy item ([LazyItem]).
+ *
+ * @param T type of value that can be associated with this item.
+ * @see Config
+ */
 sealed class Item<T : Any>(
+        /**
+         * Config spec that contains this item.
+         */
         val spec: ConfigSpec,
         name: String,
+        /**
+         * Description for this item.
+         */
         val description: String = "") {
     init {
         @Suppress("LeakingThis")
         spec.addItem(this)
     }
 
+    /**
+     * Item name qualified by path prefix, for locating item in config.
+     *
+     * Item name is unique in config, and can be used as key to operate value in config.
+     * Item name is in form of `a.b.c`, with corresponding path as `[a, b, c]`.
+     */
     val name: String = spec.qualify(name)
 
+    /**
+     * Item path for locating item in config.
+     *
+     * Item path is unique in config.
+     */
     val path: Path = this.name.toPath()
 
+    /**
+     * Type of value that can be associated with this item.
+     */
     @Suppress("LeakingThis")
     val type: JavaType = TypeFactory.defaultInstance().constructType(this::class.java)
             .findSuperType(Item::class.java).bindings.typeParameters[0]
 
+    /**
+     * Whether this is a required item or not.
+     */
     open val isRequired: Boolean get() = false
 
+    /**
+     * Whether this is an optional item or not.
+     */
     open val isOptional: Boolean get() = false
 
+    /**
+     * Whether this is a lazy item or not.
+     */
     open val isLazy: Boolean get() = false
 
+    /**
+     * Cast this item to a required item.
+     */
     val asRequiredItem: RequiredItem<T> get() = this as RequiredItem<T>
 
+    /**
+     * Cast this item to an optional item.
+     */
     val asOptionalItem: OptionalItem<T> get() = this as OptionalItem<T>
 
+    /**
+     * Cast this item to a lazy item.
+     */
     val asLazyItem: LazyItem<T> get() = this as LazyItem<T>
 }
 
 typealias Path = List<String>
 
+/**
+ * Returns corresponding item name of the item path.
+ *
+ * @receiver item path
+ * @return item name
+ */
 val Path.name: String get() = joinToString(".")
 
+/**
+ * Returns corresponding item path of the item name.
+ *
+ * @receiver item name
+ * @return item path
+ */
 fun String.toPath(): Path {
     if (isEmpty()) {
         return listOf()
@@ -63,6 +125,11 @@ fun String.toPath(): Path {
     }
 }
 
+/**
+ * Required item without default value.
+ *
+ * Required item must be set with value before any get operation in config.
+ */
 open class RequiredItem<T : Any> @JvmOverloads constructor(
         spec: ConfigSpec,
         name: String,
@@ -71,18 +138,42 @@ open class RequiredItem<T : Any> @JvmOverloads constructor(
     override val isRequired: Boolean = true
 }
 
+/**
+ * Optional item with default value.
+ *
+ * Before associated with specified value, default value will be returned when accessing.
+ * After associated with specified value, the specified value will be returned when accessing.
+ */
 open class OptionalItem<T : Any> @JvmOverloads constructor(
         spec: ConfigSpec,
         name: String,
+        /**
+         * Default value returned before associating this item with specified value.
+         */
         val default: T,
         description: String = ""
 ) : Item<T>(spec, name, description) {
     override val isOptional: Boolean = true
 }
 
+/**
+ * Lazy item evaluated value every time from thunk before associated with specified value.
+ *
+ * Before associated with specified value, value evaluated from thunk will be returned when accessing.
+ * After associated with specified value, the specified value will be returned when accessing.
+ * Returned value of the thunk will not be cached. The thunk will be evaluated every time
+ * when needed to reflect modifying of other values in config.
+ */
 open class LazyItem<T : Any> @JvmOverloads constructor(
         spec: ConfigSpec,
         name: String,
+        /**
+         * Thunk used to evaluate value for this item.
+         *
+         * [ItemContainer] is provided as evaluation environment to avoid unexpected modification
+         * to config.
+         * Thunk will be evaluated every time when needed to reflect modifying of other values in config.
+         */
         val thunk: (config: ItemContainer) -> T,
         description: String = ""
 ) : Item<T>(spec, name, description) {
