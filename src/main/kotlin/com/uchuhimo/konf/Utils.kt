@@ -31,4 +31,7 @@ fun getUnits(s: String): String {
     return s.substring(i + 1)
 }
 
+/**
+ * Returns default value if string is empty, original string otherwise.
+ */
 fun String.notEmptyOr(default: String): String = if (isEmpty()) default else this

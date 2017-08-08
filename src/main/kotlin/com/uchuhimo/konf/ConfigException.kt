@@ -16,20 +16,41 @@
 
 package com.uchuhimo.konf
 
+/**
+ * Exception for config.
+ */
 open class ConfigException : RuntimeException {
     constructor(message: String) : super(message)
     constructor(message: String, cause: Throwable) : super(message, cause)
 }
 
+/**
+ * Exception indicates that there is existed item with same name in config.
+ */
 class RepeatedItemException(val name: String) : ConfigException("item $name has been added")
 
+/**
+ * Exception indicates that there is existed item with conflicted name in config.
+ */
 class NameConflictException(message: String) : ConfigException(message)
 
+/**
+ * Exception indicates that the evaluated result of lazy thunk is invalid.
+ */
 class InvalidLazySetException(message: String) : ConfigException(message)
 
+/**
+ * Exception indicates that the specified item is in unset state.
+ */
 class UnsetValueException(val name: String) : ConfigException("$name is unset")
 
+/**
+ * Exception indicates that the specified item is not in this config.
+ */
 class NoSuchItemException(val name: String) : ConfigException("cannot find $name in config")
 
+/**
+ * Exception indicates that config spec cannot be added to this config because it has child layer.
+ */
 class SpecFrozenException(val config: Config) :
-        ConfigException("config ${config.name} has children layer, cannot add new spec")
+        ConfigException("config ${config.name} has child layer, cannot add new spec")

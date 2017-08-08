@@ -22,7 +22,14 @@ import com.uchuhimo.konf.source.ParseException
 import java.math.BigDecimal
 import java.math.BigInteger
 
-data class SizeInBytes(val bytes: Long) {
+/**
+ * Represents size in unit of bytes.
+ */
+data class SizeInBytes(
+        /**
+         * Number of bytes.
+         */
+        val bytes: Long) {
     init {
         require(bytes >= 0)
     }
@@ -33,7 +40,6 @@ data class SizeInBytes(val bytes: Long) {
          * it is assumed to be in bytes. The returned value is in bytes.
          *
          * @param input the string to parse
-         *
          * @return size in bytes
          */
         @JsonCreator
@@ -150,4 +156,7 @@ data class SizeInBytes(val bytes: Long) {
     }
 }
 
+/**
+ * Converts a string to [SizeInBytes].
+ */
 fun String.toSizeInBytes(): SizeInBytes = SizeInBytes.parse(this)

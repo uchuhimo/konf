@@ -16,13 +16,32 @@
 
 package com.uchuhimo.konf
 
+/**
+ * Tree representation of config.
+ */
 sealed class ConfigTree {
+    /**
+     * Path of this tree in config.
+     */
     abstract val path: List<String>
 
+    /**
+     * Returns a deep copy of this config tree.
+     */
     abstract fun deepCopy(): ConfigTree
 
+    /**
+     * Whether this tree represent an item or not.
+     */
     abstract val isItem: Boolean
 
+    /**
+     * Iterates this config tree in an event-driven manner.
+     *
+     * @param onEnterItem action after entering a path node
+     * @param onLeavePath action before leaving a path node
+     * @param onEnterPath action when entering an item node
+     */
     fun visit(
             onEnterPath: (node: ConfigPathNode) -> Unit = { _ -> },
             onLeavePath: (node: ConfigPathNode) -> Unit = { _ -> },
@@ -41,6 +60,9 @@ sealed class ConfigTree {
         }
     }
 
+    /**
+     * Items in this config tree.
+     */
     val items: Iterable<Item<*>> get() {
         val items = mutableListOf<Item<*>>()
         visit(onEnterItem = { node -> items += node.item })
@@ -48,6 +70,9 @@ sealed class ConfigTree {
     }
 }
 
+/**
+ * Represents an item node in config tree.
+ */
 class ConfigItemNode<T : Any>(
         override val path: List<String>,
         val item: Item<T>
@@ -57,6 +82,9 @@ class ConfigItemNode<T : Any>(
     override val isItem: Boolean = true
 }
 
+/**
+ * Represents a path node in config tree.
+ */
 class ConfigPathNode(
         override val path: List<String>,
         val children: MutableList<ConfigTree>
