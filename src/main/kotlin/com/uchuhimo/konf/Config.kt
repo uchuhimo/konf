@@ -29,39 +29,192 @@ import kotlin.concurrent.write
 import kotlin.properties.ReadWriteProperty
 import kotlin.reflect.KProperty
 
+/**
+ * Config containing items and associated values.
+ *
+ * Config contains items, which can be loaded with [addSpec].
+ * Config contains values, each of which is associated with corresponding item.
+ * Values can be loaded from [Source] with [withSource] or [withSourceFrom].
+ *
+ * Config contains read-write access operations for item.
+ * Items in config is in one of three states:
+ * - Unset. Item has not associated value in this state.
+ *   Use [unset] to change item to this state.
+ * - Unevaluated. Item is lazy and the associated value will be evaluated when accessing.
+ *   Use [lazySet] to change item to this state.
+ * - Evaluated.  Item has associated value which is evaluated.
+ *   Use [set] to change item to this state.
+ *
+ * Config is cascading. Except root config, every config has a parent config.
+ * Config with ancestor configs has multiple layers. All set operation is executed in facade layer
+ * of config.
+ * Descendant config inherits items and values in ancestor configs, and can override values for
+ * items in ancestor configs. Overridden values in config will affect itself and its descendant
+ * configs, without affecting its ancestor configs. Loading items in config will not affect its
+ * ancestor configs too. [invoke] can be used to create a root config, and [withLayer] can be used
+ * to create a child config from current config.
+ *
+ * All methods in Config is thread-safe.
+ */
 interface Config : ItemContainer {
+    /**
+     * Associate item with specified value without type checking.
+     *
+     * @param item config item
+     * @param value associated value
+     */
     fun rawSet(item: Item<*>, value: Any)
+
+    /**
+     * Associate item with specified value.
+     *
+     * @param item config item
+     * @param value associated value
+     */
     operator fun <T : Any> set(item: Item<T>, value: T)
+
+    /**
+     * Find item with specified name, and associate it with specified value.
+     *
+     * @param name item name
+     * @param value associated value
+     */
     operator fun <T : Any> set(name: String, value: T)
-    fun <T : Any> lazySet(item: Item<T>, lazyThunk: (config: ItemContainer) -> T)
-    fun <T : Any> lazySet(name: String, lazyThunk: (config: ItemContainer) -> T)
+
+    /**
+     * Associate item with specified thunk, which can be used to evaluate value for the item.
+     *
+     * @param item config item
+     * @param thunk thunk used to evaluate value for the item
+     */
+    fun <T : Any> lazySet(item: Item<T>, thunk: (config: ItemContainer) -> T)
+
+    /**
+     * Find item with specified name, and associate item with specified thunk,
+     * which can be used to evaluate value for the item.
+     *
+     * @param name item name
+     * @param thunk thunk used to evaluate value for the item
+     */
+    fun <T : Any> lazySet(name: String, thunk: (config: ItemContainer) -> T)
+
+    /**
+     * Change item to unset state.
+     *
+     * @param item config item
+     */
     fun unset(item: Item<*>)
+
+    /**
+     * Change item with specified name to unset state.
+     *
+     * @param name item name
+     */
     fun unset(name: String)
 
+    /**
+     * Returns a property that can read/set associated value for specified item.
+     *
+     * @param item config item
+     * @return a property that can read/set associated value for specified item
+     */
     fun <T : Any> property(item: Item<T>): ReadWriteProperty<Any?, T>
+
+    /**
+     * Returns a property that can read/set associated value for item with specified name.
+     *
+     * @param name item name
+     * @return a property that can read/set associated value for item with specified name
+     */
     fun <T : Any> property(name: String): ReadWriteProperty<Any?, T>
 
+    /**
+     * Name of facade layer of config.
+     *
+     * Layer name provides information for facade layer in a cascading config.
+     */
     val name: String
+
+    /**
+     * Returns parent of this config, or `null` if this config is a root config.
+     */
     val parent: Config?
 
+    /**
+     * List of config specs from all layers of this config.
+     */
     val specs: List<ConfigSpec>
+
+    /**
+     * Load items in specified config spec into facade layer.
+     *
+     * Same config spec cannot be loaded twice.
+     * All items in specified config spec cannot have same name with existed items in config.
+     *
+     * @param spec config spec
+     */
     fun addSpec(spec: ConfigSpec)
+
+    /**
+     * Returns a child config of this config with specified name.
+     *
+     * @param name name of facade layer in child config
+     * @return a child config
+     */
     fun withLayer(name: String = ""): Config
 
+    /**
+     * Returns a child config containing values from specified source.
+     *
+     * Values from specified source will be loaded into facade layer of the returned child config
+     * without affecting this config.
+     *
+     * @param source config source
+     * @return a child config containing value from specified source
+     */
     fun withSource(source: Source): Config = loadFromSource(source)
 
+    /**
+     * Returns default loaders for this config.
+     *
+     * It is a fluent API for loading source from default loaders.
+     *
+     * @return default loaders for this config
+     */
     @JavaApi
     fun withSourceFrom(): DefaultLoaders = withSourceFrom
 
+    /**
+     * Returns default loaders for this config.
+     *
+     * It is a fluent API for loading source from default loaders.
+     */
     val withSourceFrom: DefaultLoaders get() = DefaultLoaders(this)
 
+    /**
+     * Returns config tree for this config.
+     */
     val toTree: ConfigTree
 
+    /**
+     * Returns [ObjectMapper] using to map from source to value in config.
+     */
     val mapper: ObjectMapper
 
     companion object {
+        /**
+         * Create a new root config.
+         *
+         * @return a new root config
+         */
         operator fun invoke(): Config = ConfigImpl()
 
+        /**
+         * Create a new root config and initiate it.
+         *
+         * @param init initial action
+         * @return a new root config
+         */
         operator fun invoke(init: Config.() -> Unit): Config = Config().apply(init)
     }
 }
@@ -234,15 +387,15 @@ private class ConfigImpl constructor(
         }
     }
 
-    override fun <T : Any> lazySet(item: Item<T>, lazyThunk: (config: ItemContainer) -> T) {
+    override fun <T : Any> lazySet(item: Item<T>, thunk: (config: ItemContainer) -> T) {
         if (item in this) {
             lock.write {
                 val valueState = valueByItem[item]
                 if (valueState is ValueState.Lazy<*>) {
                     @Suppress("UNCHECKED_CAST")
-                    (valueState as ValueState.Lazy<T>).thunk = lazyThunk
+                    (valueState as ValueState.Lazy<T>).thunk = thunk
                 } else {
-                    valueByItem[item] = ValueState.Lazy(lazyThunk)
+                    valueByItem[item] = ValueState.Lazy(thunk)
                 }
             }
         } else {
@@ -250,11 +403,11 @@ private class ConfigImpl constructor(
         }
     }
 
-    override fun <T : Any> lazySet(name: String, lazyThunk: (config: ItemContainer) -> T) {
+    override fun <T : Any> lazySet(name: String, thunk: (config: ItemContainer) -> T) {
         val item = getItemOrNull(name)
         if (item != null) {
             @Suppress("UNCHECKED_CAST")
-            lazySet(item as Item<T>, lazyThunk)
+            lazySet(item as Item<T>, thunk)
         } else {
             throw NoSuchItemException(name)
         }

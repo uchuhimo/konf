@@ -19,7 +19,7 @@ package com.uchuhimo.konf
 /**
  * Container of items.
  *
- * Item container contains read-only access operations for [Config].
+ * Item container contains read-only access operations for item.
  *
  * @see Config
  */
