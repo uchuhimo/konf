@@ -16,18 +16,47 @@
 
 package com.uchuhimo.konf.source
 
+/**
+ * Information of source for debugging.
+ */
 interface SourceInfo {
+    /**
+     * Description of this source.
+     */
     val description: String get() = (info + context).toDescription()
 
+    /**
+     * Information about context of this source.
+     *
+     * Context is in form of key-value pairs.
+     * Context can be inherited by other related source.
+     */
     val context: Map<String, String>
 
+    /**
+     * Add information into context.
+     */
     fun addContext(name: String, value: String)
 
+    /**
+     * Information about this source.
+     *
+     * Info is in form of key-value pairs.
+     */
     val info: Map<String, String>
 
+    /**
+     * Add information into info.
+     */
     fun addInfo(name: String, value: String)
 
     companion object {
+        /**
+         * Return a new empty source info with specified context.
+         *
+         * @param context context to be inherited
+         * @return a new empty source info
+         */
         fun with(context: Map<String, String>): SourceInfo = object : SourceInfo {
             private val _info = mutableMapOf<String, String>()
 
@@ -46,6 +75,11 @@ interface SourceInfo {
             }
         }
 
+        /**
+         * Returns a new empty source info.
+         *
+         * @return a new empty source info
+         */
         fun default(): SourceInfo = with(mapOf())
     }
 }
