@@ -21,7 +21,8 @@ package com.uchuhimo.konf
  *
  * @throws UnsupportedOperationException
  */
-fun unsupported(): Nothing {
+@Suppress("NOTHING_TO_INLINE")
+inline fun unsupported(): Nothing {
     throw UnsupportedOperationException()
 }
 

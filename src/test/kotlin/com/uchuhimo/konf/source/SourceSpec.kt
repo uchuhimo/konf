@@ -390,7 +390,7 @@ object SourceSpec : Spek({
         }
         group("default implementations") {
             val source = DumbSource()
-            it("returns `false` for all `is` operation") {
+            it("returns `false` for all `is` operations") {
                 assertFalse(source.isBigDecimal())
                 assertFalse(source.isBigInteger())
                 assertFalse(source.isBoolean())
@@ -417,7 +417,7 @@ object SourceSpec : Spek({
                 assertFalse(source.isYearMonth())
                 assertFalse(source.isZonedDateTime())
             }
-            it("throws UnsupportedOperationException for all cast operation") {
+            it("throws UnsupportedOperationException for all cast operations") {
                 assertThat({ source.toList() }, throws<UnsupportedOperationException>())
                 assertThat({ source.toMap() }, throws<UnsupportedOperationException>())
                 assertThat({ source.toText() }, throws<UnsupportedOperationException>())
