@@ -34,7 +34,7 @@ import kotlin.reflect.KProperty
  *
  * Config contains items, which can be loaded with [addSpec].
  * Config contains values, each of which is associated with corresponding item.
- * Values can be loaded from [Source] with [withSource] or [withSourceFrom].
+ * Values can be loaded from [source][Source] with [withSource] or [withSourceFrom].
  *
  * Config contains read-write access operations for item.
  * Items in config is in one of three states:

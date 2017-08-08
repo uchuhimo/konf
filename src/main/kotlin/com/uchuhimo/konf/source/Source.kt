@@ -72,69 +72,238 @@ import kotlin.Long
 import kotlin.Short
 import kotlin.String
 
+/**
+ * Source to provide values for config.
+ *
+ * When config loads values from source, config will iterate all items in it, and
+ * retrieve value with path of each item from source.
+ * When source contains single value, a series of `is` operations can be used to
+ * judge the actual type of value, and `to` operation can be used to get the value
+ * with specified type.
+ * When source contains multiple value, `contains` operations can be used to check
+ * whether value(s) in specified path is in this source, and `get` operations can be used
+ * to retrieve the corresponding sub-source.
+ */
 interface Source : SourceInfo {
+    /**
+     * Whether this source contains value(s) in specified path or not.
+     *
+     * @param path item path
+     * @return `true` if this source contains value(s) in specified path, `false` otherwise
+     */
     operator fun contains(path: Path): Boolean
 
+    /**
+     * Returns sub-source in specified path if this source contains value(s) in specified path,
+     * `null` otherwise.
+     *
+     * @param path item path
+     * @return sub-source in specified path if this source contains value(s) in specified path,
+     * `null` otherwise
+     */
     fun getOrNull(path: Path): Source?
 
+    /**
+     * Returns sub-source in specified path.
+     *
+     * Throws [NoSuchPathException] if there is no value in specified path.
+     *
+     * @param path item path
+     * @return sub-source in specified path
+     * @throws NoSuchPathException
+     */
     operator fun get(path: Path): Source = getOrNull(path) ?: throw NoSuchPathException(this, path)
 
-    operator fun contains(key: String): Boolean = contains(key.toPath())
+    /**
+     * Whether this source contains value(s) with specified prefix or not.
+     *
+     * @param prefix item prefix
+     * @return `true` if this source contains value(s) with specified prefix, `false` otherwise
+     */
+    operator fun contains(prefix: String): Boolean = contains(prefix.toPath())
 
-    fun getOrNull(key: String): Source? = getOrNull(key.toPath())
+    /**
+     * Returns sub-source with specified prefix if this source contains value(s) in specified prefix,
+     * `null` otherwise.
+     *
+     * @param prefix item prefix
+     * @return sub-source with specified prefix if this source contains value(s) in specified prefix,
+     * `null` otherwise
+     */
+    fun getOrNull(prefix: String): Source? = getOrNull(prefix.toPath())
 
-    operator fun get(key: String): Source = get(key.toPath())
+    /**
+     * Returns sub-source with specified prefix.
+     *
+     * Throws [NoSuchPathException] if there is no value with specified prefix.
+     *
+     * @param prefix item prefix
+     * @return sub-source with specified prefix
+     * @throws NoSuchPathException
+     */
+    operator fun get(prefix: String): Source = get(prefix.toPath())
 
+    /**
+     * Whether this source contains a list of values or not.
+     *
+     * @return `true` if this source contains a list of values, `false` otherwise
+     */
     fun isList(): Boolean = false
 
+    /**
+     * Get a list of sub-sources from this source.
+     *
+     * @return a list of sub-sources
+     */
     fun toList(): List<Source> = unsupported()
 
+    /**
+     * Whether this source contains multiple values mapping from corresponding paths or not.
+     *
+     * @return `true` if this source contains multiple values mapping from corresponding paths,
+     * `false` otherwise
+     */
     fun isMap(): Boolean = false
 
+    /**
+     * Get a map from paths to corresponding values from this source.
+     *
+     * @return a map from paths to corresponding values
+     */
     fun toMap(): Map<String, Source> = unsupported()
 
+    /**
+     * Whether this source contains a single value with type [String] or not.
+     *
+     * @return `true` if this source contains a single value with type [String], `false` otherwise
+     */
     fun isText(): Boolean = false
 
+    /**
+     * Get a [String] value from this source.
+     *
+     * @return a [String] value
+     */
     fun toText(): String = unsupported()
 
+    /**
+     * Whether this source contains a single value with type [Boolean] or not.
+     *
+     * @return `true` if this source contains a single value with type [Boolean], `false` otherwise
+     */
     fun isBoolean(): Boolean = false
 
+    /**
+     * Get a [Boolean] value from this source.
+     *
+     * @return a [Boolean] value
+     */
     fun toBoolean(): Boolean = unsupported()
 
+    /**
+     * Whether this source contains a single value with type [Long] or not.
+     *
+     * @return `true` if this source contains a single value with type [Long], `false` otherwise
+     */
     fun isLong(): Boolean = false
 
+    /**
+     * Get a [Long] value from this source.
+     *
+     * @return a [Long] value
+     */
     fun toLong(): Long = toInt().toLong()
 
+    /**
+     * Whether this source contains a single value with type [Double] or not.
+     *
+     * @return `true` if this source contains a single value with type [Double], `false` otherwise
+     */
     fun isDouble(): Boolean = false
 
+    /**
+     * Get a [Double] value from this source.
+     *
+     * @return a [Double] value
+     */
     fun toDouble(): Double = unsupported()
 
+    /**
+     * Whether this source contains a single value with type [Int] or not.
+     *
+     * @return `true` if this source contains a single value with type [Int], `false` otherwise
+     */
     fun isInt(): Boolean = false
 
+    /**
+     * Get a [Int] value from this source.
+     *
+     * @return a [Int] value
+     */
     fun toInt(): Int = unsupported()
 
+    /**
+     * Whether this source contains a single value with type [Short] or not.
+     *
+     * @return `true` if this source contains a single value with type [Short], `false` otherwise
+     */
     fun isShort(): Boolean = false
 
+    /**
+     * Get a [Short] value from this source.
+     *
+     * @return a [Short] value
+     */
     fun toShort(): Short = toInt().also { value ->
         if (value < Short.MIN_VALUE || value > Short.MAX_VALUE) {
             throw ParseException("$value is out of range of Short")
         }
     }.toShort()
 
+    /**
+     * Whether this source contains a single value with type [Byte] or not.
+     *
+     * @return `true` if this source contains a single value with type [Byte], `false` otherwise
+     */
     fun isByte(): Boolean = false
 
+    /**
+     * Get a [Byte] value from this source.
+     *
+     * @return a [Byte] value
+     */
     fun toByte(): Byte = toInt().also { value ->
         if (value < Byte.MIN_VALUE || value > Byte.MAX_VALUE) {
             throw ParseException("$value is out of range of Byte")
         }
     }.toByte()
 
+    /**
+     * Whether this source contains a single value with type [Float] or not.
+     *
+     * @return `true` if this source contains a single value with type [Float], `false` otherwise
+     */
     fun isFloat(): Boolean = false
 
+    /**
+     * Get a [Float] value from this source.
+     *
+     * @return a [Float] value
+     */
     fun toFloat(): Float = toDouble().toFloat()
 
+    /**
+     * Whether this source contains a single value with type [Char] or not.
+     *
+     * @return `true` if this source contains a single value with type [Char], `false` otherwise
+     */
     fun isChar(): Boolean = false
 
+    /**
+     * Get a [Char] value from this source.
+     *
+     * @return a [Char] value
+     */
     fun toChar(): Char {
         val value = toText()
         if (value.length != 1) {
@@ -143,12 +312,32 @@ interface Source : SourceInfo {
         return value[0]
     }
 
+    /**
+     * Whether this source contains a single value with type [BigInteger] or not.
+     *
+     * @return `true` if this source contains a single value with type [BigInteger], `false` otherwise
+     */
     fun isBigInteger(): Boolean = false
 
+    /**
+     * Get a [BigInteger] value from this source.
+     *
+     * @return a [BigInteger] value
+     */
     fun toBigInteger(): BigInteger = BigInteger.valueOf(toLong())
 
+    /**
+     * Whether this source contains a single value with type [BigDecimal] or not.
+     *
+     * @return `true` if this source contains a single value with type [BigDecimal], `false` otherwise
+     */
     fun isBigDecimal(): Boolean = false
 
+    /**
+     * Get a [BigDecimal] value from this source.
+     *
+     * @return a [BigDecimal] value
+     */
     fun toBigDecimal(): BigDecimal = BigDecimal.valueOf(toDouble())
 
     private inline fun <T> tryParse(block: () -> T): T {
@@ -159,32 +348,102 @@ interface Source : SourceInfo {
         }
     }
 
+    /**
+     * Whether this source contains a single value with type [OffsetTime] or not.
+     *
+     * @return `true` if this source contains a single value with type [OffsetTime], `false` otherwise
+     */
     fun isOffsetTime(): Boolean = false
 
+    /**
+     * Get a [OffsetTime] value from this source.
+     *
+     * @return a [OffsetTime] value
+     */
     fun toOffsetTime(): OffsetTime = tryParse { OffsetTime.parse(toText()) }
 
+    /**
+     * Whether this source contains a single value with type [OffsetDateTime] or not.
+     *
+     * @return `true` if this source contains a single value with type [OffsetDateTime], `false` otherwise
+     */
     fun isOffsetDateTime(): Boolean = false
 
+    /**
+     * Get a [OffsetDateTime] value from this source.
+     *
+     * @return a [OffsetDateTime] value
+     */
     fun toOffsetDateTime(): OffsetDateTime = tryParse { OffsetDateTime.parse(toText()) }
 
+    /**
+     * Whether this source contains a single value with type [ZonedDateTime] or not.
+     *
+     * @return `true` if this source contains a single value with type [ZonedDateTime], `false` otherwise
+     */
     fun isZonedDateTime(): Boolean = false
 
+    /**
+     * Get a [ZonedDateTime] value from this source.
+     *
+     * @return a [ZonedDateTime] value
+     */
     fun toZonedDateTime(): ZonedDateTime = tryParse { ZonedDateTime.parse(toText()) }
 
+    /**
+     * Whether this source contains a single value with type [LocalDate] or not.
+     *
+     * @return `true` if this source contains a single value with type [LocalDate], `false` otherwise
+     */
     fun isLocalDate(): Boolean = false
 
+    /**
+     * Get a [LocalDate] value from this source.
+     *
+     * @return a [LocalDate] value
+     */
     fun toLocalDate(): LocalDate = tryParse { LocalDate.parse(toText()) }
 
+    /**
+     * Whether this source contains a single value with type [LocalTime] or not.
+     *
+     * @return `true` if this source contains a single value with type [LocalTime], `false` otherwise
+     */
     fun isLocalTime(): Boolean = false
 
+    /**
+     * Get a [LocalTime] value from this source.
+     *
+     * @return a [LocalTime] value
+     */
     fun toLocalTime(): LocalTime = tryParse { LocalTime.parse(toText()) }
 
+    /**
+     * Whether this source contains a single value with type [LocalDateTime] or not.
+     *
+     * @return `true` if this source contains a single value with type [LocalDateTime], `false` otherwise
+     */
     fun isLocalDateTime(): Boolean = false
 
+    /**
+     * Get a [LocalDateTime] value from this source.
+     *
+     * @return a [LocalDateTime] value
+     */
     fun toLocalDateTime(): LocalDateTime = tryParse { LocalDateTime.parse(toText()) }
 
+    /**
+     * Whether this source contains a single value with type [Date] or not.
+     *
+     * @return `true` if this source contains a single value with type [Date], `false` otherwise
+     */
     fun isDate(): Boolean = false
 
+    /**
+     * Get a [Date] value from this source.
+     *
+     * @return a [Date] value
+     */
     fun toDate(): Date {
         try {
             return Date.from(tryParse { Instant.parse(toText()) })
@@ -201,24 +460,74 @@ interface Source : SourceInfo {
         }
     }
 
+    /**
+     * Whether this source contains a single value with type [Year] or not.
+     *
+     * @return `true` if this source contains a single value with type [Year], `false` otherwise
+     */
     fun isYear(): Boolean = false
 
+    /**
+     * Get a [Year] value from this source.
+     *
+     * @return a [Year] value
+     */
     fun toYear(): Year = tryParse { Year.parse(toText()) }
 
+    /**
+     * Whether this source contains a single value with type [YearMonth] or not.
+     *
+     * @return `true` if this source contains a single value with type [YearMonth], `false` otherwise
+     */
     fun isYearMonth(): Boolean = false
 
+    /**
+     * Get a [YearMonth] value from this source.
+     *
+     * @return a [YearMonth] value
+     */
     fun toYearMonth(): YearMonth = tryParse { YearMonth.parse(toText()) }
 
+    /**
+     * Whether this source contains a single value with type [Instant] or not.
+     *
+     * @return `true` if this source contains a single value with type [Instant], `false` otherwise
+     */
     fun isInstant(): Boolean = false
 
+    /**
+     * Get a [Instant] value from this source.
+     *
+     * @return a [Instant] value
+     */
     fun toInstant(): Instant = tryParse { Instant.parse(toText()) }
 
+    /**
+     * Whether this source contains a single value with type [Duration] or not.
+     *
+     * @return `true` if this source contains a single value with type [Duration], `false` otherwise
+     */
     fun isDuration(): Boolean = false
 
+    /**
+     * Get a [Duration] value from this source.
+     *
+     * @return a [Duration] value
+     */
     fun toDuration(): Duration = toText().toDuration()
 
+    /**
+     * Whether this source contains a single value with type [SizeInBytes] or not.
+     *
+     * @return `true` if this source contains a single value with type [SizeInBytes], `false` otherwise
+     */
     fun isSizeInBytes(): Boolean = false
 
+    /**
+     * Get a [SizeInBytes] value from this source.
+     *
+     * @return a [SizeInBytes] value
+     */
     fun toSizeInBytes(): SizeInBytes = SizeInBytes.parse(toText())
 }
 

@@ -75,6 +75,9 @@ sealed class ConfigTree {
  */
 class ConfigItemNode<T : Any>(
         override val path: List<String>,
+        /**
+         * Config item in this node.
+         */
         val item: Item<T>
 ) : ConfigTree() {
     override fun deepCopy(): ConfigItemNode<T> = ConfigItemNode(path, item)
@@ -87,6 +90,9 @@ class ConfigItemNode<T : Any>(
  */
 class ConfigPathNode(
         override val path: List<String>,
+        /**
+         * List of children of this node.
+         */
         val children: MutableList<ConfigTree>
 ) : ConfigTree() {
     override fun deepCopy(): ConfigPathNode =

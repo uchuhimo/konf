@@ -22,28 +22,92 @@ import java.io.InputStream
 import java.io.Reader
 import java.net.URL
 
-class Loader(val config: Config, val provider: SourceProvider) {
+/**
+ * Loader to load source from various input formats.
+ *
+ * @param config parent config
+ */
+class Loader(
+        /**
+         * Parent config for all child configs loading source in this loader.
+         */
+        val config: Config,
+        /**
+         * Source provider to provide source from various input format.
+         */
+        val provider: SourceProvider
+) {
+    /**
+     * Returns a child config containing values from specified reader.
+     *
+     * @param reader specified reader for reading character streams
+     * @return a child config containing values from specified reader
+     */
     fun reader(reader: Reader): Config =
             config.withSource(provider.fromReader(reader))
 
+    /**
+     * Returns a child config containing values from specified input stream.
+     *
+     * @param inputStream specified input stream of bytes
+     * @return a child config containing values from specified input stream
+     */
     fun inputStream(inputStream: InputStream): Config =
             config.withSource(provider.fromInputStream(inputStream))
 
+    /**
+     * Returns a child config containing values from specified file.
+     *
+     * @param file specified file
+     * @return a child config containing values from specified file
+     */
     fun file(file: File): Config =
             config.withSource(provider.fromFile(file))
 
+    /**
+     * Returns a child config containing values from specified string.
+     *
+     * @param content specified string
+     * @return a child config containing values from specified string
+     */
     fun string(content: String): Config =
             config.withSource(provider.fromString(content))
 
+    /**
+     * Returns a child config containing values from specified byte array.
+     *
+     * @param content specified byte array
+     * @return a child config containing values from specified byte array
+     */
     fun bytes(content: ByteArray): Config =
             config.withSource(provider.fromBytes(content))
 
+    /**
+     * Returns a child config containing values from specified portion of byte array.
+     *
+     * @param content specified byte array
+     * @param offset the start offset of the portion of the array to read
+     * @param length the length of the portion of the array to read
+     * @return a child config containing values from specified portion of byte array
+     */
     fun bytes(content: ByteArray, offset: Int, length: Int): Config =
             config.withSource(provider.fromBytes(content, offset, length))
 
+    /**
+     * Returns a child config containing values from specified url.
+     *
+     * @param url specified url
+     * @return a child config containing values from specified url
+     */
     fun url(url: URL): Config =
             config.withSource(provider.fromUrl(url))
 
+    /**
+     * Returns a child config containing values from specified resource.
+     *
+     * @param resource path of specified resource
+     * @return a child config containing values from specified resource
+     */
     fun resource(resource: String): Config =
             config.withSource(provider.fromResource(resource))
 }

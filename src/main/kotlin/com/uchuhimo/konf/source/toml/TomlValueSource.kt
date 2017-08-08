@@ -20,6 +20,9 @@ import com.uchuhimo.konf.source.ParseException
 import com.uchuhimo.konf.source.Source
 import com.uchuhimo.konf.source.base.ValueSource
 
+/**
+ * Source from a TOML value.
+ */
 class TomlValueSource(
         value: Any,
         context: Map<String, String> = mapOf()

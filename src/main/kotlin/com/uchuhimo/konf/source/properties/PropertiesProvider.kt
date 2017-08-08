@@ -23,6 +23,9 @@ import java.io.InputStream
 import java.io.Reader
 import java.util.Properties
 
+/**
+ * Provider for properties source.
+ */
 object PropertiesProvider : SourceProvider {
     @Suppress("UNCHECKED_CAST")
     private fun Properties.toMap(): Map<String, String> = this as Map<String, String>
@@ -33,5 +36,10 @@ object PropertiesProvider : SourceProvider {
     override fun fromInputStream(inputStream: InputStream): Source =
             FlatSource(Properties().apply { load(inputStream) }.toMap(), type = "properties")
 
+    /**
+     * Returns a new source from system properties.
+     *
+     * @return a new source from system properties
+     */
     fun fromSystem(): Source = FlatSource(System.getProperties().toMap(), type = "system-properties")
 }

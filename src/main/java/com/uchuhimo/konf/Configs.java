@@ -18,13 +18,25 @@ package com.uchuhimo.konf;
 
 import java.util.function.Consumer;
 
+/** Helper class for {@link com.uchuhimo.konf.Config Config}. */
 public final class Configs {
   private Configs() {}
 
+  /**
+   * Create a new root config.
+   *
+   * @return a new root config
+   */
   public static Config create() {
     return Config.Companion.invoke();
   }
 
+  /**
+   * Create a new root config and initiate it.
+   *
+   * @param init initial action
+   * @return a new root config
+   */
   public static Config create(Consumer<Config> init) {
     final Config config = create();
     init.accept(config);

@@ -22,6 +22,9 @@ import com.uchuhimo.konf.source.SourceProvider
 import java.io.InputStream
 import java.io.Reader
 
+/**
+ * Provider for JSON source.
+ */
 object JsonProvider : SourceProvider {
     override fun fromReader(reader: Reader): Source =
             JsonSource(ObjectMapper().readTree(reader))

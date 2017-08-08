@@ -19,6 +19,9 @@ package com.uchuhimo.konf.source.toml
 import com.uchuhimo.konf.source.Source
 import com.uchuhimo.konf.source.base.MapSource
 
+/**
+ * Source from a TOML map.
+ */
 class TomlMapSource(
         map: Map<String, Any>,
         context: Map<String, String> = mapOf()

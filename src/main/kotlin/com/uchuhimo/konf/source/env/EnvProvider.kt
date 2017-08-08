@@ -19,7 +19,15 @@ package com.uchuhimo.konf.source.env
 import com.uchuhimo.konf.source.Source
 import com.uchuhimo.konf.source.base.FlatSource
 
+/**
+ * Provider for system environment source.
+ */
 object EnvProvider {
+    /**
+     * Returns a new source from system environment.
+     *
+     * @return a new source from system environment
+     */
     fun fromEnv(): Source {
         return FlatSource(System.getenv(), type = "system-environment")
     }

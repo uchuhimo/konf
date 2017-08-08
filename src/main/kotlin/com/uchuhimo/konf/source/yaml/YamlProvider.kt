@@ -24,6 +24,9 @@ import org.yaml.snakeyaml.constructor.SafeConstructor
 import java.io.InputStream
 import java.io.Reader
 
+/**
+ * Provider for YAML source.
+ */
 object YamlProvider : SourceProvider {
     override fun fromReader(reader: Reader): Source {
         val yaml = Yaml(SafeConstructor())

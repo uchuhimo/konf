@@ -23,8 +23,17 @@ import com.fasterxml.jackson.databind.deser.std.StdDeserializer
 import com.fasterxml.jackson.databind.exc.MismatchedInputException
 import java.time.format.DateTimeParseException
 
+/**
+ * Base class of deserializers for datetime classes in JSR310.
+ *
+ * @param T type of datetime value
+ */
 abstract class JSR310Deserializer<T>(clazz: Class<T>) : StdDeserializer<T>(clazz) {
     /**
+     * Parses from a string to datetime value.
+     *
+     * @param string input string
+     * @return datetime value
      * @throws DateTimeParseException
      */
     abstract fun parse(string: String): T

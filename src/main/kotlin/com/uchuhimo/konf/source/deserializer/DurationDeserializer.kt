@@ -21,6 +21,9 @@ import com.uchuhimo.konf.source.toDuration
 import java.time.Duration
 import java.time.format.DateTimeParseException
 
+/**
+ * Deserializer for [Duration].
+ */
 object DurationDeserializer : JSR310Deserializer<Duration>(Duration::class.java) {
     override fun parse(string: String): Duration {
         try {

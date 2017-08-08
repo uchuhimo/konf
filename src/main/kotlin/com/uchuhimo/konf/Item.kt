@@ -102,6 +102,9 @@ sealed class Item<T : Any>(
     val asLazyItem: LazyItem<T> get() = this as LazyItem<T>
 }
 
+/**
+ * Type of Item path.
+ */
 typealias Path = List<String>
 
 /**

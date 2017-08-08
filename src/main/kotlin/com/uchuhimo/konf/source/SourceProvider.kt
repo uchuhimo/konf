@@ -22,24 +22,71 @@ import java.io.InputStream
 import java.io.Reader
 import java.net.URL
 
+/**
+ * Provides source from various input format.
+ */
 interface SourceProvider {
+    /**
+     * Returns a new source from specified reader.
+     *
+     * @param reader specified reader for reading character streams
+     * @return a new source from specified reader
+     */
     fun fromReader(reader: Reader): Source
 
+    /**
+     * Returns a new source from specified input stream.
+     *
+     * @param inputStream specified input stream of bytes
+     * @return a new source from specified input stream
+     */
     fun fromInputStream(inputStream: InputStream): Source
 
+    /**
+     * Returns a new source from specified file.
+     *
+     * @param file specified file
+     * @return a new source from specified file
+     */
     fun fromFile(file: File): Source = fromInputStream(file.inputStream().buffered()).apply {
         addContext("file", file.toString())
     }
 
+    /**
+     * Returns a new source from specified string.
+     *
+     * @param content specified string
+     * @return a new source from specified string
+     */
     fun fromString(content: String): Source = fromReader(content.reader()).apply {
         addContext("content", "\"\n$content\n\"")
     }
 
+    /**
+     * Returns a new source from specified byte array.
+     *
+     * @param content specified byte array
+     * @return a new source from specified byte array
+     */
     fun fromBytes(content: ByteArray): Source = fromInputStream(content.inputStream())
 
+    /**
+     * Returns a new source from specified portion of byte array.
+     *
+     * @param content specified byte array
+     * @param offset the start offset of the portion of the array to read
+     * @param length the length of the portion of the array to read
+     * @return a new source from specified portion of byte array
+     */
     fun fromBytes(content: ByteArray, offset: Int, length: Int): Source =
             fromInputStream(content.inputStream(offset, length))
 
+    /**
+     * Returns a new source from specified url.
+     *
+     * @param url specified url
+     * @return a new source from specified url
+     */
     fun fromUrl(url: URL): Source {
         // from com.fasterxml.jackson.core.JsonFactory._optimizedStreamFromURL in version 2.8.9
         if (url.protocol == "file") {
@@ -59,6 +106,12 @@ interface SourceProvider {
         }
     }
 
+    /**
+     * Returns a new source from specified resource.
+     *
+     * @param resource path of specified resource
+     * @return a new source from specified resource
+     */
     fun fromResource(resource: String): Source {
         val loader = Thread.currentThread().contextClassLoader
         val e = loader.getResources(resource)

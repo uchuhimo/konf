@@ -22,6 +22,9 @@ import com.uchuhimo.konf.name
 import com.uchuhimo.konf.source.Source
 import com.uchuhimo.konf.source.SourceInfo
 
+/**
+ * Source from a HOCON map.
+ */
 class HoconSource(
         val config: Config,
         context: Map<String, String> = mapOf()

@@ -27,6 +27,9 @@ import com.uchuhimo.konf.source.SourceInfo
 import com.uchuhimo.konf.source.WrongTypeException
 import com.uchuhimo.konf.source.toDescription
 
+/**
+ * Source from a HOCON value.
+ */
 class HoconValueSource(
         val value: ConfigValue,
         context: Map<String, String> = mapOf()

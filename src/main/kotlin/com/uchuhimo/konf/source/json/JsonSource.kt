@@ -26,6 +26,9 @@ import com.uchuhimo.konf.source.toDescription
 import java.math.BigDecimal
 import java.math.BigInteger
 
+/**
+ * Source from a JSON node.
+ */
 class JsonSource(
         val node: JsonNode,
         context: Map<String, String> = mapOf()

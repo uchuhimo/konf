@@ -16,11 +16,16 @@
 
 package com.uchuhimo.konf
 
+/**
+ * Throws [UnsupportedOperationException].
+ *
+ * @throws UnsupportedOperationException
+ */
 fun unsupported(): Nothing {
     throw UnsupportedOperationException()
 }
 
-fun getUnits(s: String): String {
+internal fun getUnits(s: String): String {
     var i = s.length - 1
     while (i >= 0) {
         val c = s[i]

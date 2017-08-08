@@ -26,6 +26,9 @@ import com.uchuhimo.konf.source.SourceInfo
 import com.uchuhimo.konf.source.toDescription
 import com.uchuhimo.konf.toPath
 
+/**
+ * Source from a map in flat format.
+ */
 open class FlatSource(
         val map: Map<String, String>,
         val prefix: String = "",

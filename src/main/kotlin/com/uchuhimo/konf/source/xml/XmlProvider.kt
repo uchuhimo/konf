@@ -24,6 +24,9 @@ import org.dom4j.io.SAXReader
 import java.io.InputStream
 import java.io.Reader
 
+/**
+ * Provider for XML source.
+ */
 object XmlProvider : SourceProvider {
     private fun Document.toMap(): Map<String, String> {
         val rootElement = this.rootElement

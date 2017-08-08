@@ -22,6 +22,9 @@ import com.uchuhimo.konf.source.SourceProvider
 import java.io.InputStream
 import java.io.Reader
 
+/**
+ * Provider for HOCON source.
+ */
 object HoconProvider : SourceProvider {
     override fun fromReader(reader: Reader): Source =
             HoconSource(ConfigFactory.parseReader(reader))

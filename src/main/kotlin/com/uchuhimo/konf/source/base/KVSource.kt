@@ -21,6 +21,9 @@ import com.uchuhimo.konf.name
 import com.uchuhimo.konf.notEmptyOr
 import com.uchuhimo.konf.source.Source
 
+/**
+ * Source from a map in key-value format.
+ */
 open class KVSource(
         val map: Map<String, Any>,
         type: String = "",

@@ -39,6 +39,9 @@ import java.time.ZoneOffset
 import java.time.ZonedDateTime
 import java.util.Date
 
+/**
+ * Source from a single value.
+ */
 open class ValueSource(
         val value: Any,
         type: String = "",

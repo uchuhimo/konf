@@ -21,6 +21,9 @@ import com.uchuhimo.konf.notEmptyOr
 import com.uchuhimo.konf.source.Source
 import com.uchuhimo.konf.source.toDescription
 
+/**
+ * Source from a hierarchical map.
+ */
 open class MapSource(
         val map: Map<String, Any>,
         type: String = "",

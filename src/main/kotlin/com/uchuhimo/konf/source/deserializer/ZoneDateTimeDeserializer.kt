@@ -18,6 +18,9 @@ package com.uchuhimo.konf.source.deserializer
 
 import java.time.ZonedDateTime
 
+/**
+ * Deserializer for [ZonedDateTime].
+ */
 object ZoneDateTimeDeserializer : JSR310Deserializer<ZonedDateTime>(ZonedDateTime::class.java) {
     override fun parse(string: String): ZonedDateTime = ZonedDateTime.parse(string)
 }

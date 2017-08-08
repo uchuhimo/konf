@@ -16,6 +16,9 @@
 
 package com.uchuhimo.konf.annotation
 
+/**
+ * Indicates that this API is specially designed to be used in Java.
+ */
 @Target(
         AnnotationTarget.FUNCTION,
         AnnotationTarget.CONSTRUCTOR,

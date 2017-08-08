@@ -18,6 +18,9 @@ package com.uchuhimo.konf.source.deserializer
 
 import java.time.OffsetDateTime
 
+/**
+ * Deserializer for [OffsetDateTime].
+ */
 object OffsetDateTimeDeserializer : JSR310Deserializer<OffsetDateTime>(OffsetDateTime::class.java) {
     override fun parse(string: String): OffsetDateTime = OffsetDateTime.parse(string)
 }

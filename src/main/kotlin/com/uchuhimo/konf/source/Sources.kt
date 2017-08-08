@@ -30,6 +30,16 @@ import java.time.ZonedDateTime
 import java.time.format.DateTimeParseException
 import java.util.concurrent.TimeUnit
 
+/**
+ * Returns a source backing by specified fallback source.
+ *
+ * When config fails to retrieve values from this source, it will try to retrieve them from
+ * fallback source.
+ *
+ * @receiver facade source
+ * @param fallback fallback source
+ * @return a source backing by specified fallback source
+ */
 fun Source.withFallback(fallback: Source): Source = object : Source by this {
     init {
         addInfo("fallback", fallback.description)
@@ -44,26 +54,41 @@ fun Source.withFallback(fallback: Source): Source = object : Source by this {
     override fun getOrNull(path: List<String>): Source? =
             this@withFallback.getOrNull(path) ?: fallback.getOrNull(path)
 
-    override fun contains(key: String): Boolean =
-            this@withFallback.contains(key) || fallback.contains(key)
+    override fun contains(prefix: String): Boolean =
+            this@withFallback.contains(prefix) || fallback.contains(prefix)
 
-    override fun get(key: String): Source =
-            this@withFallback.getOrNull(key) ?: fallback[key]
+    override fun get(prefix: String): Source =
+            this@withFallback.getOrNull(prefix) ?: fallback[prefix]
 
-    override fun getOrNull(key: String): Source? =
-            this@withFallback.getOrNull(key) ?: fallback.getOrNull(key)
+    override fun getOrNull(prefix: String): Source? =
+            this@withFallback.getOrNull(prefix) ?: fallback.getOrNull(prefix)
 }
 
+/**
+ * Returns a new default object mapper for config.
+ */
 fun createDefaultMapper(): ObjectMapper = jacksonObjectMapper()
         .registerModule(JavaTimeModule()
                 .addDeserializer(Duration::class.java, DurationDeserializer)
                 .addDeserializer(OffsetDateTime::class.java, OffsetDateTimeDeserializer)
                 .addDeserializer(ZonedDateTime::class.java, ZoneDateTimeDeserializer))
 
+/**
+ * Converts key-value pairs to description in string representation.
+ *
+ * @receiver key-value pairs
+ * @return description in string representation
+ */
 fun Map<String, String>.toDescription() = map { (name, value) ->
     "$name: $value"
 }.joinToString(separator = ", ", prefix = "[", postfix = "]")
 
+/**
+ * Parses specified string to duration.
+ *
+ * @receiver specified string
+ * @return duration
+ */
 fun String.toDuration(): Duration {
     try {
         return Duration.parse(this)
@@ -77,7 +102,6 @@ fun String.toDuration(): Duration {
  * assumed to be in milliseconds. The returned duration is in nanoseconds.
  *
  * @param input the string to parse
- *
  * @return duration in nanoseconds
  */
 internal fun parseDuration(input: String): Long {
