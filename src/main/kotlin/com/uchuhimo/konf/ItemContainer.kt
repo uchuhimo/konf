@@ -16,15 +16,80 @@
 
 package com.uchuhimo.konf
 
-interface ItemContainer {
+/**
+ * Container of items.
+ *
+ * Item container contains read-only access operations for [Config].
+ *
+ * @see Config
+ */
+interface ItemContainer : Iterable<Item<*>> {
+    /**
+     * Get associated value with specified item.
+     *
+     * @param item config item
+     * @return associated value
+     */
     operator fun <T : Any> get(item: Item<T>): T
+
+    /**
+     * Get associated value with specified item name.
+     *
+     * @param name item name
+     * @return associated value
+     */
     operator fun <T : Any> get(name: String): T
+
+    /**
+     * Returns associated value if specified item exists, `null` otherwise.
+     *
+     * @param item config item
+     * @return associated value if specified item exists, `null` otherwise
+     */
     fun <T : Any> getOrNull(item: Item<T>): T?
+
+    /**
+     * Returns associated value if specified item name exists, `null` otherwise.
+     *
+     * @param name item name
+     * @return associated value if specified item name exists, `null` otherwise
+     */
     fun <T : Any> getOrNull(name: String): T?
+
+    /**
+     * Get associated value with specified item name.
+     *
+     * @param name item name
+     * @return associated value
+     */
     operator fun <T : Any> invoke(name: String): T = get(name)
-    operator fun iterator(): Iterator<Item<*>>
+
+    /**
+     * Returns iterator of items in this item container.
+     *
+     * @return iterator of items in this item container
+     */
+    override operator fun iterator(): Iterator<Item<*>>
+
+    /**
+     * Whether this item container contains specified item or not.
+     *
+     * @param item config item
+     * @return `true` if this item container contains specified item, `false` otherwise
+     */
     operator fun contains(item: Item<*>): Boolean
+
+    /**
+     * Whether this item container contains item with specified name or not.
+     *
+     * @param name item name
+     * @return `true` if this item container contains item with specified name, `false` otherwise
+     */
     operator fun contains(name: String): Boolean
+
+    /**
+     * List of items in this item container.
+     */
     val items: List<Item<*>> get() = mutableListOf<Item<*>>().apply {
         addAll(this@ItemContainer.iterator().asSequence())
     }

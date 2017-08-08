@@ -25,10 +25,13 @@ import com.fasterxml.jackson.databind.type.TypeFactory
  * Item can be associated with value in config, containing metadata for the value.
  * The metadata for value includes name, path, type, description and so on.
  * Item can be used as key to operate value in config, guaranteeing type safety.
- * There are three kinds of item: required item ([RequiredItem]),
- * optional item ([OptionalItem]) and lazy item ([LazyItem]).
+ * There are three kinds of item: [required item][RequiredItem], [optional item][OptionalItem]
+ * and [lazy item][LazyItem].
  *
  * @param T type of value that can be associated with this item.
+ * @param spec config spec that contains this item
+ * @param name item name without prefix
+ * @param description description for this item
  * @see Config
  */
 sealed class Item<T : Any>(
