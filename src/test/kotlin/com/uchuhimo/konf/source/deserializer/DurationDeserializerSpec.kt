@@ -30,7 +30,7 @@ import java.time.Duration
 
 object DurationDeserializerSpec : Spek({
     val config by memoized {
-        Config().apply {
+        Config {
             addSpec(object : ConfigSpec() {
                 init {
                     required<DurationWrapper>("item")

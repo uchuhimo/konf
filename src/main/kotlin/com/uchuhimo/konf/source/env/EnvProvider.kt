@@ -29,6 +29,10 @@ object EnvProvider {
      * @return a new source from system environment
      */
     fun fromEnv(): Source {
-        return FlatSource(System.getenv(), type = "system-environment")
+        return FlatSource(
+                System.getenv().mapKeys { (key, _) ->
+                    key.toLowerCase().replace('_', '.')
+                },
+                type = "system-environment")
     }
 }

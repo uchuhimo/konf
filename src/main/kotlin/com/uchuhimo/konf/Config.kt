@@ -45,14 +45,18 @@ import kotlin.reflect.KProperty
  * - Evaluated.  Item has associated value which is evaluated.
  *   Use [set] to change item to this state.
  *
- * Config is cascading. Except root config, every config has a parent config.
+ * Config is cascading.
+ * Config can fork from another config by adding a new layer on it.
+ * The forked config is called child config, and the original config is called parent config.
+ * A config without parent config is called root config. The new layer added by child config
+ * is called facade layer.
  * Config with ancestor configs has multiple layers. All set operation is executed in facade layer
  * of config.
  * Descendant config inherits items and values in ancestor configs, and can override values for
  * items in ancestor configs. Overridden values in config will affect itself and its descendant
  * configs, without affecting its ancestor configs. Loading items in config will not affect its
  * ancestor configs too. [invoke] can be used to create a root config, and [withLayer] can be used
- * to create a child config from current config.
+ * to create a child config from specified config.
  *
  * All methods in Config is thread-safe.
  */
@@ -99,14 +103,14 @@ interface Config : ItemContainer {
     fun <T : Any> lazySet(name: String, thunk: (config: ItemContainer) -> T)
 
     /**
-     * Change item to unset state.
+     * Discard associated value of specified item.
      *
      * @param item config item
      */
     fun unset(item: Item<*>)
 
     /**
-     * Change item with specified name to unset state.
+     * Discard associated value of item with specified name.
      *
      * @param name item name
      */

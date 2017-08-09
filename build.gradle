@@ -53,6 +53,10 @@ task wrapper(type: Wrapper) {
     distributionType = Wrapper.DistributionType.ALL
 }
 
+sourceSets {
+    example
+}
+
 dependencyManagement {
     dependencies {
         dependency "com.uchuhimo:kotlinx-bimap:1.0"
@@ -128,6 +132,11 @@ dependencies {
     testRuntimeOnly "org.junit.jupiter:junit-jupiter-engine"
     testRuntimeOnly "org.jetbrains.spek:spek-junit-platform-engine"
     testRuntimeOnly "org.slf4j:slf4j-simple"
+
+    jmhImplementation "org.jetbrains.kotlin:kotlin-stdlib"
+
+    exampleImplementation sourceSets.main.output
+    exampleImplementation "org.jetbrains.kotlin:kotlin-stdlib"
 }
 
 sourceCompatibility = JavaVersion.VERSION_1_8
@@ -147,7 +156,7 @@ tasks.withType(JavaCompile) {
 
 afterEvaluate {
     junitPlatformTest {
-        environment "source.test.type", "env"
+        environment "SOURCE_TEST_TYPE", "env"
     }
 }
 
@@ -251,9 +260,9 @@ publish {
     artifactId = rootProject.name
     publishVersion = project.version
     licences = ["Apache-2.0"]
-    desc = "A type safe configuration library for Kotlin," +
-            " support to load from JSON, XML, YAML, HOCON, TOML, properties," +
-            " map, command line and environment variables"
+    desc = "A type-safe cascading configuration library for Kotlin/Java," +
+            " supporting most mainstream source types" +
+            " (JSON/XML/YAML/HOCON/TOML/properties/environment/...)"
     website = "https://github.com/uchuhimo/konf"
     bintrayUser = bintrayUserProperty
     bintrayKey = bintrayKeyProperty

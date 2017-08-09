@@ -134,7 +134,7 @@ fun String.toPath(): Path {
 /**
  * Required item without default value.
  *
- * Required item must be set with value before any get operation in config.
+ * Required item must be set with value before retrieved in config.
  */
 open class RequiredItem<T : Any> @JvmOverloads constructor(
         spec: ConfigSpec,

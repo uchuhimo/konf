@@ -30,7 +30,7 @@ import java.time.OffsetDateTime
 
 object OffsetDateTimeDeserializerSpec : Spek({
     val config by memoized {
-        Config().apply {
+        Config {
             addSpec(object : ConfigSpec() {
                 init {
                     required<OffsetDateTimeWrapper>("item")

@@ -30,7 +30,7 @@ import java.time.ZonedDateTime
 
 object ZonedDateTimeDeserializerSpec : Spek({
     val config by memoized {
-        Config().apply {
+        Config {
             addSpec(object : ConfigSpec() {
                 init {
                     required<ZonedDateTimeWrapper>("item")
