@@ -6,7 +6,7 @@
 [![Build Status](https://travis-ci.org/uchuhimo/konf.svg?branch=master)](https://travis-ci.org/uchuhimo/konf)
 [![codecov](https://codecov.io/gh/uchuhimo/konf/branch/master/graph/badge.svg)](https://codecov.io/gh/uchuhimo/konf)
 
-A type-safe cascading configuration library for Kotlin/Java, supporting most mainstream source types (JSON/XML/YAML/HOCON/TOML/properties/environment/...).
+A type-safe cascading configuration library for Kotlin/Java, supporting most configuration formats.
 
 ## Features
 
@@ -17,11 +17,23 @@ A type-safe cascading configuration library for Kotlin/Java, supporting most mai
 - **Self-documenting**. Document config item with type, default value and description when declaring.
 - **Extensible**. Easy to customize new sources for config or expose items in config.
 
+## Contents
+
+- [Prerequisites](#prerequisites)
+- [Use in your projects](#use-in-your-projects)
+- [Quick start](#quick-start)
+- [Define items](#define-items)
+- [Use config](#use-config)
+- [Load values from source](#load-values-from-source)
+- [Supported item types](#supported-item-types)
+- [Generate document from config](#generate-document-from-config)
+- [Build from source](#build-from-source)
+
 ## Prerequisites
 
 - JDK 1.8 or higher
 
-## Using in your projects
+## Use in your projects
 
 This library are published to [JCenter](https://bintray.com/uchuhimo/maven/konf) and [JitPack](https://jitpack.io/#uchuhimo/konf).
 
@@ -118,12 +130,23 @@ compile 'com.uchuhimo:konf:0.4'
     server.start()
     ```
 
-## Config spec
+## Define items
 
 Config items is declared in config spec, added to config by `Config#addSpec`. All items in same config spec have same prefix. Define a config spec with prefix `local.server`:
 
 ```kotlin
 object server : ConfigSpec("local.server") {
+}
+```
+
+If the config spec is binding with single class, you can declare config spec as companion object of the class:
+
+```kotlin
+class Server {
+    companion object : ConfigSpec("server") {
+        val host = optional("host", "0.0.0.0")
+        val port = required<Int>("port")
+    }
 }
 ```
 
@@ -162,7 +185,7 @@ public class ServerConfig {
 
 Notice that the `{}` part in item declaration is necessary to avoid type erasure of item's type information.
 
-## Config
+## Use config
 
 ### Create config
 
@@ -273,12 +296,40 @@ Export a read-only property from value in config:
 
 ```kotlin
 val port by config.property(server.port)
-check(port == 80)
+check(port == 9090)
 ```
 
-## Source
+### fork from another config
 
-All out-of-box supported sources is declared in [`DefaultLoaders`](https://github.com/uchuhimo/konf/blob/master/src/main/kotlin/com/uchuhimo/konf/source/DefaultLoaders.kt), shown below (the corresponding config spec for these samples is [`ConfigForLoad`](https://github.com/uchuhimo/konf/blob/master/src/test/kotlin/com/uchuhimo/konf/source/ConfigForLoad.kt)):
+```kotlin
+val config = Config { addSpec(server) }
+config[server.port] = 1000
+// fork from parent config
+val childConfig = config.withLayer("child")
+// child config inherit values from parent config
+check(childConfig[server.port] == 1000)
+// modifications in parent config affect values in child config
+config[server.port] = 2000
+check(config[server.port] == 2000)
+check(childConfig[server.port] == 2000)
+// modifications in child config don't affect values in parent config
+childConfig[server.port] = 3000
+check(config[server.port] == 2000)
+check(childConfig[server.port] == 3000)
+```
+
+## Load values from source
+
+Use `withSourceFrom` to load values from source doesn't affect values in config, it will return a new child config by loading all values into new layer in child config:
+
+```kotlin
+val config = Config { addSpec(server) }
+// values in source is loaded into new layer in child config
+val childConfig = config.withSourceFrom.env()
+check(childConfig.parent === config)
+```
+
+All out-of-box supported sources are declared in [`DefaultLoaders`](https://github.com/uchuhimo/konf/blob/master/src/main/kotlin/com/uchuhimo/konf/source/DefaultLoaders.kt), shown below (the corresponding config spec for these samples is [`ConfigForLoad`](https://github.com/uchuhimo/konf/blob/master/src/test/kotlin/com/uchuhimo/konf/source/ConfigForLoad.kt)):
 
 | Type | Sample |
 | - | - |
@@ -376,7 +427,7 @@ Konf use [Jackson](https://github.com/FasterXML/jackson) to support Kotlin Built
 
 Since config provides rich operations to explore its content/structure, it is convinient to generate document from config. See [`ConfigGenerateDocSpec`](https://github.com/uchuhimo/konf/blob/master/src/test/kotlin/com/uchuhimo/konf/ConfigGenerateDocSpec.kt) to find examples to generate documents in properties/HOCON/YAML/TOML/XML file format.
 
-## Building from source
+## Build from source
 
 Build library with Gradle using the following command:
 

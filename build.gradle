@@ -57,6 +57,10 @@ sourceSets {
     example
 }
 
+configurations {
+    exampleImplementation.extendsFrom implementation
+}
+
 dependencyManagement {
     dependencies {
         dependency "com.uchuhimo:kotlinx-bimap:1.0"
@@ -136,7 +140,6 @@ dependencies {
     jmhImplementation "org.jetbrains.kotlin:kotlin-stdlib"
 
     exampleImplementation sourceSets.main.output
-    exampleImplementation "org.jetbrains.kotlin:kotlin-stdlib"
 }
 
 sourceCompatibility = JavaVersion.VERSION_1_8
@@ -261,8 +264,7 @@ publish {
     publishVersion = project.version
     licences = ["Apache-2.0"]
     desc = "A type-safe cascading configuration library for Kotlin/Java," +
-            " supporting most mainstream source types" +
-            " (JSON/XML/YAML/HOCON/TOML/properties/environment/...)"
+            " supporting most configuration formats"
     website = "https://github.com/uchuhimo/konf"
     bintrayUser = bintrayUserProperty
     bintrayKey = bintrayKeyProperty

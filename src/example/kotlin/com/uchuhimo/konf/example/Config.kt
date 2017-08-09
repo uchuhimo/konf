@@ -47,6 +47,6 @@ fun main(args: Array<String>) {
     }
     run {
         val port by config.property(server.port)
-        check(port == 80)
+        check(port == 9090)
     }
 }
