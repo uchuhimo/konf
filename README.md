@@ -299,7 +299,7 @@ val port by config.property(server.port)
 check(port == 9090)
 ```
 
-### fork from another config
+### Fork from another config
 
 ```kotlin
 val config = Config { addSpec(server) }
@@ -413,11 +413,11 @@ Supported item types include:
 - Data classes
 - POJOs supported by Jackson core modules
 
-Konf support size in bytes format described in [HOCON document](https://github.com/typesafehub/config/blob/master/HOCON.md#size-in-bytes-format) with class `SizeInBytes`.
+Konf supports size in bytes format described in [HOCON document](https://github.com/typesafehub/config/blob/master/HOCON.md#size-in-bytes-format) with class `SizeInBytes`.
 
-Konf support both [ISO-8601 duration format](https://en.wikipedia.org/wiki/ISO_8601#Durations) and [HOCON duration format](https://github.com/typesafehub/config/blob/master/HOCON.md#duration-format) for `Duration`.
+Konf supports both [ISO-8601 duration format](https://en.wikipedia.org/wiki/ISO_8601#Durations) and [HOCON duration format](https://github.com/typesafehub/config/blob/master/HOCON.md#duration-format) for `Duration`.
 
-Konf use [Jackson](https://github.com/FasterXML/jackson) to support Kotlin Built-in classes, Data classes and POJOs. You can use `config.mapper` to access `ObjectMapper` instance used by config, and configure it to support more types from third-party Jackson modules. Default modules registered by Konf include:
+Konf uses [Jackson](https://github.com/FasterXML/jackson) to support Kotlin Built-in classes, Data classes and POJOs. You can use `config.mapper` to access `ObjectMapper` instance used by config, and configure it to support more types from third-party Jackson modules. Default modules registered by Konf include:
 
 - Jackson core modules
 - `JavaTimeModule` in [jackson-modules-java8](https://github.com/FasterXML/jackson-modules-java8)
