@@ -10,12 +10,12 @@ A type-safe cascading configuration library for Kotlin/Java, supporting most mai
 
 ## Features
 
-- Type-safe. Get/set value in config with type-safe APIs.
-- Thread-safe. All APIs for config is thread-safe.
-- Batteries included. Support sources from JSON, XML, YAML, [HOCON](https://github.com/typesafehub/config/blob/master/HOCON.md), [TOML](https://github.com/toml-lang/toml), properties, map, command line and system environment out of box.
-- Cascading. Config can fork from another config by adding a new layer on it. Each layer of config can be updated independently. This feature is powerful enough to support complicated situation such as configs with different values share common fallback config, which is automatically updated when configuration file changes.
-- Self-documenting. Document config item with type, default value and description when declaring.
-- Extensible. Easy to customize new sources for config or expose items in config.
+- **Type-safe**. Get/set value in config with type-safe APIs.
+- **Thread-safe**. All APIs for config is thread-safe.
+- **Batteries included**. Support sources from JSON, XML, YAML, [HOCON](https://github.com/typesafehub/config/blob/master/HOCON.md), [TOML](https://github.com/toml-lang/toml), properties, map, command line and system environment out of box.
+- **Cascading**. Config can fork from another config by adding a new layer on it. Each layer of config can be updated independently. This feature is powerful enough to support complicated situation such as configs with different values share common fallback config, which is automatically updated when configuration file changes.
+- **Self-documenting**. Document config item with type, default value and description when declaring.
+- **Extensible**. Easy to customize new sources for config or expose items in config.
 
 ## Prerequisites
 
@@ -278,9 +278,103 @@ check(port == 80)
 
 ## Source
 
+All out-of-box supported sources is declared in [`DefaultLoaders`](https://github.com/uchuhimo/konf/blob/master/src/main/kotlin/com/uchuhimo/konf/source/DefaultLoaders.kt), shown below (the corresponding config spec for these samples is [`ConfigForLoad`](https://github.com/uchuhimo/konf/blob/master/src/test/kotlin/com/uchuhimo/konf/source/ConfigForLoad.kt)):
+
+| Type | Sample |
+| - | - |
+| [HOCON](https://github.com/typesafehub/config/blob/master/HOCON.md) | [`source.conf`](https://github.com/uchuhimo/konf/blob/master/src/test/resources/source/source.conf) |
+| JSON | [`source.json`](https://github.com/uchuhimo/konf/blob/master/src/test/resources/source/source.json) |
+| properties | [`source.properties`](https://github.com/uchuhimo/konf/blob/master/src/test/resources/source/source.properties) |
+| [TOML](https://github.com/toml-lang/toml) | [`source.toml`](https://github.com/uchuhimo/konf/blob/master/src/test/resources/source/source.toml) |
+| XML | [`source.xml`](https://github.com/uchuhimo/konf/blob/master/src/test/resources/source/source.xml) |
+| YAML | [`source.yaml`](https://github.com/uchuhimo/konf/blob/master/src/test/resources/source/source.yaml) |
+| hierarchical map | [`MapSourceLoadSpec`](https://github.com/uchuhimo/konf/blob/master/src/test/kotlin/com/uchuhimo/konf/source/base/MapSourceLoadSpec.kt) |
+| map in key-value format | [`KVSourceSpec`](https://github.com/uchuhimo/konf/blob/master/src/test/kotlin/com/uchuhimo/konf/source/base/KVSourceSpec.kt) |
+| map in flat format | [`FlatSourceLoadSpec`](https://github.com/uchuhimo/konf/blob/master/src/test/kotlin/com/uchuhimo/konf/source/base/FlatSourceLoadSpec.kt) |
+| system properties | - |
+| system environment | - |
+
+Format of system properties source is same with that of properties source. System environment source follows the same mapping convention with properties source, but with the following name convention:
+
+- All letters in name are in uppercase
+- `.` in name is replaced with `_`
+
+HOCON/JSON/properties/TOML/XML/YAML source can be loaded from a variety of input format. Use properties source as example:
+
+- From file: `config.withSourceFrom.properties.file(File("/path/to/file"))`
+- From string: `config.withSourceFrom.properties.string("server.port = 8080")`
+- From URL: `config.withSourceFrom.properties.url(URL("http://localhost:8080/source.properties"))`
+- From resource: `config.withSourceFrom.properties.resource("source.properties")`
+- From reader: `config.withSourceFrom.properties.reader(reader)`
+- From input stream: `config.withSourceFrom.properties.inputStream(inputStream)`
+- From byte array: `config.withSourceFrom.properties.bytes(bytes)`
+- From portion of byte array: `config.withSourceFrom.properties.bytes(bytes, 1, 12)`
+
+If source is from file, file extension can be auto detected. Thus, you can use `config.withSourceFrom.file(File("/path/to/source.json"))` instead of `config.withSourceFrom.json.file(File("/path/to/source.json"))`. The following file extensions can be supported:
+
+| Type | Extension |
+| - | - |
+| HOCON | conf |
+| JSON | json |
+| Properties | properties |
+| TOML | toml |
+| XML | xml |
+| YAML | yml, yaml |
+
+You can also implement [`Source`](https://github.com/uchuhimo/konf/blob/master/src/main/kotlin/com/uchuhimo/konf/source/Source.kt) to customize your new source, which can be loaded into config by `config.withSource(source)`.
+
 ## Supported item types
 
+Supported item types include:
+
+- All primitive types
+- All primitive array types
+- `BigInteger`
+- `BigDecimal`
+- `String`
+- Date and Time
+    - `java.util.Date`
+    - `OffsetTime`
+    - `OffsetDateTime`
+    - `ZonedDateTime`
+    - `LocalDate`
+    - `LocalTime`
+    - `LocalDateTime`
+    - `Year`
+    - `YearMonth`
+    - `Instant`
+    - `Duration`
+- `SizeInBytes`
+- Enum
+- Array
+- Collection
+    - `List`
+    - `Set`
+    - `SortedSet`
+    - `Map`
+    - `SortedMap`
+- Kotlin Built-in classes
+    - `Pair`
+    - `Triple`
+    - `IntRange`
+    - `CharRange`
+    - `LongRange`
+- Data classes
+- POJOs supported by Jackson core modules
+
+Konf support size in bytes format described in [HOCON document](https://github.com/typesafehub/config/blob/master/HOCON.md#size-in-bytes-format) with class `SizeInBytes`.
+
+Konf support both [ISO-8601 duration format](https://en.wikipedia.org/wiki/ISO_8601#Durations) and [HOCON duration format](https://github.com/typesafehub/config/blob/master/HOCON.md#duration-format) for `Duration`.
+
+Konf use [Jackson](https://github.com/FasterXML/jackson) to support Kotlin Built-in classes, Data classes and POJOs. You can use `config.mapper` to access `ObjectMapper` instance used by config, and configure it to support more types from third-party Jackson modules. Default modules registered by Konf include:
+
+- Jackson core modules
+- `JavaTimeModule` in [jackson-modules-java8](https://github.com/FasterXML/jackson-modules-java8)
+- [jackson-module-kotlin](https://github.com/FasterXML/jackson-module-kotlin)
+
 ## Generate document from config
+
+Since config provides rich operations to explore its content/structure, it is convinient to generate document from config. See [`ConfigGenerateDocSpec`](https://github.com/uchuhimo/konf/blob/master/src/test/kotlin/com/uchuhimo/konf/ConfigGenerateDocSpec.kt) to find examples to generate documents in properties/HOCON/YAML/TOML/XML file format.
 
 ## Building from source
 
