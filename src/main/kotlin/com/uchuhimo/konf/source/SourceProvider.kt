@@ -53,6 +53,14 @@ interface SourceProvider {
     }
 
     /**
+     * Returns a new source from specified file path.
+     *
+     * @param file specified file path
+     * @return a new source from specified file path
+     */
+    fun fromFile(file: String): Source = fromFile(File(file))
+
+    /**
      * Returns a new source from specified string.
      *
      * @param content specified string
@@ -105,6 +113,14 @@ interface SourceProvider {
             addContext("url", url.toString())
         }
     }
+
+    /**
+     * Returns a new source from specified url string.
+     *
+     * @param url specified url string
+     * @return a new source from specified url string
+     */
+    fun fromUrl(url: String): Source = fromUrl(URL(url))
 
     /**
      * Returns a new source from specified resource.

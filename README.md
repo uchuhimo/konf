@@ -91,7 +91,7 @@ compile 'com.uchuhimo:konf:0.5'
 
     ```kotlin
     val config = Config { addSpec(server) }
-            .withSourceFrom.yaml.file(File("/path/to/server.yml"))
+            .withSourceFrom.yaml.file("/path/to/server.yml")
             .withSourceFrom.json.resource("server.json")
             .withSourceFrom.env()
             .withSourceFrom.systemProperties()
@@ -353,16 +353,16 @@ Format of system properties source is same with that of properties source. Syste
 
 HOCON/JSON/properties/TOML/XML/YAML source can be loaded from a variety of input format. Use properties source as example:
 
-- From file: `config.withSourceFrom.properties.file(File("/path/to/file"))`
+- From file: `config.withSourceFrom.properties.file("/path/to/file")`
 - From string: `config.withSourceFrom.properties.string("server.port = 8080")`
-- From URL: `config.withSourceFrom.properties.url(URL("http://localhost:8080/source.properties"))`
+- From URL: `config.withSourceFrom.properties.url("http://localhost:8080/source.properties")`
 - From resource: `config.withSourceFrom.properties.resource("source.properties")`
 - From reader: `config.withSourceFrom.properties.reader(reader)`
 - From input stream: `config.withSourceFrom.properties.inputStream(inputStream)`
 - From byte array: `config.withSourceFrom.properties.bytes(bytes)`
 - From portion of byte array: `config.withSourceFrom.properties.bytes(bytes, 1, 12)`
 
-If source is from file, file extension can be auto detected. Thus, you can use `config.withSourceFrom.file(File("/path/to/source.json"))` instead of `config.withSourceFrom.json.file(File("/path/to/source.json"))`. The following file extensions can be supported:
+If source is from file, file extension can be auto detected. Thus, you can use `config.withSourceFrom.file("/path/to/source.json")` instead of `config.withSourceFrom.json.file("/path/to/source.json")`. The following file extensions can be supported:
 
 | Type | Extension |
 | - | - |

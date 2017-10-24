@@ -18,7 +18,6 @@ package com.uchuhimo.konf.example
 
 import com.uchuhimo.konf.Config
 import com.uchuhimo.konf.ConfigSpec
-import java.io.File
 
 object server : ConfigSpec("server") {
     val host = optional("host", "0.0.0.0")
@@ -27,7 +26,7 @@ object server : ConfigSpec("server") {
 
 fun main(args: Array<String>) {
     val config = Config { addSpec(server) }
-            .withSourceFrom.yaml.file(File("/path/to/server.yml"))
+            .withSourceFrom.yaml.file("/path/to/server.yml")
             .withSourceFrom.json.resource("server.json")
             .withSourceFrom.env()
             .withSourceFrom.systemProperties()

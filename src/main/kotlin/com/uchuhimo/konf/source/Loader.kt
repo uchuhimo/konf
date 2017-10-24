@@ -65,6 +65,15 @@ class Loader(
             config.withSource(provider.fromFile(file))
 
     /**
+     * Returns a child config containing values from specified file path.
+     *
+     * @param file specified file path
+     * @return a child config containing values from specified file path
+     */
+    fun file(file: String): Config =
+            config.withSource(provider.fromFile(file))
+
+    /**
      * Returns a child config containing values from specified string.
      *
      * @param content specified string
@@ -100,6 +109,15 @@ class Loader(
      * @return a child config containing values from specified url
      */
     fun url(url: URL): Config =
+            config.withSource(provider.fromUrl(url))
+
+    /**
+     * Returns a child config containing values from specified url string.
+     *
+     * @param url specified url string
+     * @return a child config containing values from specified url string
+     */
+    fun url(url: String): Config =
             config.withSource(provider.fromUrl(url))
 
     /**

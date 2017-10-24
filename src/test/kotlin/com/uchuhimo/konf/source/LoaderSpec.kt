@@ -28,7 +28,6 @@ import org.jetbrains.spek.api.dsl.on
 import org.jetbrains.spek.subject.SubjectSpek
 import spark.Spark
 import java.net.ConnectException
-import java.net.URL
 
 object LoaderSpec : SubjectSpek<Loader>({
     subject {
@@ -57,6 +56,12 @@ object LoaderSpec : SubjectSpek<Loader>({
                 assertThat(config[SourceType.type], equalTo("file"))
             }
         }
+        on("load from file path") {
+            val config = subject.file(tempFileOf("type = file").toString())
+            it("should return a config which contains value in file") {
+                assertThat(config[SourceType.type], equalTo("file"))
+            }
+        }
         on("load from string") {
             val config = subject.string("type = string")
             it("should return a config which contains value in string") {
@@ -81,7 +86,7 @@ object LoaderSpec : SubjectSpek<Loader>({
             // wait until server ready
             for (x in 1..10000) {
                 try {
-                    config = subject.url(URL("http://localhost:4567/source"))
+                    config = subject.url("http://localhost:4567/source")
                     println("wait for $x ms when testing loader")
                     break
                 } catch (e: ConnectException) {
@@ -97,6 +102,13 @@ object LoaderSpec : SubjectSpek<Loader>({
         on("load from file URL") {
             val file = tempFileOf("type = fileUrl")
             val config = subject.url(file.toURI().toURL())
+            it("should return a config which contains value in URL") {
+                assertThat(config[SourceType.type], equalTo("fileUrl"))
+            }
+        }
+        on("load from file URL string") {
+            val url = tempFileOf("type = fileUrl").toURI().toURL().toString()
+            val config = subject.url(url)
             it("should return a config which contains value in URL") {
                 assertThat(config[SourceType.type], equalTo("fileUrl"))
             }
