@@ -30,11 +30,11 @@ import java.io.Reader
 object YamlProvider : SourceProvider {
     override fun fromReader(reader: Reader): Source {
         val yaml = Yaml(SafeConstructor())
-        return yaml.load(reader).asSource("YAML")
+        return yaml.load<Any>(reader).asSource("YAML")
     }
 
     override fun fromInputStream(inputStream: InputStream): Source {
         val yaml = Yaml(SafeConstructor())
-        return yaml.load(inputStream).asSource("YAML")
+        return yaml.load<Any>(inputStream).asSource("YAML")
     }
 }
