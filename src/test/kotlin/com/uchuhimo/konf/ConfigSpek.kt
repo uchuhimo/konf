@@ -126,6 +126,13 @@ object ConfigSpek : SubjectSpek<Config>({
                         spec.name.name to "buffer",
                         spec.type.name to NetworkBuffer.Type.ON_HEAP)))
             }
+            it("should recover all items when reloaded from map") {
+                val newConfig = Config { addSpec(spec) }.withSourceFrom.map.kv(map)
+                assertThat(newConfig[spec.size], equalTo(4))
+                assertThat(newConfig[spec.maxSize], equalTo(8))
+                assertThat(newConfig[spec.name], equalTo("buffer"))
+                assertThat(newConfig[spec.type], equalTo(NetworkBuffer.Type.ON_HEAP))
+            }
         }
         group("get operation") {
             on("get with valid item") {

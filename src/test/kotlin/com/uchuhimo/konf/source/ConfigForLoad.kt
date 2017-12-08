@@ -18,6 +18,7 @@ package com.uchuhimo.konf.source
 
 import com.uchuhimo.konf.ConfigSpec
 import com.uchuhimo.konf.SizeInBytes
+import java.io.Serializable
 import java.math.BigDecimal
 import java.math.BigInteger
 import java.time.Duration
@@ -131,4 +132,4 @@ data class ClassForLoad(
         val enum: EnumForLoad,
         val booleanArray: BooleanArray,
         val nested: Array<List<Set<Map<String, Int>>>>
-)
+) : Serializable

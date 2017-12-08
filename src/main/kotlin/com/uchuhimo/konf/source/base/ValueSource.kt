@@ -74,8 +74,17 @@ open class ValueSource(
 
     override fun isList(): Boolean = value is List<*>
 
-    override fun toList(): List<Source> = cast<List<Any>>().map {
-        it.castToSource(context).apply { addInfo("inList", this@ValueSource.info.toDescription()) }
+    override fun toList(): List<Source> = when (value) {
+        is List<*> -> value
+        is Set<*> -> value.toList()
+        is Array<*> -> value.asList()
+        else ->
+            throw WrongTypeException(
+                    this, value::class.java.simpleName, List::class.java.simpleName)
+    }.map {
+        it!!.castToSource(context).apply {
+            addInfo("inList", this@ValueSource.info.toDescription())
+        }
     }
 
     override fun isText(): Boolean = value is String

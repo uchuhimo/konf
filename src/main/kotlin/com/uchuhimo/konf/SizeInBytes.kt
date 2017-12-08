@@ -19,6 +19,7 @@ package com.uchuhimo.konf
 import com.fasterxml.jackson.annotation.JsonCreator
 import com.typesafe.config.impl.ConfigImplUtil
 import com.uchuhimo.konf.source.ParseException
+import java.io.Serializable
 import java.math.BigDecimal
 import java.math.BigInteger
 
@@ -29,7 +30,7 @@ data class SizeInBytes(
         /**
          * Number of bytes.
          */
-        val bytes: Long) {
+        val bytes: Long) : Serializable {
     init {
         require(bytes >= 0)
     }

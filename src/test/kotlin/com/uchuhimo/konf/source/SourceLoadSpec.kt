@@ -25,6 +25,9 @@ import org.jetbrains.spek.api.dsl.given
 import org.jetbrains.spek.api.dsl.it
 import org.jetbrains.spek.api.dsl.on
 import org.jetbrains.spek.subject.SubjectSpek
+import org.jetbrains.spek.subject.itBehavesLike
+import java.io.ObjectInputStream
+import java.io.ObjectOutputStream
 import java.math.BigDecimal
 import java.math.BigInteger
 import java.time.Duration
@@ -221,6 +224,44 @@ object SourceLoadSpec : SubjectSpek<Config>({
             }
         }
     }
+})
+
+object SourceReloadSpec : SubjectSpek<Config>({
+
+    subject {
+        val config = Config {
+            addSpec(ConfigForLoad)
+        }.withSourceFrom.map.kv(loadContent)
+        Config {
+            addSpec(ConfigForLoad)
+        }.withSourceFrom.map.kv(config.toMap())
+    }
+
+    itBehavesLike(SourceLoadSpec)
+})
+
+object SourceReloadFromDiskSpec : SubjectSpek<Config>({
+
+    subject {
+        val config = Config {
+            addSpec(ConfigForLoad)
+        }.withSourceFrom.map.kv(loadContent)
+        val map = config.toMap()
+        val newMap = createTempFile().run {
+            ObjectOutputStream(outputStream()).use {
+                it.writeObject(map)
+            }
+            ObjectInputStream(inputStream()).use {
+                @Suppress("UNCHECKED_CAST")
+                it.readObject() as Map<String, Any>
+            }
+        }
+        Config {
+            addSpec(ConfigForLoad)
+        }.withSourceFrom.map.kv(newMap)
+    }
+
+    itBehavesLike(SourceLoadSpec)
 })
 
 private val loadContent = mapOf<String, Any>(

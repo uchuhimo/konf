@@ -37,9 +37,11 @@ import com.fasterxml.jackson.databind.type.ArrayType
 import com.fasterxml.jackson.databind.type.CollectionLikeType
 import com.fasterxml.jackson.databind.type.MapLikeType
 import com.fasterxml.jackson.databind.type.SimpleType
+import com.fasterxml.jackson.databind.type.TypeFactory
 import com.uchuhimo.konf.Config
 import com.uchuhimo.konf.Path
 import com.uchuhimo.konf.SizeInBytes
+import com.uchuhimo.konf.source.base.ValueSource
 import com.uchuhimo.konf.source.json.JsonSource
 import com.uchuhimo.konf.toPath
 import com.uchuhimo.konf.unsupported
@@ -547,6 +549,10 @@ internal fun Config.loadFromSource(source: Source): Config {
 }
 
 private fun Source.toValue(type: JavaType, mapper: ObjectMapper): Any {
+    if (this is ValueSource &&
+            type == TypeFactory.defaultInstance().constructType(value::class.java)) {
+        return value
+    }
     when (type) {
         is SimpleType -> {
             val clazz = type.rawClass
@@ -585,12 +591,16 @@ private fun Source.toValue(type: JavaType, mapper: ObjectMapper): Any {
                     Duration::class.java -> toDuration()
                     SizeInBytes::class.java -> toSizeInBytes()
                     else -> {
-                        try {
-                            mapper.readValue<Any>(
-                                    TreeTraversingParser(toJsonNode(), mapper),
-                                    type)
-                        } catch (cause: JsonProcessingException) {
-                            throw ObjectMappingException(this, clazz, cause)
+                        if (this is ValueSource && clazz == value.javaClass) {
+                            value
+                        } else {
+                            try {
+                                mapper.readValue<Any>(
+                                        TreeTraversingParser(toJsonNode(), mapper),
+                                        type)
+                            } catch (cause: JsonProcessingException) {
+                                throw ObjectMappingException(this, clazz, cause)
+                            }
                         }
                     }
                 }
