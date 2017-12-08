@@ -278,7 +278,9 @@ private class ConfigImpl constructor(
         return mutableMapOf<String, Any>().apply {
             val config = this@ConfigImpl
             for (item in config) {
-                put(item.name, config[item])
+                if (config.getOrNull(item) != null) {
+                    put(item.name, config[item])
+                }
             }
         }
     }
@@ -538,6 +540,20 @@ private class ConfigImpl constructor(
     override fun withLayer(name: String): Config {
         lock.write { hasChildren = true }
         return ConfigImpl(name, this, mapper)
+    }
+
+    override fun equals(other: Any?): Boolean {
+        if (this === other) return true
+        if (other !is Config) return false
+        return toMap() == other.toMap()
+    }
+
+    override fun hashCode(): Int {
+        return toMap().hashCode()
+    }
+
+    override fun toString(): String {
+        return "Config(items=${toMap()})"
     }
 
     private sealed class ValueState {

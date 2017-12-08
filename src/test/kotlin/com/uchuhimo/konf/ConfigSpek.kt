@@ -115,7 +115,7 @@ object ConfigSpek : SubjectSpek<Config>({
                 assertThat(typeItemNode.item, equalTo<Item<NetworkBuffer.Type>>(spec.type))
             }
         }
-        on("convert to map") {
+        on("export values to map") {
             subject[spec.size] = 4
             subject[spec.type] = NetworkBuffer.Type.ON_HEAP
             val map = subject.toMap()
@@ -132,6 +132,7 @@ object ConfigSpek : SubjectSpek<Config>({
                 assertThat(newConfig[spec.maxSize], equalTo(8))
                 assertThat(newConfig[spec.name], equalTo("buffer"))
                 assertThat(newConfig[spec.type], equalTo(NetworkBuffer.Type.ON_HEAP))
+                assertThat(newConfig, equalTo(subject))
             }
         }
         group("get operation") {
