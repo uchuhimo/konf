@@ -375,6 +375,45 @@ If source is from file, file extension can be auto detected. Thus, you can use `
 
 You can also implement [`Source`](https://github.com/uchuhimo/konf/blob/master/src/main/kotlin/com/uchuhimo/konf/source/Source.kt) to customize your new source, which can be loaded into config by `config.withSource(source)`.
 
+## Export/Reload values in config
+
+Export all values in config to map:
+
+```kotlin
+val map = config.toMap()
+```
+
+The returned map contains all items in the config, with item name as key and associated value as value.
+
+You can reload values from this map:
+
+```kotlin
+val newConfig = Config {
+    addSpec(server)
+}.withSourceFrom.map.kv(map)
+check(config == newConfig)
+```
+
+## Config persistence
+
+Combine config export and arbitrary serialization library, you can (de)serialize values in config. Here is an example using Java Object Serialization to (de)serialize config:
+
+```kotlin
+val map = config.toMap()
+val newMap = createTempFile().run {
+    ObjectOutputStream(outputStream()).use {
+        it.writeObject(map)
+    }
+    ObjectInputStream(inputStream()).use {
+        it.readObject() as Map<String, Any>
+    }
+}
+val newConfig = Config {
+    addSpec(server)
+}.withSourceFrom.map.kv(newMap)
+check(config == newConfig)
+```
+
 ## Supported item types
 
 Supported item types include:
