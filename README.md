@@ -57,7 +57,7 @@ Add dependencies:
 <dependency>
   <groupId>com.uchuhimo</groupId>
   <artifactId>konf</artifactId>
-  <version>0.6</version>
+  <version>0.7</version>
   <type>pom</type>
 </dependency>
 ```
@@ -75,7 +75,7 @@ repositories {
 Add dependencies:
 
 ```groovy
-compile 'com.uchuhimo:konf:0.6'
+compile 'com.uchuhimo:konf:0.7'
 ```
 
 ## Quick start
