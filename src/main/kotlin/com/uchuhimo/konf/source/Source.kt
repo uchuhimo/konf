@@ -445,15 +445,15 @@ interface Source : SourceInfo {
      * @return a [Date] value
      */
     fun toDate(): Date {
-        try {
-            return Date.from(tryParse { Instant.parse(toText()) })
+        return try {
+            Date.from(tryParse { Instant.parse(toText()) })
         } catch (e: ParseException) {
             try {
-                return Date.from(tryParse {
+                Date.from(tryParse {
                     LocalDateTime.parse(toText())
                 }.toInstant(ZoneOffset.UTC))
             } catch (e: ParseException) {
-                return Date.from(tryParse {
+                Date.from(tryParse {
                     LocalDate.parse(toText())
                 }.atStartOfDay().toInstant(ZoneOffset.UTC))
             }

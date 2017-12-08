@@ -120,17 +120,17 @@ class HoconValueSource(
     override fun isDouble(): Boolean = type == ConfigValueType.NUMBER && value.unwrapped() is Double
 
     override fun toDouble(): Double {
-        try {
+        return try {
             checkType(type, ConfigValueType.NUMBER)
             checkNumType(NumType.Double)
-            return value.cast()
+            value.cast()
         } catch (e: WrongTypeException) {
             try {
                 checkNumType(NumType.Long)
-                return (value.cast<Long>()).toDouble()
+                (value.cast<Long>()).toDouble()
             } catch (e: WrongTypeException) {
                 checkNumType(NumType.Int)
-                return (value.cast<Int>()).toDouble()
+                (value.cast<Int>()).toDouble()
             }
         }
     }
@@ -138,13 +138,13 @@ class HoconValueSource(
     override fun isLong(): Boolean = type == ConfigValueType.NUMBER && value.unwrapped() is Long
 
     override fun toLong(): Long {
-        try {
+        return try {
             checkType(type, ConfigValueType.NUMBER)
             checkNumType(NumType.Long)
-            return value.cast()
+            value.cast()
         } catch (e: WrongTypeException) {
             checkNumType(NumType.Int)
-            return (value.cast<Int>()).toLong()
+            (value.cast<Int>()).toLong()
         }
     }
 

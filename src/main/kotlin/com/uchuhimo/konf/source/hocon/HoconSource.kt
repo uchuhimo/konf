@@ -37,10 +37,10 @@ class HoconSource(
 
     override fun getOrNull(path: Path): Source? {
         val name = path.name
-        if (config.hasPath(name)) {
-            return HoconValueSource(config.getValue(name), context)
+        return if (config.hasPath(name)) {
+            HoconValueSource(config.getValue(name), context)
         } else {
-            return null
+            null
         }
     }
 }

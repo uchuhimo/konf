@@ -63,11 +63,12 @@ sealed class ConfigTree {
     /**
      * Items in this config tree.
      */
-    val items: Iterable<Item<*>> get() {
-        val items = mutableListOf<Item<*>>()
-        visit(onEnterItem = { node -> items += node.item })
-        return items
-    }
+    val items: Iterable<Item<*>>
+        get() {
+            val items = mutableListOf<Item<*>>()
+            visit(onEnterItem = { node -> items += node.item })
+            return items
+        }
 }
 
 /**

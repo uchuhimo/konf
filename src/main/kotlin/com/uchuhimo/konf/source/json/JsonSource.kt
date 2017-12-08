@@ -38,31 +38,31 @@ class JsonSource(
     }
 
     override fun contains(path: Path): Boolean {
-        if (path.isEmpty()) {
-            return true
+        return if (path.isEmpty()) {
+            true
         } else {
             val key = path.first()
             val rest = path.drop(1)
             val childNode = node[key]
             if (childNode != null) {
-                return JsonSource(childNode, context).contains(rest)
+                JsonSource(childNode, context).contains(rest)
             } else {
-                return false
+                false
             }
         }
     }
 
     override fun getOrNull(path: Path): Source? {
-        if (path.isEmpty()) {
-            return this
+        return if (path.isEmpty()) {
+            this
         } else {
             val key = path.first()
             val rest = path.drop(1)
             val childNode = node[key]
             if (childNode != null) {
-                return JsonSource(childNode, context).getOrNull(rest)
+                JsonSource(childNode, context).getOrNull(rest)
             } else {
-                return null
+                null
             }
         }
     }
@@ -87,8 +87,7 @@ class JsonSource(
                 for ((key, value) in node.fields()) {
                     put(key, value)
                 }
-            }.mapValues {
-                (_, value) ->
+            }.mapValues { (_, value) ->
                 JsonSource(value, context).apply {
                     addInfo("inMap", this@JsonSource.info.toDescription())
                 }
@@ -123,10 +122,10 @@ class JsonSource(
     }
 
     override fun toFloat(): Float {
-        if (node.isFloat) {
-            return node.floatValue()
+        return if (node.isFloat) {
+            node.floatValue()
         } else {
-            return super.toFloat()
+            super.toFloat()
         }
     }
 
@@ -139,34 +138,34 @@ class JsonSource(
     }
 
     override fun toLong(): Long {
-        if (node.isLong) {
-            return node.longValue()
+        return if (node.isLong) {
+            node.longValue()
         } else {
-            return super.toLong()
+            super.toLong()
         }
     }
 
     override fun toShort(): Short {
-        if (node.isShort) {
-            return node.shortValue()
+        return if (node.isShort) {
+            node.shortValue()
         } else {
-            return super.toShort()
+            super.toShort()
         }
     }
 
     override fun toBigInteger(): BigInteger {
-        if (node.isBigInteger) {
-            return node.bigIntegerValue()
+        return if (node.isBigInteger) {
+            node.bigIntegerValue()
         } else {
-            return super.toBigInteger()
+            super.toBigInteger()
         }
     }
 
     override fun toBigDecimal(): BigDecimal {
-        if (node.isBigDecimal) {
-            return node.decimalValue()
+        return if (node.isBigDecimal) {
+            node.decimalValue()
         } else {
-            return super.toBigDecimal()
+            super.toBigDecimal()
         }
     }
 }

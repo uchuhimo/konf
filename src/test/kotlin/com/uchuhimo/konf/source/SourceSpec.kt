@@ -343,7 +343,7 @@ object SourceSpec : Spek({
             on("load from valid source") {
                 it("should load successfully") {
                     val config = load<Int>(1)
-                    assertThat(config<Int>("item"), equalTo(1))
+                    assertThat(config("item"), equalTo(1))
                 }
             }
             on("load concrete map type") {

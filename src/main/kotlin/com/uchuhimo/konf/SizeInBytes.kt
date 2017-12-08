@@ -63,14 +63,14 @@ data class SizeInBytes(
                 val result: BigInteger
                 // if the string is purely digits, parse as an integer to avoid
                 // possible precision loss; otherwise as a double.
-                if (numberString.matches("[0-9]+".toRegex())) {
-                    result = units.bytes.multiply(BigInteger(numberString))
+                result = if (numberString.matches("[0-9]+".toRegex())) {
+                    units.bytes.multiply(BigInteger(numberString))
                 } else {
                     val resultDecimal = BigDecimal(units.bytes).multiply(BigDecimal(numberString))
-                    result = resultDecimal.toBigInteger()
+                    resultDecimal.toBigInteger()
                 }
-                if (result.bitLength() < 64)
-                    return SizeInBytes(result.toLong())
+                return if (result.bitLength() < 64)
+                    SizeInBytes(result.toLong())
                 else
                     throw ParseException("size-in-bytes value is out of range for a 64-bit long: '$input'")
             } catch (e: NumberFormatException) {

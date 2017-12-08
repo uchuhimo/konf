@@ -30,27 +30,23 @@ open class MapSource(
         context: Map<String, String> = mapOf()
 ) : ValueSource(map, type.notEmptyOr("map"), context) {
     override fun contains(path: Path): Boolean {
-        if (path.isEmpty()) {
-            return true
+        return if (path.isEmpty()) {
+            true
         } else {
             val key = path.first()
             val rest = path.drop(1)
-            return map[key]?.castToSource(context)?.contains(rest) ?: false
+            map[key]?.castToSource(context)?.contains(rest) ?: false
         }
     }
 
     override fun getOrNull(path: Path): Source? {
-        if (path.isEmpty()) {
-            return this
+        return if (path.isEmpty()) {
+            this
         } else {
             val key = path.first()
             val rest = path.drop(1)
             val result = map[key]
-            if (result != null) {
-                return result.castToSource(context).getOrNull(rest)
-            } else {
-                return null
-            }
+            result?.castToSource(context)?.getOrNull(rest)
         }
     }
 

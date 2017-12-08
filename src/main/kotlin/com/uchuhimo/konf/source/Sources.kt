@@ -90,10 +90,10 @@ fun Map<String, String>.toDescription() = map { (name, value) ->
  * @return duration
  */
 fun String.toDuration(): Duration {
-    try {
-        return Duration.parse(this)
+    return try {
+        Duration.parse(this)
     } catch (e: DateTimeParseException) {
-        return Duration.ofNanos(parseDuration(this))
+        Duration.ofNanos(parseDuration(this))
     }
 }
 
@@ -138,15 +138,15 @@ internal fun parseDuration(input: String): Long {
         throw ParseException("Could not parse time unit '$originalUnitString' (try ns, us, ms, s, m, h, d)")
     }
 
-    try {
+    return try {
         // if the string is purely digits, parse as an integer to avoid
         // possible precision loss;
         // otherwise as a double.
         if (numberString.matches("[+-]?[0-9]+".toRegex())) {
-            return units.toNanos(java.lang.Long.parseLong(numberString))
+            units.toNanos(java.lang.Long.parseLong(numberString))
         } else {
             val nanosInUnit = units.toNanos(1)
-            return (java.lang.Double.parseDouble(numberString) * nanosInUnit).toLong()
+            (java.lang.Double.parseDouble(numberString) * nanosInUnit).toLong()
         }
     } catch (e: NumberFormatException) {
         throw ParseException("Could not parse duration number '$numberString'")

@@ -61,17 +61,17 @@ open class FlatSource(
     }
 
     override fun getOrNull(path: Path): Source? {
-        if (path.isEmpty()) {
-            return this
+        return if (path.isEmpty()) {
+            this
         } else {
             if (contains(path)) {
                 if (prefix.isEmpty()) {
-                    return FlatSource(map, path.name, context = context)
+                    FlatSource(map, path.name, context = context)
                 } else {
-                    return FlatSource(map, "$prefix.${path.name}", context = context)
+                    FlatSource(map, "$prefix.${path.name}", context = context)
                 }
             } else {
-                return null
+                null
             }
         }
     }
@@ -115,12 +115,10 @@ open class FlatSource(
 
     override fun toBoolean(): Boolean {
         val value = getValue()
-        if (value.toLowerCase() == "true") {
-            return true
-        } else if (value.toLowerCase() == "false") {
-            return false
-        } else {
-            throw ParseException("$value cannot be parsed to a boolean")
+        return when {
+            value.toLowerCase() == "true" -> true
+            value.toLowerCase() == "false" -> false
+            else -> throw ParseException("$value cannot be parsed to a boolean")
         }
     }
 

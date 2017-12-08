@@ -132,7 +132,7 @@ object ConfigSpek : SubjectSpek<Config>({
             }
             on("get with valid name") {
                 it("should return corresponding value") {
-                    assertThat(subject<String>(spec.qualify("name")), equalTo("buffer"))
+                    assertThat(subject(spec.qualify("name")), equalTo("buffer"))
                 }
             }
             on("get with invalid name") {

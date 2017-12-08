@@ -247,16 +247,16 @@ private class ConfigImpl constructor(
         private var current = currentConfig.nameByItem.keys.iterator()
 
         tailrec override fun hasNext(): Boolean {
-            if (current.hasNext()) {
-                return true
+            return if (current.hasNext()) {
+                true
             } else {
                 val parent = currentConfig.parent
                 if (parent != null) {
                     currentConfig = parent
                     current = currentConfig.nameByItem.keys.iterator()
-                    return hasNext()
+                    hasNext()
                 } else {
-                    return false
+                    false
                 }
             }
         }
@@ -269,7 +269,7 @@ private class ConfigImpl constructor(
     override fun <T : Any> get(item: Item<T>): T = getOrNull(item, errorWhenUnset = true) ?:
             throw NoSuchItemException(item.name)
 
-    override fun <T : Any> get(name: String): T = getOrNull<T>(name, errorWhenUnset = true) ?:
+    override fun <T : Any> get(name: String): T = getOrNull(name, errorWhenUnset = true) ?:
             throw NoSuchItemException(name)
 
     override fun <T : Any> getOrNull(item: Item<T>): T? =
@@ -303,25 +303,13 @@ private class ConfigImpl constructor(
                 }
             }
         } else {
-            if (parent != null) {
-                return parent.getOrNull(item, errorWhenUnset, lazyContext)
-            } else {
-                return null
-            }
+            return parent?.getOrNull(item, errorWhenUnset, lazyContext)
         }
     }
 
     private fun getItemOrNull(name: String): Item<*>? {
         val item = lock.read { nameByItem.inverse[name] }
-        if (item != null) {
-            return item
-        } else {
-            if (parent != null) {
-                return parent.getItemOrNull(name)
-            } else {
-                return null
-            }
-        }
+        return item ?: parent?.getItemOrNull(name)
     }
 
     override fun <T : Any> getOrNull(name: String): T? = getOrNull(name, errorWhenUnset = false)
@@ -333,26 +321,18 @@ private class ConfigImpl constructor(
     }
 
     override fun contains(item: Item<*>): Boolean {
-        if (lock.read { valueByItem.containsKey(item) }) {
-            return true
+        return if (lock.read { valueByItem.containsKey(item) }) {
+            true
         } else {
-            if (parent != null) {
-                return parent.contains(item)
-            } else {
-                return false
-            }
+            parent?.contains(item) ?: false
         }
     }
 
     override fun contains(name: String): Boolean {
-        if (lock.read { nameByItem.containsValue(name) }) {
-            return true
+        return if (lock.read { nameByItem.containsValue(name) }) {
+            true
         } else {
-            if (parent != null) {
-                return parent.contains(name)
-            } else {
-                return false
-            }
+            parent?.contains(name) ?: false
         }
     }
 
@@ -486,29 +466,30 @@ private class ConfigImpl constructor(
         }
     }
 
-    override val specs: List<ConfigSpec> get() = mutableListOf<ConfigSpec>().apply {
-        addAll(object : Iterator<ConfigSpec> {
-            private var currentConfig = this@ConfigImpl
-            private var current = currentConfig.specsInLayer.iterator()
+    override val specs: List<ConfigSpec>
+        get() = mutableListOf<ConfigSpec>().apply {
+            addAll(object : Iterator<ConfigSpec> {
+                private var currentConfig = this@ConfigImpl
+                private var current = currentConfig.specsInLayer.iterator()
 
-            tailrec override fun hasNext(): Boolean {
-                if (current.hasNext()) {
-                    return true
-                } else {
-                    val parent = currentConfig.parent
-                    if (parent != null) {
-                        currentConfig = parent
-                        current = currentConfig.specsInLayer.iterator()
-                        return hasNext()
+                tailrec override fun hasNext(): Boolean {
+                    return if (current.hasNext()) {
+                        true
                     } else {
-                        return false
+                        val parent = currentConfig.parent
+                        if (parent != null) {
+                            currentConfig = parent
+                            current = currentConfig.specsInLayer.iterator()
+                            hasNext()
+                        } else {
+                            false
+                        }
                     }
                 }
-            }
 
-            override fun next(): ConfigSpec = current.next()
-        }.asSequence())
-    }
+                override fun next(): ConfigSpec = current.next()
+            }.asSequence())
+        }
 
     override fun addSpec(spec: ConfigSpec) {
         lock.write {

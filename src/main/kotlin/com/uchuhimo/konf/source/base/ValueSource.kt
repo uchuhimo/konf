@@ -89,20 +89,20 @@ open class ValueSource(
     override fun isLong(): Boolean = value is Long
 
     override fun toLong(): Long {
-        try {
-            return cast()
+        return try {
+            cast()
         } catch (e: WrongTypeException) {
-            return super.toLong()
+            super.toLong()
         }
     }
 
     override fun isDouble(): Boolean = value is Double
 
     override fun toDouble(): Double {
-        try {
-            return cast()
+        return try {
+            cast()
         } catch (e: WrongTypeException) {
-            return toLong().toDouble()
+            toLong().toDouble()
         }
     }
 
@@ -113,103 +113,103 @@ open class ValueSource(
     override fun isShort(): Boolean = value is Short
 
     override fun toShort(): Short {
-        try {
-            return cast()
+        return try {
+            cast()
         } catch (e: WrongTypeException) {
-            return super.toShort()
+            super.toShort()
         }
     }
 
     override fun isByte(): Boolean = value is Byte
 
     override fun toByte(): Byte {
-        try {
-            return cast()
+        return try {
+            cast()
         } catch (e: WrongTypeException) {
-            return super.toByte()
+            super.toByte()
         }
     }
 
     override fun isFloat(): Boolean = value is Float
 
     override fun toFloat(): Float {
-        try {
-            return cast()
+        return try {
+            cast()
         } catch (e: WrongTypeException) {
-            return super.toFloat()
+            super.toFloat()
         }
     }
 
     override fun isChar(): Boolean = value is Char
 
     override fun toChar(): Char {
-        try {
-            return cast()
+        return try {
+            cast()
         } catch (e: WrongTypeException) {
-            return super.toChar()
+            super.toChar()
         }
     }
 
     override fun isBigInteger(): Boolean = value is BigInteger
 
     override fun toBigInteger(): BigInteger {
-        try {
-            return cast()
+        return try {
+            cast()
         } catch (e: WrongTypeException) {
-            return super.toBigInteger()
+            super.toBigInteger()
         }
     }
 
     override fun isBigDecimal(): Boolean = value is BigDecimal
 
     override fun toBigDecimal(): BigDecimal {
-        try {
-            return cast()
+        return try {
+            cast()
         } catch (e: WrongTypeException) {
-            return super.toBigDecimal()
+            super.toBigDecimal()
         }
     }
 
     override fun isOffsetTime(): Boolean = value is OffsetTime
 
     override fun toOffsetTime(): OffsetTime {
-        try {
-            return cast()
+        return try {
+            cast()
         } catch (e: WrongTypeException) {
-            return super.toOffsetTime()
+            super.toOffsetTime()
         }
     }
 
     override fun isOffsetDateTime(): Boolean = value is OffsetDateTime
 
     override fun toOffsetDateTime(): OffsetDateTime {
-        try {
-            return cast()
+        return try {
+            cast()
         } catch (e: WrongTypeException) {
-            return super.toOffsetDateTime()
+            super.toOffsetDateTime()
         }
     }
 
     override fun isZonedDateTime(): Boolean = value is ZonedDateTime
 
     override fun toZonedDateTime(): ZonedDateTime {
-        try {
-            return cast()
+        return try {
+            cast()
         } catch (e: WrongTypeException) {
-            return super.toZonedDateTime()
+            super.toZonedDateTime()
         }
     }
 
     override fun isLocalDate(): Boolean = value is LocalDate
 
     override fun toLocalDate(): LocalDate {
-        try {
-            return cast()
+        return try {
+            cast()
         } catch (e: WrongTypeException) {
             try {
-                return LocalDateTime.ofInstant(cast<Date>().toInstant(), ZoneOffset.UTC).toLocalDate()
+                LocalDateTime.ofInstant(cast<Date>().toInstant(), ZoneOffset.UTC).toLocalDate()
             } catch (e: WrongTypeException) {
-                return super.toLocalDate()
+                super.toLocalDate()
             }
         }
     }
@@ -217,23 +217,23 @@ open class ValueSource(
     override fun isLocalTime(): Boolean = value is LocalTime
 
     override fun toLocalTime(): LocalTime {
-        try {
-            return cast()
+        return try {
+            cast()
         } catch (e: WrongTypeException) {
-            return super.toLocalTime()
+            super.toLocalTime()
         }
     }
 
     override fun isLocalDateTime(): Boolean = value is LocalDateTime
 
     override fun toLocalDateTime(): LocalDateTime {
-        try {
-            return cast()
+        return try {
+            cast()
         } catch (e: WrongTypeException) {
             try {
-                return LocalDateTime.ofInstant(cast<Date>().toInstant(), ZoneOffset.UTC)
+                LocalDateTime.ofInstant(cast<Date>().toInstant(), ZoneOffset.UTC)
             } catch (e: WrongTypeException) {
-                return super.toLocalDateTime()
+                super.toLocalDateTime()
             }
         }
     }
@@ -241,43 +241,43 @@ open class ValueSource(
     override fun isDate(): Boolean = value is Date
 
     override fun toDate(): Date {
-        try {
-            return cast()
+        return try {
+            cast()
         } catch (e: WrongTypeException) {
-            return super.toDate()
+            super.toDate()
         }
     }
 
     override fun isYear(): Boolean = value is Year
 
     override fun toYear(): Year {
-        try {
-            return cast()
+        return try {
+            cast()
         } catch (e: WrongTypeException) {
-            return super.toYear()
+            super.toYear()
         }
     }
 
     override fun isYearMonth(): Boolean = value is YearMonth
 
     override fun toYearMonth(): YearMonth {
-        try {
-            return cast()
+        return try {
+            cast()
         } catch (e: WrongTypeException) {
-            return super.toYearMonth()
+            super.toYearMonth()
         }
     }
 
     override fun isInstant(): Boolean = value is Instant
 
     override fun toInstant(): Instant {
-        try {
-            return cast()
+        return try {
+            cast()
         } catch (e: WrongTypeException) {
             try {
-                return cast<Date>().toInstant()
+                cast<Date>().toInstant()
             } catch (e: WrongTypeException) {
-                return super.toInstant()
+                super.toInstant()
             }
         }
     }
@@ -285,32 +285,31 @@ open class ValueSource(
     override fun isDuration(): Boolean = value is Duration
 
     override fun toDuration(): Duration {
-        try {
-            return cast()
+        return try {
+            cast()
         } catch (e: WrongTypeException) {
-            return super.toDuration()
+            super.toDuration()
         }
     }
 
     override fun isSizeInBytes(): Boolean = value is SizeInBytes
 
     override fun toSizeInBytes(): SizeInBytes {
-        try {
-            return cast()
+        return try {
+            cast()
         } catch (e: WrongTypeException) {
-            return super.toSizeInBytes()
+            super.toSizeInBytes()
         }
     }
 }
 
 fun Any.asSource(type: String = "", context: Map<String, String> = mapOf()): Source =
-        if (this is Source) {
-            this
-        } else if (this is Map<*, *>) {
-            // assume that only `Map<String, Any>` is provided,
-            // key type mismatch will be detected when loaded into Config
-            @Suppress("UNCHECKED_CAST")
-            MapSource(this as Map<String, Any>, type, context)
-        } else {
-            ValueSource(this, type, context)
+        when {
+            this is Source -> this
+            this is Map<*, *> ->
+                // assume that only `Map<String, Any>` is provided,
+                // key type mismatch will be detected when loaded into Config
+                @Suppress("UNCHECKED_CAST")
+                MapSource(this as Map<String, Any>, type, context)
+            else -> ValueSource(this, type, context)
         }

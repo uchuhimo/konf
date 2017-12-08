@@ -122,12 +122,12 @@ val Path.name: String get() = joinToString(".")
  * @return item path
  */
 fun String.toPath(): Path {
-    if (isEmpty()) {
-        return listOf()
+    return if (isEmpty()) {
+        listOf()
     } else {
         val path = this.split('.')
         check("" !in path) { "${this} is not a valid path" }
-        return path
+        path
     }
 }
 

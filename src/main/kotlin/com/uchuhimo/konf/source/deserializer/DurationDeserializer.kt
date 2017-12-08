@@ -26,11 +26,11 @@ import java.time.format.DateTimeParseException
  */
 object DurationDeserializer : JSR310Deserializer<Duration>(Duration::class.java) {
     override fun parse(string: String): Duration {
-        try {
-            return Duration.parse(string)
+        return try {
+            Duration.parse(string)
         } catch (exception: DateTimeParseException) {
             try {
-                return string.toDuration()
+                string.toDuration()
             } catch (_: SourceException) {
                 throw exception
             }

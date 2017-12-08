@@ -27,7 +27,6 @@ import org.jetbrains.spek.api.dsl.it
 import org.jetbrains.spek.api.dsl.on
 import org.jetbrains.spek.subject.SubjectSpek
 import spark.Spark
-import java.net.ConnectException
 
 object LoaderSpec : SubjectSpek<Loader>({
     subject {
@@ -81,21 +80,12 @@ object LoaderSpec : SubjectSpek<Loader>({
             }
         }
         on("load from HTTP URL") {
+            Spark.port(0)
             Spark.get("/source") { _, _ -> "type = http" }
-            var config: Config? = null
-            // wait until server ready
-            for (x in 1..10000) {
-                try {
-                    config = subject.url("http://localhost:4567/source")
-                    println("wait for $x ms when testing loader")
-                    break
-                } catch (e: ConnectException) {
-                    Thread.sleep(1)
-                    continue
-                }
-            }
+            Spark.awaitInitialization()
+            val config = subject.url("http://localhost:${Spark.port()}/source")
             it("should return a config which contains value in URL") {
-                assertThat(config!![SourceType.type], equalTo("http"))
+                assertThat(config[SourceType.type], equalTo("http"))
             }
             Spark.stop()
         }

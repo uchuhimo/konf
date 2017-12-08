@@ -90,7 +90,8 @@ interface ItemContainer : Iterable<Item<*>> {
     /**
      * List of items in this item container.
      */
-    val items: List<Item<*>> get() = mutableListOf<Item<*>>().apply {
-        addAll(this@ItemContainer.iterator().asSequence())
-    }
+    val items: List<Item<*>>
+        get() = mutableListOf<Item<*>>().apply {
+            addAll(this@ItemContainer.iterator().asSequence())
+        }
 }
