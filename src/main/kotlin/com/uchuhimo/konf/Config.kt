@@ -311,7 +311,15 @@ private class ConfigImpl constructor(
                     }
                 is ValueState.Value -> valueState.value as T
                 is ValueState.Lazy<*> -> {
-                    val value = valueState.thunk(lazyContext)!!
+                    val value = try {
+                        valueState.thunk(lazyContext)
+                    } catch (exception: UnsetValueException) {
+                        if (errorWhenUnset) {
+                            throw exception
+                        } else {
+                            return null
+                        }
+                    }
                     if (item.type.rawClass.isInstance(value)) {
                         value as T
                     } else {
@@ -558,7 +566,7 @@ private class ConfigImpl constructor(
 
     private sealed class ValueState {
         object Unset : ValueState()
-        data class Lazy<T>(var thunk: (config: ItemContainer) -> T) : ValueState()
+        data class Lazy<T : Any>(var thunk: (config: ItemContainer) -> T) : ValueState()
         data class Value(var value: Any) : ValueState()
     }
 }

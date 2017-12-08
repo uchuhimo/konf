@@ -134,6 +134,29 @@ object ConfigSpek : SubjectSpek<Config>({
                 assertThat(newConfig[spec.type], equalTo(NetworkBuffer.Type.ON_HEAP))
                 assertThat(newConfig, equalTo(subject))
             }
+            it("should not contain unset items in map") {
+                val config = Config { addSpec(spec) }
+                assertThat(config.toMap(), equalTo(mapOf(
+                        spec.name.name to "buffer",
+                        spec.type.name to NetworkBuffer.Type.OFF_HEAP)))
+            }
+        }
+        on("object methods") {
+            val map = mapOf(
+                    spec.name.name to "buffer",
+                    spec.type.name to NetworkBuffer.Type.OFF_HEAP)
+            it("should not equal to object of other class") {
+                assertFalse(subject.equals(1))
+            }
+            it("should equal to itself") {
+                assertThat(subject, equalTo(subject))
+            }
+            it("should have same hash code with map with same content") {
+                assertThat(subject.hashCode(), equalTo(map.hashCode()))
+            }
+            it("should convert to string in map-like format") {
+                assertThat(subject.toString(), equalTo("Config(items=$map)"))
+            }
         }
         group("get operation") {
             on("get with valid item") {
