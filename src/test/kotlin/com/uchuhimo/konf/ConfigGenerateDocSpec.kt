@@ -103,7 +103,7 @@ private fun encodeAsHocon(value: Any): String =
 
 fun Config.generateHoconDoc(): String =
         StringBuilder().apply {
-            toTree.visit(
+            toTree().visit(
                     onEnterPath = { node ->
                         val path = node.path
                         if (path.isNotEmpty()) {
@@ -136,7 +136,7 @@ fun Config.generateHoconDoc(): String =
 
 fun Config.generateYamlDoc(): String =
         StringBuilder().apply {
-            toTree.visit(
+            toTree().visit(
                     onEnterPath = { node ->
                         val path = node.path
                         if (path.isNotEmpty()) {

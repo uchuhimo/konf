@@ -89,7 +89,7 @@ object ConfigSpek : SubjectSpek<Config>({
             }
         }
         on("convert to ConfigTree") {
-            val tree = subject.toTree
+            val tree = subject.toTree()
             it("should contain corresponding nodes in tree") {
                 assertThat(tree.path, equalTo(emptyList()))
                 assertFalse(tree.isItem)
@@ -113,6 +113,18 @@ object ConfigSpek : SubjectSpek<Config>({
                 @Suppress("UNCHECKED_CAST")
                 val typeItemNode = bufferLevelNodes.children[3] as ConfigItemNode<NetworkBuffer.Type>
                 assertThat(typeItemNode.item, equalTo<Item<NetworkBuffer.Type>>(spec.type))
+            }
+        }
+        on("convert to map") {
+            subject[spec.size] = 4
+            subject[spec.type] = NetworkBuffer.Type.ON_HEAP
+            val map = subject.toMap()
+            it("should contain corresponding items in map") {
+                assertThat(map, equalTo(mapOf(
+                        spec.size.name to 4,
+                        spec.maxSize.name to 8,
+                        spec.name.name to "buffer",
+                        spec.type.name to NetworkBuffer.Type.ON_HEAP)))
             }
         }
         group("get operation") {

@@ -196,14 +196,22 @@ interface Config : ItemContainer {
     val withSourceFrom: DefaultLoaders get() = DefaultLoaders(this)
 
     /**
-     * Returns config tree for this config.
-     */
-    val toTree: ConfigTree
-
-    /**
      * Returns [ObjectMapper] using to map from source to value in config.
      */
     val mapper: ObjectMapper
+
+    /**
+     * Returns config tree for this config.
+     */
+    fun toTree(): ConfigTree
+
+    /**
+     * Returns a map in key-value format.
+     *
+     * The returned map contains all items in this config,
+     * with item name as key and associated value as value.
+     */
+    fun toMap(): Map<String, Any>
 
     companion object {
         /**
@@ -264,7 +272,16 @@ private class ConfigImpl constructor(
         override fun next(): Item<*> = current.next()
     }
 
-    override val toTree: ConfigTree get() = tree.deepCopy()
+    override fun toTree(): ConfigTree = tree.deepCopy()
+
+    override fun toMap(): Map<String, Any> {
+        return mutableMapOf<String, Any>().apply {
+            val config = this@ConfigImpl
+            for (item in config) {
+                put(item.name, config[item])
+            }
+        }
+    }
 
     override fun <T : Any> get(item: Item<T>): T = getOrNull(item, errorWhenUnset = true) ?:
             throw NoSuchItemException(item.name)
