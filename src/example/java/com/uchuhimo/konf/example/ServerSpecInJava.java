@@ -20,7 +20,7 @@ import com.uchuhimo.konf.ConfigSpec;
 import com.uchuhimo.konf.OptionalItem;
 import com.uchuhimo.konf.RequiredItem;
 
-public class ServerConfig {
+public class ServerSpecInJava {
   public static final ConfigSpec spec = new ConfigSpec("server");
 
   public static final OptionalItem<String> host =

@@ -19,11 +19,11 @@ package com.uchuhimo.konf.example
 import com.uchuhimo.konf.Config
 
 fun main(args: Array<String>) {
-    val config = Config { addSpec(server) }
-    config[server.port] = 1000
+    val config = Config { addSpec(Server) }
+    config[Server.port] = 1000
     val map = config.toMap()
     val newConfig = Config {
-        addSpec(server)
+        addSpec(Server)
     }.withSourceFrom.map.kv(map)
     check(config == newConfig)
 }

@@ -21,8 +21,8 @@ import java.io.ObjectInputStream
 import java.io.ObjectOutputStream
 
 fun main(args: Array<String>) {
-    val config = Config { addSpec(server) }
-    config[server.port] = 1000
+    val config = Config { addSpec(Server) }
+    config[Server.port] = 1000
     val map = config.toMap()
     val newMap = createTempFile().run {
         ObjectOutputStream(outputStream()).use {
@@ -34,7 +34,7 @@ fun main(args: Array<String>) {
         }
     }
     val newConfig = Config {
-        addSpec(server)
+        addSpec(Server)
     }.withSourceFrom.map.kv(newMap)
     check(config == newConfig)
 }

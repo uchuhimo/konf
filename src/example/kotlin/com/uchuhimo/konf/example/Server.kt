@@ -19,7 +19,7 @@ package com.uchuhimo.konf.example
 import com.uchuhimo.konf.Config
 import com.uchuhimo.konf.ConfigSpec
 
-data class Server(val host: String, val port: Int) {
+public data class Server(val host: String, val port: Int) {
     constructor(config: Config) : this(config[Server.host], config[Server.port])
 
     fun start() {}

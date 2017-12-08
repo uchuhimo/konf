@@ -21,9 +21,9 @@ import com.uchuhimo.konf.ConfigSpec
 
 fun main(args: Array<String>) {
     val config = Config()
-    config.addSpec(server)
+    config.addSpec(Server)
     run {
-        val host = config[server.host]
+        val host = config[Server.host]
     }
     run {
         val host = config.get<String>("server.host")
@@ -31,22 +31,22 @@ fun main(args: Array<String>) {
     run {
         val host = config<String>("server.host")
     }
-    config.contains(server.host)
+    config.contains(Server.host)
     config.contains("server.host")
-    config[server.port] = 80
+    config[Server.port] = 80
     config["server.port"] = 80
-    config.unset(server.port)
+    config.unset(Server.port)
     config.unset("server.port")
     val basePort = ConfigSpec("server").required<Int>("basePort")
-    config.lazySet(server.port) { it[basePort] + 1 }
+    config.lazySet(Server.port) { it[basePort] + 1 }
     config.lazySet("server.port") { it[basePort] + 1 }
     run {
-        var port by config.property(server.port)
+        var port by config.property(Server.port)
         port = 9090
         check(port == 9090)
     }
     run {
-        val port by config.property(server.port)
+        val port by config.property(Server.port)
         check(port == 9090)
     }
 }

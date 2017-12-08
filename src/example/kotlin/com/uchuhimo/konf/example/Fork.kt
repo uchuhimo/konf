@@ -19,18 +19,18 @@ package com.uchuhimo.konf.example
 import com.uchuhimo.konf.Config
 
 fun main(args: Array<String>) {
-    val config = Config { addSpec(server) }
-    config[server.port] = 1000
+    val config = Config { addSpec(Server) }
+    config[Server.port] = 1000
     // fork from parent config
     val childConfig = config.withLayer("child")
     // child config inherit values from parent config
-    check(childConfig[server.port] == 1000)
+    check(childConfig[Server.port] == 1000)
     // modifications in parent config affect values in child config
-    config[server.port] = 2000
-    check(config[server.port] == 2000)
-    check(childConfig[server.port] == 2000)
+    config[Server.port] = 2000
+    check(config[Server.port] == 2000)
+    check(childConfig[Server.port] == 2000)
     // modifications in child config don't affect values in parent config
-    childConfig[server.port] = 3000
-    check(config[server.port] == 2000)
-    check(childConfig[server.port] == 3000)
+    childConfig[Server.port] = 3000
+    check(config[Server.port] == 2000)
+    check(childConfig[Server.port] == 3000)
 }

@@ -19,7 +19,7 @@ package com.uchuhimo.konf.example
 import com.uchuhimo.konf.Config
 
 fun main(args: Array<String>) {
-    val config = Config { addSpec(server) }
+    val config = Config { addSpec(Server) }
     // values in source is loaded into new layer in child config
     val childConfig = config.withSourceFrom.env()
     check(childConfig.parent === config)

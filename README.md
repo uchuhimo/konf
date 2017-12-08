@@ -81,7 +81,7 @@ compile 'com.uchuhimo:konf:0.6'
 1. Define items in config spec:
 
     ```kotlin
-    object server : ConfigSpec("server") {
+    object ServerSpec : ConfigSpec("server") {
         val host = optional("host", "0.0.0.0")
         val port = required<Int>("port")
     }
@@ -90,14 +90,14 @@ compile 'com.uchuhimo:konf:0.6'
 2. Construct config with items in config spec and values from multiple sources:
 
     ```kotlin
-    val config = Config { addSpec(server) }
+    val config = Config { addSpec(ServerSpec) }
             .withSourceFrom.yaml.file("/path/to/server.yml")
             .withSourceFrom.json.resource("server.json")
             .withSourceFrom.env()
             .withSourceFrom.systemProperties()
     ```
 
-    This config contains all items defined in `server`, and load values from 4 different sources. Values in resource file `server.json` will override those in file `/path/to/server.yml`, values from system environment will override those in `server.json`, and values from system properties will override those from system environment.
+    This config contains all items defined in `ServerSpec`, and load values from 4 different sources. Values in resource file `server.json` will override those in file `/path/to/server.yml`, values from system environment will override those in `server.json`, and values from system properties will override those from system environment.
 
 3. Define values in source. You can define in any of these sources:
     - in `/path/to/server.yml`:
@@ -136,7 +136,7 @@ compile 'com.uchuhimo:konf:0.6'
 Config items is declared in config spec, added to config by `Config#addSpec`. All items in same config spec have same prefix. Define a config spec with prefix `local.server`:
 
 ```kotlin
-object server : ConfigSpec("local.server") {
+object ServerSpec : ConfigSpec("local.server") {
 }
 ```
 
@@ -174,7 +174,7 @@ There are three kinds of item:
 You can also define config spec in Java, with a more vorbose API (compared to Kotlin version in "quick start"):
 
 ```java
-public class ServerConfig {
+public class ServerSpec {
   public static final ConfigSpec spec = new ConfigSpec("server");
 
   public static final OptionalItem<String> host =
@@ -199,7 +199,7 @@ val config = Config()
 Or an new config with some initial actions:
 
 ```kotlin
-val config = Config { addSpec(server) }
+val config = Config { addSpec(Server) }
 ```
 
 ### Add config spec
@@ -207,8 +207,8 @@ val config = Config { addSpec(server) }
 Add multiple config specs into config:
 
 ```kotlin
-config.addSpec(server)
-config.addSpec(client)
+config.addSpec(Server)
+config.addSpec(Client)
 ```
 
 ### Retrieve value from config
@@ -216,7 +216,7 @@ config.addSpec(client)
 Retrieve associated value with item (type-safe API):
 
 ```kotlin
-val host = config[server.host]
+val host = config[Server.host]
 ```
 
 Retrieve associated value with item name (unsafe API):
@@ -236,7 +236,7 @@ val host = config<String>("server.host")
 Check whether value exists in config or not with item:
 
 ```kotlin
-config.contains(server.host)
+config.contains(Server.host)
 ```
 
 Check whether value exists in config or not with item name:
@@ -250,7 +250,7 @@ config.contains("server.host")
 Associate item with value (type-safe API):
 
 ```kotlin
-config[server.port] = 80
+config[Server.port] = 80
 ```
 
 Find item with specified name, and associate it with value (unsafe API):
@@ -262,7 +262,7 @@ config["server.port"] = 80
 Discard associated value of item:
 
 ```kotlin
-config.unset(server.port)
+config.unset(Server.port)
 ```
 
 Discard associated value of item with specified name:
@@ -274,7 +274,7 @@ config.unset("server.port")
 Associate item with lazy thunk (type-safe API):
 
 ```kotlin
-config.lazySet(server.port) { it[basePort] + 1 }
+config.lazySet(Server.port) { it[basePort] + 1 }
 ```
 
 Find item with specified name, and associate it with lazy thunk (unsafe API):
@@ -288,7 +288,7 @@ config.lazySet("server.port") { it[basePort] + 1 }
 Export a read-write property from value in config:
 
 ```kotlin
-var port by config.property(server.port)
+var port by config.property(Server.port)
 port = 9090
 check(port == 9090)
 ```
@@ -296,27 +296,27 @@ check(port == 9090)
 Export a read-only property from value in config:
 
 ```kotlin
-val port by config.property(server.port)
+val port by config.property(Server.port)
 check(port == 9090)
 ```
 
 ### Fork from another config
 
 ```kotlin
-val config = Config { addSpec(server) }
-config[server.port] = 1000
+val config = Config { addSpec(Server) }
+config[Server.port] = 1000
 // fork from parent config
 val childConfig = config.withLayer("child")
 // child config inherit values from parent config
-check(childConfig[server.port] == 1000)
+check(childConfig[Server.port] == 1000)
 // modifications in parent config affect values in child config
-config[server.port] = 2000
-check(config[server.port] == 2000)
-check(childConfig[server.port] == 2000)
+config[Server.port] = 2000
+check(config[Server.port] == 2000)
+check(childConfig[Server.port] == 2000)
 // modifications in child config don't affect values in parent config
-childConfig[server.port] = 3000
-check(config[server.port] == 2000)
-check(childConfig[server.port] == 3000)
+childConfig[Server.port] = 3000
+check(config[Server.port] == 2000)
+check(childConfig[Server.port] == 3000)
 ```
 
 ## Load values from source
@@ -324,7 +324,7 @@ check(childConfig[server.port] == 3000)
 Use `withSourceFrom` to load values from source doesn't affect values in config, it will return a new child config by loading all values into new layer in child config:
 
 ```kotlin
-val config = Config { addSpec(server) }
+val config = Config { addSpec(Server) }
 // values in source is loaded into new layer in child config
 val childConfig = config.withSourceFrom.env()
 check(childConfig.parent === config)
@@ -389,7 +389,7 @@ You can reload values from this map:
 
 ```kotlin
 val newConfig = Config {
-    addSpec(server)
+    addSpec(Server)
 }.withSourceFrom.map.kv(map)
 check(config == newConfig)
 ```
@@ -409,7 +409,7 @@ val newMap = createTempFile().run {
     }
 }
 val newConfig = Config {
-    addSpec(server)
+    addSpec(Server)
 }.withSourceFrom.map.kv(newMap)
 check(config == newConfig)
 ```
