@@ -1,18 +1,10 @@
 pluginManagement {
-    resolutionStrategy {
-        eachPlugin {
-            if (requested.id.id.startsWith("org.jetbrains.dokka")) {
-                useModule("org.jetbrains.dokka:dokka-gradle-plugin:${requested.version}")
-            }
-        }
-    }
     repositories {
+        jcenter()
         maven {
             url "http://maven.aliyun.com/nexus/content/repositories/gradle-plugin"
         }
         gradlePluginPortal()
-        mavenCentral()
-        jcenter()
     }
 }
 
