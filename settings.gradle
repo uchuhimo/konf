@@ -11,6 +11,8 @@ pluginManagement {
             url "http://maven.aliyun.com/nexus/content/repositories/gradle-plugin"
         }
         gradlePluginPortal()
+        mavenCentral()
+        jcenter()
     }
 }
 
