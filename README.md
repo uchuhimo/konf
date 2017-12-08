@@ -26,6 +26,8 @@ A type-safe cascading configuration library for Kotlin/Java, supporting most con
 - [Define items](#define-items)
 - [Use config](#use-config)
 - [Load values from source](#load-values-from-source)
+- [Export/Reload values in config](#exportreload-values-in-config)
+- [Config persistence](#config-persistence)
 - [Supported item types](#supported-item-types)
 - [Generate document from config](#generate-document-from-config)
 - [Build from source](#build-from-source)
