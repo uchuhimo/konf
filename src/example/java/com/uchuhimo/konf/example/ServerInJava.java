@@ -28,7 +28,7 @@ public class ServerInJava {
   }
 
   public ServerInJava(Config config) {
-    this(config.get(ServerSpec.host), config.get(ServerSpec.port));
+    this(config.get(ServerSpecInJava.host), config.get(ServerSpecInJava.port));
   }
 
   public String getHost() {

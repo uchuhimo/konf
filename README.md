@@ -27,7 +27,6 @@ A type-safe cascading configuration library for Kotlin/Java, supporting most con
 - [Use config](#use-config)
 - [Load values from source](#load-values-from-source)
 - [Export/Reload values in config](#exportreload-values-in-config)
-- [Config persistence](#config-persistence)
 - [Supported item types](#supported-item-types)
 - [Generate document from config](#generate-document-from-config)
 - [Build from source](#build-from-source)
@@ -379,42 +378,49 @@ You can also implement [`Source`](https://github.com/uchuhimo/konf/blob/master/s
 
 ## Export/Reload values in config
 
-Export all values in config to map:
+Export all values in config to map in key-value format:
 
 ```kotlin
 val map = config.toMap()
 ```
 
-The returned map contains all items in the config, with item name as key and associated value as value.
+Export all values in facade layer of config to map:
 
-You can reload values from this map:
+```kotlin
+val map = config.layer.toMap()
+```
+
+Export all values in config to hierarchical map:
+
+```kotlin
+val map = config.toHierarchicalMap()
+```
+
+Export all values in config to JSON:
+
+```kotlin
+val file = createTempFile(suffix = ".json")
+config.toJson.toFile(file)
+```
+
+Reload values from JSON:
 
 ```kotlin
 val newConfig = Config {
     addSpec(Server)
-}.withSourceFrom.map.kv(map)
+}.withSourceFrom.json.file(file)
 check(config == newConfig)
 ```
 
-## Config persistence
+Config can be saved to a variety of output format in JSON. Use JSON as example:
 
-Combine config export and arbitrary serialization library, you can (de)serialize values in config. Here is an example using Java Object Serialization to (de)serialize config:
+- To file: `config.toJson.toFile("/path/to/file")`
+- To string: `config.toJson.toText()`
+- To writer: `config.toJson.toWriter(writer)`
+- To output stream: `config.toJson.toOutputStream(outputStream)`
+- To byte array: `config.toJson.toBytes()`
 
-```kotlin
-val map = config.toMap()
-val newMap = createTempFile().run {
-    ObjectOutputStream(outputStream()).use {
-        it.writeObject(map)
-    }
-    ObjectInputStream(inputStream()).use {
-        it.readObject() as Map<String, Any>
-    }
-}
-val newConfig = Config {
-    addSpec(Server)
-}.withSourceFrom.map.kv(newMap)
-check(config == newConfig)
-```
+You can also implement [`Writer`](https://github.com/uchuhimo/konf/blob/master/src/main/kotlin/com/uchuhimo/konf/source/Writer.kt) to customize your new writer (see [`JsonWriter`](https://github.com/uchuhimo/konf/blob/master/src/main/kotlin/com/uchuhimo/konf/source/json/JsonWriter.kt) for how to integrate your writer with config).
 
 ## Supported item types
 

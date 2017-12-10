@@ -17,13 +17,25 @@
 package com.uchuhimo.konf.example
 
 import com.uchuhimo.konf.Config
+import com.uchuhimo.konf.source.base.toHierarchicalMap
+import com.uchuhimo.konf.source.json.toJson
 
 fun main(args: Array<String>) {
     val config = Config { addSpec(Server) }
     config[Server.port] = 1000
-    val map = config.toMap()
+    run {
+        val map = config.toMap()
+    }
+    run {
+        val map = config.layer.toMap()
+    }
+    run {
+        val map = config.toHierarchicalMap()
+    }
+    val file = createTempFile(suffix = ".json")
+    config.toJson.toFile(file)
     val newConfig = Config {
         addSpec(Server)
-    }.withSourceFrom.map.kv(map)
+    }.withSourceFrom.json.file(file)
     check(config == newConfig)
 }
