@@ -47,6 +47,20 @@ object MapSourceLoadSpec : SubjectSpek<Config>({
     itBehavesLike(SourceLoadSpec)
 })
 
+object MapSourceReloadSpec : SubjectSpek<Config>({
+
+    subject {
+        val config = Config {
+            addSpec(ConfigForLoad)
+        }.withSourceFrom.map.hierarchical(loadContent)
+        Config {
+            addSpec(ConfigForLoad)
+        }.withSourceFrom.map.hierarchical(config.toHierarchicalMap())
+    }
+
+    itBehavesLike(SourceLoadSpec)
+})
+
 private val loadContent = mapOf("level1" to mapOf("level2" to
         mapOf<String, Any>(
                 "boolean" to false,

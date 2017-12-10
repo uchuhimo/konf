@@ -23,6 +23,7 @@ import com.uchuhimo.konf.source.DefaultLoaders
 import com.uchuhimo.konf.source.Source
 import com.uchuhimo.konf.source.createDefaultMapper
 import com.uchuhimo.konf.source.loadFromSource
+import com.uchuhimo.konf.source.toCompatibleValue
 import java.util.concurrent.locks.ReentrantReadWriteLock
 import kotlin.concurrent.read
 import kotlin.concurrent.write
@@ -150,6 +151,11 @@ interface Config : ItemContainer {
     val specs: List<ConfigSpec>
 
     /**
+     * Facade layer of config.
+     */
+    val layer: Config
+
+    /**
      * Load items in specified config spec into facade layer.
      *
      * Same config spec cannot be loaded twice.
@@ -206,12 +212,24 @@ interface Config : ItemContainer {
     fun toTree(): ConfigTree
 
     /**
-     * Returns a map in key-value format.
+     * Returns a map in key-value format for this config.
      *
-     * The returned map contains all items in this config,
-     * with item name as key and associated value as value.
+     * The returned map contains all items in this config, with item name as key and
+     * associated value as value.
+     * This map can be loaded into config as [com.uchuhimo.konf.source.base.KVSource] using
+     * `config.withSourceFrom.map.kv(map)`.
      */
     fun toMap(): Map<String, Any>
+
+    /**
+     * Returns a map in key-value format for facade layer.
+     *
+     * The returned map contains all items in facade layer, with item name as key and
+     * associated value as value.
+     * This map can be loaded into config as [com.uchuhimo.konf.source.base.KVSource] using
+     * `config.withSourceFrom.map.kv(map)`.
+     */
+    fun layerToMap(): Map<String, Any>
 
     companion object {
         /**
@@ -279,7 +297,18 @@ private class ConfigImpl constructor(
             val config = this@ConfigImpl
             for (item in config) {
                 if (config.getOrNull(item) != null) {
-                    put(item.name, config[item])
+                    put(item.name, config[item].toCompatibleValue(mapper))
+                }
+            }
+        }
+    }
+
+    override fun layerToMap(): Map<String, Any> {
+        return mutableMapOf<String, Any>().apply {
+            val config = this@ConfigImpl
+            for (item in config.valueByItem.keys) {
+                if (config.getOrNull(item) != null) {
+                    put(item.name, config[item].toCompatibleValue(mapper))
                 }
             }
         }
@@ -518,6 +547,8 @@ private class ConfigImpl constructor(
             }.asSequence())
         }
 
+    override val layer: Config = Layer(this)
+
     override fun addSpec(spec: ConfigSpec) {
         lock.write {
             if (hasChildren) {
@@ -568,5 +599,66 @@ private class ConfigImpl constructor(
         object Unset : ValueState()
         data class Lazy<T : Any>(var thunk: (config: ItemContainer) -> T) : ValueState()
         data class Value(var value: Any) : ValueState()
+    }
+
+    private class Layer(val config: ConfigImpl) : Config by config {
+        override val parent: Config? = null
+        override val specs: List<ConfigSpec> = config.specsInLayer
+        override val layer: Config = this
+
+        override fun toMap(): Map<String, Any> {
+            return mutableMapOf<String, Any>().apply {
+                for (item in config.valueByItem.keys) {
+                    if (config.getOrNull(item) != null) {
+                        put(item.name, config[item].toCompatibleValue(mapper))
+                    }
+                }
+            }
+        }
+
+        override fun <T : Any> get(item: Item<T>): T =
+                if (contains(item)) config[item] else throw NoSuchItemException(item.name)
+
+        override fun <T : Any> get(name: String): T =
+                if (contains(name)) config[name] else throw NoSuchItemException(name)
+
+        override fun <T : Any> getOrNull(item: Item<T>): T? =
+                if (contains(item)) config.getOrNull(item) else null
+
+        override fun <T : Any> getOrNull(name: String): T? =
+                if (contains(name)) config.getOrNull(name) else null
+
+        override fun <T : Any> invoke(name: String): T = super.invoke(name)
+
+        override fun iterator(): Iterator<Item<*>> = config.valueByItem.keys.iterator()
+
+        override fun contains(item: Item<*>): Boolean {
+            return config.run { lock.read { valueByItem.containsKey(item) } }
+        }
+
+        override fun contains(name: String): Boolean {
+            return config.run {
+                lock.read {
+                    val item = getItemOrNull(name)
+                    if (item == null) false else valueByItem.containsKey(item)
+                }
+            }
+        }
+
+        override val items: List<Item<*>> get() = super.items
+
+        override fun equals(other: Any?): Boolean {
+            if (this === other) return true
+            if (other !is Config) return false
+            return toMap() == other.toMap()
+        }
+
+        override fun hashCode(): Int {
+            return toMap().hashCode()
+        }
+
+        override fun toString(): String {
+            return "Layer(items=${toMap()})"
+        }
     }
 }

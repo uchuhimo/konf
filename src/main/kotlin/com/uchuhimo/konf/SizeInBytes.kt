@@ -17,6 +17,7 @@
 package com.uchuhimo.konf
 
 import com.fasterxml.jackson.annotation.JsonCreator
+import com.fasterxml.jackson.annotation.JsonValue
 import com.typesafe.config.impl.ConfigImplUtil
 import com.uchuhimo.konf.source.ParseException
 import java.io.Serializable
@@ -30,6 +31,7 @@ data class SizeInBytes(
         /**
          * Number of bytes.
          */
+        @JsonValue
         val bytes: Long) : Serializable {
     init {
         require(bytes >= 0)

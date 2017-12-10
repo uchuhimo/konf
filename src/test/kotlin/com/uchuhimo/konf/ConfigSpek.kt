@@ -21,6 +21,7 @@ import com.natpryce.hamkrest.assertion.assertThat
 import com.natpryce.hamkrest.equalTo
 import com.natpryce.hamkrest.has
 import com.natpryce.hamkrest.throws
+import com.uchuhimo.konf.source.base.toHierarchicalMap
 import org.jetbrains.spek.api.dsl.given
 import org.jetbrains.spek.api.dsl.it
 import org.jetbrains.spek.api.dsl.on
@@ -116,17 +117,25 @@ object ConfigSpek : SubjectSpek<Config>({
             }
         }
         on("export values to map") {
-            subject[spec.size] = 4
-            subject[spec.type] = NetworkBuffer.Type.ON_HEAP
-            val map = subject.toMap()
+            it("should not contain unset items in map") {
+                assertThat(subject.toMap(), equalTo(mapOf<String, Any>(
+                        spec.name.name to "buffer",
+                        spec.type.name to NetworkBuffer.Type.OFF_HEAP.name)))
+            }
             it("should contain corresponding items in map") {
+                subject[spec.size] = 4
+                subject[spec.type] = NetworkBuffer.Type.ON_HEAP
+                val map = subject.toMap()
                 assertThat(map, equalTo(mapOf(
                         spec.size.name to 4,
                         spec.maxSize.name to 8,
                         spec.name.name to "buffer",
-                        spec.type.name to NetworkBuffer.Type.ON_HEAP)))
+                        spec.type.name to NetworkBuffer.Type.ON_HEAP.name)))
             }
             it("should recover all items when reloaded from map") {
+                subject[spec.size] = 4
+                subject[spec.type] = NetworkBuffer.Type.ON_HEAP
+                val map = subject.toMap()
                 val newConfig = Config { addSpec(spec) }.withSourceFrom.map.kv(map)
                 assertThat(newConfig[spec.size], equalTo(4))
                 assertThat(newConfig[spec.maxSize], equalTo(8))
@@ -134,17 +143,43 @@ object ConfigSpek : SubjectSpek<Config>({
                 assertThat(newConfig[spec.type], equalTo(NetworkBuffer.Type.ON_HEAP))
                 assertThat(newConfig, equalTo(subject))
             }
+        }
+        on("export values to hierarchical map") {
             it("should not contain unset items in map") {
-                val config = Config { addSpec(spec) }
-                assertThat(config.toMap(), equalTo(mapOf(
-                        spec.name.name to "buffer",
-                        spec.type.name to NetworkBuffer.Type.OFF_HEAP)))
+                assertThat(subject.toHierarchicalMap(), equalTo(mapOf<String, Any>(
+                        "network" to mapOf(
+                                "buffer" to mapOf(
+                                        "name" to "buffer",
+                                        "type" to NetworkBuffer.Type.OFF_HEAP.name)))))
+            }
+            it("should contain corresponding items in map") {
+                subject[spec.size] = 4
+                subject[spec.type] = NetworkBuffer.Type.ON_HEAP
+                val map = subject.toHierarchicalMap()
+                assertThat(map, equalTo(mapOf<String, Any>(
+                        "network" to mapOf(
+                                "buffer" to mapOf(
+                                        "size" to 4,
+                                        "maxSize" to 8,
+                                        "name" to "buffer",
+                                        "type" to NetworkBuffer.Type.ON_HEAP.name)))))
+            }
+            it("should recover all items when reloaded from map") {
+                subject[spec.size] = 4
+                subject[spec.type] = NetworkBuffer.Type.ON_HEAP
+                val map = subject.toHierarchicalMap()
+                val newConfig = Config { addSpec(spec) }.withSourceFrom.map.hierarchical(map)
+                assertThat(newConfig[spec.size], equalTo(4))
+                assertThat(newConfig[spec.maxSize], equalTo(8))
+                assertThat(newConfig[spec.name], equalTo("buffer"))
+                assertThat(newConfig[spec.type], equalTo(NetworkBuffer.Type.ON_HEAP))
+                assertThat(newConfig, equalTo(subject))
             }
         }
         on("object methods") {
             val map = mapOf(
                     spec.name.name to "buffer",
-                    spec.type.name to NetworkBuffer.Type.OFF_HEAP)
+                    spec.type.name to NetworkBuffer.Type.OFF_HEAP.name)
             it("should not equal to object of other class") {
                 assertFalse(subject.equals(1))
             }

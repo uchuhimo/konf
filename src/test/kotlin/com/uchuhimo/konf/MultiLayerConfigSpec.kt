@@ -47,6 +47,23 @@ object MultiLayerConfigSpec : SubjectSpek<Config>({
             assertThat(subject[NetworkBuffer.type],
                     equalTo(subject.parent!![NetworkBuffer.type]))
         }
+        on("export values in facade layer to map") {
+            val spec = NetworkBuffer
+            it("should not contain unset items in map") {
+                assertThat(subject.parent!!.layer.toMap(), equalTo(mapOf<String, Any>(
+                        spec.name.name to "buffer",
+                        spec.type.name to NetworkBuffer.Type.OFF_HEAP.name)))
+            }
+            it("should not contain values from other layers in map") {
+                subject[spec.size] = 4
+                subject[spec.type] = NetworkBuffer.Type.ON_HEAP
+                val layer = subject.layer
+                val map = layer.toMap()
+                assertThat(map, equalTo(mapOf(
+                        spec.size.name to 4,
+                        spec.type.name to NetworkBuffer.Type.ON_HEAP.name)))
+            }
+        }
         on("set with item") {
             subject[NetworkBuffer.name] = "newName"
             it("should contain the specified value in the top level," +

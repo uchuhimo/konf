@@ -16,6 +16,7 @@
 
 package com.uchuhimo.konf.source.base
 
+import com.uchuhimo.konf.Config
 import com.uchuhimo.konf.Path
 import com.uchuhimo.konf.notEmptyOr
 import com.uchuhimo.konf.source.Source
@@ -54,5 +55,31 @@ open class MapSource(
 
     override fun toMap(): Map<String, Source> = map.mapValues { (_, value) ->
         value.castToSource(context).apply { addInfo("inMap", this@MapSource.info.toDescription()) }
+    }
+}
+
+/**
+ * Returns a hierarchical map for this config.
+ *
+ * The returned map contains all items in this config.
+ * This map can be loaded into config as [com.uchuhimo.konf.source.base.MapSource] using
+ * `config.withSourceFrom.map.hierarchical(map)`.
+ */
+fun Config.toHierarchicalMap(): Map<String, Any> {
+    fun MutableMap<String, Any>.putHierarchically(key: String, value: Any) {
+        if ('.' in key) {
+            val prefix = key.substringBefore('.')
+            val suffix = key.substringAfter('.')
+            @Suppress("UNCHECKED_CAST")
+            val child = getOrPut(prefix) { mutableMapOf<String, Any>() } as MutableMap<String, Any>
+            child.putHierarchically(suffix, value)
+        } else {
+            put(key, value)
+        }
+    }
+    return mutableMapOf<String, Any>().apply {
+        for ((key, value) in this@toHierarchicalMap.toMap()) {
+            putHierarchically(key, value)
+        }
     }
 }

@@ -533,6 +533,53 @@ interface Source : SourceInfo {
     fun toSizeInBytes(): SizeInBytes = SizeInBytes.parse(toText())
 }
 
+internal fun Any.toCompatibleValue(mapper: ObjectMapper): Any {
+    return when (this) {
+        is OffsetTime,
+        is OffsetDateTime,
+        is ZonedDateTime,
+        is LocalDate,
+        is LocalDateTime,
+        is LocalTime,
+        is Year,
+        is YearMonth,
+        is Instant,
+        is Duration -> this.toString()
+        is Date -> this.toInstant().toString()
+        is SizeInBytes -> this.bytes.toString()
+        is Enum<*> -> this.name
+        is ByteArray -> this.toList()
+        is CharArray -> this.toList()
+        is List<*>,
+        is Set<*>,
+        is Map<*, *>,
+        is Array<*>,
+        is String,
+        is Boolean,
+        is Int,
+        is Short,
+        is Byte,
+        is Long,
+        is BigInteger,
+        is Double,
+        is Float,
+        is BigDecimal,
+        is Char,
+        is BooleanArray,
+        is IntArray,
+        is ShortArray,
+        is LongArray,
+        is DoubleArray,
+        is FloatArray -> this
+        else -> {
+            val result = mapper.convertValue(this, Map::class.java).mapValues { (_, value) ->
+                value!!.toCompatibleValue(mapper)
+            }
+            result
+        }
+    }
+}
+
 internal fun Config.loadFromSource(source: Source): Config {
     return withLayer("source: ${source.description}").apply {
         for (item in this) {

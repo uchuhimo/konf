@@ -17,6 +17,7 @@
 package com.uchuhimo.konf.source
 
 import com.fasterxml.jackson.databind.ObjectMapper
+import com.fasterxml.jackson.databind.SerializationFeature
 import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule
 import com.fasterxml.jackson.module.kotlin.jacksonObjectMapper
 import com.typesafe.config.impl.ConfigImplUtil
@@ -68,6 +69,9 @@ fun Source.withFallback(fallback: Source): Source = object : Source by this {
  * Returns a new default object mapper for config.
  */
 fun createDefaultMapper(): ObjectMapper = jacksonObjectMapper()
+        .disable(SerializationFeature.WRITE_DATES_AS_TIMESTAMPS)
+        .disable(SerializationFeature.WRITE_DURATIONS_AS_TIMESTAMPS)
+        .enable(SerializationFeature.WRITE_DATES_WITH_ZONE_ID)
         .registerModule(JavaTimeModule()
                 .addDeserializer(Duration::class.java, DurationDeserializer)
                 .addDeserializer(OffsetDateTime::class.java, OffsetDateTimeDeserializer)
