@@ -114,7 +114,7 @@ dependencies {
     implementation "org.jetbrains.kotlin:kotlin-stdlib-jre8"
     implementation "org.jetbrains.kotlin:kotlin-reflect"
     implementation "org.apiguardian:apiguardian-api"
-    implementation "com.uchuhimo:kotlinx-bimap"
+    implementation "com.uchuhimo:kotlinx-bimap:1.0"
     implementation "com.typesafe:config"
     implementation "com.fasterxml.jackson.core:jackson-core"
     implementation "com.fasterxml.jackson.core:jackson-annotations"
