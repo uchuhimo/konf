@@ -77,6 +77,43 @@ Add dependencies:
 compile 'com.uchuhimo:konf:0.7'
 ```
 
+### Maven (master snapshot)
+
+Add JitPack repository to `<repositories>` section:
+
+```xml
+<repository>
+    <id>jitpack.io</id>
+    <url>https://jitpack.io</url>
+</repository>
+```
+
+Add dependencies:
+
+```xml
+<dependency>
+    <groupId>com.github.uchuhimo</groupId>
+    <artifactId>konf</artifactId>
+    <version>master-SNAPSHOT</version>
+</dependency>
+```
+
+### Gradle (master snapshot)
+
+Add JitPack repository:
+
+```groovy
+repositories {
+    maven { url 'https://jitpack.io' }
+}
+```
+
+Add dependencies:
+
+```groovy
+compile 'com.github.uchuhimo:konf:master-SNAPSHOT'
+```
+
 ## Quick start
 
 1. Define items in config spec:
