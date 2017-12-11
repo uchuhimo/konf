@@ -45,4 +45,7 @@ class HoconWriter(val config: Config) : Writer {
     }
 }
 
+/**
+ * Returns writer for HOCON source.
+ */
 val Config.toHocon: Writer get() = HoconWriter(this)

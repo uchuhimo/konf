@@ -38,4 +38,7 @@ class YamlWriter(val config: Config) : Writer {
     }
 }
 
+/**
+ * Returns writer for YAML source.
+ */
 val Config.toYaml: Writer get() = YamlWriter(this)

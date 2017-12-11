@@ -36,4 +36,7 @@ class JsonWriter(val config: Config) : Writer {
     }
 }
 
+/**
+ * Returns Writer for JSON source.
+ */
 val Config.toJson: Writer get() = JsonWriter(this)

@@ -23,7 +23,7 @@ import java.io.OutputStream
 import java.util.Properties
 
 /**
- * Provider for properties source.
+ * Writer for properties source.
  */
 class PropertiesWriter(val config: Config) : Writer {
     override fun toWriter(writer: java.io.Writer) {
@@ -35,4 +35,7 @@ class PropertiesWriter(val config: Config) : Writer {
     }
 }
 
+/**
+ * Returns writer for properties source.
+ */
 val Config.toProperties: Writer get() = PropertiesWriter(this)

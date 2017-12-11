@@ -23,7 +23,7 @@ import java.io.OutputStream
 import com.moandjiezana.toml.TomlWriter as Toml4jWriter
 
 /**
- * Provider for TOML source.
+ * Writer for TOML source.
  */
 class TomlWriter(val config: Config) : Writer {
     private val toml4jWriter = Toml4jWriter.Builder()
@@ -45,4 +45,7 @@ class TomlWriter(val config: Config) : Writer {
     }
 }
 
+/**
+ * Returns writer for TOML source.
+ */
 val Config.toToml: Writer get() = TomlWriter(this)
