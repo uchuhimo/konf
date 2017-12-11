@@ -40,7 +40,6 @@ object XmlSourceReloadSpec : SubjectSpek<Config>({
             addSpec(ConfigForLoad)
         }.withSourceFrom.xml.resource("source/source.xml")
         val xml = config.toXml.toText()
-        println(xml)
         Config {
             addSpec(ConfigForLoad)
         }.withSourceFrom.xml.string(xml)

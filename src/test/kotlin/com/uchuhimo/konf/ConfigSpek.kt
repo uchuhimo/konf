@@ -20,6 +20,8 @@ import com.natpryce.hamkrest.absent
 import com.natpryce.hamkrest.assertion.assertThat
 import com.natpryce.hamkrest.equalTo
 import com.natpryce.hamkrest.has
+import com.natpryce.hamkrest.isEmpty
+import com.natpryce.hamkrest.sameInstance
 import com.natpryce.hamkrest.throws
 import com.uchuhimo.konf.source.base.toHierarchicalMap
 import org.jetbrains.spek.api.dsl.given
@@ -27,6 +29,7 @@ import org.jetbrains.spek.api.dsl.it
 import org.jetbrains.spek.api.dsl.on
 import org.jetbrains.spek.subject.SubjectSpek
 import kotlin.test.assertFalse
+import kotlin.test.assertNull
 import kotlin.test.assertTrue
 
 object ConfigSpek : SubjectSpek<Config>({
@@ -373,6 +376,95 @@ object ConfigSpek : SubjectSpek<Config>({
                         @Suppress("UNUSED_VARIABLE")
                         var nameProperty by subject.property<Int>(invalidItem.name)
                     }, throws(has(NoSuchItemException::name, equalTo(invalidItem.name))))
+                }
+            }
+        }
+        group("layer") {
+            val layer by memoized {
+                subject.withLayer("layer").apply {
+                    this[size] = 4
+                    this.unset(maxSize)
+                }.layer
+            }
+            it("should have not parent") {
+                assertNull(layer.parent)
+            }
+            it("should contain specs in this layer") {
+                assertThat(layer.specs, isEmpty)
+            }
+            it("should return itself as its layer") {
+                assertThat(layer.layer, sameInstance(layer))
+            }
+            on("iterate items in layer") {
+                it("should cover all items in layer") {
+                    assertThat(layer.items.toSet(), equalTo(setOf<Item<*>>(size, maxSize)))
+                }
+            }
+            on("export values to map") {
+                it("should contain corresponding items in map") {
+                    val map = layer.toMap()
+                    assertThat(map, equalTo(mapOf<String, Any>(size.name to 4)))
+                }
+            }
+            on("object methods") {
+                val map = mapOf(spec.size.name to 4)
+                it("should not equal to object of other class") {
+                    assertFalse(layer.equals(1))
+                }
+                it("should not equal to config with different items") {
+                    assertTrue(layer != subject)
+                }
+                it("should equal to itself") {
+                    assertThat(layer, equalTo(layer))
+                }
+                it("should have same hash code with map with same content") {
+                    assertThat(layer.hashCode(), equalTo(map.hashCode()))
+                }
+                it("should convert to string in map-like format") {
+                    assertThat(layer.toString(), equalTo("Layer(items=$map)"))
+                }
+            }
+            group("get operation") {
+                on("get with valid item") {
+                    it("should return corresponding value") {
+                        assertThat(layer[size], equalTo(4))
+                        assertThat(layer.getOrNull(size), equalTo(4))
+                        assertTrue(size in layer)
+                    }
+                }
+                on("get with invalid item") {
+                    it("should throw NoSuchItemException when using `get`") {
+                        assertThat({ layer[name] },
+                                throws(has(NoSuchItemException::name, equalTo(name.name))))
+                    }
+                    it("should return null when using `getOrNull`") {
+                        assertThat(layer.getOrNull(name), absent())
+                        assertFalse(name in layer)
+                    }
+                }
+                on("get with valid name") {
+                    it("should return corresponding value") {
+                        assertThat(layer(spec.qualify("size")), equalTo(4))
+                        assertThat(layer.getOrNull(spec.qualify("size")), equalTo(4))
+                        assertTrue(spec.qualify("size") in layer)
+                    }
+                }
+                on("get with invalid name") {
+                    it("should throw NoSuchItemException when using `get`") {
+                        assertThat({ layer<Int>(spec.qualify("name")) }, throws(has(
+                                NoSuchItemException::name, equalTo(spec.qualify("name")))))
+                    }
+                    it("should return null when using `getOrNull`") {
+                        assertThat(layer.getOrNull<Int>(spec.qualify("name")), absent())
+                        assertFalse(spec.qualify("name") in layer)
+                    }
+                }
+                on("get unset item") {
+                    it("should throw UnsetValueException") {
+                        assertThat({ layer[maxSize] }, throws(has(
+                                UnsetValueException::name,
+                                equalTo(maxSize.name))))
+                    }
                 }
             }
         }

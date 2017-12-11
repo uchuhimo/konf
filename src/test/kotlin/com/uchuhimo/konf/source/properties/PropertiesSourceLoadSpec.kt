@@ -40,7 +40,6 @@ object PropertiesSourceReloadSpec : SubjectSpek<Config>({
             addSpec(ConfigForLoad)
         }.withSourceFrom.properties.resource("source/source.properties")
         val properties = config.toProperties.toText()
-        println(properties)
         Config {
             addSpec(ConfigForLoad)
         }.withSourceFrom.properties.string(properties)

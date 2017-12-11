@@ -221,16 +221,6 @@ interface Config : ItemContainer {
      */
     fun toMap(): Map<String, Any>
 
-    /**
-     * Returns a map in key-value format for facade layer.
-     *
-     * The returned map contains all items in facade layer, with item name as key and
-     * associated value as value.
-     * This map can be loaded into config as [com.uchuhimo.konf.source.base.KVSource] using
-     * `config.withSourceFrom.map.kv(map)`.
-     */
-    fun layerToMap(): Map<String, Any>
-
     companion object {
         /**
          * Create a new root config.
@@ -296,17 +286,6 @@ private class ConfigImpl constructor(
         return mutableMapOf<String, Any>().apply {
             val config = this@ConfigImpl
             for (item in config) {
-                if (config.getOrNull(item) != null) {
-                    put(item.name, config[item].toCompatibleValue(mapper))
-                }
-            }
-        }
-    }
-
-    override fun layerToMap(): Map<String, Any> {
-        return mutableMapOf<String, Any>().apply {
-            val config = this@ConfigImpl
-            for (item in config.valueByItem.keys) {
                 if (config.getOrNull(item) != null) {
                     put(item.name, config[item].toCompatibleValue(mapper))
                 }
