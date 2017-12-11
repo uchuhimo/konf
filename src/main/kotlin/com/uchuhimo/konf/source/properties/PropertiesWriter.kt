@@ -14,32 +14,25 @@
  * limitations under the License.
  */
 
-package com.uchuhimo.konf.example
+package com.uchuhimo.konf.source.properties
 
 import com.uchuhimo.konf.Config
+import com.uchuhimo.konf.source.Writer
 import com.uchuhimo.konf.source.base.toFlatMap
-import com.uchuhimo.konf.source.base.toHierarchicalMap
-import com.uchuhimo.konf.source.json.toJson
+import java.io.OutputStream
+import java.util.Properties
 
-fun main(args: Array<String>) {
-    val config = Config { addSpec(Server) }
-    config[Server.port] = 1000
-    run {
-        val map = config.toMap()
+/**
+ * Provider for properties source.
+ */
+class PropertiesWriter(val config: Config) : Writer {
+    override fun toWriter(writer: java.io.Writer) {
+        Properties().apply { putAll(config.toFlatMap()) }.store(writer, null)
     }
-    run {
-        val map = config.layer.toMap()
+
+    override fun toOutputStream(outputStream: OutputStream) {
+        Properties().apply { putAll(config.toFlatMap()) }.store(outputStream, null)
     }
-    run {
-        val map = config.toHierarchicalMap()
-    }
-    run {
-        val map = config.toFlatMap()
-    }
-    val file = createTempFile(suffix = ".json")
-    config.toJson.toFile(file)
-    val newConfig = Config {
-        addSpec(Server)
-    }.withSourceFrom.json.file(file)
-    check(config == newConfig)
 }
+
+val Config.toProperties: Writer get() = PropertiesWriter(this)

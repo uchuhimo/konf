@@ -16,6 +16,7 @@
 
 package com.uchuhimo.konf.source.base
 
+import com.uchuhimo.konf.Config
 import com.uchuhimo.konf.Path
 import com.uchuhimo.konf.name
 import com.uchuhimo.konf.notEmptyOr
@@ -146,6 +147,32 @@ open class FlatSource(
             return value.toLong()
         } catch (cause: NumberFormatException) {
             throw ParseException("$value cannot be parsed to a long", cause)
+        }
+    }
+}
+
+/**
+ * Returns a map in flat format for this config.
+ *
+ * The returned map contains all items in this config.
+ * This map can be loaded into config as [com.uchuhimo.konf.source.base.FlatSource] using
+ * `config.withSourceFrom.map.flat(map)`.
+ */
+fun Config.toFlatMap(): Map<String, String> {
+    fun MutableMap<String, String>.putFlat(key: String, value: Any) {
+        when (value) {
+            is List<*> -> value.forEachIndexed { index, child ->
+                putFlat("$key.$index", child!!)
+            }
+            is Map<*, *> -> value.forEach { (suffix, child) ->
+                putFlat("$key.$suffix", child!!)
+            }
+            else -> put(key, value.toString())
+        }
+    }
+    return mutableMapOf<String, String>().apply {
+        for ((key, value) in this@toFlatMap.toMap()) {
+            putFlat(key, value)
         }
     }
 }

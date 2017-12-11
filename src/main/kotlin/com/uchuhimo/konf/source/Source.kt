@@ -549,11 +549,18 @@ internal fun Any.toCompatibleValue(mapper: ObjectMapper): Any {
         is SizeInBytes -> this.bytes.toString()
         is Enum<*> -> this.name
         is ByteArray -> this.toList()
-        is CharArray -> this.toList()
-        is List<*>,
-        is Set<*>,
-        is Map<*, *>,
-        is Array<*>,
+        is CharArray -> this.toList().map { it.toString() }
+        is BooleanArray -> this.toList()
+        is IntArray -> this.toList()
+        is ShortArray -> this.toList()
+        is LongArray -> this.toList()
+        is DoubleArray -> this.toList()
+        is FloatArray -> this.toList()
+        is List<*> -> this.map { it!!.toCompatibleValue(mapper) }
+        is Set<*> -> this.map { it!!.toCompatibleValue(mapper) }
+        is Array<*> -> this.map { it!!.toCompatibleValue(mapper) }
+        is Map<*, *> -> this.mapValues { (_, value) -> value!!.toCompatibleValue(mapper) }
+        is Char -> this.toString()
         is String,
         is Boolean,
         is Int,
@@ -563,14 +570,7 @@ internal fun Any.toCompatibleValue(mapper: ObjectMapper): Any {
         is BigInteger,
         is Double,
         is Float,
-        is BigDecimal,
-        is Char,
-        is BooleanArray,
-        is IntArray,
-        is ShortArray,
-        is LongArray,
-        is DoubleArray,
-        is FloatArray -> this
+        is BigDecimal -> this
         else -> {
             val result = mapper.convertValue(this, Map::class.java).mapValues { (_, value) ->
                 value!!.toCompatibleValue(mapper)

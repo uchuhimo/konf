@@ -14,32 +14,28 @@
  * limitations under the License.
  */
 
-package com.uchuhimo.konf.example
+package com.uchuhimo.konf.source.yaml
 
 import com.uchuhimo.konf.Config
-import com.uchuhimo.konf.source.base.toFlatMap
+import com.uchuhimo.konf.source.Writer
 import com.uchuhimo.konf.source.base.toHierarchicalMap
-import com.uchuhimo.konf.source.json.toJson
+import org.yaml.snakeyaml.Yaml
+import org.yaml.snakeyaml.constructor.SafeConstructor
+import java.io.OutputStream
 
-fun main(args: Array<String>) {
-    val config = Config { addSpec(Server) }
-    config[Server.port] = 1000
-    run {
-        val map = config.toMap()
+/**
+ * Writer for YAML source.
+ */
+class YamlWriter(val config: Config) : Writer {
+    private val yaml = Yaml(SafeConstructor())
+
+    override fun toWriter(writer: java.io.Writer) {
+        yaml.dump(config.toHierarchicalMap(), writer)
     }
-    run {
-        val map = config.layer.toMap()
+
+    override fun toOutputStream(outputStream: OutputStream) {
+        toWriter(outputStream.writer())
     }
-    run {
-        val map = config.toHierarchicalMap()
-    }
-    run {
-        val map = config.toFlatMap()
-    }
-    val file = createTempFile(suffix = ".json")
-    config.toJson.toFile(file)
-    val newConfig = Config {
-        addSpec(Server)
-    }.withSourceFrom.json.file(file)
-    check(config == newConfig)
 }
+
+val Config.toYaml: Writer get() = YamlWriter(this)

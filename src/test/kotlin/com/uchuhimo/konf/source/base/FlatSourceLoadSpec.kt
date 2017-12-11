@@ -33,6 +33,20 @@ object FlatSourceLoadSpec : SubjectSpek<Config>({
     itBehavesLike(SourceLoadSpec)
 })
 
+object FlatSourceReloadSpec : SubjectSpek<Config>({
+
+    subject {
+        val config = Config {
+            addSpec(ConfigForLoad)
+        }.withSourceFrom.map.flat(loadContent)
+        Config {
+            addSpec(ConfigForLoad)
+        }.withSourceFrom.map.flat(config.toFlatMap())
+    }
+
+    itBehavesLike(SourceLoadSpec)
+})
+
 private val loadContent = mapOf(
         "boolean" to "false",
         "int" to "1",

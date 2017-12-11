@@ -32,3 +32,18 @@ object YamlSourceLoadSpec : SubjectSpek<Config>({
 
     itBehavesLike(SourceLoadSpec)
 })
+
+object YamlSourceReloadSpec : SubjectSpek<Config>({
+
+    subject {
+        val config = Config {
+            addSpec(ConfigForLoad)
+        }.withSourceFrom.yaml.resource("source/source.yaml")
+        val yaml = config.toYaml.toText()
+        Config {
+            addSpec(ConfigForLoad)
+        }.withSourceFrom.yaml.string(yaml)
+    }
+
+    itBehavesLike(SourceLoadSpec)
+})

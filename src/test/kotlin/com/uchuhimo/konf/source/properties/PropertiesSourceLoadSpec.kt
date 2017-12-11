@@ -32,3 +32,19 @@ object PropertiesSourceLoadSpec : SubjectSpek<Config>({
 
     itBehavesLike(SourceLoadSpec)
 })
+
+object PropertiesSourceReloadSpec : SubjectSpek<Config>({
+
+    subject {
+        val config = Config {
+            addSpec(ConfigForLoad)
+        }.withSourceFrom.properties.resource("source/source.properties")
+        val properties = config.toProperties.toText()
+        println(properties)
+        Config {
+            addSpec(ConfigForLoad)
+        }.withSourceFrom.properties.string(properties)
+    }
+
+    itBehavesLike(SourceLoadSpec)
+})

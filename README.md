@@ -433,6 +433,12 @@ Export all values in config to hierarchical map:
 val map = config.toHierarchicalMap()
 ```
 
+Export all values in config to map in flat format:
+
+```kotlin
+val map = config.toFlatMap()
+```
+
 Export all values in config to JSON:
 
 ```kotlin
@@ -449,7 +455,7 @@ val newConfig = Config {
 check(config == newConfig)
 ```
 
-Config can be saved to a variety of output format in JSON. Use JSON as example:
+Config can be saved to a variety of output format in HOCON/JSON/properties/TOML/XML/YAML. Use JSON as example:
 
 - To file: `config.toJson.toFile("/path/to/file")`
 - To string: `config.toJson.toText()`
