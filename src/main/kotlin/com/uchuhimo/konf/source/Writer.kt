@@ -19,7 +19,6 @@ package com.uchuhimo.konf.source
 import java.io.File
 import java.io.OutputStream
 import java.io.StringWriter
-import java.io.Writer
 
 /**
  * Save config to various output format.
@@ -30,7 +29,7 @@ interface Writer {
      *
      * @param writer specified writer for writing character streams
      */
-    fun toWriter(writer: Writer)
+    fun toWriter(writer: java.io.Writer)
 
     /**
      * Save to specified output stream.
