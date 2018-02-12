@@ -25,7 +25,7 @@ import java.net.URL
 /**
  * Provides source from various input format.
  */
-interface SourceProvider {
+interface Provider {
     /**
      * Returns a new source from specified reader.
      *

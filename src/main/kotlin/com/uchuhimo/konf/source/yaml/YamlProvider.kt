@@ -16,8 +16,8 @@
 
 package com.uchuhimo.konf.source.yaml
 
+import com.uchuhimo.konf.source.Provider
 import com.uchuhimo.konf.source.Source
-import com.uchuhimo.konf.source.SourceProvider
 import com.uchuhimo.konf.source.base.asSource
 import org.yaml.snakeyaml.Yaml
 import org.yaml.snakeyaml.constructor.SafeConstructor
@@ -27,7 +27,7 @@ import java.io.Reader
 /**
  * Provider for YAML source.
  */
-object YamlProvider : SourceProvider {
+object YamlProvider : Provider {
     override fun fromReader(reader: Reader): Source {
         val yaml = Yaml(SafeConstructor())
         return yaml.load<Any>(reader).asSource("YAML")

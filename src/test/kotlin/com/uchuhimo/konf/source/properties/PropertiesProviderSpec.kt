@@ -27,7 +27,7 @@ import org.jetbrains.spek.subject.SubjectSpek
 object PropertiesProviderSpec : SubjectSpek<PropertiesProvider>({
     subject { PropertiesProvider }
 
-    given("a source provider") {
+    given("a properties provider") {
         on("create source from reader") {
             val source = subject.fromReader("type = reader".reader())
             it("should have correct type") {

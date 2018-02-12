@@ -27,7 +27,7 @@ import org.jetbrains.spek.subject.SubjectSpek
 object TomlProviderSpec : SubjectSpek<TomlProvider>({
     subject { TomlProvider }
 
-    given("a source provider") {
+    given("a TOML provider") {
         on("create source from reader") {
             val source = subject.fromReader("type = \"reader\"".reader())
             it("should have correct type") {

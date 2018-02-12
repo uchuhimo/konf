@@ -33,7 +33,7 @@ interface Writer {
     fun toWriter(writer: Writer)
 
     /**
-     * Save to specified input stream.
+     * Save to specified output stream.
      *
      * @param outputStream specified output stream of bytes
      */

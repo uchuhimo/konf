@@ -17,15 +17,15 @@
 package com.uchuhimo.konf.source.hocon
 
 import com.typesafe.config.ConfigFactory
+import com.uchuhimo.konf.source.Provider
 import com.uchuhimo.konf.source.Source
-import com.uchuhimo.konf.source.SourceProvider
 import java.io.InputStream
 import java.io.Reader
 
 /**
  * Provider for HOCON source.
  */
-object HoconProvider : SourceProvider {
+object HoconProvider : Provider {
     override fun fromReader(reader: Reader): Source =
             HoconSource(ConfigFactory.parseReader(reader))
 

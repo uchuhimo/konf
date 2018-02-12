@@ -116,8 +116,8 @@ object DefaultLoadersSpec : SubjectSpek<DefaultLoaders>({
                     .properties.string("source.test.type = properties")
             val afterLoadToml = afterLoadProperties.withSourceFrom
                     .toml.string(tomlContent)
-            val afterLoadXml = afterLoadToml.withSourceFrom.
-                    xml.string(xmlContent)
+            val afterLoadXml = afterLoadToml.withSourceFrom
+                    .xml.string(xmlContent)
             val afterLoadYaml = afterLoadXml.withSourceFrom
                     .yaml.string(yamlContent)
             val afterLoadFlat = afterLoadYaml.withSourceFrom

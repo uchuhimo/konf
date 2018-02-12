@@ -28,10 +28,10 @@ import org.jetbrains.spek.subject.SubjectSpek
 import spark.Spark
 import java.net.URL
 
-object SourceProviderSpec : SubjectSpek<SourceProvider>({
+object ProviderSpec : SubjectSpek<Provider>({
     subject { PropertiesProvider }
 
-    given("a source provider") {
+    given("a provider") {
         on("create source from reader") {
             val source = subject.fromReader("type = reader".reader())
             it("should return a source which contains value from reader") {

@@ -17,15 +17,15 @@
 package com.uchuhimo.konf.source.json
 
 import com.fasterxml.jackson.databind.ObjectMapper
+import com.uchuhimo.konf.source.Provider
 import com.uchuhimo.konf.source.Source
-import com.uchuhimo.konf.source.SourceProvider
 import java.io.InputStream
 import java.io.Reader
 
 /**
  * Provider for JSON source.
  */
-object JsonProvider : SourceProvider {
+object JsonProvider : Provider {
     override fun fromReader(reader: Reader): Source =
             JsonSource(ObjectMapper().readTree(reader))
 

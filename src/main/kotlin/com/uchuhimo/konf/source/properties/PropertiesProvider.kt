@@ -16,8 +16,8 @@
 
 package com.uchuhimo.konf.source.properties
 
+import com.uchuhimo.konf.source.Provider
 import com.uchuhimo.konf.source.Source
-import com.uchuhimo.konf.source.SourceProvider
 import com.uchuhimo.konf.source.base.FlatSource
 import java.io.InputStream
 import java.io.Reader
@@ -26,7 +26,7 @@ import java.util.Properties
 /**
  * Provider for properties source.
  */
-object PropertiesProvider : SourceProvider {
+object PropertiesProvider : Provider {
     @Suppress("UNCHECKED_CAST")
     private fun Properties.toMap(): Map<String, String> = this as Map<String, String>
 

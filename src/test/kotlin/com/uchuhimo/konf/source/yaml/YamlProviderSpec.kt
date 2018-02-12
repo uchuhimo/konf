@@ -27,7 +27,7 @@ import org.jetbrains.spek.subject.SubjectSpek
 object YamlProviderSpec : SubjectSpek<YamlProvider>({
     subject { YamlProvider }
 
-    given("a source provider") {
+    given("a YAML provider") {
         on("create source from reader") {
             val source = subject.fromReader("type: reader".reader())
             it("should have correct type") {

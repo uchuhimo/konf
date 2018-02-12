@@ -16,8 +16,8 @@
 
 package com.uchuhimo.konf.source.xml
 
+import com.uchuhimo.konf.source.Provider
 import com.uchuhimo.konf.source.Source
-import com.uchuhimo.konf.source.SourceProvider
 import com.uchuhimo.konf.source.base.FlatSource
 import org.dom4j.Document
 import org.dom4j.io.SAXReader
@@ -27,7 +27,7 @@ import java.io.Reader
 /**
  * Provider for XML source.
  */
-object XmlProvider : SourceProvider {
+object XmlProvider : Provider {
     private fun Document.toMap(): Map<String, String> {
         val rootElement = this.rootElement
         val propertyNodes = rootElement.selectNodes("/configuration/property")

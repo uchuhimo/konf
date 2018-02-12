@@ -37,7 +37,7 @@ object XmlProviderSpec : SubjectSpek<XmlProvider>({
 </configuration>
 """.trim()
 
-    given("a source provider") {
+    given("a XML provider") {
         on("create source from reader") {
             val source = subject.fromReader(xmlDoc("type", "reader").reader())
             it("should have correct type") {

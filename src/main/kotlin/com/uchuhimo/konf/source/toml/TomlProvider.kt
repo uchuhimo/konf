@@ -17,15 +17,15 @@
 package com.uchuhimo.konf.source.toml
 
 import com.moandjiezana.toml.Toml
+import com.uchuhimo.konf.source.Provider
 import com.uchuhimo.konf.source.Source
-import com.uchuhimo.konf.source.SourceProvider
 import java.io.InputStream
 import java.io.Reader
 
 /**
  * Provider for TOML source.
  */
-object TomlProvider : SourceProvider {
+object TomlProvider : Provider {
     override fun fromReader(reader: Reader): Source =
             Toml().read(reader).toMap().asTomlSource()
 

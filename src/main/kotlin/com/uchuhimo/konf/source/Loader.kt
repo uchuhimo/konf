@@ -35,7 +35,7 @@ class Loader(
         /**
          * Source provider to provide source from various input format.
          */
-        val provider: SourceProvider
+        val provider: Provider
 ) {
     /**
      * Returns a child config containing values from specified reader.

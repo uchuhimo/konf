@@ -293,11 +293,11 @@ private class ConfigImpl constructor(
         }
     }
 
-    override fun <T : Any> get(item: Item<T>): T = getOrNull(item, errorWhenUnset = true) ?:
-            throw NoSuchItemException(item.name)
+    override fun <T : Any> get(item: Item<T>): T = getOrNull(item, errorWhenUnset = true)
+            ?: throw NoSuchItemException(item.name)
 
-    override fun <T : Any> get(name: String): T = getOrNull(name, errorWhenUnset = true) ?:
-            throw NoSuchItemException(name)
+    override fun <T : Any> get(name: String): T = getOrNull(name, errorWhenUnset = true)
+            ?: throw NoSuchItemException(name)
 
     override fun <T : Any> getOrNull(item: Item<T>): T? =
             getOrNull(item, errorWhenUnset = false)

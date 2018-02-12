@@ -58,8 +58,8 @@ data class SizeInBytes(
             if (numberString.isEmpty())
                 throw ParseException("No number in size-in-bytes value '$input'")
 
-            val units = MemoryUnit.parseUnit(unitString) ?:
-                    throw ParseException("Could not parse size-in-bytes unit '$unitString'" +
+            val units = MemoryUnit.parseUnit(unitString)
+                    ?: throw ParseException("Could not parse size-in-bytes unit '$unitString'" +
                             " (try k, K, kB, KiB, kilobytes, kibibytes)")
 
             try {

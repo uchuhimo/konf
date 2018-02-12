@@ -72,10 +72,10 @@ class JsonSource(
             return mutableListOf<JsonNode>().apply {
                 addAll(node.elements().asSequence())
             }.map {
-                JsonSource(it, context).apply {
-                    addInfo("inList", this@JsonSource.info.toDescription())
-                }
-            }
+                        JsonSource(it, context).apply {
+                            addInfo("inList", this@JsonSource.info.toDescription())
+                        }
+                    }
         } else {
             throw WrongTypeException(this, node.nodeType.name, JsonNodeType.ARRAY.name)
         }
@@ -88,10 +88,10 @@ class JsonSource(
                     put(key, value)
                 }
             }.mapValues { (_, value) ->
-                JsonSource(value, context).apply {
-                    addInfo("inMap", this@JsonSource.info.toDescription())
-                }
-            }
+                        JsonSource(value, context).apply {
+                            addInfo("inMap", this@JsonSource.info.toDescription())
+                        }
+                    }
         } else {
             throw WrongTypeException(this, node.nodeType.name, JsonNodeType.OBJECT.name)
         }
