@@ -40,14 +40,18 @@ class XmlWriter(val config: Config) : Writer {
         return document
     }
 
+    private val outputFormat = OutputFormat.createPrettyPrint().apply {
+        lineSeparator = System.lineSeparator()
+    }
+
     override fun toWriter(writer: java.io.Writer) {
-        val xmlWriter = XMLWriter(writer, OutputFormat.createPrettyPrint())
+        val xmlWriter = XMLWriter(writer, outputFormat)
         xmlWriter.write(config.toFlatMap().toDocument())
         xmlWriter.close()
     }
 
     override fun toOutputStream(outputStream: OutputStream) {
-        val xmlWriter = XMLWriter(outputStream, OutputFormat.createPrettyPrint())
+        val xmlWriter = XMLWriter(outputStream, outputFormat)
         xmlWriter.write(config.toFlatMap().toDocument())
         xmlWriter.close()
     }

@@ -37,11 +37,14 @@ class HoconWriter(val config: Config) : Writer {
     }
 
     override fun toOutputStream(outputStream: OutputStream) {
-        toWriter(outputStream.writer())
+        outputStream.writer().use {
+            toWriter(it)
+        }
     }
 
     override fun toText(): String {
         return ConfigValueFactory.fromMap(config.toHierarchicalMap()).render(renderOpts)
+                .replace("\n", System.lineSeparator())
     }
 }
 

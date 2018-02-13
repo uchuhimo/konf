@@ -32,16 +32,18 @@ class TomlWriter(val config: Config) : Writer {
             .build()
 
     override fun toWriter(writer: java.io.Writer) {
-        toml4jWriter.write(config.toHierarchicalMap(), writer)
+        writer.write(toText())
     }
 
     override fun toOutputStream(outputStream: OutputStream) {
-        toml4jWriter.write(config.toHierarchicalMap(), outputStream)
+        outputStream.writer().use {
+            toWriter(it)
+        }
     }
 
     override fun toText(): String {
         // TODO: fix bug that map in nested list is formatted incorrectly (open issue in toml4j)
-        return toml4jWriter.write(config.toHierarchicalMap())
+        return toml4jWriter.write(config.toHierarchicalMap()).replace("\n", System.lineSeparator())
     }
 }
 

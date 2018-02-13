@@ -19,15 +19,20 @@ package com.uchuhimo.konf.source.yaml
 import com.uchuhimo.konf.Config
 import com.uchuhimo.konf.source.Writer
 import com.uchuhimo.konf.source.base.toHierarchicalMap
+import org.yaml.snakeyaml.DumperOptions
 import org.yaml.snakeyaml.Yaml
 import org.yaml.snakeyaml.constructor.SafeConstructor
+import org.yaml.snakeyaml.representer.Representer
 import java.io.OutputStream
 
 /**
  * Writer for YAML source.
  */
 class YamlWriter(val config: Config) : Writer {
-    private val yaml = Yaml(SafeConstructor())
+    private val yaml = Yaml(SafeConstructor(), Representer(), DumperOptions().apply {
+        defaultFlowStyle = DumperOptions.FlowStyle.BLOCK
+        lineBreak = DumperOptions.LineBreak.getPlatformLineBreak()
+    })
 
     override fun toWriter(writer: java.io.Writer) {
         yaml.dump(config.toHierarchicalMap(), writer)

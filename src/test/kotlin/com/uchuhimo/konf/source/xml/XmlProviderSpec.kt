@@ -28,14 +28,14 @@ object XmlProviderSpec : SubjectSpek<XmlProvider>({
     subject { XmlProvider }
 
     fun xmlDoc(name: String, value: String) = """
-<?xml version="1.0" encoding="UTF-8"?>
-<configuration>
-    <property>
-        <name>$name</name>
-        <value>$value</value>
-    </property>
-</configuration>
-""".trim()
+        <?xml version="1.0" encoding="UTF-8"?>
+        <configuration>
+            <property>
+                <name>$name</name>
+                <value>$value</value>
+            </property>
+        </configuration>
+        """.replaceIndent()
 
     given("a XML provider") {
         on("create source from reader") {
