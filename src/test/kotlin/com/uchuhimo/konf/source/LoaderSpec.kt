@@ -26,7 +26,7 @@ import org.jetbrains.spek.api.dsl.given
 import org.jetbrains.spek.api.dsl.it
 import org.jetbrains.spek.api.dsl.on
 import org.jetbrains.spek.subject.SubjectSpek
-import spark.Spark
+import spark.Service
 
 object LoaderSpec : SubjectSpek<Loader>({
     subject {
@@ -80,14 +80,15 @@ object LoaderSpec : SubjectSpek<Loader>({
             }
         }
         on("load from HTTP URL") {
-            Spark.port(0)
-            Spark.get("/source") { _, _ -> "type = http" }
-            Spark.awaitInitialization()
-            val config = subject.url("http://localhost:${Spark.port()}/source")
+            val service = Service.ignite()
+            service.port(0)
+            service.get("/source") { _, _ -> "type = http" }
+            service.awaitInitialization()
+            val config = subject.url("http://localhost:${service.port()}/source")
             it("should return a config which contains value in URL") {
                 assertThat(config[SourceType.type], equalTo("http"))
             }
-            Spark.stop()
+            service.stop()
         }
         on("load from file URL") {
             val file = tempFileOf("type = fileUrl")
