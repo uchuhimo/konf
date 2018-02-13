@@ -72,10 +72,11 @@ data class SizeInBytes(
                     val resultDecimal = BigDecimal(units.bytes).multiply(BigDecimal(numberString))
                     resultDecimal.toBigInteger()
                 }
-                return if (result.bitLength() < 64)
+                return if (result.bitLength() < 64) {
                     SizeInBytes(result.toLong())
-                else
+                } else {
                     throw ParseException("size-in-bytes value is out of range for a 64-bit long: '$input'")
+                }
             } catch (e: NumberFormatException) {
                 throw ParseException("Could not parse size-in-bytes number '$numberString'")
             }

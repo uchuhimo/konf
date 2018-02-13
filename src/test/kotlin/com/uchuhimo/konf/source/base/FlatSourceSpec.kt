@@ -108,6 +108,5 @@ object FlatSourceSpec : SubjectSpek<FlatSource>({
                 }
             }
         }
-
     }
 })

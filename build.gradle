@@ -205,7 +205,7 @@ jmh {
 
 spotless {
     java {
-        googleJavaFormat("1.3")
+        googleJavaFormat("1.5")
         trimTrailingWhitespace()
         endWithNewline()
         // licenseHeaderFile will fail with an empty line after license header,
@@ -213,7 +213,7 @@ spotless {
         //licenseHeaderFile rootProject.file("config/spotless/apache-license-2.0.java")
     }
     kotlin {
-        ktlint("0.8.3")
+        ktlint("0.15.0")
         trimTrailingWhitespace()
         endWithNewline()
         // licenseHeaderFile is unstable for Kotlin

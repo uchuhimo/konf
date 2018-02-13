@@ -126,7 +126,7 @@ fun String.toPath(): Path {
         listOf()
     } else {
         val path = this.split('.')
-        check("" !in path) { "${this} is not a valid path" }
+        check("" !in path) { "$this is not a valid path" }
         path
     }
 }

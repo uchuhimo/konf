@@ -105,7 +105,6 @@ interface Provider {
                     return fromInputStream(FileInputStream(url.path)).apply {
                         addContext("url", url.toString())
                     }
-
                 }
             }
         }
