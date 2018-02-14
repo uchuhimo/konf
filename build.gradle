@@ -221,6 +221,7 @@ spotless {
         //licenseHeaderFile rootProject.file("config/spotless/apache-license-2.0.java")
     }
     kotlin {
+        // TODO: remove this condition after ktlint issue-152 (https://github.com/shyiko/ktlint/issues/152) fixed
         if (JavaVersion.current() <= JavaVersion.VERSION_1_8) {
             ktlint("0.15.0")
         }
