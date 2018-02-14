@@ -22,10 +22,14 @@ import com.natpryce.hamkrest.throws
 import com.uchuhimo.konf.Config
 import com.uchuhimo.konf.ConfigSpec
 import com.uchuhimo.konf.tempFileOf
+import kotlinx.coroutines.experimental.delay
+import kotlinx.coroutines.experimental.newSingleThreadContext
+import kotlinx.coroutines.experimental.runBlocking
 import org.jetbrains.spek.api.dsl.given
 import org.jetbrains.spek.api.dsl.it
 import org.jetbrains.spek.api.dsl.on
 import org.jetbrains.spek.subject.SubjectSpek
+import java.util.concurrent.TimeUnit
 
 object DefaultLoadersSpec : SubjectSpek<DefaultLoaders>({
     subject {
@@ -52,10 +56,9 @@ object DefaultLoadersSpec : SubjectSpek<DefaultLoaders>({
         }
         group("load from file") {
             on("load from file with .conf extension") {
-                val config = subject.file(
-                        tempFileOf("source.test.type = hocon", suffix = ".conf"))
+                val config = subject.file(tempFileOf(hoconContent, suffix = ".conf"))
                 it("should load as HOCON format") {
-                    assertThat(config[item], equalTo("hocon"))
+                    assertThat(config[item], equalTo("conf"))
                 }
             }
             on("load from file with .json extension") {
@@ -66,7 +69,7 @@ object DefaultLoadersSpec : SubjectSpek<DefaultLoaders>({
             }
             on("load from file with .properties extension") {
                 val config = subject.file(
-                        tempFileOf("source.test.type = properties", suffix = ".properties"))
+                        tempFileOf(propertiesContent, suffix = ".properties"))
                 it("should load as properties file format") {
                     assertThat(config[item], equalTo("properties"))
                 }
@@ -102,6 +105,74 @@ object DefaultLoadersSpec : SubjectSpek<DefaultLoaders>({
                     }, throws<UnsupportedExtensionException>())
                 }
             }
+            on("load from file path") {
+                val file = tempFileOf(propertiesContent, suffix = ".properties")
+                val config = subject.file(file.path)
+                it("should load as auto-detected file format") {
+                    assertThat(config[item], equalTo("properties"))
+                }
+            }
+        }
+        group("load from watched file") {
+            fun load(type: String, suffix: String, content: String, newContent: String) {
+                on("load from watched file with .$suffix extension") {
+                    newSingleThreadContext("context").use { context ->
+                        val file = tempFileOf(content, suffix = ".$suffix")
+                        val config = subject.watchFile(file, 1, context = context)
+                        val originalValue = config[item]
+                        file.writeText(newContent)
+                        runBlocking(context) {
+                            delay(1, TimeUnit.SECONDS)
+                        }
+                        val newValue = config[item]
+                        it("should load as $type format") {
+                            assertThat(originalValue, equalTo(suffix))
+                        }
+                        it("should load new value when file has been changed") {
+                            assertThat(newValue, equalTo("newValue"))
+                        }
+                    }
+                }
+            }
+            load("HOCON", suffix = "conf", content = hoconContent,
+                    newContent = hoconContent.replace("conf", "newValue"))
+            load("JSON", suffix = "json", content = jsonContent,
+                    newContent = jsonContent.replace("json", "newValue"))
+            load("properties file", suffix = "properties", content = propertiesContent,
+                    newContent = propertiesContent.replace("properties", "newValue"))
+            load("TOML", suffix = "toml", content = tomlContent,
+                    newContent = tomlContent.replace("toml", "newValue"))
+            load("XML", suffix = "xml", content = xmlContent,
+                    newContent = xmlContent.replace("<value>xml", "<value>newValue"))
+            load("YAML", suffix = "yaml", content = yamlContent,
+                    newContent = yamlContent.replace("yaml", "newValue"))
+            load("YAML", suffix = "yml", content = ymlContent,
+                    newContent = ymlContent.replace("yml", "newValue"))
+            on("load from watched file with unsupported extension") {
+                it("should throw UnsupportedExtensionException") {
+                    assertThat({
+                        subject.watchFile(tempFileOf("source.test.type = txt", suffix = ".txt"))
+                    }, throws<UnsupportedExtensionException>())
+                }
+            }
+            on("load from watched file path") {
+                newSingleThreadContext("context").use { context ->
+                    val file = tempFileOf(propertiesContent, suffix = ".properties")
+                    val config = subject.watchFile(file.path, 1, context = context)
+                    val originalValue = config[item]
+                    file.writeText(propertiesContent.replace("properties", "newValue"))
+                    runBlocking(context) {
+                        delay(1, TimeUnit.SECONDS)
+                    }
+                    val newValue = config[item]
+                    it("should load as auto-detected file format") {
+                        assertThat(originalValue, equalTo("properties"))
+                    }
+                    it("should load new value when file has been changed") {
+                        assertThat(newValue, equalTo("newValue"))
+                    }
+                }
+            }
         }
         on("load from multiple sources") {
             val afterLoadEnv = subject.env()
@@ -109,11 +180,11 @@ object DefaultLoadersSpec : SubjectSpek<DefaultLoaders>({
             val afterLoadSystemProperties = afterLoadEnv.withSourceFrom
                     .systemProperties()
             val afterLoadHocon = afterLoadSystemProperties.withSourceFrom
-                    .hocon.string("source.test.type = hocon")
+                    .hocon.string(hoconContent)
             val afterLoadJson = afterLoadHocon.withSourceFrom
                     .json.string(jsonContent)
             val afterLoadProperties = afterLoadJson.withSourceFrom
-                    .properties.string("source.test.type = properties")
+                    .properties.string(propertiesContent)
             val afterLoadToml = afterLoadProperties.withSourceFrom
                     .toml.string(tomlContent)
             val afterLoadXml = afterLoadToml.withSourceFrom
@@ -132,7 +203,7 @@ object DefaultLoadersSpec : SubjectSpek<DefaultLoaders>({
             it("should load the corresponding value in each layer") {
                 assertThat(afterLoadEnv[item], equalTo("env"))
                 assertThat(afterLoadSystemProperties[item], equalTo("system"))
-                assertThat(afterLoadHocon[item], equalTo("hocon"))
+                assertThat(afterLoadHocon[item], equalTo("conf"))
                 assertThat(afterLoadJson[item], equalTo("json"))
                 assertThat(afterLoadProperties[item], equalTo("properties"))
                 assertThat(afterLoadToml[item], equalTo("toml"))
@@ -150,7 +221,9 @@ private object DefaultLoadersConfig : ConfigSpec("source.test") {
     val type = required<String>("type")
 }
 
-private val jsonContent = """
+private const val hoconContent = "source.test.type = conf"
+
+private const val jsonContent = """
 {
   "source": {
     "test": {
@@ -160,12 +233,14 @@ private val jsonContent = """
 }
 """
 
-private val tomlContent = """
+private const val propertiesContent = "source.test.type = properties"
+
+private const val tomlContent = """
 [source.test]
 type = "toml"
 """
 
-val xmlContent = """
+private val xmlContent = """
 <?xml version="1.0" encoding="UTF-8"?>
 <configuration>
     <property>
@@ -175,13 +250,13 @@ val xmlContent = """
 </configuration>
 """.trim()
 
-val yamlContent = """
+private const val yamlContent = """
 source:
     test:
         type: yaml
 """
 
-val ymlContent = """
+private val ymlContent = """
 source:
     test:
         type: yml
