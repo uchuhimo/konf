@@ -137,6 +137,16 @@ compile 'com.github.uchuhimo:konf:master-SNAPSHOT'
 
     This config contains all items defined in `ServerSpec`, and load values from 4 different sources. Values in resource file `server.json` will override those in file `/path/to/server.yml`, values from system environment will override those in `server.json`, and values from system properties will override those from system environment.
 
+    If you want to watch file `/path/to/server.yml` and reload values when file content is changed, you can use `watchFile` instead of `file`:
+
+    ```kotlin
+    val config = Config { addSpec(ServerSpec) }
+            .withSourceFrom.yaml.watchFile("/path/to/server.yml")
+            .withSourceFrom.json.resource("server.json")
+            .withSourceFrom.env()
+            .withSourceFrom.systemProperties()
+    ```
+
 3. Define values in source. You can define in any of these sources:
     - in `/path/to/server.yml`:
         ```yaml
@@ -392,15 +402,17 @@ Format of system properties source is same with that of properties source. Syste
 HOCON/JSON/properties/TOML/XML/YAML source can be loaded from a variety of input format. Use properties source as example:
 
 - From file: `config.withSourceFrom.properties.file("/path/to/file")`
+- From watched file: `config.withSourceFrom.properties.watchFile("/path/to/file", 100, TimeUnit.MILLISECONDS)`
 - From string: `config.withSourceFrom.properties.string("server.port = 8080")`
 - From URL: `config.withSourceFrom.properties.url("http://localhost:8080/source.properties")`
+- From watched URL: `config.withSourceFrom.properties.watchUrl("http://localhost:8080/source.properties", 1, TimeUnit.MINUTES)`
 - From resource: `config.withSourceFrom.properties.resource("source.properties")`
 - From reader: `config.withSourceFrom.properties.reader(reader)`
 - From input stream: `config.withSourceFrom.properties.inputStream(inputStream)`
 - From byte array: `config.withSourceFrom.properties.bytes(bytes)`
 - From portion of byte array: `config.withSourceFrom.properties.bytes(bytes, 1, 12)`
 
-If source is from file, file extension can be auto detected. Thus, you can use `config.withSourceFrom.file("/path/to/source.json")` instead of `config.withSourceFrom.json.file("/path/to/source.json")`. The following file extensions can be supported:
+If source is from file, file extension can be auto detected. Thus, you can use `config.withSourceFrom.file("/path/to/source.json")` instead of `config.withSourceFrom.json.file("/path/to/source.json")`, or use `config.withSourceFrom.watchFile("/path/to/source.json")` instead of `config.withSourceFrom.json.watchFile("/path/to/source.json")`. The following file extensions can be supported:
 
 | Type | Extension |
 | - | - |

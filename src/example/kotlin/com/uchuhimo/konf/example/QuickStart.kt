@@ -30,6 +30,13 @@ fun main(args: Array<String>) {
             .withSourceFrom.json.resource("server.json")
             .withSourceFrom.env()
             .withSourceFrom.systemProperties()
+    run {
+        val config = Config { addSpec(ServerSpec) }
+                .withSourceFrom.yaml.watchFile("/path/to/server.yml")
+                .withSourceFrom.json.resource("server.json")
+                .withSourceFrom.env()
+                .withSourceFrom.systemProperties()
+    }
     val server = Server(config[ServerSpec.host], config[ServerSpec.port])
     server.start()
 }
