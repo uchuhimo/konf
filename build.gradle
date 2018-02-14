@@ -16,10 +16,12 @@ buildscript {
     repositories {
         maven { url aliyunMavenUrl }
         jcenter()
+        maven { url "https://dl.bintray.com/kotlin/kotlin-eap" }
     }
     dependencies {
         classpath "org.junit.platform:junit-platform-gradle-plugin:$junitPlatformVersion"
         classpath "com.novoda:bintray-release:0.8.0"
+        classpath "org.jetbrains.dokka:dokka-gradle-plugin:0.9.16-eap-3"
     }
 }
 
@@ -32,16 +34,16 @@ plugins {
     id "com.diffplug.gradle.spotless" version "3.9.0"
     id "io.spring.dependency-management" version "1.0.4.RELEASE"
     id "com.github.ben-manes.versions" version "0.17.0"
-    id "org.jetbrains.dokka" version "0.9.15"
 }
 
 apply plugin: "java"
 apply plugin: "jacoco"
 apply plugin: "org.junit.platform.gradle.plugin"
 apply plugin: "com.novoda.bintray-release"
+apply plugin: "org.jetbrains.dokka"
 
 group "com.uchuhimo"
-version "0.8"
+version "0.9"
 
 repositories {
     maven { url aliyunMavenUrl }
