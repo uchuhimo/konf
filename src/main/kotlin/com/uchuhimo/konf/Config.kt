@@ -22,6 +22,7 @@ import com.uchuhimo.konf.annotation.JavaApi
 import com.uchuhimo.konf.source.DefaultLoaders
 import com.uchuhimo.konf.source.Source
 import com.uchuhimo.konf.source.createDefaultMapper
+import com.uchuhimo.konf.source.loadBy
 import com.uchuhimo.konf.source.loadFromSource
 import com.uchuhimo.konf.source.toCompatibleValue
 import java.util.concurrent.locks.ReentrantReadWriteLock
@@ -118,6 +119,11 @@ interface Config : ItemContainer {
     fun unset(name: String)
 
     /**
+     * Remove all values from the facade layer of this config.
+     */
+    fun clear()
+
+    /**
      * Returns a property that can read/set associated value for specified item.
      *
      * @param item config item
@@ -166,6 +172,14 @@ interface Config : ItemContainer {
     fun addSpec(spec: ConfigSpec)
 
     /**
+     * Executes the given [action] after locking the facade layer of this config.
+     *
+     * @param action the given action
+     * @return the return value of the action.
+     */
+    fun <T> lock(action: () -> T): T
+
+    /**
      * Returns a child config of this config with specified name.
      *
      * @param name name of facade layer in child config
@@ -183,6 +197,21 @@ interface Config : ItemContainer {
      * @return a child config containing value from specified source
      */
     fun withSource(source: Source): Config = loadFromSource(source)
+
+    /**
+     * Returns a child config containing values loaded by specified trigger.
+     *
+     * Values loaded by specified trigger will be loaded into facade layer of
+     * the returned child config without affecting this config.
+     *
+     * @param description trigger description
+     * @param trigger load trigger
+     * @return a child config containing value loaded by specified trigger
+     */
+    fun withLoadTrigger(description: String,
+                        trigger: (config: Config,
+                                  load: (source: Source) -> Unit) -> Unit): Config =
+            loadBy(description, trigger)
 
     /**
      * Returns default loaders for this config.
@@ -257,6 +286,8 @@ private class ConfigImpl constructor(
     private var hasChildren = false
 
     private val lock = ReentrantReadWriteLock()
+
+    override fun <T> lock(action: () -> T): T = lock.write(action)
 
     override fun iterator(): Iterator<Item<*>> = object : Iterator<Item<*>> {
         private var currentConfig = this@ConfigImpl
@@ -447,6 +478,10 @@ private class ConfigImpl constructor(
         } else {
             throw NoSuchItemException(name)
         }
+    }
+
+    override fun clear() {
+        valueByItem.clear()
     }
 
     override fun <T : Any> property(item: Item<T>): ReadWriteProperty<Any?, T> {

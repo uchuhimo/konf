@@ -580,17 +580,32 @@ internal fun Any.toCompatibleValue(mapper: ObjectMapper): Any {
     }
 }
 
-internal fun Config.loadFromSource(source: Source): Config {
-    return withLayer("source: ${source.description}").apply {
-        for (item in this) {
-            val path = item.path
-            if (path in source) {
-                try {
-                    rawSet(item, source[path].toValue(item.type, mapper))
-                } catch (cause: SourceException) {
-                    throw LoadException(path, cause)
+private fun load(config: Config, source: Source): Config {
+    return config.apply {
+        lock {
+            for (item in this) {
+                val path = item.path
+                if (path in source) {
+                    try {
+                        rawSet(item, source[path].toValue(item.type, mapper))
+                    } catch (cause: SourceException) {
+                        throw LoadException(path, cause)
+                    }
                 }
             }
+        }
+    }
+}
+
+internal fun Config.loadFromSource(source: Source): Config =
+        load(withLayer("source: ${source.description}"), source)
+
+internal fun Config.loadBy(description: String,
+                           trigger: (config: Config,
+                                     load: (source: Source) -> Unit) -> Unit): Config {
+    return withLayer("trigger: $description").apply {
+        trigger(this) { source ->
+            load(this, source)
         }
     }
 }

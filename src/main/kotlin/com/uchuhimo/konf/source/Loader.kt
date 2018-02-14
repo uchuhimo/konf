@@ -17,10 +17,19 @@
 package com.uchuhimo.konf.source
 
 import com.uchuhimo.konf.Config
+import kotlinx.coroutines.experimental.DefaultDispatcher
+import kotlinx.coroutines.experimental.delay
+import kotlinx.coroutines.experimental.launch
 import java.io.File
 import java.io.InputStream
 import java.io.Reader
 import java.net.URL
+import java.nio.file.FileSystems
+import java.nio.file.Path
+import java.nio.file.StandardWatchEventKinds
+import java.nio.file.WatchEvent
+import java.util.concurrent.TimeUnit
+import kotlin.coroutines.experimental.CoroutineContext
 
 /**
  * Loader to load source from various input formats.
@@ -74,6 +83,69 @@ class Loader(
             config.withSource(provider.fromFile(file))
 
     /**
+     * Returns a child config containing values from specified file,
+     * and reloads values when file content has been changed.
+     *
+     * @param file specified file
+     * @param delayTime delay to observe between every check. The default value is 5.
+     * @param unit time unit of delay. The default value is [TimeUnit.SECONDS].
+     * @param context context of the coroutine. The default value is [DefaultDispatcher].
+     * @return a child config containing values from watched file
+     */
+    fun watchFile(file: File, delayTime: Long = 5, unit: TimeUnit = TimeUnit.SECONDS,
+                  context: CoroutineContext = DefaultDispatcher): Config =
+            provider.fromFile(file).let { source ->
+                config.withLoadTrigger("watch ${source.description}") { newConfig, load ->
+                    load(source)
+                    val watcher = FileSystems.getDefault().newWatchService()
+                    val path = file.toPath().parent
+                    path.register(watcher, StandardWatchEventKinds.ENTRY_MODIFY)
+                    launch(context) {
+                        while (true) {
+                            delay(delayTime, unit)
+                            val key = watcher.poll()
+                            if (key != null) {
+                                for (event in key.pollEvents()) {
+                                    val kind = event.kind()
+                                    @Suppress("UNCHECKED_CAST")
+                                    event as WatchEvent<Path>
+                                    val filename = event.context()
+                                    if (kind == StandardWatchEventKinds.OVERFLOW) {
+                                        continue
+                                    } else if (kind == StandardWatchEventKinds.ENTRY_MODIFY &&
+                                            filename.toString() == file.name) {
+                                        newConfig.lock {
+                                            newConfig.clear()
+                                            load(provider.fromFile(file))
+                                        }
+                                    }
+                                    val valid = key.reset()
+                                    if (!valid) {
+                                        watcher.close()
+                                        throw InvalidWatchKeyException(source)
+                                    }
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+
+    /**
+     * Returns a child config containing values from specified file path,
+     * and reloads values when file content has been changed.
+     *
+     * @param file specified file path
+     * @param delayTime delay to observe between every check. The default value is 5.
+     * @param unit time unit of delay. The default value is [TimeUnit.SECONDS].
+     * @param context context of the coroutine. The default value is [DefaultDispatcher].
+     * @return a child config containing values from watched file
+     */
+    fun watchFile(file: String, delayTime: Long = 5, unit: TimeUnit = TimeUnit.SECONDS,
+                  context: CoroutineContext = DefaultDispatcher): Config =
+            watchFile(File(file), delayTime, unit, context)
+
+    /**
      * Returns a child config containing values from specified string.
      *
      * @param content specified string
@@ -119,6 +191,47 @@ class Loader(
      */
     fun url(url: String): Config =
             config.withSource(provider.fromUrl(url))
+
+    /**
+     * Returns a child config containing values from specified url,
+     * and reloads values periodically.
+     *
+     * @param url specified url
+     * @param period reload period. The default value is 5.
+     * @param unit time unit of reload period. The default value is [TimeUnit.SECONDS].
+     * @param context context of the coroutine. The default value is [DefaultDispatcher].
+     * @return a child config containing values from specified url
+     */
+    fun watchUrl(url: URL, period: Long = 5, unit: TimeUnit = TimeUnit.SECONDS,
+                 context: CoroutineContext = DefaultDispatcher): Config =
+            provider.fromUrl(url).let { source ->
+                config.withLoadTrigger("watch ${source.description}") { newConfig, load ->
+                    load(source)
+                    launch(context) {
+                        while (true) {
+                            delay(period, unit)
+                            newConfig.lock {
+                                newConfig.clear()
+                                load(provider.fromUrl(url))
+                            }
+                        }
+                    }
+                }
+            }
+
+    /**
+     * Returns a child config containing values from specified url string,
+     * and reloads values periodically.
+     *
+     * @param url specified url string
+     * @param period reload period. The default value is 5.
+     * @param unit time unit of reload period. The default value is [TimeUnit.SECONDS].
+     * @param context context of the coroutine. The default value is [DefaultDispatcher].
+     * @return a child config containing values from specified url string
+     */
+    fun watchUrl(url: String, period: Long = 5, unit: TimeUnit = TimeUnit.SECONDS,
+                 context: CoroutineContext = DefaultDispatcher): Config =
+            watchUrl(URL(url), period, unit, context)
 
     /**
      * Returns a child config containing values from specified resource.

@@ -69,11 +69,12 @@ dependencyManagement {
         dependency "org.yaml:snakeyaml:1.19"
         dependency "com.moandjiezana.toml:toml4j:0.7.2"
         dependency "org.dom4j:dom4j:2.1.0"
+        dependency "org.jetbrains.kotlinx:kotlinx-coroutines-core:0.22.2"
 
         dependencySet(group: "org.jetbrains.kotlin", version: "1.2.21") {
             entry "kotlin-stdlib"
             entry "kotlin-reflect"
-            entry "kotlin-stdlib-jre8"
+            entry "kotlin-stdlib-jdk8"
         }
 
         def jacksonVersion = "2.9.4"
@@ -111,8 +112,9 @@ dependencyManagement {
 }
 
 dependencies {
-    implementation "org.jetbrains.kotlin:kotlin-stdlib-jre8"
+    implementation "org.jetbrains.kotlin:kotlin-stdlib-jdk8"
     implementation "org.jetbrains.kotlin:kotlin-reflect"
+    implementation "org.jetbrains.kotlinx:kotlinx-coroutines-core"
     implementation "org.apiguardian:apiguardian-api"
     implementation "com.uchuhimo:kotlinx-bimap:1.0"
     implementation "com.typesafe:config"
@@ -146,6 +148,12 @@ dependencies {
 
 sourceCompatibility = JavaVersion.VERSION_1_8
 targetCompatibility = JavaVersion.VERSION_1_8
+
+kotlin {
+    experimental {
+        coroutines "enable"
+    }
+}
 
 junitPlatform {
     filters {

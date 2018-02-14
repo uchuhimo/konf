@@ -56,6 +56,12 @@ class UnsupportedTypeException(source: Source, clazz: Class<*>) :
         SourceException("value of type ${clazz.simpleName} is unsupported in source ${source.description}")
 
 /**
+ * Exception indicates that watch key is no longer valid for the source.
+ */
+class InvalidWatchKeyException(source: Source) :
+        SourceException("watch key for source ${source.description} is no longer valid")
+
+/**
  * Exception indicates failure to map source to value of specified class.
  */
 class ObjectMappingException(source: Source, clazz: Class<*>, cause: Throwable) :

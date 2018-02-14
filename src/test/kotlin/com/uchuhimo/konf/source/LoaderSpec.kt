@@ -22,11 +22,15 @@ import com.natpryce.hamkrest.throws
 import com.uchuhimo.konf.Config
 import com.uchuhimo.konf.ConfigSpec
 import com.uchuhimo.konf.tempFileOf
+import kotlinx.coroutines.experimental.delay
+import kotlinx.coroutines.experimental.newSingleThreadContext
+import kotlinx.coroutines.experimental.runBlocking
 import org.jetbrains.spek.api.dsl.given
 import org.jetbrains.spek.api.dsl.it
 import org.jetbrains.spek.api.dsl.on
 import org.jetbrains.spek.subject.SubjectSpek
 import spark.Service
+import java.util.concurrent.TimeUnit
 
 object LoaderSpec : SubjectSpek<Loader>({
     subject {
@@ -59,6 +63,42 @@ object LoaderSpec : SubjectSpek<Loader>({
             val config = subject.file(tempFileOf("type = file").toString())
             it("should return a config which contains value in file") {
                 assertThat(config[SourceType.type], equalTo("file"))
+            }
+        }
+        on("load from watched file") {
+            newSingleThreadContext("context").use { context ->
+                val file = tempFileOf("type = originalValue")
+                val config = subject.watchFile(file, context = context)
+                val originalValue = config[SourceType.type]
+                file.writeText("type = newValue")
+                runBlocking(context) {
+                    delay(5, TimeUnit.SECONDS)
+                }
+                val newValue = config[SourceType.type]
+                it("should return a config which contains value in file") {
+                    assertThat(originalValue, equalTo("originalValue"))
+                }
+                it("should load new value when file has been changed") {
+                    assertThat(newValue, equalTo("newValue"))
+                }
+            }
+        }
+        on("load from watched file path") {
+            newSingleThreadContext("context").use { context ->
+                val file = tempFileOf("type = originalValue")
+                val config = subject.watchFile(file.toString(), context = context)
+                val originalValue = config[SourceType.type]
+                file.writeText("type = newValue")
+                runBlocking(context) {
+                    delay(5, TimeUnit.SECONDS)
+                }
+                val newValue = config[SourceType.type]
+                it("should return a config which contains value in file") {
+                    assertThat(originalValue, equalTo("originalValue"))
+                }
+                it("should load new value when file has been changed") {
+                    assertThat(newValue, equalTo("newValue"))
+                }
             }
         }
         on("load from string") {
@@ -102,6 +142,66 @@ object LoaderSpec : SubjectSpek<Loader>({
             val config = subject.url(url)
             it("should return a config which contains value in URL") {
                 assertThat(config[SourceType.type], equalTo("fileUrl"))
+            }
+        }
+        on("load from watched HTTP URL") {
+            newSingleThreadContext("context").use { context ->
+                var content = "type = originalValue"
+                val service = Service.ignite()
+                service.port(0)
+                service.get("/source") { _, _ -> content }
+                service.awaitInitialization()
+                val url = "http://localhost:${service.port()}/source"
+                val config = subject.watchUrl(url, context = context)
+                val originalValue = config[SourceType.type]
+                content = "type = newValue"
+                runBlocking(context) {
+                    delay(5, TimeUnit.SECONDS)
+                }
+                val newValue = config[SourceType.type]
+                it("should return a config which contains value in URL") {
+                    assertThat(originalValue, equalTo("originalValue"))
+                }
+                it("should load new value after URL content has been changed") {
+                    assertThat(newValue, equalTo("newValue"))
+                }
+            }
+        }
+        on("load from watched file URL") {
+            newSingleThreadContext("context").use { context ->
+                val file = tempFileOf("type = originalValue")
+                val config = subject.watchUrl(file.toURI().toURL(), context = context)
+                val originalValue = config[SourceType.type]
+                file.writeText("type = newValue")
+                runBlocking(context) {
+                    delay(5, TimeUnit.SECONDS)
+                }
+                val newValue = config[SourceType.type]
+                it("should return a config which contains value in URL") {
+                    assertThat(originalValue, equalTo("originalValue"))
+                }
+                it("should load new value after URL content has been changed") {
+                    assertThat(newValue, equalTo("newValue"))
+                }
+            }
+        }
+        on("load from watched file URL string") {
+            newSingleThreadContext("context").use { context ->
+                val file = tempFileOf("type = originalValue")
+                val url = file.toURI().toURL()
+                val config = subject.watchUrl(url.toString(), context = context)
+                val originalValue = config[SourceType.type]
+                file.writeText("type = newValue")
+                runBlocking(context) {
+                    delay(5, TimeUnit.SECONDS)
+                }
+                val newValue = config[SourceType.type]
+                it("should return a config which contains value in URL") {
+                    assertThat(originalValue, equalTo("originalValue"))
+                }
+                it("should load new value after URL content has been changed") {
+                    assertThat(newValue, equalTo("newValue"))
+                }
             }
         }
         on("load from resource") {
