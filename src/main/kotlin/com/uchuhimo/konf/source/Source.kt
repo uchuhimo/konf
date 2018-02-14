@@ -693,7 +693,7 @@ private fun Source.toValue(type: JavaType, mapper: ObjectMapper): Any {
         is CollectionLikeType -> {
             if (type.isTrueCollectionType) {
                 @Suppress("UNCHECKED_CAST")
-                return (implOf(type.rawClass).newInstance() as MutableCollection<Any>).apply {
+                return (implOf(type.rawClass).getDeclaredConstructor().newInstance() as MutableCollection<Any>).apply {
                     addAll(toListValue(type.contentType, mapper))
                 }
             } else {
@@ -704,7 +704,7 @@ private fun Source.toValue(type: JavaType, mapper: ObjectMapper): Any {
             if (type.isTrueMapType) {
                 if (type.keyType.rawClass == String::class.java) {
                     @Suppress("UNCHECKED_CAST")
-                    return (implOf(type.rawClass).newInstance() as MutableMap<String, Any>).apply {
+                    return (implOf(type.rawClass).getDeclaredConstructor().newInstance() as MutableMap<String, Any>).apply {
                         putAll(this@toValue.toMap().mapValues { (_, value) ->
                             value.toValue(type.contentType, mapper)
                         })

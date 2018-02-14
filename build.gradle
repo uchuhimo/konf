@@ -221,7 +221,9 @@ spotless {
         //licenseHeaderFile rootProject.file("config/spotless/apache-license-2.0.java")
     }
     kotlin {
-        ktlint("0.15.0")
+        if (JavaVersion.current() <= JavaVersion.VERSION_1_8) {
+            ktlint("0.15.0")
+        }
         trimTrailingWhitespace()
         endWithNewline()
         // licenseHeaderFile is unstable for Kotlin
