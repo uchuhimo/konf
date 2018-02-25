@@ -30,6 +30,7 @@ import org.jetbrains.spek.api.dsl.it
 import org.jetbrains.spek.api.dsl.on
 import org.jetbrains.spek.subject.SubjectSpek
 import java.util.concurrent.TimeUnit
+import spark.Service
 
 object DefaultLoadersSpec : SubjectSpek<DefaultLoaders>({
     subject {
@@ -52,6 +53,19 @@ object DefaultLoadersSpec : SubjectSpek<DefaultLoaders>({
             val config = subject.systemProperties()
             it("should return a config which contains value from system properties") {
                 assertThat(config[item], equalTo("system"))
+            }
+        }
+        group("load from url") {
+            on("load from HTTP URL") {
+                val service = Service.ignite()
+                service.port(0)
+                service.get("/source.properties") { _, _ -> propertiesContent }
+                service.awaitInitialization()
+                val config = subject.url("http://localhost:${service.port()}/source.properties")
+                it("should return a config which contains value in URL") {
+                    assertThat(config[item], equalTo("properties"))
+                }
+                service.stop()
             }
         }
         group("load from file") {

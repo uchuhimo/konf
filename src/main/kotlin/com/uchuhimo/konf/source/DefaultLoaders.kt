@@ -29,6 +29,7 @@ import com.uchuhimo.konf.source.xml.XmlProvider
 import com.uchuhimo.konf.source.yaml.YamlProvider
 import kotlinx.coroutines.experimental.DefaultDispatcher
 import java.io.File
+import java.net.URL
 import java.util.concurrent.TimeUnit
 import kotlin.coroutines.experimental.CoroutineContext
 
@@ -148,6 +149,56 @@ class DefaultLoaders(
      * @throws UnsupportedExtensionException
      */
     fun file(file: String): Config = file(File(file))
+
+    /**
+     * Returns a child config containing values from specified url.
+     *
+     * Format of the file is auto-detected from the url extension.
+     * Supported file formats and the corresponding extensions:
+     * - HOCON: conf
+     * - JSON: json
+     * - Properties: properties
+     * - TOML: toml
+     * - XML: xml
+     * - YAML: yml, yaml
+     *
+     * Throws [UnsupportedExtensionException] if the file extension is unsupported.
+     *
+     * @param file specified file
+     * @return a child config containing values from specified file
+     * @throws UnsupportedExtensionException
+     */
+    fun url(url: URL): Config {
+        return when (File(url.path).extension) {
+            "conf" -> hocon.url(url)
+            "json" -> json.url(url)
+            "properties" -> properties.url(url)
+            "toml" -> toml.url(url)
+            "xml" -> xml.url(url)
+            "yml", "yaml" -> yaml.url(url)
+            else -> throw UnsupportedExtensionException(File(url.path))
+        }
+    }
+
+    /**
+     * Returns a child config containing values from specified url.
+     *
+     * Format of the file is auto-detected from the url extension.
+     * Supported file formats and the corresponding extensions:
+     * - HOCON: conf
+     * - JSON: json
+     * - Properties: properties
+     * - TOML: toml
+     * - XML: xml
+     * - YAML: yml, yaml
+     *
+     * Throws [UnsupportedExtensionException] if the file extension is unsupported.
+     *
+     * @param file specified file
+     * @return a child config containing values from specified file
+     * @throws UnsupportedExtensionException
+     */
+    fun url(url: String): Config = url(URL(url))
 
     /**
      * Returns a child config containing values from specified file,
