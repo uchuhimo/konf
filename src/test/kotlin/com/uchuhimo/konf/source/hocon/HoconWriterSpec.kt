@@ -32,7 +32,7 @@ object HoconWriterSpec : SubjectSpek<Writer>({
     subject {
         val config = Config {
             addSpec(object : ConfigSpec() {
-                val key = optional("key", "value")
+                val key by optional("value")
             })
         }
         config.toHocon

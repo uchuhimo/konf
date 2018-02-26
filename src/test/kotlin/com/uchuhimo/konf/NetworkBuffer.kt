@@ -18,32 +18,21 @@ package com.uchuhimo.konf
 
 class NetworkBuffer {
     companion object : ConfigSpec("network.buffer") {
-        @JvmField
-        val size = required<Int>(name = "size", description = "size of buffer in KB")
+        val size by required<Int>(description = "size of buffer in KB")
 
-        @JvmField
-        val maxSize = lazy(
-                name = "maxSize",
-                description = "max size of buffer in KB"
-        ) { it[size] * 2 }
+        val maxSize by lazy(description = "max size of buffer in KB") { it[size] * 2 }
 
-        @JvmField
-        val name = optional(
-                name = "name",
-                default = "buffer",
-                description = "name of buffer")
+        val name by optional("buffer", description = "name of buffer")
 
-        @JvmField
-        val type = optional(
-                name = "type",
-                default = Type.OFF_HEAP,
+        val type by optional(
+                Type.OFF_HEAP,
                 description = """
-                              | type of network buffer.
-                              | two type:
-                              | - on-heap
-                              | - off-heap
-                              | buffer is off-heap by default.
-                              """.trimMargin("| "))
+                | type of network buffer.
+                | two type:
+                | - on-heap
+                | - off-heap
+                | buffer is off-heap by default.
+                """.trimMargin("| "))
     }
 
     enum class Type {

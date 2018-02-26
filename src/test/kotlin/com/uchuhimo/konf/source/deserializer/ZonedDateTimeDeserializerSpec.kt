@@ -33,7 +33,8 @@ object ZonedDateTimeDeserializerSpec : Spek({
         Config {
             addSpec(object : ConfigSpec() {
                 init {
-                    required<ZonedDateTimeWrapper>("item")
+                    @Suppress("UNUSED_VARIABLE")
+                    val item by required<ZonedDateTimeWrapper>()
                 }
             })
         }

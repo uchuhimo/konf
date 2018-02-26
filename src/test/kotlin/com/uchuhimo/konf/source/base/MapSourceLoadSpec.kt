@@ -136,7 +136,7 @@ private val loadContent = mapOf("level1" to mapOf("level2" to
 
                 "pair" to mapOf("first" to 1, "second" to 2),
 
-                "class" to mapOf(
+                "clazz" to mapOf(
                         "boolean" to false,
 
                         "int" to 1,

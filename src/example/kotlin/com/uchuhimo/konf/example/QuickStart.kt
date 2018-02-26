@@ -20,8 +20,8 @@ import com.uchuhimo.konf.Config
 import com.uchuhimo.konf.ConfigSpec
 
 public object ServerSpec : ConfigSpec("server") {
-    val host = optional("host", "0.0.0.0")
-    val port = required<Int>("port")
+    val host by optional("0.0.0.0")
+    val port by required<Int>()
 }
 
 fun main(args: Array<String>) {

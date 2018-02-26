@@ -78,7 +78,7 @@ level1:
       first: 1
       second: 2
 
-    class:
+    clazz:
       boolean: false
 
       int: 1

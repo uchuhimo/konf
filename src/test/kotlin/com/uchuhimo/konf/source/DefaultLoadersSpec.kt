@@ -218,7 +218,7 @@ object DefaultLoadersSpec : SubjectSpek<DefaultLoaders>({
 })
 
 private object DefaultLoadersConfig : ConfigSpec("source.test") {
-    val type = required<String>("type")
+    val type by required<String>()
 }
 
 private const val hoconContent = "source.test.type = conf"

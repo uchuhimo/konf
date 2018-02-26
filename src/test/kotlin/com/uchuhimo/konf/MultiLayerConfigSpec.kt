@@ -89,7 +89,7 @@ object MultiLayerConfigSpec : SubjectSpek<Config>({
         }
         on("add spec") {
             val spec = object : ConfigSpec(NetworkBuffer.prefix) {
-                val minSize = optional("minSize", 1)
+                val minSize by optional(1)
             }
             subject.addSpec(spec)
             it("should contain items in new spec, and keep the rest level unchanged") {
@@ -102,7 +102,8 @@ object MultiLayerConfigSpec : SubjectSpek<Config>({
         on("add spec to parent") {
             val spec = object : ConfigSpec(NetworkBuffer.prefix) {
                 init {
-                    optional("minSize", 1)
+                    @Suppress("UNUSED_VARIABLE")
+                    val minSize by optional(1)
                 }
             }
             it("should throw SpecFrozenException") {
@@ -112,7 +113,8 @@ object MultiLayerConfigSpec : SubjectSpek<Config>({
         on("iterate items in config after adding spec") {
             val spec = object : ConfigSpec(NetworkBuffer.prefix) {
                 init {
-                    optional("minSize", 1)
+                    @Suppress("UNUSED_VARIABLE")
+                    val minSize by optional(1)
                 }
             }
             subject.addSpec(spec)
@@ -125,7 +127,8 @@ object MultiLayerConfigSpec : SubjectSpek<Config>({
             it("should throw LoadException before adding deserializer") {
                 val spec = object : ConfigSpec() {
                     init {
-                        required<StringWrapper>("item")
+                        @Suppress("UNUSED_VARIABLE")
+                        val item by required<StringWrapper>()
                     }
                 }
                 val parent = Config { addSpec(spec) }
@@ -137,7 +140,7 @@ object MultiLayerConfigSpec : SubjectSpek<Config>({
             }
             it("should be able to use the specified deserializer after adding") {
                 val spec = object : ConfigSpec() {
-                    val item = required<StringWrapper>("item")
+                    val item by required<StringWrapper>()
                 }
                 val parent = Config { addSpec(spec) }
                 val child = parent.withLayer("child")

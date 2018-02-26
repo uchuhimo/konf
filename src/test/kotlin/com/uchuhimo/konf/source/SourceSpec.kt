@@ -434,7 +434,8 @@ private inline fun <reified T : Any> load(value: Any): Config =
         Config().apply {
             addSpec(object : ConfigSpec() {
                 init {
-                    required<T>("item")
+                    @Suppress("UNUSED_VARIABLE")
+                    val item by required<T>()
                 }
             })
         }.withSource(mapOf("item" to value).asSource())

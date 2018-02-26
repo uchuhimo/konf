@@ -37,7 +37,7 @@ fun main(args: Array<String>) {
     config["server.port"] = 80
     config.unset(Server.port)
     config.unset("server.port")
-    val basePort = ConfigSpec("server").required<Int>("basePort")
+    val basePort by ConfigSpec("server").required<Int>()
     config.lazySet(Server.port) { it[basePort] + 1 }
     config.lazySet("server.port") { it[basePort] + 1 }
     run {

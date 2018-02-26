@@ -220,5 +220,5 @@ object LoaderSpec : SubjectSpek<Loader>({
 })
 
 private object SourceType : ConfigSpec() {
-    val type = required<String>("type")
+    val type by required<String>()
 }

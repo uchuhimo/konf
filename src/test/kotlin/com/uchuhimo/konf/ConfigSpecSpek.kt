@@ -59,7 +59,7 @@ object ConfigSpecSpek : Spek({
         }
 
         val specForRequired = object : ConfigSpec("a.b") {
-            val item = required<Int>("int", "description")
+            val item by required<Int>("int", "description")
         }
         testItem(specForRequired, specForRequired.item, "a required item")
         group("for a required item") {
@@ -76,7 +76,7 @@ object ConfigSpecSpek : Spek({
             }
         }
         val specForOptional = object : ConfigSpec("a.b") {
-            val item = optional("int", 1, "description")
+            val item by optional(1, "int", "description")
         }
         testItem(specForOptional, specForOptional.item, "an optional item")
         group("for an optional item") {
@@ -96,7 +96,7 @@ object ConfigSpecSpek : Spek({
             }
         }
         val specForLazy = object : ConfigSpec("a.b") {
-            val item = lazy("int", "description") { 2 }
+            val item by lazy("int", "description") { 2 }
         }
         val config = Config { addSpec(specForLazy) }
         testItem(specForLazy, specForLazy.item, "a lazy item")

@@ -357,115 +357,115 @@
         <value>2</value>
     </property>
     <property>
-        <name>level1.level2.class.boolean</name>
+        <name>level1.level2.clazz.boolean</name>
         <value>false</value>
     </property>
     <property>
-        <name>level1.level2.class.int</name>
+        <name>level1.level2.clazz.int</name>
         <value>1</value>
     </property>
     <property>
-        <name>level1.level2.class.short</name>
+        <name>level1.level2.clazz.short</name>
         <value>2</value>
     </property>
     <property>
-        <name>level1.level2.class.byte</name>
+        <name>level1.level2.clazz.byte</name>
         <value>3</value>
     </property>
     <property>
-        <name>level1.level2.class.bigInteger</name>
+        <name>level1.level2.clazz.bigInteger</name>
         <value>4</value>
     </property>
     <property>
-        <name>level1.level2.class.long</name>
+        <name>level1.level2.clazz.long</name>
         <value>4</value>
     </property>
     <property>
-        <name>level1.level2.class.double</name>
+        <name>level1.level2.clazz.double</name>
         <value>1.5</value>
     </property>
     <property>
-        <name>level1.level2.class.float</name>
+        <name>level1.level2.clazz.float</name>
         <value>-1.5</value>
     </property>
     <property>
-        <name>level1.level2.class.bigDecimal</name>
+        <name>level1.level2.clazz.bigDecimal</name>
         <value>1.5</value>
     </property>
     <property>
-        <name>level1.level2.class.char</name>
+        <name>level1.level2.clazz.char</name>
         <value>a</value>
     </property>
     <property>
-        <name>level1.level2.class.string</name>
+        <name>level1.level2.clazz.string</name>
         <value>string</value>
     </property>
     <property>
-        <name>level1.level2.class.offsetTime</name>
+        <name>level1.level2.clazz.offsetTime</name>
         <value>10:15:30+01:00</value>
     </property>
     <property>
-        <name>level1.level2.class.offsetDateTime</name>
+        <name>level1.level2.clazz.offsetDateTime</name>
         <value>2007-12-03T10:15:30+01:00</value>
     </property>
     <property>
-        <name>level1.level2.class.zonedDateTime</name>
+        <name>level1.level2.clazz.zonedDateTime</name>
         <value>2007-12-03T10:15:30+01:00[Europe/Paris]</value>
     </property>
     <property>
-        <name>level1.level2.class.localDate</name>
+        <name>level1.level2.clazz.localDate</name>
         <value>2007-12-03</value>
     </property>
     <property>
-        <name>level1.level2.class.localTime</name>
+        <name>level1.level2.clazz.localTime</name>
         <value>10:15:30</value>
     </property>
     <property>
-        <name>level1.level2.class.localDateTime</name>
+        <name>level1.level2.clazz.localDateTime</name>
         <value>2007-12-03T10:15:30</value>
     </property>
     <property>
-        <name>level1.level2.class.date</name>
+        <name>level1.level2.clazz.date</name>
         <value>2007-12-03T10:15:30Z</value>
     </property>
     <property>
-        <name>level1.level2.class.year</name>
+        <name>level1.level2.clazz.year</name>
         <value>2007</value>
     </property>
     <property>
-        <name>level1.level2.class.yearMonth</name>
+        <name>level1.level2.clazz.yearMonth</name>
         <value>2007-12</value>
     </property>
     <property>
-        <name>level1.level2.class.instant</name>
+        <name>level1.level2.clazz.instant</name>
         <value>2007-12-03T10:15:30.00Z</value>
     </property>
     <property>
-        <name>level1.level2.class.duration</name>
+        <name>level1.level2.clazz.duration</name>
         <value>P2DT3H4M</value>
     </property>
     <property>
-        <name>level1.level2.class.simpleDuration</name>
+        <name>level1.level2.clazz.simpleDuration</name>
         <value>200millis</value>
     </property>
     <property>
-        <name>level1.level2.class.size</name>
+        <name>level1.level2.clazz.size</name>
         <value>10k</value>
     </property>
     <property>
-        <name>level1.level2.class.enum</name>
+        <name>level1.level2.clazz.enum</name>
         <value>LABEL2</value>
     </property>
     <property>
-        <name>level1.level2.class.booleanArray.0</name>
+        <name>level1.level2.clazz.booleanArray.0</name>
         <value>true</value>
     </property>
     <property>
-        <name>level1.level2.class.booleanArray.1</name>
+        <name>level1.level2.clazz.booleanArray.1</name>
         <value>false</value>
     </property>
     <property>
-        <name>level1.level2.class.nested.0.0.0.a</name>
+        <name>level1.level2.clazz.nested.0.0.0.a</name>
         <value>1</value>
     </property>
 </configuration>

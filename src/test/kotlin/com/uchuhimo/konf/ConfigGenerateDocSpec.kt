@@ -33,7 +33,7 @@ object ConfigGenerateDocSpec : SubjectSpek<Config>({
                 subject.apply {
                     addSpec(object : ConfigSpec("disk.file") {
                         init {
-                            optional("size", 1024, description = "size of disk file")
+                            optional(1024, name = "size", description = "size of disk file")
                         }
                     })
                 }

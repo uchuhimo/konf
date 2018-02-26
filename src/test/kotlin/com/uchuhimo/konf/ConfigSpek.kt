@@ -43,11 +43,11 @@ object ConfigSpek : SubjectSpek<Config>({
     subject { Config { addSpec(spec) } }
 
     given("a config") {
-        val invalidItem = ConfigSpec("invalid").run { required<Int>("invalidItem") }
+        val invalidItem by ConfigSpec("invalid").run { required<Int>() }
         group("addSpec operation") {
             on("add orthogonal spec") {
                 val newSpec = object : ConfigSpec(spec.prefix) {
-                    val minSize = optional("minSize", 1)
+                    val minSize by optional(1)
                 }
                 subject.addSpec(newSpec)
                 it("should contain items in new spec") {
@@ -67,20 +67,27 @@ object ConfigSpek : SubjectSpek<Config>({
                 }
             }
             on("add repeated name") {
-                val newSpec = ConfigSpec(spec.prefix).apply { required<Int>("size") }
+                val newSpec = ConfigSpec(spec.prefix).apply {
+                    @Suppress("UNUSED_VARIABLE", "NAME_SHADOWING")
+                    val size by required<Int>()
+                }
                 it("should throw NameConflictException") {
                     assertThat({ subject.addSpec(newSpec) }, throws<NameConflictException>())
                 }
             }
             on("add conflict name, which is prefix of existed name") {
-                val newSpec = ConfigSpec("network").apply { required<Int>("buffer") }
+                val newSpec = ConfigSpec("network").apply {
+                    @Suppress("UNUSED_VARIABLE")
+                    val buffer by required<Int>()
+                }
                 it("should throw NameConflictException") {
                     assertThat({ subject.addSpec(newSpec) }, throws<NameConflictException>())
                 }
             }
             on("add conflict name, and an existed name is prefix of it") {
                 val newSpec = ConfigSpec(type.name).apply {
-                    required<Int>("subType")
+                    @Suppress("UNUSED_VARIABLE")
+                    val subType by required<Int>()
                 }
                 it("should throw NameConflictException") {
                     assertThat({ subject.addSpec(newSpec) }, throws<NameConflictException>())

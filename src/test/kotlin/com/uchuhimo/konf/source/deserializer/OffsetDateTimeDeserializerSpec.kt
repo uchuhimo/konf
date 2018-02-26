@@ -33,7 +33,8 @@ object OffsetDateTimeDeserializerSpec : Spek({
         Config {
             addSpec(object : ConfigSpec() {
                 init {
-                    required<OffsetDateTimeWrapper>("item")
+                    @Suppress("UNUSED_VARIABLE")
+                    val item by required<OffsetDateTimeWrapper>()
                 }
             })
         }

@@ -25,8 +25,8 @@ public data class Server(val host: String, val port: Int) {
     fun start() {}
 
     companion object : ConfigSpec("server") {
-        val host = optional("host", "0.0.0.0", description = "host IP of server")
-        val port = required<Int>("port", description = "port of server")
-        val nextPort = lazy("nextPort") { config -> config[port] + 1 }
+        val host by optional("0.0.0.0", description = "host IP of server")
+        val port by required<Int>(description = "port of server")
+        val nextPort by lazy { config -> config[port] + 1 }
     }
 }
