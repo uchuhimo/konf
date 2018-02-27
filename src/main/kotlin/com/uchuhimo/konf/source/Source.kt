@@ -732,6 +732,17 @@ private fun Source.toJsonNode(): JsonNode {
         return this.node
     } else {
         return when {
+            isList() -> ArrayNode(
+                JsonNodeFactory.instance,
+                toList().map {
+                    it.toJsonNode()
+                })
+            isMap() -> ObjectNode(
+                JsonNodeFactory.instance,
+                toMap().mapValues { (_, value) ->
+                    value.toJsonNode()
+                }
+            )
             isBoolean() -> BooleanNode.valueOf(toBoolean())
             isLong() -> LongNode.valueOf(toLong())
             isInt() -> IntNode.valueOf(toInt())
@@ -755,17 +766,6 @@ private fun Source.toJsonNode(): JsonNode {
             isInstant() -> TextNode.valueOf(toInstant().toString())
             isDuration() -> TextNode.valueOf(toDuration().toString())
             isSizeInBytes() -> LongNode.valueOf(toSizeInBytes().bytes)
-            isList() -> ArrayNode(
-                JsonNodeFactory.instance,
-                toList().map {
-                    it.toJsonNode()
-                })
-            isMap() -> ObjectNode(
-                JsonNodeFactory.instance,
-                toMap().mapValues { (_, value) ->
-                    value.toJsonNode()
-                }
-            )
             else -> throw ParseException("fail to cast source $description to JSON node")
         }
     }

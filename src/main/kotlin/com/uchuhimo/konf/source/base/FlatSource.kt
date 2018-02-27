@@ -35,7 +35,7 @@ open class FlatSource(
     val prefix: String = "",
     type: String = "",
     context: Map<String, String> = mapOf()
-) : Source, SourceInfo by SourceInfo.with(context) {
+) : StringValueSource, SourceInfo by SourceInfo.with(context) {
     init {
         @Suppress("LeakingThis")
         addInfo("type", type.notEmptyOr("flat"))
@@ -77,18 +77,25 @@ open class FlatSource(
         }
     }
 
-    private fun getValue(): String =
+    override fun getValue(): String =
         map[prefix] ?: throw NoSuchPathException(this, prefix.toPath())
 
-    override fun isList(): Boolean = toList().isNotEmpty()
-
     override fun toList(): List<Source> {
-        return generateSequence(0) { it + 1 }.map {
-            getOrNull(it.toString().toPath())
-        }.takeWhile {
-                it != null
-            }.filterNotNull().toList().map {
-            it.apply { addInfo("inList", this@FlatSource.info.toDescription()) }
+        try {
+            return super.toList()
+        } catch (e: Exception) {
+            val list = generateSequence(0) { it + 1 }.map {
+                getOrNull(it.toString().toPath())
+            }.takeWhile {
+                    it != null
+                }.filterNotNull().toList().map {
+                it.apply { addInfo("inList", this@FlatSource.info.toDescription()) }
+            }
+            if (list.isNotEmpty()) {
+                return list
+            } else {
+                throw ParseException("$prefix in $map cannot be parsed to a list")
+            }
         }
     }
 
@@ -111,44 +118,6 @@ open class FlatSource(
     }
 
     override fun isText(): Boolean = map.contains(prefix)
-
-    override fun toText(): String = getValue()
-
-    override fun toBoolean(): Boolean {
-        val value = getValue()
-        return when {
-            value.toLowerCase() == "true" -> true
-            value.toLowerCase() == "false" -> false
-            else -> throw ParseException("$value cannot be parsed to a boolean")
-        }
-    }
-
-    override fun toDouble(): Double {
-        val value = getValue()
-        try {
-            return value.toDouble()
-        } catch (cause: NumberFormatException) {
-            throw ParseException("$value cannot be parsed to a double", cause)
-        }
-    }
-
-    override fun toInt(): Int {
-        val value = getValue()
-        try {
-            return value.toInt()
-        } catch (cause: NumberFormatException) {
-            throw ParseException("$value cannot be parsed to an int", cause)
-        }
-    }
-
-    override fun toLong(): Long {
-        val value = getValue()
-        try {
-            return value.toLong()
-        } catch (cause: NumberFormatException) {
-            throw ParseException("$value cannot be parsed to a long", cause)
-        }
-    }
 }
 
 /**
