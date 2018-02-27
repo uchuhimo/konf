@@ -27,12 +27,12 @@ import java.io.OutputStream
 class JsonWriter(val config: Config) : Writer {
     override fun toWriter(writer: java.io.Writer) {
         config.mapper.writerWithDefaultPrettyPrinter()
-                .writeValue(writer, config.toHierarchicalMap())
+            .writeValue(writer, config.toHierarchicalMap())
     }
 
     override fun toOutputStream(outputStream: OutputStream) {
         config.mapper.writerWithDefaultPrettyPrinter()
-                .writeValue(outputStream, config.toHierarchicalMap())
+            .writeValue(outputStream, config.toHierarchicalMap())
     }
 }
 

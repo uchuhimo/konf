@@ -48,7 +48,7 @@ object LoaderSpec : SubjectSpek<Loader>({
         }
         on("load from input stream") {
             val config = subject.inputStream(
-                    tempFileOf("type = inputStream").inputStream())
+                tempFileOf("type = inputStream").inputStream())
             it("should return a config which contains value from input stream") {
                 assertThat(config[SourceType.type], equalTo("inputStream"))
             }
@@ -213,7 +213,7 @@ object LoaderSpec : SubjectSpek<Loader>({
         on("load from non-existed resource") {
             it("should throw SourceNotFoundException") {
                 assertThat({ subject.resource("source/no-provider.properties") },
-                        throws<SourceNotFoundException>())
+                    throws<SourceNotFoundException>())
             }
         }
     }

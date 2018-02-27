@@ -27,9 +27,9 @@ import com.moandjiezana.toml.TomlWriter as Toml4jWriter
  */
 class TomlWriter(val config: Config) : Writer {
     private val toml4jWriter = Toml4jWriter.Builder()
-            .indentValuesBy(0)
-            .indentTablesBy(0)
-            .build()
+        .indentValuesBy(0)
+        .indentTablesBy(0)
+        .build()
 
     override fun toWriter(writer: java.io.Writer) {
         writer.write(toText())

@@ -43,9 +43,9 @@ import java.util.Date
  * Source from a single value.
  */
 open class ValueSource(
-        val value: Any,
-        type: String = "",
-        context: Map<String, String> = mapOf()
+    val value: Any,
+    type: String = "",
+    context: Map<String, String> = mapOf()
 ) : Source, SourceInfo by SourceInfo.with(context) {
     init {
         @Suppress("LeakingThis")
@@ -80,7 +80,7 @@ open class ValueSource(
         is Array<*> -> value.asList()
         else ->
             throw WrongTypeException(
-                    this, value::class.java.simpleName, List::class.java.simpleName)
+                this, value::class.java.simpleName, List::class.java.simpleName)
     }.map {
         it!!.castToSource(context).apply {
             addInfo("inList", this@ValueSource.info.toDescription())
@@ -313,12 +313,12 @@ open class ValueSource(
 }
 
 fun Any.asSource(type: String = "", context: Map<String, String> = mapOf()): Source =
-        when {
-            this is Source -> this
-            this is Map<*, *> ->
-                // assume that only `Map<String, Any>` is provided,
-                // key type mismatch will be detected when loaded into Config
-                @Suppress("UNCHECKED_CAST")
-                MapSource(this as Map<String, Any>, type, context)
-            else -> ValueSource(this, type, context)
-        }
+    when {
+        this is Source -> this
+        this is Map<*, *> ->
+            // assume that only `Map<String, Any>` is provided,
+            // key type mismatch will be detected when loaded into Config
+            @Suppress("UNCHECKED_CAST")
+            MapSource(this as Map<String, Any>, type, context)
+        else -> ValueSource(this, type, context)
+    }

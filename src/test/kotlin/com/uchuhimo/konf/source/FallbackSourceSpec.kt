@@ -48,9 +48,9 @@ object FallbackSourceSpec : Spek({
                 assertThat(source[path].toText(), equalTo(facadeSource[path].toText()))
                 assertThat(source[key].toText(), equalTo(facadeSource[key].toText()))
                 assertThat(source.getOrNull(path)?.toText(),
-                        equalTo(facadeSource.getOrNull(path)?.toText()))
+                    equalTo(facadeSource.getOrNull(path)?.toText()))
                 assertThat(source.getOrNull(key)?.toText(),
-                        equalTo(facadeSource.getOrNull(key)?.toText()))
+                    equalTo(facadeSource.getOrNull(key)?.toText()))
             }
         }
         on("path/key is in fallback source") {
@@ -67,9 +67,9 @@ object FallbackSourceSpec : Spek({
                 assertThat(source[path].toText(), equalTo(fallbackSource[path].toText()))
                 assertThat(source[key].toText(), equalTo(fallbackSource[key].toText()))
                 assertThat(source.getOrNull(path)?.toText(),
-                        equalTo(fallbackSource.getOrNull(path)?.toText()))
+                    equalTo(fallbackSource.getOrNull(path)?.toText()))
                 assertThat(source.getOrNull(key)?.toText(),
-                        equalTo(fallbackSource.getOrNull(key)?.toText()))
+                    equalTo(fallbackSource.getOrNull(key)?.toText()))
             }
             it("contains value in facade source") {
                 assertTrue(facadePath in source)

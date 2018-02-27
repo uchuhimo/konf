@@ -27,8 +27,8 @@ import java.io.Reader
  */
 object JsonProvider : Provider {
     override fun fromReader(reader: Reader): Source =
-            JsonSource(ObjectMapper().readTree(reader))
+        JsonSource(ObjectMapper().readTree(reader))
 
     override fun fromInputStream(inputStream: InputStream): Source =
-            JsonSource(ObjectMapper().readTree(inputStream))
+        JsonSource(ObjectMapper().readTree(inputStream))
 }

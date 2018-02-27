@@ -31,8 +31,8 @@ import com.uchuhimo.konf.source.toDescription
  * Source from a HOCON value.
  */
 class HoconValueSource(
-        val value: ConfigValue,
-        context: Map<String, String> = mapOf()
+    val value: ConfigValue,
+    context: Map<String, String> = mapOf()
 ) : Source, SourceInfo by SourceInfo.with(context) {
     init {
         addInfo("type", "HOCON-value")
@@ -60,8 +60,8 @@ class HoconValueSource(
             is Long -> NumType.Long
             is Double -> NumType.Double
             else -> throw ParseException(
-                    "value $unwrappedValue with type ${unwrappedValue::class.java.simpleName}" +
-                            " is not a valid number(Int/Long/Double)")
+                "value $unwrappedValue with type ${unwrappedValue::class.java.simpleName}" +
+                    " is not a valid number(Int/Long/Double)")
         }
         if (type != expected) {
             throw WrongTypeException(this, "HOCON(${type.name})", "HOCON(${expected.name})")

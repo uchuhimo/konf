@@ -208,10 +208,14 @@ interface Config : ItemContainer {
      * @param trigger load trigger
      * @return a child config containing value loaded by specified trigger
      */
-    fun withLoadTrigger(description: String,
-                        trigger: (config: Config,
-                                  load: (source: Source) -> Unit) -> Unit): Config =
-            loadBy(description, trigger)
+    fun withLoadTrigger(
+        description: String,
+        trigger: (
+            config: Config,
+            load: (source: Source) -> Unit
+        ) -> Unit
+    ): Config =
+        loadBy(description, trigger)
 
     /**
      * Returns default loaders for this config.
@@ -269,9 +273,9 @@ interface Config : ItemContainer {
 }
 
 private class ConfigImpl constructor(
-        override val name: String = "",
-        override val parent: ConfigImpl? = null,
-        override val mapper: ObjectMapper = createDefaultMapper()
+    override val name: String = "",
+    override val parent: ConfigImpl? = null,
+    override val mapper: ObjectMapper = createDefaultMapper()
 ) : Config {
     private val specsInLayer = mutableListOf<ConfigSpec>()
     private val valueByItem = mutableMapOf<Item<*>, ValueState>()
@@ -293,7 +297,7 @@ private class ConfigImpl constructor(
         private var currentConfig = this@ConfigImpl
         private var current = currentConfig.nameByItem.keys.iterator()
 
-        tailrec override fun hasNext(): Boolean {
+        override tailrec fun hasNext(): Boolean {
             return if (current.hasNext()) {
                 true
             } else {
@@ -325,18 +329,18 @@ private class ConfigImpl constructor(
     }
 
     override fun <T : Any> get(item: Item<T>): T = getOrNull(item, errorWhenUnset = true)
-            ?: throw NoSuchItemException(item.name)
+        ?: throw NoSuchItemException(item.name)
 
     override fun <T : Any> get(name: String): T = getOrNull(name, errorWhenUnset = true)
-            ?: throw NoSuchItemException(name)
+        ?: throw NoSuchItemException(name)
 
     override fun <T : Any> getOrNull(item: Item<T>): T? =
-            getOrNull(item, errorWhenUnset = false)
+        getOrNull(item, errorWhenUnset = false)
 
     private fun <T : Any> getOrNull(
-            item: Item<T>,
-            errorWhenUnset: Boolean,
-            lazyContext: ItemContainer = this
+        item: Item<T>,
+        errorWhenUnset: Boolean,
+        lazyContext: ItemContainer = this
     ): T? {
         val valueState = lock.read { valueByItem[item] }
         if (valueState != null) {
@@ -363,8 +367,8 @@ private class ConfigImpl constructor(
                         value as T
                     } else {
                         throw InvalidLazySetException(
-                                "fail to cast $value with ${value::class} to ${item.type.rawClass}" +
-                                        " when getting ${item.name} in config")
+                            "fail to cast $value with ${value::class} to ${item.type.rawClass}" +
+                                " when getting ${item.name} in config")
                     }
                 }
             }
@@ -418,8 +422,8 @@ private class ConfigImpl constructor(
             }
         } else {
             throw ClassCastException(
-                    "fail to cast $value with ${value::class} to ${item.type.rawClass}" +
-                            " when setting ${item.name} in config")
+                "fail to cast $value with ${value::class} to ${item.type.rawClass}" +
+                    " when setting ${item.name} in config")
         }
     }
 
@@ -492,7 +496,7 @@ private class ConfigImpl constructor(
             override fun getValue(thisRef: Any?, property: KProperty<*>): T = get(item)
 
             override fun setValue(thisRef: Any?, property: KProperty<*>, value: T) =
-                    set(item, value)
+                set(item, value)
         }
     }
 
@@ -504,7 +508,7 @@ private class ConfigImpl constructor(
             override fun getValue(thisRef: Any?, property: KProperty<*>): T = get(name)
 
             override fun setValue(thisRef: Any?, property: KProperty<*>, value: T) =
-                    set(name, value)
+                set(name, value)
         }
     }
 
@@ -513,8 +517,8 @@ private class ConfigImpl constructor(
             is ConfigPathNode -> {
                 if (path.isEmpty()) {
                     throw NameConflictException("${item.name} cannot be added" +
-                            " since the following items has been added to config:" +
-                            " ${tree.items.joinToString { it.name }}")
+                        " since the following items has been added to config:" +
+                        " ${tree.items.joinToString { it.name }}")
                 }
                 val matchChild = tree.children.find { it.path.last() == path[0] }
                 if (matchChild != null) {
@@ -531,7 +535,7 @@ private class ConfigImpl constructor(
             }
             is ConfigItemNode<*> -> {
                 throw NameConflictException("${item.name} cannot be added" +
-                        " since item ${tree.item.name} has been added to config")
+                    " since item ${tree.item.name} has been added to config")
             }
         }
     }
@@ -542,7 +546,7 @@ private class ConfigImpl constructor(
                 private var currentConfig = this@ConfigImpl
                 private var current = currentConfig.specsInLayer.iterator()
 
-                tailrec override fun hasNext(): Boolean {
+                override tailrec fun hasNext(): Boolean {
                     return if (current.hasNext()) {
                         true
                     } else {
@@ -631,16 +635,16 @@ private class ConfigImpl constructor(
         }
 
         override fun <T : Any> get(item: Item<T>): T =
-                if (contains(item)) config[item] else throw NoSuchItemException(item.name)
+            if (contains(item)) config[item] else throw NoSuchItemException(item.name)
 
         override fun <T : Any> get(name: String): T =
-                if (contains(name)) config[name] else throw NoSuchItemException(name)
+            if (contains(name)) config[name] else throw NoSuchItemException(name)
 
         override fun <T : Any> getOrNull(item: Item<T>): T? =
-                if (contains(item)) config.getOrNull(item) else null
+            if (contains(item)) config.getOrNull(item) else null
 
         override fun <T : Any> getOrNull(name: String): T? =
-                if (contains(name)) config.getOrNull(name) else null
+            if (contains(name)) config.getOrNull(name) else null
 
         override fun <T : Any> invoke(name: String): T = super.invoke(name)
 

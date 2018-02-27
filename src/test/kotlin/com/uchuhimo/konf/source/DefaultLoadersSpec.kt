@@ -69,7 +69,7 @@ object DefaultLoadersSpec : SubjectSpek<DefaultLoaders>({
             }
             on("load from file with .properties extension") {
                 val config = subject.file(
-                        tempFileOf(propertiesContent, suffix = ".properties"))
+                    tempFileOf(propertiesContent, suffix = ".properties"))
                 it("should load as properties file format") {
                     assertThat(config[item], equalTo("properties"))
                 }
@@ -135,19 +135,19 @@ object DefaultLoadersSpec : SubjectSpek<DefaultLoaders>({
                 }
             }
             load("HOCON", suffix = "conf", content = hoconContent,
-                    newContent = hoconContent.replace("conf", "newValue"))
+                newContent = hoconContent.replace("conf", "newValue"))
             load("JSON", suffix = "json", content = jsonContent,
-                    newContent = jsonContent.replace("json", "newValue"))
+                newContent = jsonContent.replace("json", "newValue"))
             load("properties file", suffix = "properties", content = propertiesContent,
-                    newContent = propertiesContent.replace("properties", "newValue"))
+                newContent = propertiesContent.replace("properties", "newValue"))
             load("TOML", suffix = "toml", content = tomlContent,
-                    newContent = tomlContent.replace("toml", "newValue"))
+                newContent = tomlContent.replace("toml", "newValue"))
             load("XML", suffix = "xml", content = xmlContent,
-                    newContent = xmlContent.replace("<value>xml", "<value>newValue"))
+                newContent = xmlContent.replace("<value>xml", "<value>newValue"))
             load("YAML", suffix = "yaml", content = yamlContent,
-                    newContent = yamlContent.replace("yaml", "newValue"))
+                newContent = yamlContent.replace("yaml", "newValue"))
             load("YAML", suffix = "yml", content = ymlContent,
-                    newContent = ymlContent.replace("yml", "newValue"))
+                newContent = ymlContent.replace("yml", "newValue"))
             on("load from watched file with unsupported extension") {
                 it("should throw UnsupportedExtensionException") {
                     assertThat({
@@ -178,28 +178,28 @@ object DefaultLoadersSpec : SubjectSpek<DefaultLoaders>({
             val afterLoadEnv = subject.env()
             System.setProperty(DefaultLoadersConfig.qualify("type"), "system")
             val afterLoadSystemProperties = afterLoadEnv.withSourceFrom
-                    .systemProperties()
+                .systemProperties()
             val afterLoadHocon = afterLoadSystemProperties.withSourceFrom
-                    .hocon.string(hoconContent)
+                .hocon.string(hoconContent)
             val afterLoadJson = afterLoadHocon.withSourceFrom
-                    .json.string(jsonContent)
+                .json.string(jsonContent)
             val afterLoadProperties = afterLoadJson.withSourceFrom
-                    .properties.string(propertiesContent)
+                .properties.string(propertiesContent)
             val afterLoadToml = afterLoadProperties.withSourceFrom
-                    .toml.string(tomlContent)
+                .toml.string(tomlContent)
             val afterLoadXml = afterLoadToml.withSourceFrom
-                    .xml.string(xmlContent)
+                .xml.string(xmlContent)
             val afterLoadYaml = afterLoadXml.withSourceFrom
-                    .yaml.string(yamlContent)
+                .yaml.string(yamlContent)
             val afterLoadFlat = afterLoadYaml.withSourceFrom
-                    .map.flat(mapOf("source.test.type" to "flat"))
+                .map.flat(mapOf("source.test.type" to "flat"))
             val afterLoadKv = afterLoadFlat.withSourceFrom.map
-                    .kv(mapOf("source.test.type" to "kv"))
+                .kv(mapOf("source.test.type" to "kv"))
             val afterLoadHierarchical = afterLoadKv.withSourceFrom.map
-                    .hierarchical(
-                            mapOf("source" to
-                                    mapOf("test" to
-                                            mapOf("type" to "hierarchical"))))
+                .hierarchical(
+                    mapOf("source" to
+                        mapOf("test" to
+                            mapOf("type" to "hierarchical"))))
             it("should load the corresponding value in each layer") {
                 assertThat(afterLoadEnv[item], equalTo("env"))
                 assertThat(afterLoadSystemProperties[item], equalTo("system"))

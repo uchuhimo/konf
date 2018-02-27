@@ -31,10 +31,10 @@ import com.uchuhimo.konf.toPath
  * Source from a map in flat format.
  */
 open class FlatSource(
-        val map: Map<String, String>,
-        val prefix: String = "",
-        type: String = "",
-        context: Map<String, String> = mapOf()
+    val map: Map<String, String>,
+    val prefix: String = "",
+    type: String = "",
+    context: Map<String, String> = mapOf()
 ) : Source, SourceInfo by SourceInfo.with(context) {
     init {
         @Suppress("LeakingThis")
@@ -78,7 +78,7 @@ open class FlatSource(
     }
 
     private fun getValue(): String =
-            map[prefix] ?: throw NoSuchPathException(this, prefix.toPath())
+        map[prefix] ?: throw NoSuchPathException(this, prefix.toPath())
 
     override fun isList(): Boolean = toList().isNotEmpty()
 
@@ -86,8 +86,8 @@ open class FlatSource(
         return generateSequence(0) { it + 1 }.map {
             getOrNull(it.toString().toPath())
         }.takeWhile {
-                    it != null
-                }.filterNotNull().toList().map {
+                it != null
+            }.filterNotNull().toList().map {
             it.apply { addInfo("inList", this@FlatSource.info.toDescription()) }
         }
     }
@@ -98,12 +98,12 @@ open class FlatSource(
         return map.keys.filter {
             it.startsWith("$prefix.")
         }.map {
-                    it.removePrefix("$prefix.")
-                }.filter {
-                    it.isNotEmpty()
-                }.map {
-                    it.takeWhile { it != '.' }
-                }.toSet().associate {
+                it.removePrefix("$prefix.")
+            }.filter {
+                it.isNotEmpty()
+            }.map {
+                it.takeWhile { it != '.' }
+            }.toSet().associate {
             it to FlatSource(map, "$prefix.$it", context = context).apply {
                 addInfo("inMap", this@FlatSource.info.toDescription())
             }

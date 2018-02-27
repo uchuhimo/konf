@@ -43,16 +43,16 @@ object MultiLayerConfigSpec : SubjectSpek<Config>({
         }
         it("should contain same items with parent config") {
             assertThat(subject[NetworkBuffer.name],
-                    equalTo(subject.parent!![NetworkBuffer.name]))
+                equalTo(subject.parent!![NetworkBuffer.name]))
             assertThat(subject[NetworkBuffer.type],
-                    equalTo(subject.parent!![NetworkBuffer.type]))
+                equalTo(subject.parent!![NetworkBuffer.type]))
         }
         on("export values in facade layer to map") {
             val spec = NetworkBuffer
             it("should not contain unset items in map") {
                 assertThat(subject.parent!!.layer.toMap(), equalTo(mapOf<String, Any>(
-                        spec.name.name to "buffer",
-                        spec.type.name to NetworkBuffer.Type.OFF_HEAP.name)))
+                    spec.name.name to "buffer",
+                    spec.type.name to NetworkBuffer.Type.OFF_HEAP.name)))
             }
             it("should not contain values from other layers in map") {
                 subject[spec.size] = 4
@@ -60,14 +60,14 @@ object MultiLayerConfigSpec : SubjectSpek<Config>({
                 val layer = subject.layer
                 val map = layer.toMap()
                 assertThat(map, equalTo(mapOf(
-                        spec.size.name to 4,
-                        spec.type.name to NetworkBuffer.Type.ON_HEAP.name)))
+                    spec.size.name to 4,
+                    spec.type.name to NetworkBuffer.Type.ON_HEAP.name)))
             }
         }
         on("set with item") {
             subject[NetworkBuffer.name] = "newName"
             it("should contain the specified value in the top level," +
-                    " and keep the rest levels unchanged") {
+                " and keep the rest levels unchanged") {
                 assertThat(subject[NetworkBuffer.name], equalTo("newName"))
                 assertThat(subject.parent!![NetworkBuffer.name], equalTo("buffer"))
             }
@@ -75,7 +75,7 @@ object MultiLayerConfigSpec : SubjectSpek<Config>({
         on("set with name") {
             subject[NetworkBuffer.name.name] = "newName"
             it("should contain the specified value in the top level," +
-                    " and keep the rest levels unchanged") {
+                " and keep the rest levels unchanged") {
                 assertThat(subject[NetworkBuffer.name], equalTo("newName"))
                 assertThat(subject.parent!![NetworkBuffer.name], equalTo("buffer"))
             }
@@ -120,7 +120,7 @@ object MultiLayerConfigSpec : SubjectSpek<Config>({
             subject.addSpec(spec)
             it("should cover all items in config") {
                 assertThat(subject.iterator().asSequence().toSet(),
-                        equalTo((NetworkBuffer.items + spec.items).toSet()))
+                    equalTo((NetworkBuffer.items + spec.items).toSet()))
             }
         }
         on("add custom deserializer to mapper in parent") {
@@ -136,7 +136,7 @@ object MultiLayerConfigSpec : SubjectSpek<Config>({
 
                 assertThat(parent.mapper, sameInstance(child.mapper))
                 assertThat({ child.withSourceFrom.map.kv(mapOf("item" to "string")) },
-                        throws<LoadException>())
+                    throws<LoadException>())
             }
             it("should be able to use the specified deserializer after adding") {
                 val spec = object : ConfigSpec() {
@@ -160,10 +160,10 @@ object MultiLayerConfigSpec : SubjectSpek<Config>({
 private data class StringWrapper(val string: String)
 
 private class StringWrapperDeserializer :
-        StdDeserializer<StringWrapper>(StringWrapper::class.java) {
+    StdDeserializer<StringWrapper>(StringWrapper::class.java) {
     override fun deserialize(
-            jp: JsonParser,
-            ctxt: DeserializationContext
+        jp: JsonParser,
+        ctxt: DeserializationContext
     ): StringWrapper {
         val node = jp.codec.readTree<JsonNode>(jp)
         return StringWrapper(node.textValue())

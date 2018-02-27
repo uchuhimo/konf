@@ -35,16 +35,17 @@ import com.fasterxml.jackson.databind.type.TypeFactory
  * @see Config
  */
 sealed class Item<T : Any>(
-        /**
-         * Config spec that contains this item.
-         */
-        val spec: ConfigSpec,
-        name: String,
-        /**
-         * Description for this item.
-         */
-        val description: String = "",
-        type: JavaType? = null) {
+    /**
+     * Config spec that contains this item.
+     */
+    val spec: ConfigSpec,
+    name: String,
+    /**
+     * Description for this item.
+     */
+    val description: String = "",
+    type: JavaType? = null
+) {
     init {
         @Suppress("LeakingThis")
         spec.addItem(this)
@@ -70,7 +71,7 @@ sealed class Item<T : Any>(
      */
     @Suppress("LeakingThis")
     val type: JavaType = type ?: TypeFactory.defaultInstance().constructType(this::class.java)
-            .findSuperType(Item::class.java).bindings.typeParameters[0]
+        .findSuperType(Item::class.java).bindings.typeParameters[0]
 
     /**
      * Whether this is a required item or not.
@@ -103,9 +104,9 @@ sealed class Item<T : Any>(
     val asLazyItem: LazyItem<T> get() = this as LazyItem<T>
 }
 
-        /**
-         * Type of Item path.
-         */
+    /**
+     * Type of Item path.
+     */
 typealias Path = List<String>
 
 /**
@@ -138,10 +139,10 @@ fun String.toPath(): Path {
  * Required item must be set with value before retrieved in config.
  */
 open class RequiredItem<T : Any> @JvmOverloads constructor(
-        spec: ConfigSpec,
-        name: String,
-        description: String = "",
-        type: JavaType? = null
+    spec: ConfigSpec,
+    name: String,
+    description: String = "",
+    type: JavaType? = null
 ) : Item<T>(spec, name, description, type) {
     override val isRequired: Boolean = true
 }
@@ -153,14 +154,14 @@ open class RequiredItem<T : Any> @JvmOverloads constructor(
  * After associated with specified value, the specified value will be returned when accessing.
  */
 open class OptionalItem<T : Any> @JvmOverloads constructor(
-        spec: ConfigSpec,
-        name: String,
-        /**
-         * Default value returned before associating this item with specified value.
-         */
-        val default: T,
-        description: String = "",
-        type: JavaType? = null
+    spec: ConfigSpec,
+    name: String,
+    /**
+     * Default value returned before associating this item with specified value.
+     */
+    val default: T,
+    description: String = "",
+    type: JavaType? = null
 ) : Item<T>(spec, name, description, type) {
     override val isOptional: Boolean = true
 }
@@ -174,18 +175,18 @@ open class OptionalItem<T : Any> @JvmOverloads constructor(
  * when needed to reflect modifying of other values in config.
  */
 open class LazyItem<T : Any> @JvmOverloads constructor(
-        spec: ConfigSpec,
-        name: String,
-        /**
-         * Thunk used to evaluate value for this item.
-         *
-         * [ItemContainer] is provided as evaluation environment to avoid unexpected modification
-         * to config.
-         * Thunk will be evaluated every time when needed to reflect modifying of other values in config.
-         */
-        val thunk: (config: ItemContainer) -> T,
-        description: String = "",
-        type: JavaType? = null
+    spec: ConfigSpec,
+    name: String,
+    /**
+     * Thunk used to evaluate value for this item.
+     *
+     * [ItemContainer] is provided as evaluation environment to avoid unexpected modification
+     * to config.
+     * Thunk will be evaluated every time when needed to reflect modifying of other values in config.
+     */
+    val thunk: (config: ItemContainer) -> T,
+    description: String = "",
+    type: JavaType? = null
 ) : Item<T>(spec, name, description, type) {
     override val isLazy: Boolean = true
 }

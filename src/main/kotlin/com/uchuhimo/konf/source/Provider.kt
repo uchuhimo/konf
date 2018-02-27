@@ -87,7 +87,7 @@ interface Provider {
      * @return a new source from specified portion of byte array
      */
     fun fromBytes(content: ByteArray, offset: Int, length: Int): Source =
-            fromInputStream(content.inputStream(offset, length))
+        fromInputStream(content.inputStream(offset, length))
 
     /**
      * Returns a new source from specified url.

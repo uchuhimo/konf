@@ -26,8 +26,8 @@ import com.uchuhimo.konf.source.SourceInfo
  * Source from a HOCON map.
  */
 class HoconSource(
-        val config: Config,
-        context: Map<String, String> = mapOf()
+    val config: Config,
+    context: Map<String, String> = mapOf()
 ) : Source, SourceInfo by SourceInfo.with(context) {
     init {
         addInfo("type", "HOCON")

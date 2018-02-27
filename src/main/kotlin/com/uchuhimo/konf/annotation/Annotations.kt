@@ -20,10 +20,10 @@ package com.uchuhimo.konf.annotation
  * Indicates that this API is specially designed to be used in Java.
  */
 @Target(
-        AnnotationTarget.FUNCTION,
-        AnnotationTarget.CONSTRUCTOR,
-        AnnotationTarget.PROPERTY_GETTER,
-        AnnotationTarget.PROPERTY_SETTER,
-        AnnotationTarget.CLASS)
+    AnnotationTarget.FUNCTION,
+    AnnotationTarget.CONSTRUCTOR,
+    AnnotationTarget.PROPERTY_GETTER,
+    AnnotationTarget.PROPERTY_SETTER,
+    AnnotationTarget.CLASS)
 @Retention(AnnotationRetention.SOURCE)
 annotation class JavaApi

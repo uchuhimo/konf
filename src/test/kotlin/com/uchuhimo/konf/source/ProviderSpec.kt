@@ -40,7 +40,7 @@ object ProviderSpec : SubjectSpek<Provider>({
         }
         on("create source from input stream") {
             val source = subject.fromInputStream(
-                    tempFileOf("type = inputStream").inputStream())
+                tempFileOf("type = inputStream").inputStream())
             it("should return a source which contains value from input stream") {
                 assertThat(source["type"].toText(), equalTo("inputStream"))
             }
@@ -137,7 +137,7 @@ object ProviderSpec : SubjectSpek<Provider>({
         on("create source from non-existed resource") {
             it("should throw SourceNotFoundException") {
                 assertThat({ subject.fromResource("source/no-provider.properties") },
-                        throws<SourceNotFoundException>())
+                    throws<SourceNotFoundException>())
             }
         }
     }

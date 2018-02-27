@@ -51,8 +51,8 @@ object ConfigSpecSpek : Spek({
                     }
                     it("should have specified type") {
                         assertThat(item.type,
-                                equalTo(TypeFactory.defaultInstance()
-                                        .constructType(Int::class.javaObjectType)))
+                            equalTo(TypeFactory.defaultInstance()
+                                .constructType(Int::class.javaObjectType)))
                     }
                 }
             }

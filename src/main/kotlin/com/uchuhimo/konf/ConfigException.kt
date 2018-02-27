@@ -53,4 +53,4 @@ class NoSuchItemException(val name: String) : ConfigException("cannot find $name
  * Exception indicates that config spec cannot be added to this config because it has child layer.
  */
 class SpecFrozenException(val config: Config) :
-        ConfigException("config ${config.name} has child layer, cannot add new spec")
+    ConfigException("config ${config.name} has child layer, cannot add new spec")

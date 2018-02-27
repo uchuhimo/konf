@@ -45,7 +45,7 @@ object OffsetDateTimeDeserializerSpec : Spek({
             config.withSourceFrom.map.kv(mapOf("item" to mapOf("offsetDateTime" to "2007-12-03T10:15:30+01:00"))).apply {
                 it("should succeed") {
                     assertThat(this@apply<OffsetDateTimeWrapper>("item").offsetDateTime,
-                            equalTo(OffsetDateTime.parse("2007-12-03T10:15:30+01:00")))
+                        equalTo(OffsetDateTime.parse("2007-12-03T10:15:30+01:00")))
                 }
             }
         }

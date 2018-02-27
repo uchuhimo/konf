@@ -27,9 +27,9 @@ import java.util.concurrent.TimeUnit.NANOSECONDS
 class Buffer {
     companion object : ConfigSpec("network.buffer") {
         val name = optional(
-                name = "name",
-                default = "buffer",
-                description = "name of buffer")
+            name = "name",
+            default = "buffer",
+            description = "name of buffer")
     }
 }
 
@@ -68,7 +68,7 @@ class ConfigBenchmark {
 
     @Benchmark
     fun getWithNameFromMultiThread(state: MultiThreadConfigState) =
-            state.config<String>(Buffer.name.name)
+        state.config<String>(Buffer.name.name)
 
     @Benchmark
     fun setWithName(state: ConfigState) {
@@ -116,7 +116,7 @@ class MultiLevelConfigBenchmark {
 
     @Benchmark
     fun getWithNameFromMultiThread(state: MultiThreadConfigState) =
-            state.config<String>(Buffer.name.name)
+        state.config<String>(Buffer.name.name)
 
     @Benchmark
     fun setWithName(state: ConfigState) {

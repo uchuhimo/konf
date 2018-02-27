@@ -49,7 +49,7 @@ object XmlProviderSpec : SubjectSpek<XmlProvider>({
         }
         on("create source from input stream") {
             val source = subject.fromInputStream(
-                    tempFileOf(xmlDoc("type", "inputStream")).inputStream())
+                tempFileOf(xmlDoc("type", "inputStream")).inputStream())
             it("should have correct type") {
                 assertThat(source.info["type"], equalTo("XML"))
             }
