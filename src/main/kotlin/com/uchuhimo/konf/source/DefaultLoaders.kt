@@ -101,6 +101,25 @@ class DefaultLoaders(
     fun systemProperties(): Config = config.withSource(PropertiesProvider.fromSystem())
 
     /**
+     * Returns corresponding loader based on extension.
+     *
+     * @param extension the file extension
+     * @param source the source description for error message
+     * @return the corresponding loader based on extension
+     */
+    fun dispatchExtension(extension: String, source: String = ""): Loader {
+        return when (extension) {
+            "conf" -> hocon
+            "json" -> json
+            "properties" -> properties
+            "toml" -> toml
+            "xml" -> xml
+            "yml", "yaml" -> yaml
+            else -> throw UnsupportedExtensionException(source)
+        }
+    }
+
+    /**
      * Returns a child config containing values from specified file.
      *
      * Format of the file is auto-detected from the file extension.
@@ -118,17 +137,7 @@ class DefaultLoaders(
      * @return a child config containing values from specified file
      * @throws UnsupportedExtensionException
      */
-    fun file(file: File): Config {
-        return when (file.extension) {
-            "conf" -> hocon.file(file)
-            "json" -> json.file(file)
-            "properties" -> properties.file(file)
-            "toml" -> toml.file(file)
-            "xml" -> xml.file(file)
-            "yml", "yaml" -> yaml.file(file)
-            else -> throw UnsupportedExtensionException(file)
-        }
-    }
+    fun file(file: File): Config = dispatchExtension(file.extension, file.name).file(file)
 
     /**
      * Returns a child config containing values from specified file path.
@@ -149,56 +158,6 @@ class DefaultLoaders(
      * @throws UnsupportedExtensionException
      */
     fun file(file: String): Config = file(File(file))
-
-    /**
-     * Returns a child config containing values from specified url.
-     *
-     * Format of the file is auto-detected from the url extension.
-     * Supported file formats and the corresponding extensions:
-     * - HOCON: conf
-     * - JSON: json
-     * - Properties: properties
-     * - TOML: toml
-     * - XML: xml
-     * - YAML: yml, yaml
-     *
-     * Throws [UnsupportedExtensionException] if the file extension is unsupported.
-     *
-     * @param file specified file
-     * @return a child config containing values from specified file
-     * @throws UnsupportedExtensionException
-     */
-    fun url(url: URL): Config {
-        return when (File(url.path).extension) {
-            "conf" -> hocon.url(url)
-            "json" -> json.url(url)
-            "properties" -> properties.url(url)
-            "toml" -> toml.url(url)
-            "xml" -> xml.url(url)
-            "yml", "yaml" -> yaml.url(url)
-            else -> throw UnsupportedExtensionException(File(url.path))
-        }
-    }
-
-    /**
-     * Returns a child config containing values from specified url.
-     *
-     * Format of the file is auto-detected from the url extension.
-     * Supported file formats and the corresponding extensions:
-     * - HOCON: conf
-     * - JSON: json
-     * - Properties: properties
-     * - TOML: toml
-     * - XML: xml
-     * - YAML: yml, yaml
-     *
-     * Throws [UnsupportedExtensionException] if the file extension is unsupported.
-     *
-     * @param file specified file
-     * @return a child config containing values from specified file
-     * @throws UnsupportedExtensionException
-     */
-    fun url(url: String): Config = url(URL(url))
 
     /**
      * Returns a child config containing values from specified file,
@@ -227,17 +186,8 @@ class DefaultLoaders(
         delayTime: Long = 5,
         unit: TimeUnit = TimeUnit.SECONDS,
         context: CoroutineContext = DefaultDispatcher
-    ): Config {
-        return when (file.extension) {
-            "conf" -> hocon.watchFile(file, delayTime, unit, context)
-            "json" -> json.watchFile(file, delayTime, unit, context)
-            "properties" -> properties.watchFile(file, delayTime, unit, context)
-            "toml" -> toml.watchFile(file, delayTime, unit, context)
-            "xml" -> xml.watchFile(file, delayTime, unit, context)
-            "yml", "yaml" -> yaml.watchFile(file, delayTime, unit, context)
-            else -> throw UnsupportedExtensionException(file)
-        }
-    }
+    ): Config = dispatchExtension(file.extension, file.name)
+        .watchFile(file, delayTime, unit, context)
 
     /**
      * Returns a child config containing values from specified file path,
@@ -266,8 +216,106 @@ class DefaultLoaders(
         delayTime: Long = 5,
         unit: TimeUnit = TimeUnit.SECONDS,
         context: CoroutineContext = DefaultDispatcher
-    ): Config =
-        watchFile(File(file), delayTime, unit, context)
+    ): Config = watchFile(File(file), delayTime, unit, context)
+
+    /**
+     * Returns a child config containing values from specified url.
+     *
+     * Format of the url is auto-detected from the url extension.
+     * Supported url formats and the corresponding extensions:
+     * - HOCON: conf
+     * - JSON: json
+     * - Properties: properties
+     * - TOML: toml
+     * - XML: xml
+     * - YAML: yml, yaml
+     *
+     * Throws [UnsupportedExtensionException] if the url extension is unsupported.
+     *
+     * @param url specified url
+     * @return a child config containing values from specified url
+     * @throws UnsupportedExtensionException
+     */
+    fun url(url: URL): Config = dispatchExtension(File(url.path).extension, url.toString()).url(url)
+
+    /**
+     * Returns a child config containing values from specified url string.
+     *
+     * Format of the url is auto-detected from the url extension.
+     * Supported url formats and the corresponding extensions:
+     * - HOCON: conf
+     * - JSON: json
+     * - Properties: properties
+     * - TOML: toml
+     * - XML: xml
+     * - YAML: yml, yaml
+     *
+     * Throws [UnsupportedExtensionException] if the url extension is unsupported.
+     *
+     * @param url specified url string
+     * @return a child config containing values from specified url string
+     * @throws UnsupportedExtensionException
+     */
+    fun url(url: String): Config = url(URL(url))
+
+    /**
+     * Returns a child config containing values from specified url,
+     * and reloads values periodically.
+     *
+     * Format of the url is auto-detected from the url extension.
+     * Supported url formats and the corresponding extensions:
+     * - HOCON: conf
+     * - JSON: json
+     * - Properties: properties
+     * - TOML: toml
+     * - XML: xml
+     * - YAML: yml, yaml
+     *
+     * Throws [UnsupportedExtensionException] if the url extension is unsupported.
+     *
+     * @param url specified url
+     * @param delayTime delay to observe between every check. The default value is 5.
+     * @param unit time unit of delay. The default value is [TimeUnit.SECONDS].
+     * @param context context of the coroutine. The default value is [DefaultDispatcher].
+     * @return a child config containing values from specified url
+     * @throws UnsupportedExtensionException
+     */
+    fun watchUrl(
+        url: URL,
+        delayTime: Long = 5,
+        unit: TimeUnit = TimeUnit.SECONDS,
+        context: CoroutineContext = DefaultDispatcher
+    ): Config = dispatchExtension(File(url.path).extension, url.toString())
+        .watchUrl(url, delayTime, unit, context)
+
+    /**
+     * Returns a child config containing values from specified url string,
+     * and reloads values periodically.
+     *
+     * Format of the url is auto-detected from the url extension.
+     * Supported url formats and the corresponding extensions:
+     * - HOCON: conf
+     * - JSON: json
+     * - Properties: properties
+     * - TOML: toml
+     * - XML: xml
+     * - YAML: yml, yaml
+     *
+     * Throws [UnsupportedExtensionException] if the url extension is unsupported.
+     *
+     * @param url specified url string
+     * @param delayTime delay to observe between every check. The default value is 5.
+     * @param unit time unit of delay. The default value is [TimeUnit.SECONDS].
+     * @param context context of the coroutine. The default value is [DefaultDispatcher].
+     * @return a child config containing values from specified url string
+     * @throws UnsupportedExtensionException
+     */
+    fun watchUrl(
+        url: String,
+        delayTime: Long = 5,
+        unit: TimeUnit = TimeUnit.SECONDS,
+        context: CoroutineContext = DefaultDispatcher
+    ): Config = watchUrl(URL(url), delayTime, unit, context)
 }
 
 /**

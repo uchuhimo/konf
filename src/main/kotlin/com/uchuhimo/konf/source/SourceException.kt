@@ -19,7 +19,6 @@ package com.uchuhimo.konf.source
 import com.uchuhimo.konf.ConfigException
 import com.uchuhimo.konf.Path
 import com.uchuhimo.konf.name
-import java.io.File
 
 /**
  * Exception for source.
@@ -85,8 +84,8 @@ class LoadException(val path: Path, cause: Throwable) :
 class SourceNotFoundException(message: String) : SourceException(message)
 
 /**
- * Exception indicates that specified file has unsupported file extension.
+ * Exception indicates that specified source has unsupported extension.
  */
-class UnsupportedExtensionException(file: File) : SourceException(
-    "cannot detect supported extension for \"${file.name}\"," +
+class UnsupportedExtensionException(source: String) : SourceException(
+    "cannot detect supported extension for \"$source\"," +
         " supported extensions: conf, json, properties, toml, xml, yml, yaml")

@@ -29,8 +29,9 @@ import org.jetbrains.spek.api.dsl.given
 import org.jetbrains.spek.api.dsl.it
 import org.jetbrains.spek.api.dsl.on
 import org.jetbrains.spek.subject.SubjectSpek
-import java.util.concurrent.TimeUnit
 import spark.Service
+import java.net.URL
+import java.util.concurrent.TimeUnit
 
 object DefaultLoadersSpec : SubjectSpek<DefaultLoaders>({
     subject {
@@ -55,205 +56,176 @@ object DefaultLoadersSpec : SubjectSpek<DefaultLoaders>({
                 assertThat(config[item], equalTo("system"))
             }
         }
-        group("load from url") {
-            var service = memoized {
-                Service.ignite().apply {
-                    port(0)
-                    get("/source.properties") { _, _ -> propertiesContent }
-                    get("/source.toml") { _, _ -> tomlContent }
-                    get("/source.conf") { _, _ -> hoconContent }
-                    get("/source.json") { _, _ -> jsonContent }
-                    get("/source.yaml") { _, _ -> yamlContent }
-                    get("/source.yml") { _, _ -> yamlContent }
-                    get("/source.xml") { _,_ -> xmlContent }
-                    awaitInitialization()
-                }
+        on("dispatch loader based on extension") {
+            it("should return the corresponding loader") {
+                assertThat(subject.dispatchExtension("conf"), equalTo(subject.hocon))
+                assertThat(subject.dispatchExtension("json"), equalTo(subject.json))
+                assertThat(subject.dispatchExtension("properties"), equalTo(subject.properties))
+                assertThat(subject.dispatchExtension("toml"), equalTo(subject.toml))
+                assertThat(subject.dispatchExtension("xml"), equalTo(subject.xml))
+                assertThat(subject.dispatchExtension("yml"), equalTo(subject.yaml))
+                assertThat(subject.dispatchExtension("yaml"), equalTo(subject.yaml))
             }
-            fun sparky(path: String, expect: String )
-            {
-              val port = service().port()
-              val config=subject.url("http://localhost:${port}${path}")
-              it("should return a config which contains value in URL") {
-                assertThat(config[item], equalTo(expect))
-              }
+            it("should throw UnsupportedExtensionException when the extension is unsupported") {
+                assertThat({ subject.dispatchExtension("txt") }, throws<UnsupportedExtensionException>())
             }
-            on("load properties from HTTP URL") {
-              sparky("/source.properties","properties")
-              sparky("/source.toml","toml")
-              sparky("/source.conf","conf")
-              sparky("/source.json","json")
-              sparky("/source.xml", "xml")
-              sparky("/source.yaml","yaml")
-              sparky("/source.yml", "yml")
-              sparky("/source.xml","xml")
-              it("should throw UnsupportedExtensionException") {
-                assertThat({
-                  sparky("/source.text","text")
-                }, throws<UnsupportedExtensionException>())
-              }
-              service().stop()
-            }
-
         }
-        group("load from file") {
-            on("load from file with .conf extension") {
-                val config = subject.file(tempFileOf(hoconContent, suffix = ".conf"))
-                it("should load as HOCON format") {
-                    assertThat(config[item], equalTo("conf"))
-                }
+        on("load from URL") {
+            val service = Service.ignite()
+            service.port(0)
+            service.get("/source.properties") { _, _ -> propertiesContent }
+            service.awaitInitialization()
+            val config = subject.url(URL("http://localhost:${service.port()}/source.properties"))
+            it("should load as auto-detected URL format") {
+                assertThat(config[item], equalTo("properties"))
             }
-            on("load from file with .json extension") {
-                val config = subject.file(tempFileOf(jsonContent, suffix = ".json"))
-                it("should load as JSON format") {
-                    assertThat(config[item], equalTo("json"))
-                }
+            service.stop()
+        }
+        on("load from URL string") {
+            val service = Service.ignite()
+            service.port(0)
+            service.get("/source.properties") { _, _ -> propertiesContent }
+            service.awaitInitialization()
+            val config = subject.url("http://localhost:${service.port()}/source.properties")
+            it("should load as auto-detected URL format") {
+                assertThat(config[item], equalTo("properties"))
             }
-            on("load from file with .properties extension") {
-                val config = subject.file(
-                    tempFileOf(propertiesContent, suffix = ".properties"))
-                it("should load as properties file format") {
-                    assertThat(config[item], equalTo("properties"))
-                }
+            service.stop()
+        }
+        on("load from file") {
+            val config = subject.file(tempFileOf(propertiesContent, suffix = ".properties"))
+            it("should load as auto-detected file format") {
+                assertThat(config[item], equalTo("properties"))
             }
-            on("load from file with .toml extension") {
-                val config = subject.file(tempFileOf(tomlContent, suffix = ".toml"))
-                it("should load as TOML format") {
-                    assertThat(config[item], equalTo("toml"))
-                }
+        }
+        on("load from file path") {
+            val file = tempFileOf(propertiesContent, suffix = ".properties")
+            val config = subject.file(file.path)
+            it("should load as auto-detected file format") {
+                assertThat(config[item], equalTo("properties"))
             }
-            on("load from file with .xml extension") {
-                val config = subject.file(tempFileOf(xmlContent, suffix = ".xml"))
-                it("should load as XML format") {
-                    assertThat(config[item], equalTo("xml"))
-                }
-            }
-            on("load from file with .yaml extension") {
-                val config = subject.file(tempFileOf(yamlContent, suffix = ".yaml"))
-                it("should load as YAML format") {
-                    assertThat(config[item], equalTo("yaml"))
-                }
-            }
-            on("load from file with .yml extension") {
-                val config = subject.file(tempFileOf(ymlContent, suffix = ".yml"))
-                it("should load as YAML format") {
-                    assertThat(config[item], equalTo("yml"))
-                }
-            }
-            on("load from file with unsupported extension") {
-                it("should throw UnsupportedExtensionException") {
-                    assertThat({
-                        subject.file(tempFileOf("source.test.type = txt", suffix = ".txt"))
-                    }, throws<UnsupportedExtensionException>())
-                }
-            }
-            on("load from file path") {
+        }
+        on("load from watched file") {
+            newSingleThreadContext("context").use { context ->
                 val file = tempFileOf(propertiesContent, suffix = ".properties")
-                val config = subject.file(file.path)
+                val config = subject.watchFile(file, 1, context = context)
+                val originalValue = config[item]
+                file.writeText(propertiesContent.replace("properties", "newValue"))
+                runBlocking(context) {
+                    delay(1, TimeUnit.SECONDS)
+                }
+                val newValue = config[item]
                 it("should load as auto-detected file format") {
-                    assertThat(config[item], equalTo("properties"))
+                    assertThat(originalValue, equalTo("properties"))
+                }
+                it("should load new value when file has been changed") {
+                    assertThat(newValue, equalTo("newValue"))
                 }
             }
         }
-        group("load from watched file") {
-            fun load(type: String, suffix: String, content: String, newContent: String) {
-                on("load from watched file with .$suffix extension") {
-                    newSingleThreadContext("context").use { context ->
-                        val file = tempFileOf(content, suffix = ".$suffix")
-                        val config = subject.watchFile(file, 1, context = context)
-                        val originalValue = config[item]
-                        file.writeText(newContent)
-                        runBlocking(context) {
-                            delay(1, TimeUnit.SECONDS)
-                        }
-                        val newValue = config[item]
-                        it("should load as $type format") {
-                            assertThat(originalValue, equalTo(suffix))
-                        }
-                        it("should load new value when file has been changed") {
-                            assertThat(newValue, equalTo("newValue"))
-                        }
-                    }
+        on("load from watched file path") {
+            newSingleThreadContext("context").use { context ->
+                val file = tempFileOf(propertiesContent, suffix = ".properties")
+                val config = subject.watchFile(file.path, 1, context = context)
+                val originalValue = config[item]
+                file.writeText(propertiesContent.replace("properties", "newValue"))
+                runBlocking(context) {
+                    delay(1, TimeUnit.SECONDS)
                 }
-            }
-            load("HOCON", suffix = "conf", content = hoconContent,
-                newContent = hoconContent.replace("conf", "newValue"))
-            load("JSON", suffix = "json", content = jsonContent,
-                newContent = jsonContent.replace("json", "newValue"))
-            load("properties file", suffix = "properties", content = propertiesContent,
-                newContent = propertiesContent.replace("properties", "newValue"))
-            load("TOML", suffix = "toml", content = tomlContent,
-                newContent = tomlContent.replace("toml", "newValue"))
-            load("XML", suffix = "xml", content = xmlContent,
-                newContent = xmlContent.replace("<value>xml", "<value>newValue"))
-            load("YAML", suffix = "yaml", content = yamlContent,
-                newContent = yamlContent.replace("yaml", "newValue"))
-            load("YAML", suffix = "yml", content = ymlContent,
-                newContent = ymlContent.replace("yml", "newValue"))
-            on("load from watched file with unsupported extension") {
-                it("should throw UnsupportedExtensionException") {
-                    assertThat({
-                        subject.watchFile(tempFileOf("source.test.type = txt", suffix = ".txt"))
-                    }, throws<UnsupportedExtensionException>())
+                val newValue = config[item]
+                it("should load as auto-detected file format") {
+                    assertThat(originalValue, equalTo("properties"))
                 }
-            }
-            on("load from watched file path") {
-                newSingleThreadContext("context").use { context ->
-                    val file = tempFileOf(propertiesContent, suffix = ".properties")
-                    val config = subject.watchFile(file.path, 1, context = context)
-                    val originalValue = config[item]
-                    file.writeText(propertiesContent.replace("properties", "newValue"))
-                    runBlocking(context) {
-                        delay(1, TimeUnit.SECONDS)
-                    }
-                    val newValue = config[item]
-                    it("should load as auto-detected file format") {
-                        assertThat(originalValue, equalTo("properties"))
-                    }
-                    it("should load new value when file has been changed") {
-                        assertThat(newValue, equalTo("newValue"))
-                    }
+                it("should load new value when file has been changed") {
+                    assertThat(newValue, equalTo("newValue"))
                 }
             }
         }
-        on("load from multiple sources") {
-            val afterLoadEnv = subject.env()
-            System.setProperty(DefaultLoadersConfig.qualify("type"), "system")
-            val afterLoadSystemProperties = afterLoadEnv.withSourceFrom
-                .systemProperties()
-            val afterLoadHocon = afterLoadSystemProperties.withSourceFrom
-                .hocon.string(hoconContent)
-            val afterLoadJson = afterLoadHocon.withSourceFrom
-                .json.string(jsonContent)
-            val afterLoadProperties = afterLoadJson.withSourceFrom
-                .properties.string(propertiesContent)
-            val afterLoadToml = afterLoadProperties.withSourceFrom
-                .toml.string(tomlContent)
-            val afterLoadXml = afterLoadToml.withSourceFrom
-                .xml.string(xmlContent)
-            val afterLoadYaml = afterLoadXml.withSourceFrom
-                .yaml.string(yamlContent)
-            val afterLoadFlat = afterLoadYaml.withSourceFrom
-                .map.flat(mapOf("source.test.type" to "flat"))
-            val afterLoadKv = afterLoadFlat.withSourceFrom.map
-                .kv(mapOf("source.test.type" to "kv"))
-            val afterLoadHierarchical = afterLoadKv.withSourceFrom.map
-                .hierarchical(
-                    mapOf("source" to
-                        mapOf("test" to
-                            mapOf("type" to "hierarchical"))))
-            it("should load the corresponding value in each layer") {
-                assertThat(afterLoadEnv[item], equalTo("env"))
-                assertThat(afterLoadSystemProperties[item], equalTo("system"))
-                assertThat(afterLoadHocon[item], equalTo("conf"))
-                assertThat(afterLoadJson[item], equalTo("json"))
-                assertThat(afterLoadProperties[item], equalTo("properties"))
-                assertThat(afterLoadToml[item], equalTo("toml"))
-                assertThat(afterLoadXml[item], equalTo("xml"))
-                assertThat(afterLoadYaml[item], equalTo("yaml"))
-                assertThat(afterLoadFlat[item], equalTo("flat"))
-                assertThat(afterLoadKv[item], equalTo("kv"))
-                assertThat(afterLoadHierarchical[item], equalTo("hierarchical"))
+        on("load from watched URL") {
+            newSingleThreadContext("context").use { context ->
+                var content = propertiesContent
+                val service = Service.ignite()
+                service.port(0)
+                service.get("/source.properties") { _, _ -> content }
+                service.awaitInitialization()
+                val url = "http://localhost:${service.port()}/source.properties"
+                val config = subject.watchUrl(URL(url), context = context)
+                val originalValue = config[item]
+                content = propertiesContent.replace("properties", "newValue")
+                runBlocking(context) {
+                    delay(5, TimeUnit.SECONDS)
+                }
+                val newValue = config[item]
+                it("should load as auto-detected URL format") {
+                    assertThat(originalValue, equalTo("properties"))
+                }
+                it("should load new value after URL content has been changed") {
+                    assertThat(newValue, equalTo("newValue"))
+                }
             }
+        }
+        on("load from watched URL string") {
+            newSingleThreadContext("context").use { context ->
+                var content = propertiesContent
+                val service = Service.ignite()
+                service.port(0)
+                service.get("/source.properties") { _, _ -> content }
+                service.awaitInitialization()
+                val url = "http://localhost:${service.port()}/source.properties"
+                val config = subject.watchUrl(url, context = context)
+                val originalValue = config[item]
+                content = propertiesContent.replace("properties", "newValue")
+                runBlocking(context) {
+                    delay(5, TimeUnit.SECONDS)
+                }
+                val newValue = config[item]
+                it("should load as auto-detected URL format") {
+                    assertThat(originalValue, equalTo("properties"))
+                }
+                it("should load new value after URL content has been changed") {
+                    assertThat(newValue, equalTo("newValue"))
+                }
+            }
+        }
+    }
+    on("load from multiple sources") {
+        val afterLoadEnv = subject.env()
+        System.setProperty(DefaultLoadersConfig.qualify("type"), "system")
+        val afterLoadSystemProperties = afterLoadEnv.withSourceFrom
+            .systemProperties()
+        val afterLoadHocon = afterLoadSystemProperties.withSourceFrom
+            .hocon.string(hoconContent)
+        val afterLoadJson = afterLoadHocon.withSourceFrom
+            .json.string(jsonContent)
+        val afterLoadProperties = afterLoadJson.withSourceFrom
+            .properties.string(propertiesContent)
+        val afterLoadToml = afterLoadProperties.withSourceFrom
+            .toml.string(tomlContent)
+        val afterLoadXml = afterLoadToml.withSourceFrom
+            .xml.string(xmlContent)
+        val afterLoadYaml = afterLoadXml.withSourceFrom
+            .yaml.string(yamlContent)
+        val afterLoadFlat = afterLoadYaml.withSourceFrom
+            .map.flat(mapOf("source.test.type" to "flat"))
+        val afterLoadKv = afterLoadFlat.withSourceFrom.map
+            .kv(mapOf("source.test.type" to "kv"))
+        val afterLoadHierarchical = afterLoadKv.withSourceFrom.map
+            .hierarchical(
+                mapOf("source" to
+                    mapOf("test" to
+                        mapOf("type" to "hierarchical"))))
+        it("should load the corresponding value in each layer") {
+            assertThat(afterLoadEnv[item], equalTo("env"))
+            assertThat(afterLoadSystemProperties[item], equalTo("system"))
+            assertThat(afterLoadHocon[item], equalTo("conf"))
+            assertThat(afterLoadJson[item], equalTo("json"))
+            assertThat(afterLoadProperties[item], equalTo("properties"))
+            assertThat(afterLoadToml[item], equalTo("toml"))
+            assertThat(afterLoadXml[item], equalTo("xml"))
+            assertThat(afterLoadYaml[item], equalTo("yaml"))
+            assertThat(afterLoadFlat[item], equalTo("flat"))
+            assertThat(afterLoadKv[item], equalTo("kv"))
+            assertThat(afterLoadHierarchical[item], equalTo("hierarchical"))
         }
     }
 })
@@ -295,10 +267,4 @@ private const val yamlContent = """
 source:
     test:
         type: yaml
-"""
-
-private val ymlContent = """
-source:
-    test:
-        type: yml
 """
