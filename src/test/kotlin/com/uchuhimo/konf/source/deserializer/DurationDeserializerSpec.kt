@@ -29,14 +29,12 @@ import org.jetbrains.spek.api.dsl.on
 import java.time.Duration
 
 object DurationDeserializerSpec : Spek({
+    val spec = object : ConfigSpec() {
+        val item by required<DurationWrapper>()
+    }
     val config by memoized {
         Config {
-            addSpec(object : ConfigSpec() {
-                init {
-                    @Suppress("UNUSED_VARIABLE")
-                    val item by required<DurationWrapper>()
-                }
-            })
+            addSpec(spec)
         }
     }
 
@@ -44,7 +42,7 @@ object DurationDeserializerSpec : Spek({
         on("deserialize valid string") {
             config.withSourceFrom.map.kv(mapOf("item" to mapOf("duration" to "P2DT3H4M"))).apply {
                 it("should succeed") {
-                    assertThat(this@apply<DurationWrapper>("item").duration,
+                    assertThat(this@apply[spec.item].duration,
                         equalTo(Duration.parse("P2DT3H4M")))
                 }
             }

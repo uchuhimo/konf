@@ -101,10 +101,8 @@ object MultiLayerConfigSpec : SubjectSpek<Config>({
         }
         on("add spec to parent") {
             val spec = object : ConfigSpec(NetworkBuffer.prefix) {
-                init {
-                    @Suppress("UNUSED_VARIABLE")
-                    val minSize by optional(1)
-                }
+                @Suppress("unused")
+                val minSize by optional(1)
             }
             it("should throw SpecFrozenException") {
                 assertThat({ subject.parent!!.addSpec(spec) }, throws<SpecFrozenException>())
@@ -112,10 +110,8 @@ object MultiLayerConfigSpec : SubjectSpek<Config>({
         }
         on("iterate items in config after adding spec") {
             val spec = object : ConfigSpec(NetworkBuffer.prefix) {
-                init {
-                    @Suppress("UNUSED_VARIABLE")
-                    val minSize by optional(1)
-                }
+                @Suppress("unused")
+                val minSize by optional(1)
             }
             subject.addSpec(spec)
             it("should cover all items in config") {
@@ -126,10 +122,8 @@ object MultiLayerConfigSpec : SubjectSpek<Config>({
         on("add custom deserializer to mapper in parent") {
             it("should throw LoadException before adding deserializer") {
                 val spec = object : ConfigSpec() {
-                    init {
-                        @Suppress("UNUSED_VARIABLE")
-                        val item by required<StringWrapper>()
-                    }
+                    @Suppress("unused")
+                    val item by required<StringWrapper>()
                 }
                 val parent = Config { addSpec(spec) }
                 val child = parent.withLayer("child")

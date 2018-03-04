@@ -29,14 +29,12 @@ import org.jetbrains.spek.api.dsl.on
 import java.time.ZonedDateTime
 
 object ZonedDateTimeDeserializerSpec : Spek({
+    val spec = object : ConfigSpec() {
+        val item by required<ZonedDateTimeWrapper>()
+    }
     val config by memoized {
         Config {
-            addSpec(object : ConfigSpec() {
-                init {
-                    @Suppress("UNUSED_VARIABLE")
-                    val item by required<ZonedDateTimeWrapper>()
-                }
-            })
+            addSpec(spec)
         }
     }
 
@@ -44,7 +42,7 @@ object ZonedDateTimeDeserializerSpec : Spek({
         on("deserialize valid string") {
             config.withSourceFrom.map.kv(mapOf("item" to mapOf("zonedDateTime" to "2007-12-03T10:15:30+01:00[Europe/Paris]"))).apply {
                 it("should succeed") {
-                    assertThat(this@apply<ZonedDateTimeWrapper>("item").zonedDateTime,
+                    assertThat(this@apply[spec.item].zonedDateTime,
                         equalTo(ZonedDateTime.parse("2007-12-03T10:15:30+01:00[Europe/Paris]")))
                 }
             }

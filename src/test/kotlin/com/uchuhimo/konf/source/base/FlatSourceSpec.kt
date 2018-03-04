@@ -19,6 +19,8 @@ package com.uchuhimo.konf.source.base
 import com.natpryce.hamkrest.assertion.assertThat
 import com.natpryce.hamkrest.equalTo
 import com.natpryce.hamkrest.throws
+import com.uchuhimo.konf.Config
+import com.uchuhimo.konf.ConfigSpec
 import com.uchuhimo.konf.source.NoSuchPathException
 import com.uchuhimo.konf.source.ParseException
 import com.uchuhimo.konf.source.Source
@@ -107,6 +109,34 @@ object FlatSourceSpec : SubjectSpek<FlatSource>({
                     assertThat({ source.toLong() }, throws<ParseException>())
                 }
             }
+        }
+    }
+
+    given("a config that contains list of strings with commas") {
+        val spec = object : ConfigSpec() {
+            @Suppress("unused")
+            val list by optional(listOf("a,b", "c, d"))
+        }
+        val config = Config {
+            addSpec(spec)
+        }
+        val map = config.toFlatMap()
+        it("should not be joined into a string") {
+            assertThat(map["list.0"], equalTo("a,b"))
+            assertThat(map["list.1"], equalTo("c, d"))
+        }
+    }
+    given("a config that contains list of strings without commas") {
+        val spec = object : ConfigSpec() {
+            @Suppress("unused")
+            val list by optional(listOf("a", "b", "c", "d"))
+        }
+        val config = Config {
+            addSpec(spec)
+        }
+        val map = config.toFlatMap()
+        it("should be joined into a string with commas") {
+            assertThat(map["list"], equalTo("a,b,c,d"))
         }
     }
 })

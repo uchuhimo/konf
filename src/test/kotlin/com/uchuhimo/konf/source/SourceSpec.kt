@@ -433,10 +433,8 @@ object SourceSpec : Spek({
 private inline fun <reified T : Any> load(value: Any): Config =
     Config().apply {
         addSpec(object : ConfigSpec() {
-            init {
-                @Suppress("UNUSED_VARIABLE")
-                val item by required<T>()
-            }
+            @Suppress("unused")
+            val item by required<T>()
         })
     }.withSource(mapOf("item" to value).asSource())
 

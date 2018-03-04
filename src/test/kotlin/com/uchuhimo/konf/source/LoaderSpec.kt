@@ -33,13 +33,17 @@ import spark.Service
 import java.util.concurrent.TimeUnit
 
 object LoaderSpec : SubjectSpek<Loader>({
+    val parentConfig = Config {
+        addSpec(SourceType)
+    }
     subject {
-        Config {
-            addSpec(SourceType)
-        }.withSourceFrom.properties
+        parentConfig.withSourceFrom.properties
     }
 
     given("a loader") {
+        it("should fork from parent config") {
+            assertThat(subject.config, equalTo(parentConfig))
+        }
         on("load from reader") {
             val config = subject.reader("type = reader".reader())
             it("should return a config which contains value from reader") {

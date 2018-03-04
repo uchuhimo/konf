@@ -23,7 +23,7 @@ import com.fasterxml.jackson.databind.DeserializationFeature
 import com.fasterxml.jackson.databind.deser.std.StringDeserializer as JacksonStringDeserializer
 
 object StringDeserializer : JacksonStringDeserializer() {
-    override fun _deserializeFromArray(p: JsonParser, ctxt: DeserializationContext): String {
+    override fun _deserializeFromArray(p: JsonParser, ctxt: DeserializationContext): String? {
         val t = p.nextToken()
         if (ctxt.hasSomeOfFeatures(F_MASK_ACCEPT_ARRAYS)) {
             if (t == JsonToken.END_ARRAY) {

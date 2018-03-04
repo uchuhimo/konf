@@ -23,6 +23,9 @@ import com.uchuhimo.konf.source.ParseException
 import com.uchuhimo.konf.source.Source
 import com.uchuhimo.konf.source.SourceInfo
 
+/**
+ * Source from something that can be viewed as string.
+ */
 interface StringValueSource : Source, SourceInfo {
 
     fun getValue(): String
@@ -96,6 +99,9 @@ interface StringValueSource : Source, SourceInfo {
     }
 }
 
+/**
+ * Source from a single string.
+ */
 open class SingleStringValueSource(
     private val value: String,
     type: String = "",

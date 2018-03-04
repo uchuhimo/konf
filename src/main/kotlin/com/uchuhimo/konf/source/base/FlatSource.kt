@@ -87,8 +87,8 @@ open class FlatSource(
             val list = generateSequence(0) { it + 1 }.map {
                 getOrNull(it.toString().toPath())
             }.takeWhile {
-                    it != null
-                }.filterNotNull().toList().map {
+                it != null
+            }.filterNotNull().toList().map {
                 it.apply { addInfo("inList", this@FlatSource.info.toDescription()) }
             }
             if (list.isNotEmpty()) {
@@ -105,12 +105,12 @@ open class FlatSource(
         return map.keys.filter {
             it.startsWith("$prefix.")
         }.map {
-                it.removePrefix("$prefix.")
-            }.filter {
-                it.isNotEmpty()
-            }.map {
-                it.takeWhile { it != '.' }
-            }.toSet().associate {
+            it.removePrefix("$prefix.")
+        }.filter {
+            it.isNotEmpty()
+        }.map {
+            it.takeWhile { it != '.' }
+        }.toSet().associate {
             it to FlatSource(map, "$prefix.$it", context = context).apply {
                 addInfo("inMap", this@FlatSource.info.toDescription())
             }
@@ -130,12 +130,30 @@ open class FlatSource(
 fun Config.toFlatMap(): Map<String, String> {
     fun MutableMap<String, String>.putFlat(key: String, value: Any) {
         when (value) {
-            is List<*> -> value.forEachIndexed { index, child ->
-                putFlat("$key.$index", child!!)
+            is List<*> -> {
+                if (value.isNotEmpty()) {
+                    val first = value[0]
+                    when (first) {
+                        is List<*>, is Map<*, *> ->
+                            value.forEachIndexed { index, child ->
+                                putFlat("$key.$index", child!!)
+                            }
+                        else -> {
+                            if (value.map { it.toString() }.any { it.contains(',') }) {
+                                value.forEachIndexed { index, child ->
+                                    putFlat("$key.$index", child!!)
+                                }
+                            } else {
+                                put(key, value.joinToString(","))
+                            }
+                        }
+                    }
+                }
             }
-            is Map<*, *> -> value.forEach { (suffix, child) ->
-                putFlat("$key.$suffix", child!!)
-            }
+            is Map<*, *> ->
+                value.forEach { (suffix, child) ->
+                    putFlat("$key.$suffix", child!!)
+                }
             else -> put(key, value.toString())
         }
     }
