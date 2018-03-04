@@ -120,8 +120,8 @@ compile 'com.github.uchuhimo:konf:master-SNAPSHOT'
 
     ```kotlin
     object ServerSpec : ConfigSpec("server") {
-        val host = optional("host", "0.0.0.0")
-        val port = required<Int>("port")
+        val host by optional("0.0.0.0")
+        val port by required<Int>()
     }
     ```
 
@@ -193,8 +193,8 @@ If the config spec is binding with single class, you can declare config spec as 
 ```kotlin
 class Server {
     companion object : ConfigSpec("server") {
-        val host = optional("host", "0.0.0.0")
-        val port = required<Int>("port")
+        val host by optional("0.0.0.0")
+        val port by required<Int>()
     }
 }
 ```
@@ -203,20 +203,20 @@ There are three kinds of item:
 
 - Required item. Required item doesn't have default value, thus must be set with value before retrieved in config. Define a required item with description:
     ```kotlin
-    val port = required<Int>("port", description = "port of server")
+    val port by required<Int>(description = "port of server")
     ```
     Or omit the description:
     ```kotlin
-    val port = required<Int>("port")
+    val port by required<Int>()
     ```
 - Optional item. Optional item has default value, thus can be safely retrieved before setting. Define an optional item:
     ```kotlin
-    val host = optional("host", "0.0.0.0", description = "host IP of server")
+    val host by optional("0.0.0.0", description = "host IP of server")
     ```
     Description can be omitted.
 - Lazy item. Lazy item also has default value, however, the default value is not a constant, it is evaluated from thunk every time when retrieved. Define a lazy item:
     ```kotlin
-    val nextPort = lazy("nextPort") { config -> config[port] + 1 }
+    val nextPort by lazy { config -> config[port] + 1 }
     ```
 
 You can also define config spec in Java, with a more vorbose API (compared to Kotlin version in "quick start"):
@@ -412,7 +412,7 @@ HOCON/JSON/properties/TOML/XML/YAML source can be loaded from a variety of input
 - From byte array: `config.withSourceFrom.properties.bytes(bytes)`
 - From portion of byte array: `config.withSourceFrom.properties.bytes(bytes, 1, 12)`
 
-If source is from file, file extension can be auto detected. Thus, you can use `config.withSourceFrom.file("/path/to/source.json")` instead of `config.withSourceFrom.json.file("/path/to/source.json")`, or use `config.withSourceFrom.watchFile("/path/to/source.json")` instead of `config.withSourceFrom.json.watchFile("/path/to/source.json")`. The following file extensions can be supported:
+If source is from file, file extension can be auto detected. Thus, you can use `config.withSourceFrom.file("/path/to/source.json")` instead of `config.withSourceFrom.json.file("/path/to/source.json")`, or use `config.withSourceFrom.watchFile("/path/to/source.json")` instead of `config.withSourceFrom.json.watchFile("/path/to/source.json")`. Source from URL also support auto-detected extension (use `config.withSourceFrom.url` or `config.withSourceFrom.watchUrl`). The following file extensions can be supported:
 
 | Type | Extension |
 | - | - |
