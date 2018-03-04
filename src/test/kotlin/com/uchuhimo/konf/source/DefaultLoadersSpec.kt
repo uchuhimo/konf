@@ -30,6 +30,7 @@ import org.jetbrains.spek.api.dsl.it
 import org.jetbrains.spek.api.dsl.on
 import org.jetbrains.spek.subject.SubjectSpek
 import java.util.concurrent.TimeUnit
+import spark.Service
 
 object DefaultLoadersSpec : SubjectSpek<DefaultLoaders>({
     subject {
@@ -53,6 +54,46 @@ object DefaultLoadersSpec : SubjectSpek<DefaultLoaders>({
             it("should return a config which contains value from system properties") {
                 assertThat(config[item], equalTo("system"))
             }
+        }
+        group("load from url") {
+            var service = memoized {
+                Service.ignite().apply {
+                    port(0)
+                    get("/source.properties") { _, _ -> propertiesContent }
+                    get("/source.toml") { _, _ -> tomlContent }
+                    get("/source.conf") { _, _ -> hoconContent }
+                    get("/source.json") { _, _ -> jsonContent }
+                    get("/source.yaml") { _, _ -> yamlContent }
+                    get("/source.yml") { _, _ -> yamlContent }
+                    get("/source.xml") { _,_ -> xmlContent }
+                    awaitInitialization()
+                }
+            }
+            fun sparky(path: String, expect: String )
+            {
+              val port = service().port()
+              val config=subject.url("http://localhost:${port}${path}")
+              it("should return a config which contains value in URL") {
+                assertThat(config[item], equalTo(expect))
+              }
+            }
+            on("load properties from HTTP URL") {
+              sparky("/source.properties","properties")
+              sparky("/source.toml","toml")
+              sparky("/source.conf","conf")
+              sparky("/source.json","json")
+              sparky("/source.xml", "xml")
+              sparky("/source.yaml","yaml")
+              sparky("/source.yml", "yml")
+              sparky("/source.xml","xml")
+              it("should throw UnsupportedExtensionException") {
+                assertThat({
+                  sparky("/source.text","text")
+                }, throws<UnsupportedExtensionException>())
+              }
+              service().stop()
+            }
+
         }
         group("load from file") {
             on("load from file with .conf extension") {
