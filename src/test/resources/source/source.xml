@@ -101,72 +101,28 @@
         <value>LABEL2</value>
     </property>
     <property>
-        <name>level1.level2.list.0</name>
-        <value>1</value>
+        <name>level1.level2.list</name>
+        <value>1,2,3</value>
     </property>
     <property>
-        <name>level1.level2.list.1</name>
-        <value>2</value>
+        <name>level1.level2.mutableList</name>
+        <value>1,2,3</value>
     </property>
     <property>
-        <name>level1.level2.list.2</name>
-        <value>3</value>
+        <name>level1.level2.listOfList.0</name>
+        <value>1,2</value>
     </property>
     <property>
-        <name>level1.level2.mutableList.0</name>
-        <value>1</value>
+        <name>level1.level2.listOfList.1</name>
+        <value>3,4</value>
     </property>
     <property>
-        <name>level1.level2.mutableList.1</name>
-        <value>2</value>
+        <name>level1.level2.set</name>
+        <value>1,2,1</value>
     </property>
     <property>
-        <name>level1.level2.mutableList.2</name>
-        <value>3</value>
-    </property>
-    <property>
-        <name>level1.level2.listOfList.0.0</name>
-        <value>1</value>
-    </property>
-    <property>
-        <name>level1.level2.listOfList.0.1</name>
-        <value>2</value>
-    </property>
-    <property>
-        <name>level1.level2.listOfList.1.0</name>
-        <value>3</value>
-    </property>
-    <property>
-        <name>level1.level2.listOfList.1.1</name>
-        <value>4</value>
-    </property>
-    <property>
-        <name>level1.level2.set.0</name>
-        <value>1</value>
-    </property>
-    <property>
-        <name>level1.level2.set.1</name>
-        <value>2</value>
-    </property>
-    <property>
-        <name>level1.level2.set.2</name>
-        <value>1</value>
-    </property>
-    <property>
-        <name>level1.level2.sortedSet.0</name>
-        <value>2</value>
-    </property>
-    <property>
-        <name>level1.level2.sortedSet.1</name>
-        <value>1</value>
-    </property>
-    <property>
-        <name>level1.level2.sortedSet.2</name>
-        <value>1</value>
-    </property>
-    <property>
-        <name>level1.level2.sortedSet.3</name>
-        <value>3</value>
+        <name>level1.level2.sortedSet</name>
+        <value>2,1,1,3</value>
     </property>
     <property>
         <name>level1.level2.map.a</name>
@@ -213,140 +169,52 @@
         <value>4</value>
     </property>
     <property>
-        <name>level1.level2.array.boolean.0</name>
-        <value>true</value>
+        <name>level1.level2.array.boolean</name>
+        <value>true,false</value>
     </property>
     <property>
-        <name>level1.level2.array.boolean.1</name>
-        <value>false</value>
+        <name>level1.level2.array.byte</name>
+        <value>1,2,3</value>
     </property>
     <property>
-        <name>level1.level2.array.byte.0</name>
-        <value>1</value>
+        <name>level1.level2.array.short</name>
+        <value>1,2,3</value>
     </property>
     <property>
-        <name>level1.level2.array.byte.1</name>
-        <value>2</value>
+        <name>level1.level2.array.int</name>
+        <value>1,2,3</value>
     </property>
     <property>
-        <name>level1.level2.array.byte.2</name>
-        <value>3</value>
+        <name>level1.level2.array.long</name>
+        <value>4,5,6</value>
     </property>
     <property>
-        <name>level1.level2.array.short.0</name>
-        <value>1</value>
+        <name>level1.level2.array.float</name>
+        <value>-1, 0.0, 1</value>
     </property>
     <property>
-        <name>level1.level2.array.short.1</name>
-        <value>2</value>
+        <name>level1.level2.array.double</name>
+        <value>-1, 0.0, 1</value>
     </property>
     <property>
-        <name>level1.level2.array.short.2</name>
-        <value>3</value>
+        <name>level1.level2.array.char</name>
+        <value>a,b,c</value>
     </property>
     <property>
-        <name>level1.level2.array.int.0</name>
-        <value>1</value>
+        <name>level1.level2.array.object.boolean</name>
+        <value>true,false</value>
     </property>
     <property>
-        <name>level1.level2.array.int.1</name>
-        <value>2</value>
+        <name>level1.level2.array.object.int</name>
+        <value>1,2,3</value>
     </property>
     <property>
-        <name>level1.level2.array.int.2</name>
-        <value>3</value>
+        <name>level1.level2.array.object.string</name>
+        <value>one,two,three</value>
     </property>
     <property>
-        <name>level1.level2.array.long.0</name>
-        <value>4</value>
-    </property>
-    <property>
-        <name>level1.level2.array.long.1</name>
-        <value>5</value>
-    </property>
-    <property>
-        <name>level1.level2.array.long.2</name>
-        <value>6</value>
-    </property>
-    <property>
-        <name>level1.level2.array.float.0</name>
-        <value>-1</value>
-    </property>
-    <property>
-        <name>level1.level2.array.float.1</name>
-        <value>0.0</value>
-    </property>
-    <property>
-        <name>level1.level2.array.float.2</name>
-        <value>1</value>
-    </property>
-    <property>
-        <name>level1.level2.array.double.0</name>
-        <value>-1</value>
-    </property>
-    <property>
-        <name>level1.level2.array.double.1</name>
-        <value>0.0</value>
-    </property>
-    <property>
-        <name>level1.level2.array.double.2</name>
-        <value>1</value>
-    </property>
-    <property>
-        <name>level1.level2.array.char.0</name>
-        <value>a</value>
-    </property>
-    <property>
-        <name>level1.level2.array.char.1</name>
-        <value>b</value>
-    </property>
-    <property>
-        <name>level1.level2.array.char.2</name>
-        <value>c</value>
-    </property>
-    <property>
-        <name>level1.level2.array.object.boolean.0</name>
-        <value>true</value>
-    </property>
-    <property>
-        <name>level1.level2.array.object.boolean.1</name>
-        <value>false</value>
-    </property>
-    <property>
-        <name>level1.level2.array.object.int.0</name>
-        <value>1</value>
-    </property>
-    <property>
-        <name>level1.level2.array.object.int.1</name>
-        <value>2</value>
-    </property>
-    <property>
-        <name>level1.level2.array.object.int.2</name>
-        <value>3</value>
-    </property>
-    <property>
-        <name>level1.level2.array.object.string.0</name>
-        <value>one</value>
-    </property>
-    <property>
-        <name>level1.level2.array.object.string.1</name>
-        <value>two</value>
-    </property>
-    <property>
-        <name>level1.level2.array.object.string.2</name>
-        <value>three</value>
-    </property>
-    <property>
-        <name>level1.level2.array.object.enum.0</name>
-        <value>LABEL1</value>
-    </property>
-    <property>
-        <name>level1.level2.array.object.enum.1</name>
-        <value>LABEL2</value>
-    </property>
-    <property>
-        <name>level1.level2.array.object.enum.2</name>
-        <value>LABEL3</value>
+        <name>level1.level2.array.object.enum</name>
+        <value>LABEL1,LABEL2,LABEL3</value>
     </property>
     <property>
         <name>level1.level2.pair.first</name>
@@ -357,115 +225,111 @@
         <value>2</value>
     </property>
     <property>
-        <name>level1.level2.class.boolean</name>
+        <name>level1.level2.clazz.boolean</name>
         <value>false</value>
     </property>
     <property>
-        <name>level1.level2.class.int</name>
+        <name>level1.level2.clazz.int</name>
         <value>1</value>
     </property>
     <property>
-        <name>level1.level2.class.short</name>
+        <name>level1.level2.clazz.short</name>
         <value>2</value>
     </property>
     <property>
-        <name>level1.level2.class.byte</name>
+        <name>level1.level2.clazz.byte</name>
         <value>3</value>
     </property>
     <property>
-        <name>level1.level2.class.bigInteger</name>
+        <name>level1.level2.clazz.bigInteger</name>
         <value>4</value>
     </property>
     <property>
-        <name>level1.level2.class.long</name>
+        <name>level1.level2.clazz.long</name>
         <value>4</value>
     </property>
     <property>
-        <name>level1.level2.class.double</name>
+        <name>level1.level2.clazz.double</name>
         <value>1.5</value>
     </property>
     <property>
-        <name>level1.level2.class.float</name>
+        <name>level1.level2.clazz.float</name>
         <value>-1.5</value>
     </property>
     <property>
-        <name>level1.level2.class.bigDecimal</name>
+        <name>level1.level2.clazz.bigDecimal</name>
         <value>1.5</value>
     </property>
     <property>
-        <name>level1.level2.class.char</name>
+        <name>level1.level2.clazz.char</name>
         <value>a</value>
     </property>
     <property>
-        <name>level1.level2.class.string</name>
+        <name>level1.level2.clazz.string</name>
         <value>string</value>
     </property>
     <property>
-        <name>level1.level2.class.offsetTime</name>
+        <name>level1.level2.clazz.offsetTime</name>
         <value>10:15:30+01:00</value>
     </property>
     <property>
-        <name>level1.level2.class.offsetDateTime</name>
+        <name>level1.level2.clazz.offsetDateTime</name>
         <value>2007-12-03T10:15:30+01:00</value>
     </property>
     <property>
-        <name>level1.level2.class.zonedDateTime</name>
+        <name>level1.level2.clazz.zonedDateTime</name>
         <value>2007-12-03T10:15:30+01:00[Europe/Paris]</value>
     </property>
     <property>
-        <name>level1.level2.class.localDate</name>
+        <name>level1.level2.clazz.localDate</name>
         <value>2007-12-03</value>
     </property>
     <property>
-        <name>level1.level2.class.localTime</name>
+        <name>level1.level2.clazz.localTime</name>
         <value>10:15:30</value>
     </property>
     <property>
-        <name>level1.level2.class.localDateTime</name>
+        <name>level1.level2.clazz.localDateTime</name>
         <value>2007-12-03T10:15:30</value>
     </property>
     <property>
-        <name>level1.level2.class.date</name>
+        <name>level1.level2.clazz.date</name>
         <value>2007-12-03T10:15:30Z</value>
     </property>
     <property>
-        <name>level1.level2.class.year</name>
+        <name>level1.level2.clazz.year</name>
         <value>2007</value>
     </property>
     <property>
-        <name>level1.level2.class.yearMonth</name>
+        <name>level1.level2.clazz.yearMonth</name>
         <value>2007-12</value>
     </property>
     <property>
-        <name>level1.level2.class.instant</name>
+        <name>level1.level2.clazz.instant</name>
         <value>2007-12-03T10:15:30.00Z</value>
     </property>
     <property>
-        <name>level1.level2.class.duration</name>
+        <name>level1.level2.clazz.duration</name>
         <value>P2DT3H4M</value>
     </property>
     <property>
-        <name>level1.level2.class.simpleDuration</name>
+        <name>level1.level2.clazz.simpleDuration</name>
         <value>200millis</value>
     </property>
     <property>
-        <name>level1.level2.class.size</name>
+        <name>level1.level2.clazz.size</name>
         <value>10k</value>
     </property>
     <property>
-        <name>level1.level2.class.enum</name>
+        <name>level1.level2.clazz.enum</name>
         <value>LABEL2</value>
     </property>
     <property>
-        <name>level1.level2.class.booleanArray.0</name>
-        <value>true</value>
+        <name>level1.level2.clazz.booleanArray</name>
+        <value>true,false</value>
     </property>
     <property>
-        <name>level1.level2.class.booleanArray.1</name>
-        <value>false</value>
-    </property>
-    <property>
-        <name>level1.level2.class.nested.0.0.0.a</name>
+        <name>level1.level2.clazz.nested.0.0.0.a</name>
         <value>1</value>
     </property>
 </configuration>

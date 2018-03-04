@@ -28,9 +28,9 @@ import java.io.OutputStream
  */
 class HoconWriter(val config: Config) : Writer {
     private val renderOpts = ConfigRenderOptions.defaults()
-            .setOriginComments(false)
-            .setComments(false)
-            .setJson(false)
+        .setOriginComments(false)
+        .setComments(false)
+        .setJson(false)
 
     override fun toWriter(writer: java.io.Writer) {
         writer.write(toText())
@@ -44,7 +44,7 @@ class HoconWriter(val config: Config) : Writer {
 
     override fun toText(): String {
         return ConfigValueFactory.fromMap(config.toHierarchicalMap()).render(renderOpts)
-                .replace("\n", System.lineSeparator())
+            .replace("\n", System.lineSeparator())
     }
 }
 

@@ -33,7 +33,8 @@ object ZonedDateTimeDeserializerSpec : Spek({
         Config {
             addSpec(object : ConfigSpec() {
                 init {
-                    required<ZonedDateTimeWrapper>("item")
+                    @Suppress("UNUSED_VARIABLE")
+                    val item by required<ZonedDateTimeWrapper>()
                 }
             })
         }
@@ -44,7 +45,7 @@ object ZonedDateTimeDeserializerSpec : Spek({
             config.withSourceFrom.map.kv(mapOf("item" to mapOf("zonedDateTime" to "2007-12-03T10:15:30+01:00[Europe/Paris]"))).apply {
                 it("should succeed") {
                     assertThat(this@apply<ZonedDateTimeWrapper>("item").zonedDateTime,
-                            equalTo(ZonedDateTime.parse("2007-12-03T10:15:30+01:00[Europe/Paris]")))
+                        equalTo(ZonedDateTime.parse("2007-12-03T10:15:30+01:00[Europe/Paris]")))
                 }
             }
         }

@@ -1,14 +1,14 @@
 /*
  * Copyright 2017-2018 the original author or authors.
  *
- * Licensed under the Apache License, Version 2.0 (the "License");
+ * Licensed under the Apache License, Version 2.0 (the );
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
  *
  *     http://www.apache.org/licenses/LICENSE-2.0
  *
  * Unless required by applicable law or agreed to in writing, software
- * distributed under the License is distributed on an "AS IS" BASIS,
+ * distributed under the License is distributed on an  BASIS,
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
  * See the License for the specific language governing permissions and
  * limitations under the License.
@@ -36,68 +36,68 @@ import java.util.SortedMap
 import java.util.SortedSet
 
 object ConfigForLoad : ConfigSpec("level1.level2") {
-    val booleanItem = required<Boolean>("boolean")
+    val boolean by required<Boolean>()
 
-    val intItem = required<Int>("int")
-    val shortItem = required<Short>("short")
-    val byteItem = required<Byte>("byte")
-    val bigIntegerItem = required<BigInteger>("bigInteger")
-    val longItem = required<Long>("long")
+    val int by required<Int>()
+    val short by required<Short>()
+    val byte by required<Byte>()
+    val bigInteger by required<BigInteger>()
+    val long by required<Long>()
 
-    val doubleItem = required<Double>("double")
-    val floatItem = required<Float>("float")
-    val bigDecimalItem = required<BigDecimal>("bigDecimal")
+    val double by required<Double>()
+    val float by required<Float>()
+    val bigDecimal by required<BigDecimal>()
 
-    val charItem = required<Char>("char")
+    val char by required<Char>()
 
-    val stringItem = required<String>("string")
-    val offsetTimeItem = required<OffsetTime>("offsetTime")
-    val offsetDateTimeItem = required<OffsetDateTime>("offsetDateTime")
-    val zonedDateTimeItem = required<ZonedDateTime>("zonedDateTime")
-    val localDateItem = required<LocalDate>("localDate")
-    val localTimeItem = required<LocalTime>("localTime")
-    val localDateTimeItem = required<LocalDateTime>("localDateTime")
-    val dateItem = required<Date>("date")
-    val yearItem = required<Year>("year")
-    val yearMonthItem = required<YearMonth>("yearMonth")
-    val instantItem = required<Instant>("instant")
-    val durationItem = required<Duration>("duration")
-    val simpleDurationItem = required<Duration>("simpleDuration")
-    val sizeItem = required<SizeInBytes>("size")
+    val string by required<String>()
+    val offsetTime by required<OffsetTime>()
+    val offsetDateTime by required<OffsetDateTime>()
+    val zonedDateTime by required<ZonedDateTime>()
+    val localDate by required<LocalDate>()
+    val localTime by required<LocalTime>()
+    val localDateTime by required<LocalDateTime>()
+    val date by required<Date>()
+    val year by required<Year>()
+    val yearMonth by required<YearMonth>()
+    val instant by required<Instant>()
+    val duration by required<Duration>()
+    val simpleDuration by required<Duration>()
+    val size by required<SizeInBytes>()
 
-    val enumItem = required<EnumForLoad>("enum")
+    val enum by required<EnumForLoad>()
 
     // array items
-    val booleanArrayItem = required<BooleanArray>("array.boolean")
-    val byteArrayItem = required<ByteArray>("array.byte")
-    val shortArrayItem = required<ShortArray>("array.short")
-    val intArrayItem = required<IntArray>("array.int")
-    val longArrayItem = required<LongArray>("array.long")
-    val floatArrayItem = required<FloatArray>("array.float")
-    val doubleArrayItem = required<DoubleArray>("array.double")
-    val charArrayItem = required<CharArray>("array.char")
+    val booleanArray by required<BooleanArray>("array.boolean")
+    val byteArray by required<ByteArray>("array.byte")
+    val shortArray by required<ShortArray>("array.short")
+    val intArray by required<IntArray>("array.int")
+    val longArray by required<LongArray>("array.long")
+    val floatArray by required<FloatArray>("array.float")
+    val doubleArray by required<DoubleArray>("array.double")
+    val charArray by required<CharArray>("array.char")
 
     // object array item
-    val booleanObjectArrayItem = required<Array<Boolean>>("array.object.boolean")
-    val intObjectArrayItem = required<Array<Int>>("array.object.int")
-    val stringArrayItem = required<Array<String>>("array.object.string")
-    val enumArrayItem = required<Array<EnumForLoad>>("array.object.enum")
+    val booleanObjectArray by required<Array<Boolean>>("array.object.boolean")
+    val intObjectArray by required<Array<Int>>("array.object.int")
+    val stringArray by required<Array<String>>("array.object.string")
+    val enumArray by required<Array<EnumForLoad>>("array.object.enum")
 
-    val listItem = required<List<Int>>("list")
-    val mutableListItem = required<List<Int>>("mutableList")
-    val listOfListItem = required<List<List<Int>>>("listOfList")
-    val setItem = required<Set<Int>>("set")
-    val sortedSetItem = required<SortedSet<Int>>("sortedSet")
+    val list by required<List<Int>>()
+    val mutableList by required<List<Int>>()
+    val listOfList by required<List<List<Int>>>()
+    val set by required<Set<Int>>()
+    val sortedSet by required<SortedSet<Int>>()
 
-    val mapItem = required<Map<String, Int>>("map")
-    val sortedMapItem = required<SortedMap<String, Int>>("sortedMap")
-    val listOfMapItem = required<List<Map<String, Int>>>("listOfMap")
+    val map by required<Map<String, Int>>()
+    val sortedMap by required<SortedMap<String, Int>>()
+    val listOfMap by required<List<Map<String, Int>>>()
 
-    val nestedItem = required<Array<List<Set<Map<String, Int>>>>>("nested")
+    val nested by required<Array<List<Set<Map<String, Int>>>>>()
 
-    val pairItem = required<Pair<Int, Int>>("pair")
+    val pair by required<Pair<Int, Int>>()
 
-    val classItem = required<ClassForLoad>("class")
+    val clazz by required<ClassForLoad>()
 }
 
 enum class EnumForLoad {
@@ -105,31 +105,31 @@ enum class EnumForLoad {
 }
 
 data class ClassForLoad(
-        val boolean: Boolean,
-        val int: Int,
-        val short: Short,
-        val byte: Byte,
-        val bigInteger: BigInteger,
-        val long: Long,
-        val double: Double,
-        val float: Float,
-        val bigDecimal: BigDecimal?,
-        val char: Char,
-        val string: String,
-        val offsetTime: OffsetTime,
-        val offsetDateTime: OffsetDateTime,
-        val zonedDateTime: ZonedDateTime,
-        val localDate: LocalDate,
-        val localTime: LocalTime,
-        val localDateTime: LocalDateTime,
-        val date: Date,
-        val year: Year,
-        val yearMonth: YearMonth,
-        val instant: Instant,
-        val duration: Duration,
-        val simpleDuration: Duration,
-        val size: SizeInBytes,
-        val enum: EnumForLoad,
-        val booleanArray: BooleanArray,
-        val nested: Array<List<Set<Map<String, Int>>>>
+    val boolean: Boolean,
+    val int: Int,
+    val short: Short,
+    val byte: Byte,
+    val bigInteger: BigInteger,
+    val long: Long,
+    val double: Double,
+    val float: Float,
+    val bigDecimal: BigDecimal?,
+    val char: Char,
+    val string: String,
+    val offsetTime: OffsetTime,
+    val offsetDateTime: OffsetDateTime,
+    val zonedDateTime: ZonedDateTime,
+    val localDate: LocalDate,
+    val localTime: LocalTime,
+    val localDateTime: LocalDateTime,
+    val date: Date,
+    val year: Year,
+    val yearMonth: YearMonth,
+    val instant: Instant,
+    val duration: Duration,
+    val simpleDuration: Duration,
+    val size: SizeInBytes,
+    val enum: EnumForLoad,
+    val booleanArray: BooleanArray,
+    val nested: Array<List<Set<Map<String, Int>>>>
 ) : Serializable

@@ -25,9 +25,9 @@ import com.uchuhimo.konf.source.Source
  * Source from a map in key-value format.
  */
 open class KVSource(
-        val map: Map<String, Any>,
-        type: String = "",
-        context: Map<String, String> = mapOf()
+    val map: Map<String, Any>,
+    type: String = "",
+    context: Map<String, String> = mapOf()
 ) : ValueSource(map, type.notEmptyOr("KV"), context) {
     override fun contains(path: Path): Boolean = map.contains(path.name)
 

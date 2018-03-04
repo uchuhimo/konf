@@ -91,7 +91,7 @@ object SourceSpec : Spek({
             on("get by an invalid path using `get`") {
                 it("should throw NoSuchPathException") {
                     assertThat({ sourceForPath[invalidPath] },
-                            throws(has(NoSuchPathException::path, equalTo(invalidPath))))
+                        throws(has(NoSuchPathException::path, equalTo(invalidPath))))
                 }
             }
 
@@ -125,7 +125,7 @@ object SourceSpec : Spek({
             on("get by an invalid key using `get`") {
                 it("should throw NoSuchPathException") {
                     assertThat({ sourceForKey[invalidKey] },
-                            throws(has(NoSuchPathException::path, equalTo(invalidKey.toPath()))))
+                        throws(has(NoSuchPathException::path, equalTo(invalidKey.toPath()))))
                 }
             }
         }
@@ -288,7 +288,7 @@ object SourceSpec : Spek({
                 val source = text.asSource()
                 it("should succeed") {
                     assertThat(source.toDate(),
-                            equalTo(Date.from(LocalDateTime.parse(text).toInstant(ZoneOffset.UTC))))
+                        equalTo(Date.from(LocalDateTime.parse(text).toInstant(ZoneOffset.UTC))))
                 }
             }
 
@@ -297,7 +297,7 @@ object SourceSpec : Spek({
                 val source = text.asSource()
                 it("should succeed") {
                     assertThat(source.toDate(),
-                            equalTo(Date.from(LocalDate.parse(text).atStartOfDay().toInstant(ZoneOffset.UTC))))
+                        equalTo(Date.from(LocalDate.parse(text).atStartOfDay().toInstant(ZoneOffset.UTC))))
                 }
             }
 
@@ -431,12 +431,13 @@ object SourceSpec : Spek({
 })
 
 private inline fun <reified T : Any> load(value: Any): Config =
-        Config().apply {
-            addSpec(object : ConfigSpec() {
-                init {
-                    required<T>("item")
-                }
-            })
-        }.withSource(mapOf("item" to value).asSource())
+    Config().apply {
+        addSpec(object : ConfigSpec() {
+            init {
+                @Suppress("UNUSED_VARIABLE")
+                val item by required<T>()
+            }
+        })
+    }.withSource(mapOf("item" to value).asSource())
 
 private data class Person(val name: String)

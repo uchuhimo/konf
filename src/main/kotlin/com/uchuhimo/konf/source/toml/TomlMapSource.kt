@@ -23,8 +23,8 @@ import com.uchuhimo.konf.source.base.MapSource
  * Source from a TOML map.
  */
 class TomlMapSource(
-        map: Map<String, Any>,
-        context: Map<String, String> = mapOf()
+    map: Map<String, Any>,
+    context: Map<String, String> = mapOf()
 ) : MapSource(map, "TOML", context) {
     override fun Any.castToSource(context: Map<String, String>): Source = asTomlSource(context)
 }

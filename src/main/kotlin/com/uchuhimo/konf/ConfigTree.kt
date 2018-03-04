@@ -43,9 +43,10 @@ sealed class ConfigTree {
      * @param onEnterPath action when entering an item node
      */
     fun visit(
-            onEnterPath: (node: ConfigPathNode) -> Unit = { _ -> },
-            onLeavePath: (node: ConfigPathNode) -> Unit = { _ -> },
-            onEnterItem: (node: ConfigItemNode<*>) -> Unit = { _ -> }) {
+        onEnterPath: (node: ConfigPathNode) -> Unit = { _ -> },
+        onLeavePath: (node: ConfigPathNode) -> Unit = { _ -> },
+        onEnterItem: (node: ConfigItemNode<*>) -> Unit = { _ -> }
+    ) {
         when (this) {
             is ConfigPathNode -> {
                 onEnterPath(this)
@@ -75,11 +76,11 @@ sealed class ConfigTree {
  * Represents an item node in config tree.
  */
 class ConfigItemNode<T : Any>(
-        override val path: List<String>,
-        /**
-         * Config item in this node.
-         */
-        val item: Item<T>
+    override val path: List<String>,
+    /**
+     * Config item in this node.
+     */
+    val item: Item<T>
 ) : ConfigTree() {
     override fun deepCopy(): ConfigItemNode<T> = ConfigItemNode(path, item)
 
@@ -90,14 +91,14 @@ class ConfigItemNode<T : Any>(
  * Represents a path node in config tree.
  */
 class ConfigPathNode(
-        override val path: List<String>,
-        /**
-         * List of children of this node.
-         */
-        val children: MutableList<ConfigTree>
+    override val path: List<String>,
+    /**
+     * List of children of this node.
+     */
+    val children: MutableList<ConfigTree>
 ) : ConfigTree() {
     override fun deepCopy(): ConfigPathNode =
-            ConfigPathNode(path, children.mapTo(mutableListOf(), ConfigTree::deepCopy))
+        ConfigPathNode(path, children.mapTo(mutableListOf(), ConfigTree::deepCopy))
 
     override val isItem: Boolean = false
 }

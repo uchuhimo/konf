@@ -28,11 +28,12 @@ import java.math.BigInteger
  * Represents size in unit of bytes.
  */
 data class SizeInBytes(
-        /**
-         * Number of bytes.
-         */
-        @JsonValue
-        val bytes: Long) : Serializable {
+    /**
+     * Number of bytes.
+     */
+    @JsonValue
+    val bytes: Long
+) : Serializable {
     init {
         require(bytes >= 0)
     }
@@ -51,7 +52,7 @@ data class SizeInBytes(
             val s = ConfigImplUtil.unicodeTrim(input)
             val unitString = getUnits(s)
             val numberString = ConfigImplUtil.unicodeTrim(s.substring(0,
-                    s.length - unitString.length))
+                s.length - unitString.length))
 
             // this would be caught later anyway, but the error message
             // is more helpful if we check it here.
@@ -59,8 +60,8 @@ data class SizeInBytes(
                 throw ParseException("No number in size-in-bytes value '$input'")
 
             val units = MemoryUnit.parseUnit(unitString)
-                    ?: throw ParseException("Could not parse size-in-bytes unit '$unitString'" +
-                            " (try k, K, kB, KiB, kilobytes, kibibytes)")
+                ?: throw ParseException("Could not parse size-in-bytes unit '$unitString'" +
+                    " (try k, K, kB, KiB, kilobytes, kibibytes)")
 
             try {
                 val result: BigInteger
@@ -94,9 +95,9 @@ data class SizeInBytes(
         }
 
         private enum class MemoryUnit(
-                private val prefix: String,
-                private val radix: Radix,
-                private val power: Int
+            private val prefix: String,
+            private val radix: Radix,
+            private val power: Int
         ) {
             BYTES("", Radix.KIBI, 0),
 

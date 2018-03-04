@@ -55,6 +55,6 @@ abstract class JSR310Deserializer<T>(clazz: Class<T>) : StdDeserializer<T>(clazz
             }
         }
         throw MismatchedInputException.from(parser, handledType(),
-                "Unexpected token (${parser.currentToken}), expected string for ${handledType().name} value")
+            "Unexpected token (${parser.currentToken}), expected string for ${handledType().name} value")
     }
 }

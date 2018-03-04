@@ -130,25 +130,25 @@ object JsonSourceSpec : Spek({
             on("get BigInteger from BigInteger source") {
                 it("should succeed") {
                     assertThat(JsonSource(BigIntegerNode.valueOf(BigInteger.valueOf(1L))).toBigInteger(),
-                            equalTo(BigInteger.valueOf(1L)))
+                        equalTo(BigInteger.valueOf(1L)))
                 }
             }
             on("get BigInteger from long source") {
                 it("should succeed") {
                     assertThat(JsonSource(LongNode.valueOf(1L)).toBigInteger(),
-                            equalTo(BigInteger.valueOf(1L)))
+                        equalTo(BigInteger.valueOf(1L)))
                 }
             }
             on("get BigDecimal from BigDecimal source") {
                 it("should succeed") {
                     assertThat(JsonSource(DecimalNode.valueOf(BigDecimal.valueOf(1.0))).toBigDecimal(),
-                            equalTo(BigDecimal.valueOf(1.0)))
+                        equalTo(BigDecimal.valueOf(1.0)))
                 }
             }
             on("get BigDecimal from double source") {
                 it("should succeed") {
                     assertThat(JsonSource(DoubleNode.valueOf(1.0)).toBigDecimal(),
-                            equalTo(BigDecimal.valueOf(1.0)))
+                        equalTo(BigDecimal.valueOf(1.0)))
                 }
             }
         }

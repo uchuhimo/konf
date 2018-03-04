@@ -26,9 +26,9 @@ import com.uchuhimo.konf.source.toDescription
  * Source from a hierarchical map.
  */
 open class MapSource(
-        val map: Map<String, Any>,
-        type: String = "",
-        context: Map<String, String> = mapOf()
+    val map: Map<String, Any>,
+    type: String = "",
+    context: Map<String, String> = mapOf()
 ) : ValueSource(map, type.notEmptyOr("map"), context) {
     override fun contains(path: Path): Boolean {
         return if (path.isEmpty()) {

@@ -57,8 +57,8 @@ object FlatSourceSpec : SubjectSpek<FlatSource>({
         }
         on("contain invalid key") {
             val source = FlatSource(
-                    map = mapOf("level1.level2.key." to "value"),
-                    prefix = "level1.level2")
+                map = mapOf("level1.level2.key." to "value"),
+                prefix = "level1.level2")
             it("should not contain any path") {
                 assertFalse("key" in source)
             }

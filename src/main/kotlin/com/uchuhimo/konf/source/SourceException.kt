@@ -33,13 +33,13 @@ open class SourceException : ConfigException {
  * Exception indicates that actual type of value in source is unmatched with expected type.
  */
 class WrongTypeException(val source: Source, actual: String, expected: String) :
-        SourceException("source ${source.description} has type $actual rather than $expected")
+    SourceException("source ${source.description} has type $actual rather than $expected")
 
 /**
  * Exception indicates that expected value in specified path is not existed in the source.
  */
 class NoSuchPathException(val source: Source, val path: Path) :
-        SourceException("cannot find path \"${path.name}\" in source ${source.description}")
+    SourceException("cannot find path \"${path.name}\" in source ${source.description}")
 
 /**
  * Exception indicates that there is a parsing error.
@@ -53,31 +53,31 @@ class ParseException : SourceException {
  * Exception indicates that value of specified class in unsupported in the source.
  */
 class UnsupportedTypeException(source: Source, clazz: Class<*>) :
-        SourceException("value of type ${clazz.simpleName} is unsupported in source ${source.description}")
+    SourceException("value of type ${clazz.simpleName} is unsupported in source ${source.description}")
 
 /**
  * Exception indicates that watch key is no longer valid for the source.
  */
 class InvalidWatchKeyException(source: Source) :
-        SourceException("watch key for source ${source.description} is no longer valid")
+    SourceException("watch key for source ${source.description} is no longer valid")
 
 /**
  * Exception indicates failure to map source to value of specified class.
  */
 class ObjectMappingException(source: Source, clazz: Class<*>, cause: Throwable) :
-        SourceException("unable to map source ${source.description} to value of type ${clazz.simpleName}", cause)
+    SourceException("unable to map source ${source.description} to value of type ${clazz.simpleName}", cause)
 
 /**
  * Exception indicates that value of specified class is unsupported as key of map.
  */
 class UnsupportedMapKeyException(val clazz: Class<*>) : SourceException(
-        "cannot support map with ${clazz.simpleName} key, only support string key")
+    "cannot support map with ${clazz.simpleName} key, only support string key")
 
 /**
  * Exception indicates failure to load specified path.
  */
 class LoadException(val path: Path, cause: Throwable) :
-        SourceException("fail to load ${path.name}", cause)
+    SourceException("fail to load ${path.name}", cause)
 
 /**
  * Exception indicates that specified source is not found.
@@ -88,5 +88,5 @@ class SourceNotFoundException(message: String) : SourceException(message)
  * Exception indicates that specified file has unsupported file extension.
  */
 class UnsupportedExtensionException(file: File) : SourceException(
-        "cannot detect supported extension for \"${file.name}\"," +
-                " supported extensions: conf, json, properties, toml, xml, yml, yaml")
+    "cannot detect supported extension for \"${file.name}\"," +
+        " supported extensions: conf, json, properties, toml, xml, yml, yaml")

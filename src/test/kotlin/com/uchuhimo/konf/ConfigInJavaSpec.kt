@@ -37,11 +37,11 @@ object ConfigInJavaSpec : SubjectSpek<Config>({
     subject { Config { addSpec(spec) } }
 
     given("a config") {
-        val invalidItem = ConfigSpec("invalid").run { required<Int>("invalidItem") }
+        val invalidItem by ConfigSpec("invalid").run { required<Int>() }
         group("addSpec operation") {
             on("add orthogonal spec") {
                 val newSpec = object : ConfigSpec(spec.prefix) {
-                    val minSize = optional("minSize", 1)
+                    val minSize by optional(1)
                 }
                 subject.addSpec(newSpec)
                 it("should contain items in new spec") {
@@ -56,25 +56,32 @@ object ConfigInJavaSpec : SubjectSpek<Config>({
             on("add repeated item") {
                 it("should throw RepeatedItemException") {
                     assertThat({ subject.addSpec(spec) }, throws(has(
-                            RepeatedItemException::name,
-                            equalTo(size.name))))
+                        RepeatedItemException::name,
+                        equalTo(size.name))))
                 }
             }
             on("add repeated name") {
-                val newSpec = ConfigSpec(spec.prefix).apply { required<Int>("size") }
+                val newSpec = ConfigSpec(spec.prefix).apply {
+                    @Suppress("UNUSED_VARIABLE", "NAME_SHADOWING")
+                    val size by required<Int>()
+                }
                 it("should throw NameConflictException") {
                     assertThat({ subject.addSpec(newSpec) }, throws<NameConflictException>())
                 }
             }
             on("add conflict name, which is prefix of existed name") {
-                val newSpec = ConfigSpec("network").apply { required<Int>("buffer") }
+                val newSpec = ConfigSpec("network").apply {
+                    @Suppress("UNUSED_VARIABLE")
+                    val buffer by required<Int>()
+                }
                 it("should throw NameConflictException") {
                     assertThat({ subject.addSpec(newSpec) }, throws<NameConflictException>())
                 }
             }
             on("add conflict name, and an existed name is prefix of it") {
                 val newSpec = ConfigSpec(type.name).apply {
-                    required<Int>("subType")
+                    @Suppress("UNUSED_VARIABLE")
+                    val subType by required<Int>()
                 }
                 it("should throw NameConflictException") {
                     assertThat({ subject.addSpec(newSpec) }, throws<NameConflictException>())
@@ -95,7 +102,7 @@ object ConfigInJavaSpec : SubjectSpek<Config>({
             on("get with invalid item") {
                 it("should throw NoSuchItemException when using `get`") {
                     assertThat({ subject[invalidItem] },
-                            throws(has(NoSuchItemException::name, equalTo(invalidItem.name))))
+                        throws(has(NoSuchItemException::name, equalTo(invalidItem.name))))
                 }
                 it("should return null when using `getOrNull`") {
                     assertThat(subject.getOrNull(invalidItem), absent())
@@ -109,7 +116,7 @@ object ConfigInJavaSpec : SubjectSpek<Config>({
             on("get with invalid name") {
                 it("should throw NoSuchItemException when using `get`") {
                     assertThat({ subject<String>(spec.qualify("invalid")) }, throws(has(
-                            NoSuchItemException::name, equalTo(spec.qualify("invalid")))))
+                        NoSuchItemException::name, equalTo(spec.qualify("invalid")))))
                 }
                 it("should return null when using `getOrNull`") {
                     assertThat(subject.getOrNull<String>(spec.qualify("invalid")), absent())
@@ -118,11 +125,11 @@ object ConfigInJavaSpec : SubjectSpek<Config>({
             on("get unset item") {
                 it("should throw UnsetValueException") {
                     assertThat({ subject[size] }, throws(has(
-                            UnsetValueException::name,
-                            equalTo(size.name))))
+                        UnsetValueException::name,
+                        equalTo(size.name))))
                     assertThat({ subject[maxSize] }, throws(has(
-                            UnsetValueException::name,
-                            equalTo(size.name))))
+                        UnsetValueException::name,
+                        equalTo(size.name))))
                 }
             }
         }
@@ -141,7 +148,7 @@ object ConfigInJavaSpec : SubjectSpek<Config>({
             }
             on("set with valid item when corresponding value is lazy") {
                 test("before set, the item should be lazy; after set," +
-                        " the item should be no longer lazy, and it contains the specified value") {
+                    " the item should be no longer lazy, and it contains the specified value") {
                     subject[size] = 1024
                     assertThat(subject[maxSize], equalTo(subject[size] * 2))
                     subject[maxSize] = 0
@@ -154,7 +161,7 @@ object ConfigInJavaSpec : SubjectSpek<Config>({
             on("set with invalid item") {
                 it("should throw NoSuchItemException") {
                     assertThat({ subject[invalidItem] = 1024 },
-                            throws(has(NoSuchItemException::name, equalTo(invalidItem.name))))
+                        throws(has(NoSuchItemException::name, equalTo(invalidItem.name))))
                 }
             }
             on("set with valid name") {
@@ -166,7 +173,7 @@ object ConfigInJavaSpec : SubjectSpek<Config>({
             on("set with invalid name") {
                 it("should throw NoSuchItemException") {
                     assertThat({ subject[invalidItem] = 1024 },
-                            throws(has(NoSuchItemException::name, equalTo(invalidItem.name))))
+                        throws(has(NoSuchItemException::name, equalTo(invalidItem.name))))
                 }
             }
             on("set with incorrect type of value") {

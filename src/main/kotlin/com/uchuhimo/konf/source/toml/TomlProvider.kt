@@ -27,8 +27,8 @@ import java.io.Reader
  */
 object TomlProvider : Provider {
     override fun fromReader(reader: Reader): Source =
-            Toml().read(reader).toMap().asTomlSource()
+        Toml().read(reader).toMap().asTomlSource()
 
     override fun fromInputStream(inputStream: InputStream): Source =
-            Toml().read(inputStream).toMap().asTomlSource()
+        Toml().read(inputStream).toMap().asTomlSource()
 }

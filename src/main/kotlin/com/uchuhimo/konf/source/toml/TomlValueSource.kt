@@ -24,8 +24,8 @@ import com.uchuhimo.konf.source.base.ValueSource
  * Source from a TOML value.
  */
 class TomlValueSource(
-        value: Any,
-        context: Map<String, String> = mapOf()
+    value: Any,
+    context: Map<String, String> = mapOf()
 ) : ValueSource(value, "TOML-value", context) {
     override fun Any.castToSource(context: Map<String, String>): Source = asTomlSource(context)
 
@@ -39,12 +39,12 @@ class TomlValueSource(
 }
 
 fun Any.asTomlSource(context: Map<String, String> = mapOf()): Source =
-        when {
-            this is Source -> this
-            this is Map<*, *> ->
-                // assume that only `Map<String, Any>` is provided,
-                // key type mismatch will be detected when loaded into Config
-                @Suppress("UNCHECKED_CAST")
-                TomlMapSource(this as Map<String, Any>, context)
-            else -> TomlValueSource(this, context)
-        }
+    when {
+        this is Source -> this
+        this is Map<*, *> ->
+            // assume that only `Map<String, Any>` is provided,
+            // key type mismatch will be detected when loaded into Config
+            @Suppress("UNCHECKED_CAST")
+            TomlMapSource(this as Map<String, Any>, context)
+        else -> TomlValueSource(this, context)
+    }

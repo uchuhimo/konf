@@ -37,14 +37,14 @@ import kotlin.coroutines.experimental.CoroutineContext
  * @param config parent config
  */
 class Loader(
-        /**
-         * Parent config for all child configs loading source in this loader.
-         */
-        val config: Config,
-        /**
-         * Source provider to provide source from various input format.
-         */
-        val provider: Provider
+    /**
+     * Parent config for all child configs loading source in this loader.
+     */
+    val config: Config,
+    /**
+     * Source provider to provide source from various input format.
+     */
+    val provider: Provider
 ) {
     /**
      * Returns a child config containing values from specified reader.
@@ -53,7 +53,7 @@ class Loader(
      * @return a child config containing values from specified reader
      */
     fun reader(reader: Reader): Config =
-            config.withSource(provider.fromReader(reader))
+        config.withSource(provider.fromReader(reader))
 
     /**
      * Returns a child config containing values from specified input stream.
@@ -62,7 +62,7 @@ class Loader(
      * @return a child config containing values from specified input stream
      */
     fun inputStream(inputStream: InputStream): Config =
-            config.withSource(provider.fromInputStream(inputStream))
+        config.withSource(provider.fromInputStream(inputStream))
 
     /**
      * Returns a child config containing values from specified file.
@@ -71,7 +71,7 @@ class Loader(
      * @return a child config containing values from specified file
      */
     fun file(file: File): Config =
-            config.withSource(provider.fromFile(file))
+        config.withSource(provider.fromFile(file))
 
     /**
      * Returns a child config containing values from specified file path.
@@ -80,7 +80,7 @@ class Loader(
      * @return a child config containing values from specified file path
      */
     fun file(file: String): Config =
-            config.withSource(provider.fromFile(file))
+        config.withSource(provider.fromFile(file))
 
     /**
      * Returns a child config containing values from specified file,
@@ -92,44 +92,48 @@ class Loader(
      * @param context context of the coroutine. The default value is [DefaultDispatcher].
      * @return a child config containing values from watched file
      */
-    fun watchFile(file: File, delayTime: Long = 5, unit: TimeUnit = TimeUnit.SECONDS,
-                  context: CoroutineContext = DefaultDispatcher): Config =
-            provider.fromFile(file).let { source ->
-                config.withLoadTrigger("watch ${source.description}") { newConfig, load ->
-                    load(source)
-                    val watcher = FileSystems.getDefault().newWatchService()
-                    val path = file.toPath().parent
-                    path.register(watcher, StandardWatchEventKinds.ENTRY_MODIFY)
-                    launch(context) {
-                        while (true) {
-                            delay(delayTime, unit)
-                            val key = watcher.poll()
-                            if (key != null) {
-                                for (event in key.pollEvents()) {
-                                    val kind = event.kind()
-                                    @Suppress("UNCHECKED_CAST")
-                                    event as WatchEvent<Path>
-                                    val filename = event.context()
-                                    if (kind == StandardWatchEventKinds.OVERFLOW) {
-                                        continue
-                                    } else if (kind == StandardWatchEventKinds.ENTRY_MODIFY &&
-                                            filename.toString() == file.name) {
-                                        newConfig.lock {
-                                            newConfig.clear()
-                                            load(provider.fromFile(file))
-                                        }
+    fun watchFile(
+        file: File,
+        delayTime: Long = 5,
+        unit: TimeUnit = TimeUnit.SECONDS,
+        context: CoroutineContext = DefaultDispatcher
+    ): Config =
+        provider.fromFile(file).let { source ->
+            config.withLoadTrigger("watch ${source.description}") { newConfig, load ->
+                load(source)
+                val watcher = FileSystems.getDefault().newWatchService()
+                val path = file.toPath().parent
+                path.register(watcher, StandardWatchEventKinds.ENTRY_MODIFY)
+                launch(context) {
+                    while (true) {
+                        delay(delayTime, unit)
+                        val key = watcher.poll()
+                        if (key != null) {
+                            for (event in key.pollEvents()) {
+                                val kind = event.kind()
+                                @Suppress("UNCHECKED_CAST")
+                                event as WatchEvent<Path>
+                                val filename = event.context()
+                                if (kind == StandardWatchEventKinds.OVERFLOW) {
+                                    continue
+                                } else if (kind == StandardWatchEventKinds.ENTRY_MODIFY &&
+                                    filename.toString() == file.name) {
+                                    newConfig.lock {
+                                        newConfig.clear()
+                                        load(provider.fromFile(file))
                                     }
-                                    val valid = key.reset()
-                                    if (!valid) {
-                                        watcher.close()
-                                        throw InvalidWatchKeyException(source)
-                                    }
+                                }
+                                val valid = key.reset()
+                                if (!valid) {
+                                    watcher.close()
+                                    throw InvalidWatchKeyException(source)
                                 }
                             }
                         }
                     }
                 }
             }
+        }
 
     /**
      * Returns a child config containing values from specified file path,
@@ -141,9 +145,13 @@ class Loader(
      * @param context context of the coroutine. The default value is [DefaultDispatcher].
      * @return a child config containing values from watched file
      */
-    fun watchFile(file: String, delayTime: Long = 5, unit: TimeUnit = TimeUnit.SECONDS,
-                  context: CoroutineContext = DefaultDispatcher): Config =
-            watchFile(File(file), delayTime, unit, context)
+    fun watchFile(
+        file: String,
+        delayTime: Long = 5,
+        unit: TimeUnit = TimeUnit.SECONDS,
+        context: CoroutineContext = DefaultDispatcher
+    ): Config =
+        watchFile(File(file), delayTime, unit, context)
 
     /**
      * Returns a child config containing values from specified string.
@@ -152,7 +160,7 @@ class Loader(
      * @return a child config containing values from specified string
      */
     fun string(content: String): Config =
-            config.withSource(provider.fromString(content))
+        config.withSource(provider.fromString(content))
 
     /**
      * Returns a child config containing values from specified byte array.
@@ -161,7 +169,7 @@ class Loader(
      * @return a child config containing values from specified byte array
      */
     fun bytes(content: ByteArray): Config =
-            config.withSource(provider.fromBytes(content))
+        config.withSource(provider.fromBytes(content))
 
     /**
      * Returns a child config containing values from specified portion of byte array.
@@ -172,7 +180,7 @@ class Loader(
      * @return a child config containing values from specified portion of byte array
      */
     fun bytes(content: ByteArray, offset: Int, length: Int): Config =
-            config.withSource(provider.fromBytes(content, offset, length))
+        config.withSource(provider.fromBytes(content, offset, length))
 
     /**
      * Returns a child config containing values from specified url.
@@ -181,7 +189,7 @@ class Loader(
      * @return a child config containing values from specified url
      */
     fun url(url: URL): Config =
-            config.withSource(provider.fromUrl(url))
+        config.withSource(provider.fromUrl(url))
 
     /**
      * Returns a child config containing values from specified url string.
@@ -190,7 +198,7 @@ class Loader(
      * @return a child config containing values from specified url string
      */
     fun url(url: String): Config =
-            config.withSource(provider.fromUrl(url))
+        config.withSource(provider.fromUrl(url))
 
     /**
      * Returns a child config containing values from specified url,
@@ -202,22 +210,26 @@ class Loader(
      * @param context context of the coroutine. The default value is [DefaultDispatcher].
      * @return a child config containing values from specified url
      */
-    fun watchUrl(url: URL, period: Long = 5, unit: TimeUnit = TimeUnit.SECONDS,
-                 context: CoroutineContext = DefaultDispatcher): Config =
-            provider.fromUrl(url).let { source ->
-                config.withLoadTrigger("watch ${source.description}") { newConfig, load ->
-                    load(source)
-                    launch(context) {
-                        while (true) {
-                            delay(period, unit)
-                            newConfig.lock {
-                                newConfig.clear()
-                                load(provider.fromUrl(url))
-                            }
+    fun watchUrl(
+        url: URL,
+        period: Long = 5,
+        unit: TimeUnit = TimeUnit.SECONDS,
+        context: CoroutineContext = DefaultDispatcher
+    ): Config =
+        provider.fromUrl(url).let { source ->
+            config.withLoadTrigger("watch ${source.description}") { newConfig, load ->
+                load(source)
+                launch(context) {
+                    while (true) {
+                        delay(period, unit)
+                        newConfig.lock {
+                            newConfig.clear()
+                            load(provider.fromUrl(url))
                         }
                     }
                 }
             }
+        }
 
     /**
      * Returns a child config containing values from specified url string,
@@ -229,9 +241,13 @@ class Loader(
      * @param context context of the coroutine. The default value is [DefaultDispatcher].
      * @return a child config containing values from specified url string
      */
-    fun watchUrl(url: String, period: Long = 5, unit: TimeUnit = TimeUnit.SECONDS,
-                 context: CoroutineContext = DefaultDispatcher): Config =
-            watchUrl(URL(url), period, unit, context)
+    fun watchUrl(
+        url: String,
+        period: Long = 5,
+        unit: TimeUnit = TimeUnit.SECONDS,
+        context: CoroutineContext = DefaultDispatcher
+    ): Config =
+        watchUrl(URL(url), period, unit, context)
 
     /**
      * Returns a child config containing values from specified resource.
@@ -240,5 +256,5 @@ class Loader(
      * @return a child config containing values from specified resource
      */
     fun resource(resource: String): Config =
-            config.withSource(provider.fromResource(resource))
+        config.withSource(provider.fromResource(resource))
 }

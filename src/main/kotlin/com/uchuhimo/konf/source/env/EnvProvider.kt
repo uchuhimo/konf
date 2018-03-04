@@ -30,9 +30,9 @@ object EnvProvider {
      */
     fun fromEnv(): Source {
         return FlatSource(
-                System.getenv().mapKeys { (key, _) ->
-                    key.toLowerCase().replace('_', '.')
-                },
-                type = "system-environment")
+            System.getenv().mapKeys { (key, _) ->
+                key.toLowerCase().replace('_', '.')
+            },
+            type = "system-environment")
     }
 }

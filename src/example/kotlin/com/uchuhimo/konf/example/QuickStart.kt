@@ -20,22 +20,22 @@ import com.uchuhimo.konf.Config
 import com.uchuhimo.konf.ConfigSpec
 
 public object ServerSpec : ConfigSpec("server") {
-    val host = optional("host", "0.0.0.0")
-    val port = required<Int>("port")
+    val host by optional("0.0.0.0")
+    val port by required<Int>()
 }
 
 fun main(args: Array<String>) {
     val config = Config { addSpec(ServerSpec) }
-            .withSourceFrom.yaml.file("/path/to/server.yml")
+        .withSourceFrom.yaml.file("/path/to/server.yml")
+        .withSourceFrom.json.resource("server.json")
+        .withSourceFrom.env()
+        .withSourceFrom.systemProperties()
+    run {
+        val config = Config { addSpec(ServerSpec) }
+            .withSourceFrom.yaml.watchFile("/path/to/server.yml")
             .withSourceFrom.json.resource("server.json")
             .withSourceFrom.env()
             .withSourceFrom.systemProperties()
-    run {
-        val config = Config { addSpec(ServerSpec) }
-                .withSourceFrom.yaml.watchFile("/path/to/server.yml")
-                .withSourceFrom.json.resource("server.json")
-                .withSourceFrom.env()
-                .withSourceFrom.systemProperties()
     }
     val server = Server(config[ServerSpec.host], config[ServerSpec.port])
     server.start()

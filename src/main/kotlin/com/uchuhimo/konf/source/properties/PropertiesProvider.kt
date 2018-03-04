@@ -31,10 +31,10 @@ object PropertiesProvider : Provider {
     private fun Properties.toMap(): Map<String, String> = this as Map<String, String>
 
     override fun fromReader(reader: Reader): Source =
-            FlatSource(Properties().apply { load(reader) }.toMap(), type = "properties")
+        FlatSource(Properties().apply { load(reader) }.toMap(), type = "properties")
 
     override fun fromInputStream(inputStream: InputStream): Source =
-            FlatSource(Properties().apply { load(inputStream) }.toMap(), type = "properties")
+        FlatSource(Properties().apply { load(inputStream) }.toMap(), type = "properties")
 
     /**
      * Returns a new source from system properties.

@@ -33,7 +33,8 @@ object DurationDeserializerSpec : Spek({
         Config {
             addSpec(object : ConfigSpec() {
                 init {
-                    required<DurationWrapper>("item")
+                    @Suppress("UNUSED_VARIABLE")
+                    val item by required<DurationWrapper>()
                 }
             })
         }
@@ -44,7 +45,7 @@ object DurationDeserializerSpec : Spek({
             config.withSourceFrom.map.kv(mapOf("item" to mapOf("duration" to "P2DT3H4M"))).apply {
                 it("should succeed") {
                     assertThat(this@apply<DurationWrapper>("item").duration,
-                            equalTo(Duration.parse("P2DT3H4M")))
+                        equalTo(Duration.parse("P2DT3H4M")))
                 }
             }
         }

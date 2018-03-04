@@ -598,11 +598,15 @@ private fun load(config: Config, source: Source): Config {
 }
 
 internal fun Config.loadFromSource(source: Source): Config =
-        load(withLayer("source: ${source.description}"), source)
+    load(withLayer("source: ${source.description}"), source)
 
-internal fun Config.loadBy(description: String,
-                           trigger: (config: Config,
-                                     load: (source: Source) -> Unit) -> Unit): Config {
+internal fun Config.loadBy(
+    description: String,
+    trigger: (
+        config: Config,
+        load: (source: Source) -> Unit
+    ) -> Unit
+): Config {
     return withLayer("trigger: $description").apply {
         trigger(this) { source ->
             load(this, source)
@@ -612,7 +616,7 @@ internal fun Config.loadBy(description: String,
 
 private fun Source.toValue(type: JavaType, mapper: ObjectMapper): Any {
     if (this is ValueSource &&
-            type == TypeFactory.defaultInstance().constructType(value::class.java)) {
+        type == TypeFactory.defaultInstance().constructType(value::class.java)) {
         return value
     }
     when (type) {
@@ -625,7 +629,7 @@ private fun Source.toValue(type: JavaType, mapper: ObjectMapper): Any {
                     return valueOfMethod.invoke(null, name)
                 } catch (cause: InvocationTargetException) {
                     throw ParseException(
-                            "enum type $clazz has no constant with name $name", cause)
+                        "enum type $clazz has no constant with name $name", cause)
                 }
             } else {
                 return when (clazz) {
@@ -658,8 +662,8 @@ private fun Source.toValue(type: JavaType, mapper: ObjectMapper): Any {
                         } else {
                             try {
                                 mapper.readValue<Any>(
-                                        TreeTraversingParser(toJsonNode(), mapper),
-                                        type)
+                                    TreeTraversingParser(toJsonNode(), mapper),
+                                    type)
                             } catch (cause: JsonProcessingException) {
                                 throw ObjectMappingException(this, clazz, cause)
                             }
@@ -721,13 +725,24 @@ private fun Source.toValue(type: JavaType, mapper: ObjectMapper): Any {
 }
 
 private fun Source.toListValue(type: JavaType, mapper: ObjectMapper) =
-        toList().map { it.toValue(type, mapper) }
+    toList().map { it.toValue(type, mapper) }
 
 private fun Source.toJsonNode(): JsonNode {
     if (this is JsonSource) {
         return this.node
     } else {
         return when {
+            isList() -> ArrayNode(
+                JsonNodeFactory.instance,
+                toList().map {
+                    it.toJsonNode()
+                })
+            isMap() -> ObjectNode(
+                JsonNodeFactory.instance,
+                toMap().mapValues { (_, value) ->
+                    value.toJsonNode()
+                }
+            )
             isBoolean() -> BooleanNode.valueOf(toBoolean())
             isLong() -> LongNode.valueOf(toLong())
             isInt() -> IntNode.valueOf(toInt())
@@ -751,28 +766,17 @@ private fun Source.toJsonNode(): JsonNode {
             isInstant() -> TextNode.valueOf(toInstant().toString())
             isDuration() -> TextNode.valueOf(toDuration().toString())
             isSizeInBytes() -> LongNode.valueOf(toSizeInBytes().bytes)
-            isList() -> ArrayNode(
-                    JsonNodeFactory.instance,
-                    toList().map {
-                        it.toJsonNode()
-                    })
-            isMap() -> ObjectNode(
-                    JsonNodeFactory.instance,
-                    toMap().mapValues { (_, value) ->
-                        value.toJsonNode()
-                    }
-            )
             else -> throw ParseException("fail to cast source $description to JSON node")
         }
     }
 }
 
 private fun implOf(clazz: Class<*>): Class<*> =
-        when (clazz) {
-            List::class.java -> ArrayList::class.java
-            Set::class.java -> HashSet::class.java
-            SortedSet::class.java -> TreeSet::class.java
-            Map::class.java -> HashMap::class.java
-            SortedMap::class.java -> TreeMap::class.java
-            else -> clazz
-        }
+    when (clazz) {
+        List::class.java -> ArrayList::class.java
+        Set::class.java -> HashSet::class.java
+        SortedSet::class.java -> TreeSet::class.java
+        Map::class.java -> HashMap::class.java
+        SortedMap::class.java -> TreeMap::class.java
+        else -> clazz
+    }

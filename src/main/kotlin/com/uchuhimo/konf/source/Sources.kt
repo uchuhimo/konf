@@ -47,35 +47,35 @@ fun Source.withFallback(fallback: Source): Source = object : Source by this {
     }
 
     override fun contains(path: List<String>): Boolean =
-            this@withFallback.contains(path) || fallback.contains(path)
+        this@withFallback.contains(path) || fallback.contains(path)
 
     override fun get(path: List<String>): Source =
-            this@withFallback.getOrNull(path) ?: fallback[path]
+        this@withFallback.getOrNull(path) ?: fallback[path]
 
     override fun getOrNull(path: List<String>): Source? =
-            this@withFallback.getOrNull(path) ?: fallback.getOrNull(path)
+        this@withFallback.getOrNull(path) ?: fallback.getOrNull(path)
 
     override fun contains(prefix: String): Boolean =
-            this@withFallback.contains(prefix) || fallback.contains(prefix)
+        this@withFallback.contains(prefix) || fallback.contains(prefix)
 
     override fun get(prefix: String): Source =
-            this@withFallback.getOrNull(prefix) ?: fallback[prefix]
+        this@withFallback.getOrNull(prefix) ?: fallback[prefix]
 
     override fun getOrNull(prefix: String): Source? =
-            this@withFallback.getOrNull(prefix) ?: fallback.getOrNull(prefix)
+        this@withFallback.getOrNull(prefix) ?: fallback.getOrNull(prefix)
 }
 
 /**
  * Returns a new default object mapper for config.
  */
 fun createDefaultMapper(): ObjectMapper = jacksonObjectMapper()
-        .disable(SerializationFeature.WRITE_DATES_AS_TIMESTAMPS)
-        .disable(SerializationFeature.WRITE_DURATIONS_AS_TIMESTAMPS)
-        .enable(SerializationFeature.WRITE_DATES_WITH_ZONE_ID)
-        .registerModule(JavaTimeModule()
-                .addDeserializer(Duration::class.java, DurationDeserializer)
-                .addDeserializer(OffsetDateTime::class.java, OffsetDateTimeDeserializer)
-                .addDeserializer(ZonedDateTime::class.java, ZoneDateTimeDeserializer))
+    .disable(SerializationFeature.WRITE_DATES_AS_TIMESTAMPS)
+    .disable(SerializationFeature.WRITE_DURATIONS_AS_TIMESTAMPS)
+    .enable(SerializationFeature.WRITE_DATES_WITH_ZONE_ID)
+    .registerModule(JavaTimeModule()
+        .addDeserializer(Duration::class.java, DurationDeserializer)
+        .addDeserializer(OffsetDateTime::class.java, OffsetDateTimeDeserializer)
+        .addDeserializer(ZonedDateTime::class.java, ZoneDateTimeDeserializer))
 
 /**
  * Converts key-value pairs to description in string representation.
@@ -123,8 +123,8 @@ internal fun parseDuration(input: String): Long {
         unitString += "s"
 
     // note that this is deliberately case-sensitive
-    val units = if (unitString == "" || unitString == "ms" || unitString == "millis"
-            || unitString == "milliseconds") {
+    val units = if (unitString == "" || unitString == "ms" || unitString == "millis" ||
+        unitString == "milliseconds") {
         TimeUnit.MILLISECONDS
     } else if (unitString == "us" || unitString == "micros" || unitString == "microseconds") {
         TimeUnit.MICROSECONDS

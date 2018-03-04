@@ -39,10 +39,10 @@ import kotlin.coroutines.experimental.CoroutineContext
  * @param config parent config for loader
  */
 class DefaultLoaders(
-        /**
-         * Parent config for loader.
-         */
-        val config: Config
+    /**
+     * Parent config for loader.
+     */
+    val config: Config
 ) {
     /**
      * Loader for HOCON source.
@@ -222,8 +222,12 @@ class DefaultLoaders(
      * @return a child config containing values from watched file
      * @throws UnsupportedExtensionException
      */
-    fun watchFile(file: File, delayTime: Long = 5, unit: TimeUnit = TimeUnit.SECONDS,
-                  context: CoroutineContext = DefaultDispatcher): Config {
+    fun watchFile(
+        file: File,
+        delayTime: Long = 5,
+        unit: TimeUnit = TimeUnit.SECONDS,
+        context: CoroutineContext = DefaultDispatcher
+    ): Config {
         return when (file.extension) {
             "conf" -> hocon.watchFile(file, delayTime, unit, context)
             "json" -> json.watchFile(file, delayTime, unit, context)
@@ -257,9 +261,13 @@ class DefaultLoaders(
      * @return a child config containing values from watched file
      * @throws UnsupportedExtensionException
      */
-    fun watchFile(file: String, delayTime: Long = 5, unit: TimeUnit = TimeUnit.SECONDS,
-                  context: CoroutineContext = DefaultDispatcher): Config =
-            watchFile(File(file), delayTime, unit, context)
+    fun watchFile(
+        file: String,
+        delayTime: Long = 5,
+        unit: TimeUnit = TimeUnit.SECONDS,
+        context: CoroutineContext = DefaultDispatcher
+    ): Config =
+        watchFile(File(file), delayTime, unit, context)
 }
 
 /**
@@ -268,10 +276,10 @@ class DefaultLoaders(
  * @param config parent config
  */
 class MapLoader(
-        /**
-         * Parent config for all child configs loading source in this loader.
-         */
-        val config: Config
+    /**
+     * Parent config for all child configs loading source in this loader.
+     */
+    val config: Config
 ) {
     /**
      * Returns a child config containing values from specified hierarchical map.

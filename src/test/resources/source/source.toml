@@ -69,7 +69,7 @@ nested = [[[{ a = 1 }]]]
     first = 1
     second = 2
 
-    [level1.level2.class]
+    [level1.level2.clazz]
     boolean = false
 
     int = 1
