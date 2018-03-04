@@ -18,7 +18,8 @@ package com.uchuhimo.konf.source.properties
 
 import com.uchuhimo.konf.Config
 import com.uchuhimo.konf.source.ConfigForLoad
-import com.uchuhimo.konf.source.SourceLoadSpec
+import com.uchuhimo.konf.source.base.FlatConfigForLoad
+import com.uchuhimo.konf.source.base.FlatSourceLoadSpec
 import org.jetbrains.spek.subject.SubjectSpek
 import org.jetbrains.spek.subject.itBehavesLike
 
@@ -27,10 +28,11 @@ object PropertiesSourceLoadSpec : SubjectSpek<Config>({
     subject {
         Config {
             addSpec(ConfigForLoad)
+            addSpec(FlatConfigForLoad)
         }.withSourceFrom.properties.resource("source/source.properties")
     }
 
-    itBehavesLike(SourceLoadSpec)
+    itBehavesLike(FlatSourceLoadSpec)
 })
 
 object PropertiesSourceReloadSpec : SubjectSpek<Config>({
@@ -38,12 +40,14 @@ object PropertiesSourceReloadSpec : SubjectSpek<Config>({
     subject {
         val config = Config {
             addSpec(ConfigForLoad)
+            addSpec(FlatConfigForLoad)
         }.withSourceFrom.properties.resource("source/source.properties")
         val properties = config.toProperties.toText()
         Config {
             addSpec(ConfigForLoad)
+            addSpec(FlatConfigForLoad)
         }.withSourceFrom.properties.string(properties)
     }
 
-    itBehavesLike(SourceLoadSpec)
+    itBehavesLike(FlatSourceLoadSpec)
 })

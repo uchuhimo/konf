@@ -16,9 +16,14 @@
 
 package com.uchuhimo.konf.source.base
 
+import com.natpryce.hamkrest.assertion.assertThat
+import com.natpryce.hamkrest.equalTo
 import com.uchuhimo.konf.Config
 import com.uchuhimo.konf.source.ConfigForLoad
 import com.uchuhimo.konf.source.SourceLoadSpec
+import org.jetbrains.spek.api.dsl.given
+import org.jetbrains.spek.api.dsl.it
+import org.jetbrains.spek.api.dsl.on
 import org.jetbrains.spek.subject.SubjectSpek
 import org.jetbrains.spek.subject.itBehavesLike
 
@@ -27,10 +32,21 @@ object FlatSourceLoadSpec : SubjectSpek<Config>({
     subject {
         Config {
             addSpec(ConfigForLoad)
+            addSpec(FlatConfigForLoad)
         }.withSourceFrom.map.flat(loadContent)
     }
 
     itBehavesLike(SourceLoadSpec)
+
+    given("a flat source") {
+        on("load the source into config") {
+            it("should contain every value specified in the source") {
+                val classForLoad = ClassForLoad(stringWithComma = "string,with,comma")
+                assertThat(subject[FlatConfigForLoad.flatClass].stringWithComma,
+                    equalTo(classForLoad.stringWithComma))
+            }
+        }
+    }
 })
 
 object FlatSourceReloadSpec : SubjectSpek<Config>({
@@ -38,13 +54,15 @@ object FlatSourceReloadSpec : SubjectSpek<Config>({
     subject {
         val config = Config {
             addSpec(ConfigForLoad)
+            addSpec(FlatConfigForLoad)
         }.withSourceFrom.map.flat(loadContent)
         Config {
             addSpec(ConfigForLoad)
+            addSpec(FlatConfigForLoad)
         }.withSourceFrom.map.flat(config.toFlatMap())
     }
 
-    itBehavesLike(SourceLoadSpec)
+    itBehavesLike(FlatSourceLoadSpec)
 })
 
 private val loadContent = mapOf(
@@ -130,5 +148,6 @@ private val loadContent = mapOf(
     "clazz.size" to "10k",
     "clazz.enum" to "LABEL2",
     "clazz.booleanArray" to "true,false",
-    "clazz.nested.0.0.0.a" to "1"
+    "clazz.nested.0.0.0.a" to "1",
+    "flatClass.stringWithComma" to "string,with,comma"
 ).mapKeys { (key, _) -> "level1.level2.$key" }

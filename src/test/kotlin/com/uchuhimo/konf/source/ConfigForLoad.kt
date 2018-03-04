@@ -113,7 +113,7 @@ data class ClassForLoad(
     val long: Long,
     val double: Double,
     val float: Float,
-    val bigDecimal: BigDecimal?,
+    val bigDecimal: BigDecimal,
     val char: Char,
     val string: String,
     val offsetTime: OffsetTime,

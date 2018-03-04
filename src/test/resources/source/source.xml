@@ -332,4 +332,8 @@
         <name>level1.level2.clazz.nested.0.0.0.a</name>
         <value>1</value>
     </property>
+    <property>
+        <name>level1.level2.flatClass.stringWithComma</name>
+        <value>string,with,comma</value>
+    </property>
 </configuration>
