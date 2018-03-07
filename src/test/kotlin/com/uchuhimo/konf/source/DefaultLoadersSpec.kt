@@ -21,6 +21,7 @@ import com.natpryce.hamkrest.equalTo
 import com.natpryce.hamkrest.throws
 import com.uchuhimo.konf.Config
 import com.uchuhimo.konf.ConfigSpec
+import com.uchuhimo.konf.source.properties.PropertiesProvider
 import com.uchuhimo.konf.tempFileOf
 import kotlinx.coroutines.experimental.delay
 import kotlinx.coroutines.experimental.newSingleThreadContext
@@ -68,6 +69,10 @@ object DefaultLoadersSpec : SubjectSpek<DefaultLoaders>({
             }
             it("should throw UnsupportedExtensionException when the extension is unsupported") {
                 assertThat({ subject.dispatchExtension("txt") }, throws<UnsupportedExtensionException>())
+            }
+            it("should return the corresponding loader when the extension is registered") {
+                DefaultLoaders.registerExtension("txt", PropertiesProvider)
+                assertThat(subject.dispatchExtension("txt"), equalTo(subject.properties))
             }
         }
         on("load from URL") {

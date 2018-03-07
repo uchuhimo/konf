@@ -107,17 +107,9 @@ class DefaultLoaders(
      * @param source the source description for error message
      * @return the corresponding loader based on extension
      */
-    fun dispatchExtension(extension: String, source: String = ""): Loader {
-        return when (extension) {
-            "conf" -> hocon
-            "json" -> json
-            "properties" -> properties
-            "toml" -> toml
-            "xml" -> xml
-            "yml", "yaml" -> yaml
-            else -> throw UnsupportedExtensionException(source)
-        }
-    }
+    fun dispatchExtension(extension: String, source: String = ""): Loader =
+        Loader(config, extensionToProvider[extension]
+            ?: throw UnsupportedExtensionException(source))
 
     /**
      * Returns a child config containing values from specified file.
@@ -316,6 +308,28 @@ class DefaultLoaders(
         unit: TimeUnit = TimeUnit.SECONDS,
         context: CoroutineContext = DefaultDispatcher
     ): Config = watchUrl(URL(url), delayTime, unit, context)
+
+    companion object {
+        private val extensionToProvider = mutableMapOf(
+            "conf" to HoconProvider,
+            "json" to JsonProvider,
+            "properties" to PropertiesProvider,
+            "toml" to TomlProvider,
+            "xml" to XmlProvider,
+            "yml" to YamlProvider,
+            "yaml" to YamlProvider
+        )
+
+        /**
+         * Register extension with the corresponding provider.
+         *
+         * @param extension the file extension
+         * @param provider the corresponding provider
+         */
+        fun registerExtension(extension: String, provider: Provider) {
+            extensionToProvider[extension] = provider
+        }
+    }
 }
 
 /**
