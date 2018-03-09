@@ -38,8 +38,11 @@ sealed class Item<T : Any>(
     /**
      * Config spec that contains this item.
      */
-    val spec: ConfigSpec,
-    name: String,
+    val spec: Spec,
+    /**
+     * Item name without prefix.
+     */
+    val name: String,
     /**
      * Description for this item.
      */
@@ -52,17 +55,7 @@ sealed class Item<T : Any>(
     }
 
     /**
-     * Item name qualified by path prefix, for locating item in config.
-     *
-     * Item name is unique in config, and can be used as key to operate value in config.
-     * Item name is in form of `a.b.c`, with corresponding path as `[a, b, c]`.
-     */
-    val name: String = spec.qualify(name)
-
-    /**
-     * Item path for locating item in config.
-     *
-     * Item path is unique in config.
+     * Item path without prefix.
      */
     val path: Path = this.name.toPath()
 
@@ -104,9 +97,9 @@ sealed class Item<T : Any>(
     val asLazyItem: LazyItem<T> get() = this as LazyItem<T>
 }
 
-    /**
-     * Type of Item path.
-     */
+/**
+ * Type of Item path.
+ */
 typealias Path = List<String>
 
 /**
@@ -139,7 +132,7 @@ fun String.toPath(): Path {
  * Required item must be set with value before retrieved in config.
  */
 open class RequiredItem<T : Any> @JvmOverloads constructor(
-    spec: ConfigSpec,
+    spec: Spec,
     name: String,
     description: String = "",
     type: JavaType? = null
@@ -154,7 +147,7 @@ open class RequiredItem<T : Any> @JvmOverloads constructor(
  * After associated with specified value, the specified value will be returned when accessing.
  */
 open class OptionalItem<T : Any> @JvmOverloads constructor(
-    spec: ConfigSpec,
+    spec: Spec,
     name: String,
     /**
      * Default value returned before associating this item with specified value.
@@ -175,7 +168,7 @@ open class OptionalItem<T : Any> @JvmOverloads constructor(
  * when needed to reflect modifying of other values in config.
  */
 open class LazyItem<T : Any> @JvmOverloads constructor(
-    spec: ConfigSpec,
+    spec: Spec,
     name: String,
     /**
      * Thunk used to evaluate value for this item.

@@ -52,7 +52,7 @@ class ConfigJavaApiTest {
   @DisplayName("test fluent API to load from map")
   void loadFromMap() {
     final HashMap<String, Integer> map = new HashMap<>();
-    map.put(NetworkBufferInJava.size.getName(), 1024);
+    map.put(config.nameOf(NetworkBufferInJava.size), 1024);
     final Config newConfig = config.withSourceFrom().map.kv(map);
     assertThat(newConfig.get(NetworkBufferInJava.size), equalTo(1024));
   }
@@ -61,14 +61,14 @@ class ConfigJavaApiTest {
   @DisplayName("test fluent API to load from loader")
   void loadFromLoader() {
     final Config newConfig =
-        config.withSourceFrom().hocon.string(NetworkBufferInJava.size.getName() + " = 1024");
+        config.withSourceFrom().hocon.string(config.nameOf(NetworkBufferInJava.size) + " = 1024");
     assertThat(newConfig.get(NetworkBufferInJava.size), equalTo(1024));
   }
 
   @Test
   @DisplayName("test fluent API to load from system properties")
   void loadFromSystem() {
-    System.setProperty(NetworkBufferInJava.size.getName(), "1024");
+    System.setProperty(config.nameOf(NetworkBufferInJava.size), "1024");
     final Config newConfig = config.withSourceFrom().systemProperties();
     assertThat(newConfig.get(NetworkBufferInJava.size), equalTo(1024));
   }
@@ -83,7 +83,7 @@ class ConfigJavaApiTest {
   @Test
   @DisplayName("test `get(String)`")
   void getWithName() {
-    final NetworkBuffer.Type type = config.get(NetworkBufferInJava.type.getName());
+    final NetworkBuffer.Type type = config.get(config.nameOf(NetworkBufferInJava.type));
     assertThat(type, equalTo(NetworkBuffer.Type.OFF_HEAP));
   }
 
@@ -97,7 +97,7 @@ class ConfigJavaApiTest {
   @Test
   @DisplayName("test `set(String, T)`")
   void setWithName() {
-    config.set(NetworkBufferInJava.size.getName(), 1024);
+    config.set(config.nameOf(NetworkBufferInJava.size), 1024);
     assertThat(config.get(NetworkBufferInJava.size), equalTo(1024));
   }
 
@@ -113,7 +113,7 @@ class ConfigJavaApiTest {
   @DisplayName("test `lazySet(String, Function1<ItemContainer, T>)`")
   void lazySetWithName() {
     config.lazySet(
-        NetworkBufferInJava.maxSize.getName(), it -> it.get(NetworkBufferInJava.size) * 4);
+        config.nameOf(NetworkBufferInJava.maxSize), it -> it.get(NetworkBufferInJava.size) * 4);
     config.set(NetworkBufferInJava.size, 1024);
     assertThat(config.get(NetworkBufferInJava.maxSize), equalTo(1024 * 4));
   }

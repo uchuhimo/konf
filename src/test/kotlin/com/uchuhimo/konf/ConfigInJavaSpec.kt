@@ -46,7 +46,7 @@ object ConfigInJavaSpec : SubjectSpek<Config>({
                 subject.addSpec(newSpec)
                 it("should contain items in new spec") {
                     assertThat(newSpec.minSize in subject, equalTo(true))
-                    assertThat(newSpec.minSize.name in subject, equalTo(true))
+                    assertThat(subject.nameOf(newSpec.minSize) in subject, equalTo(true))
                 }
                 it("should contain new spec") {
                     assertThat(newSpec in subject.specs, equalTo(true))
@@ -57,7 +57,7 @@ object ConfigInJavaSpec : SubjectSpek<Config>({
                 it("should throw RepeatedItemException") {
                     assertThat({ subject.addSpec(spec) }, throws(has(
                         RepeatedItemException::name,
-                        equalTo(size.name))))
+                        equalTo(subject.nameOf(size)))))
                 }
             }
             on("add repeated name") {
@@ -79,7 +79,7 @@ object ConfigInJavaSpec : SubjectSpek<Config>({
                 }
             }
             on("add conflict name, and an existed name is prefix of it") {
-                val newSpec = ConfigSpec(type.name).apply {
+                val newSpec = ConfigSpec(subject.nameOf(type)).apply {
                     @Suppress("UNUSED_VARIABLE")
                     val subType by required<Int>()
                 }
@@ -102,7 +102,7 @@ object ConfigInJavaSpec : SubjectSpek<Config>({
             on("get with invalid item") {
                 it("should throw NoSuchItemException when using `get`") {
                     assertThat({ subject[invalidItem] },
-                        throws(has(NoSuchItemException::name, equalTo(invalidItem.name))))
+                        throws(has(NoSuchItemException::name, equalTo(invalidItem.asName))))
                 }
                 it("should return null when using `getOrNull`") {
                     assertThat(subject.getOrNull(invalidItem), absent())
@@ -126,10 +126,10 @@ object ConfigInJavaSpec : SubjectSpek<Config>({
                 it("should throw UnsetValueException") {
                     assertThat({ subject[size] }, throws(has(
                         UnsetValueException::name,
-                        equalTo(size.name))))
+                        equalTo(size.asName))))
                     assertThat({ subject[maxSize] }, throws(has(
                         UnsetValueException::name,
-                        equalTo(size.name))))
+                        equalTo(size.asName))))
                 }
             }
         }
@@ -161,7 +161,7 @@ object ConfigInJavaSpec : SubjectSpek<Config>({
             on("set with invalid item") {
                 it("should throw NoSuchItemException") {
                     assertThat({ subject[invalidItem] = 1024 },
-                        throws(has(NoSuchItemException::name, equalTo(invalidItem.name))))
+                        throws(has(NoSuchItemException::name, equalTo(invalidItem.asName))))
                 }
             }
             on("set with valid name") {
@@ -173,12 +173,12 @@ object ConfigInJavaSpec : SubjectSpek<Config>({
             on("set with invalid name") {
                 it("should throw NoSuchItemException") {
                     assertThat({ subject[invalidItem] = 1024 },
-                        throws(has(NoSuchItemException::name, equalTo(invalidItem.name))))
+                        throws(has(NoSuchItemException::name, equalTo(invalidItem.asName))))
                 }
             }
             on("set with incorrect type of value") {
                 it("should throw ClassCastException") {
-                    assertThat({ subject[size.name] = "1024" }, throws<ClassCastException>())
+                    assertThat({ subject[subject.nameOf(size)] = "1024" }, throws<ClassCastException>())
                 }
             }
             on("lazy set with valid item") {
@@ -189,16 +189,16 @@ object ConfigInJavaSpec : SubjectSpek<Config>({
                 }
             }
             on("lazy set with valid name") {
-                subject.lazySet(maxSize.name) { it[size] * 4 }
+                subject.lazySet(subject.nameOf(maxSize)) { it[size] * 4 }
                 subject[size] = 1024
                 it("should contain the specified value") {
                     assertThat(subject[maxSize], equalTo(subject[size] * 4))
                 }
             }
             on("lazy set with valid name and invalid value with incompatible type") {
-                subject.lazySet(maxSize.name) { "string" }
+                subject.lazySet(subject.nameOf(maxSize)) { "string" }
                 it("should throw InvalidLazySetException when getting") {
-                    assertThat({ subject[maxSize.name] }, throws<InvalidLazySetException>())
+                    assertThat({ subject[subject.nameOf(maxSize)] }, throws<InvalidLazySetException>())
                 }
             }
             on("unset with valid item") {
@@ -208,7 +208,7 @@ object ConfigInJavaSpec : SubjectSpek<Config>({
                 }
             }
             on("unset with valid name") {
-                subject.unset(type.name)
+                subject.unset(subject.nameOf(type))
                 it("should contain `null` when using `getOrNull`") {
                     assertThat(subject.getOrNull(type), absent())
                 }
@@ -226,7 +226,7 @@ object ConfigInJavaSpec : SubjectSpek<Config>({
                 }
             }
             on("declare a property by name") {
-                var nameProperty by subject.property<String>(name.name)
+                var nameProperty by subject.property<String>(subject.nameOf(name))
                 it("should behave same as `get`") {
                     assertThat(nameProperty, equalTo(subject[name]))
                 }

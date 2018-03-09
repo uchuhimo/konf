@@ -154,7 +154,7 @@ interface Config : ItemContainer {
     /**
      * List of config specs from all layers of this config.
      */
-    val specs: List<ConfigSpec>
+    val specs: List<Spec>
 
     /**
      * Facade layer of config.
@@ -169,7 +169,7 @@ interface Config : ItemContainer {
      *
      * @param spec config spec
      */
-    fun addSpec(spec: ConfigSpec)
+    fun addSpec(spec: Spec)
 
     /**
      * Executes the given [action] after locking the facade layer of this config.
@@ -277,7 +277,7 @@ private class ConfigImpl constructor(
     override val parent: ConfigImpl? = null,
     override val mapper: ObjectMapper = createDefaultMapper()
 ) : Config {
-    private val specsInLayer = mutableListOf<ConfigSpec>()
+    private val specsInLayer = mutableListOf<Spec>()
     private val valueByItem = mutableMapOf<Item<*>, ValueState>()
     private val nameByItem = mutableBiMapOf<Item<*>, String>()
     private val tree: ConfigTree = run {
@@ -315,21 +315,49 @@ private class ConfigImpl constructor(
         override fun next(): Item<*> = current.next()
     }
 
+    override val itemWithNames: List<Pair<Item<*>, String>>
+        get() {
+            val iterator = object : Iterator<Pair<Item<*>, String>> {
+                private var currentConfig = this@ConfigImpl
+                private var current = currentConfig.nameByItem.iterator()
+
+                override tailrec fun hasNext(): Boolean {
+                    return if (current.hasNext()) {
+                        true
+                    } else {
+                        val parent = currentConfig.parent
+                        if (parent != null) {
+                            currentConfig = parent
+                            current = currentConfig.nameByItem.iterator()
+                            hasNext()
+                        } else {
+                            false
+                        }
+                    }
+                }
+
+                override fun next(): Pair<Item<*>, String> = current.next().toPair()
+            }
+            return mutableListOf<Pair<Item<*>, String>>().apply {
+                addAll(iterator.asSequence())
+            }
+        }
+
     override fun toTree(): ConfigTree = tree.deepCopy()
 
     override fun toMap(): Map<String, Any> {
         return mutableMapOf<String, Any>().apply {
             val config = this@ConfigImpl
-            for (item in config) {
+            for ((item, name) in config.itemWithNames) {
                 if (config.getOrNull(item) != null) {
-                    put(item.name, config[item].toCompatibleValue(mapper))
+                    put(name, config[item].toCompatibleValue(mapper))
                 }
             }
         }
     }
 
     override fun <T : Any> get(item: Item<T>): T = getOrNull(item, errorWhenUnset = true)
-        ?: throw NoSuchItemException(item.name)
+        ?: throw NoSuchItemException(item)
 
     override fun <T : Any> get(name: String): T = getOrNull(name, errorWhenUnset = true)
         ?: throw NoSuchItemException(name)
@@ -348,7 +376,7 @@ private class ConfigImpl constructor(
             return when (valueState) {
                 is ValueState.Unset ->
                     if (errorWhenUnset) {
-                        throw UnsetValueException(item.name)
+                        throw UnsetValueException(item)
                     } else {
                         return null
                     }
@@ -368,7 +396,7 @@ private class ConfigImpl constructor(
                     } else {
                         throw InvalidLazySetException(
                             "fail to cast $value with ${value::class} to ${item.type.rawClass}" +
-                                " when getting ${item.name} in config")
+                                " when getting item ${item.name} in config")
                     }
                 }
             }
@@ -406,6 +434,11 @@ private class ConfigImpl constructor(
         }
     }
 
+    override fun nameOf(item: Item<*>): String {
+        val name = lock.read { nameByItem[item] }
+        return name ?: parent?.nameOf(item) ?: throw NoSuchItemException(item)
+    }
+
     override fun rawSet(item: Item<*>, value: Any) {
         if (item.type.rawClass.isInstance(value)) {
             if (item in this) {
@@ -418,12 +451,12 @@ private class ConfigImpl constructor(
                     }
                 }
             } else {
-                throw NoSuchItemException(item.name)
+                throw NoSuchItemException(item)
             }
         } else {
             throw ClassCastException(
                 "fail to cast $value with ${value::class} to ${item.type.rawClass}" +
-                    " when setting ${item.name} in config")
+                    " when setting item ${item.name} in config")
         }
     }
 
@@ -453,7 +486,7 @@ private class ConfigImpl constructor(
                 }
             }
         } else {
-            throw NoSuchItemException(item.name)
+            throw NoSuchItemException(item)
         }
     }
 
@@ -471,7 +504,7 @@ private class ConfigImpl constructor(
         if (item in this) {
             lock.write { valueByItem[item] = ValueState.Unset }
         } else {
-            throw NoSuchItemException(item.name)
+            throw NoSuchItemException(item)
         }
     }
 
@@ -490,7 +523,7 @@ private class ConfigImpl constructor(
 
     override fun <T : Any> property(item: Item<T>): ReadWriteProperty<Any?, T> {
         if (!contains(item)) {
-            throw NoSuchItemException(item.name)
+            throw NoSuchItemException(item)
         }
         return object : ReadWriteProperty<Any?, T> {
             override fun getValue(thisRef: Any?, property: KProperty<*>): T = get(item)
@@ -516,7 +549,7 @@ private class ConfigImpl constructor(
         when (tree) {
             is ConfigPathNode -> {
                 if (path.isEmpty()) {
-                    throw NameConflictException("${item.name} cannot be added" +
+                    throw NameConflictException("item ${item.name} cannot be added" +
                         " since the following items has been added to config:" +
                         " ${tree.items.joinToString { it.name }}")
                 }
@@ -534,15 +567,15 @@ private class ConfigImpl constructor(
                 }
             }
             is ConfigItemNode<*> -> {
-                throw NameConflictException("${item.name} cannot be added" +
+                throw NameConflictException("item ${item.name} cannot be added" +
                     " since item ${tree.item.name} has been added to config")
             }
         }
     }
 
-    override val specs: List<ConfigSpec>
-        get() = mutableListOf<ConfigSpec>().apply {
-            addAll(object : Iterator<ConfigSpec> {
+    override val specs: List<Spec>
+        get() = mutableListOf<Spec>().apply {
+            addAll(object : Iterator<Spec> {
                 private var currentConfig = this@ConfigImpl
                 private var current = currentConfig.specsInLayer.iterator()
 
@@ -561,22 +594,22 @@ private class ConfigImpl constructor(
                     }
                 }
 
-                override fun next(): ConfigSpec = current.next()
+                override fun next(): Spec = current.next()
             }.asSequence())
         }
 
     override val layer: Config = Layer(this)
 
-    override fun addSpec(spec: ConfigSpec) {
+    override fun addSpec(spec: Spec) {
         lock.write {
             if (hasChildren) {
                 throw SpecFrozenException(this)
             }
             spec.items.forEach { item ->
-                val name = item.name
+                val name = spec.qualify(item.name)
                 if (item !in this) {
                     if (name !in this) {
-                        addNode(tree, item.path, item)
+                        addNode(tree, name.toPath(), item)
                         nameByItem[item] = name
                         valueByItem[item] = when (item) {
                             is OptionalItem -> ValueState.Value(item.default)
@@ -584,7 +617,7 @@ private class ConfigImpl constructor(
                             is LazyItem -> ValueState.Lazy(item.thunk)
                         }
                     } else {
-                        throw NameConflictException("item $name has been added")
+                        throw NameConflictException("$name has been added")
                     }
                 } else {
                     throw RepeatedItemException(name)
@@ -621,21 +654,21 @@ private class ConfigImpl constructor(
 
     private class Layer(val config: ConfigImpl) : Config by config {
         override val parent: Config? = null
-        override val specs: List<ConfigSpec> = config.specsInLayer
+        override val specs: List<Spec> = config.specsInLayer
         override val layer: Config = this
 
         override fun toMap(): Map<String, Any> {
             return mutableMapOf<String, Any>().apply {
                 for (item in config.valueByItem.keys) {
                     if (config.getOrNull(item) != null) {
-                        put(item.name, config[item].toCompatibleValue(mapper))
+                        put(nameOf(item), config[item].toCompatibleValue(mapper))
                     }
                 }
             }
         }
 
         override fun <T : Any> get(item: Item<T>): T =
-            if (contains(item)) config[item] else throw NoSuchItemException(item.name)
+            if (contains(item)) config[item] else throw NoSuchItemException(item)
 
         override fun <T : Any> get(name: String): T =
             if (contains(name)) config[name] else throw NoSuchItemException(name)

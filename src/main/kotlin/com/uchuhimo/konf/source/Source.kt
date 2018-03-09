@@ -627,7 +627,7 @@ private fun load(config: Config, source: Source): Config {
     return config.apply {
         lock {
             for (item in this) {
-                val path = item.path
+                val path = pathOf(item)
                 if (path in source) {
                     try {
                         rawSet(item, source[path].toValue(item.type, mapper))

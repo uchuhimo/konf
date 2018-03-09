@@ -69,7 +69,7 @@ object ConfigGenerateDocSpec : SubjectSpek<Config>({
 
 private fun generateItemDoc(
     item: Item<*>,
-    key: String = item.name,
+    key: String,
     separator: String = " = ",
     encode: (Any) -> String
 ): String =
@@ -88,7 +88,10 @@ private fun generateItemDoc(
 fun Config.generatePropertiesDoc(): String =
     StringBuilder().apply {
         for (item in this@generatePropertiesDoc) {
-            append(generateItemDoc(item, encode = Any::toString))
+            append(generateItemDoc(
+                item,
+                this@generatePropertiesDoc.nameOf(item),
+                encode = Any::toString))
             appendln()
         }
     }.toString()
@@ -178,7 +181,7 @@ fun Config.generateXmlDoc(): String =
         appendln("<configuration>")
         for (item in this@generateXmlDoc) {
             appendln("  <property>")
-            appendln("    <name>${item.name}</name>")
+            appendln("    <name>${this@generateXmlDoc.nameOf(item)}</name>")
             append("    <value>")
             if (item is OptionalItem) {
                 append(item.default.toString())

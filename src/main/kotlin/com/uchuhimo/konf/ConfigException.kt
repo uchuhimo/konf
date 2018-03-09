@@ -39,18 +39,30 @@ class NameConflictException(message: String) : ConfigException(message)
  */
 class InvalidLazySetException(message: String) : ConfigException(message)
 
+val Item<*>.asName: String get() = "item $name"
+
 /**
  * Exception indicates that the specified item is in unset state.
  */
-class UnsetValueException(val name: String) : ConfigException("$name is unset")
+class UnsetValueException(val name: String) : ConfigException("$name is unset") {
+    constructor(item: Item<*>) : this(item.asName)
+}
 
 /**
  * Exception indicates that the specified item is not in this config.
  */
-class NoSuchItemException(val name: String) : ConfigException("cannot find $name in config")
+class NoSuchItemException(val name: String) : ConfigException("cannot find $name in config") {
+    constructor(item: Item<*>) : this(item.asName)
+}
 
 /**
  * Exception indicates that config spec cannot be added to this config because it has child layer.
  */
 class SpecFrozenException(val config: Config) :
     ConfigException("config ${config.name} has child layer, cannot add new spec")
+
+/**
+ * Exception indicates that expected value in specified path is not existed in the source.
+ */
+class NoSuchPathException(val path: String) :
+    ConfigException("cannot find path \"$path\" in config spec")

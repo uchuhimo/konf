@@ -51,8 +51,8 @@ object MultiLayerConfigSpec : SubjectSpek<Config>({
             val spec = NetworkBuffer
             it("should not contain unset items in map") {
                 assertThat(subject.parent!!.layer.toMap(), equalTo(mapOf<String, Any>(
-                    spec.name.name to "buffer",
-                    spec.type.name to NetworkBuffer.Type.OFF_HEAP.name)))
+                    subject.nameOf(spec.name) to "buffer",
+                    subject.nameOf(spec.type) to NetworkBuffer.Type.OFF_HEAP.name)))
             }
             it("should not contain values from other layers in map") {
                 subject[spec.size] = 4
@@ -60,8 +60,8 @@ object MultiLayerConfigSpec : SubjectSpek<Config>({
                 val layer = subject.layer
                 val map = layer.toMap()
                 assertThat(map, equalTo(mapOf(
-                    spec.size.name to 4,
-                    spec.type.name to NetworkBuffer.Type.ON_HEAP.name)))
+                    subject.nameOf(spec.size) to 4,
+                    subject.nameOf(spec.type) to NetworkBuffer.Type.ON_HEAP.name)))
             }
         }
         on("set with item") {
@@ -73,7 +73,7 @@ object MultiLayerConfigSpec : SubjectSpek<Config>({
             }
         }
         on("set with name") {
-            subject[NetworkBuffer.name.name] = "newName"
+            subject[subject.nameOf(NetworkBuffer.name)] = "newName"
             it("should contain the specified value in the top level," +
                 " and keep the rest levels unchanged") {
                 assertThat(subject[NetworkBuffer.name], equalTo("newName"))
@@ -94,9 +94,9 @@ object MultiLayerConfigSpec : SubjectSpek<Config>({
             subject.addSpec(spec)
             it("should contain items in new spec, and keep the rest level unchanged") {
                 assertThat(spec.minSize in subject, equalTo(true))
-                assertThat(spec.minSize.name in subject, equalTo(true))
+                assertThat(subject.nameOf(spec.minSize) in subject, equalTo(true))
                 assertThat(spec.minSize !in subject.parent!!, equalTo(true))
-                assertThat(spec.minSize.name !in subject.parent!!, equalTo(true))
+                assertThat(subject.nameOf(spec.minSize) !in subject.parent!!, equalTo(true))
             }
         }
         on("add spec to parent") {
