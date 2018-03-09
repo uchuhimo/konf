@@ -533,6 +533,49 @@ interface Source : SourceInfo {
     fun toSizeInBytes(): SizeInBytes = SizeInBytes.parse(toText())
 }
 
+fun Source.withPrefix(prefix: Path): Source {
+    return if (prefix.isEmpty()) {
+        this
+    } else {
+        object : Source, SourceInfo by SourceInfo.default() {
+            init {
+                addInfo("type", "prefix")
+                addInfo("source", this@withPrefix.description)
+            }
+
+            override fun contains(path: Path): Boolean {
+                return if (prefix.size >= path.size) {
+                    prefix.subList(0, path.size) == path
+                } else {
+                    if (path.subList(0, prefix.size) == prefix) {
+                        this@withPrefix.contains(path.subList(prefix.size, path.size))
+                    } else {
+                        false
+                    }
+                }
+            }
+
+            override fun getOrNull(path: Path): Source? {
+                return if (prefix.size >= path.size) {
+                    if (prefix.subList(0, path.size) == path) {
+                        this@withPrefix.withPrefix(prefix.subList(path.size, prefix.size))
+                    } else {
+                        null
+                    }
+                } else {
+                    if (path.subList(0, prefix.size) == prefix) {
+                        this@withPrefix.getOrNull(path.subList(prefix.size, path.size))
+                    } else {
+                        null
+                    }
+                }
+            }
+        }
+    }
+}
+
+fun Source.withPrefix(prefix: String): Source = withPrefix(prefix.toPath())
+
 internal fun Any.toCompatibleValue(mapper: ObjectMapper): Any {
     return when (this) {
         is OffsetTime,

@@ -427,6 +427,46 @@ object SourceSpec : Spek({
                 assertThat({ source.toInt() }, throws<UnsupportedOperationException>())
             }
         }
+        group("source with prefix") {
+            val source by memoized {
+                mapOf("key" to "value").asSource().withPrefix("level1.level2")
+            }
+            on("find a valid path") {
+                it("should contain the value") {
+                    assertTrue("level1" in source)
+                    assertTrue("level1.level2" in source)
+                    assertTrue("level1.level2.key" in source)
+                }
+            }
+            on("find an invalid path") {
+                it("should not contain the value") {
+                    assertTrue("level3" !in source)
+                    assertTrue("level1.level3" !in source)
+                    assertTrue("level1.level2.level3" !in source)
+                }
+            }
+
+            on("get by a valid path using `getOrNull`") {
+                it("should return the corresponding value") {
+                    assertThat(
+                        (source.getOrNull("level1")?.get("level2.key") as ValueSource).value as String,
+                        equalTo("value"))
+                    assertThat(
+                        (source.getOrNull("level1.level2")?.get("key") as ValueSource).value as String,
+                        equalTo("value"))
+                    assertThat(
+                        (source.getOrNull("level1.level2.key") as ValueSource).value as String,
+                        equalTo("value"))
+                }
+            }
+            on("get by an invalid path using `getOrNull`") {
+                it("should return null") {
+                    assertThat(source.getOrNull("level3"), absent())
+                    assertThat(source.getOrNull("level1.level3"), absent())
+                    assertThat(source.getOrNull("level1.level2.level3"), absent())
+                }
+            }
+        }
     }
 })
 
