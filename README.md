@@ -28,7 +28,6 @@ A type-safe cascading configuration library for Kotlin/Java, supporting most con
 - [Load values from source](#load-values-from-source)
 - [Export/Reload values in config](#exportreload-values-in-config)
 - [Supported item types](#supported-item-types)
-- [Generate document from config](#generate-document-from-config)
 - [Build from source](#build-from-source)
 
 ## Prerequisites
@@ -525,10 +524,6 @@ Konf uses [Jackson](https://github.com/FasterXML/jackson) to support Kotlin Buil
 - Jackson core modules
 - `JavaTimeModule` in [jackson-modules-java8](https://github.com/FasterXML/jackson-modules-java8)
 - [jackson-module-kotlin](https://github.com/FasterXML/jackson-module-kotlin)
-
-## Generate document from config
-
-Since config provides rich operations to explore its content/structure, it is convinient to generate document from config. See [`ConfigGenerateDocSpec`](https://github.com/uchuhimo/konf/blob/master/src/test/kotlin/com/uchuhimo/konf/ConfigGenerateDocSpec.kt) to find examples to generate documents in properties/HOCON/YAML/TOML/XML file format.
 
 ## Build from source
 

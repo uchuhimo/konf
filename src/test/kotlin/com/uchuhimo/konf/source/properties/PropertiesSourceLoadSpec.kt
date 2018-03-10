@@ -29,7 +29,7 @@ object PropertiesSourceLoadSpec : SubjectSpek<Config>({
         Config {
             addSpec(ConfigForLoad)
             addSpec(FlatConfigForLoad)
-        }.withSourceFrom.properties.resource("source/source.properties")
+        }.from.properties.resource("source/source.properties")
     }
 
     itBehavesLike(FlatSourceLoadSpec)
@@ -41,12 +41,12 @@ object PropertiesSourceReloadSpec : SubjectSpek<Config>({
         val config = Config {
             addSpec(ConfigForLoad)
             addSpec(FlatConfigForLoad)
-        }.withSourceFrom.properties.resource("source/source.properties")
+        }.from.properties.resource("source/source.properties")
         val properties = config.toProperties.toText()
         Config {
             addSpec(ConfigForLoad)
             addSpec(FlatConfigForLoad)
-        }.withSourceFrom.properties.string(properties)
+        }.from.properties.string(properties)
     }
 
     itBehavesLike(FlatSourceLoadSpec)

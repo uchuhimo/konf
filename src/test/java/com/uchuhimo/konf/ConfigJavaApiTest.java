@@ -53,7 +53,7 @@ class ConfigJavaApiTest {
   void loadFromMap() {
     final HashMap<String, Integer> map = new HashMap<>();
     map.put(config.nameOf(NetworkBufferInJava.size), 1024);
-    final Config newConfig = config.withSourceFrom().map.kv(map);
+    final Config newConfig = config.from().map.kv(map);
     assertThat(newConfig.get(NetworkBufferInJava.size), equalTo(1024));
   }
 
@@ -61,7 +61,7 @@ class ConfigJavaApiTest {
   @DisplayName("test fluent API to load from loader")
   void loadFromLoader() {
     final Config newConfig =
-        config.withSourceFrom().hocon.string(config.nameOf(NetworkBufferInJava.size) + " = 1024");
+        config.from().hocon.string(config.nameOf(NetworkBufferInJava.size) + " = 1024");
     assertThat(newConfig.get(NetworkBufferInJava.size), equalTo(1024));
   }
 
@@ -69,7 +69,7 @@ class ConfigJavaApiTest {
   @DisplayName("test fluent API to load from system properties")
   void loadFromSystem() {
     System.setProperty(config.nameOf(NetworkBufferInJava.size), "1024");
-    final Config newConfig = config.withSourceFrom().systemProperties();
+    final Config newConfig = config.from().systemProperties();
     assertThat(newConfig.get(NetworkBufferInJava.size), equalTo(1024));
   }
 

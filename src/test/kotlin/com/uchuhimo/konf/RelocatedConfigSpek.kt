@@ -14,13 +14,27 @@
  * limitations under the License.
  */
 
-package com.uchuhimo.konf.example
+package com.uchuhimo.konf
 
-import com.uchuhimo.konf.Config
+import org.jetbrains.spek.subject.SubjectSpek
 
-fun main(args: Array<String>) {
-    val config = Config { addSpec(Server) }
-    // values in source is loaded into new layer in child config
-    val childConfig = config.from.env()
-    check(childConfig.parent === config)
-}
+object RelocatedConfigSpek : SubjectSpek<Config>({
+
+    subject { Prefix("network.buffer") + Config { addSpec(NetworkBuffer) }.at("network.buffer") }
+
+    configSpek()
+})
+
+object RollUpConfigSpek : SubjectSpek<Config>({
+
+    subject { Prefix("prefix") + Config { addSpec(NetworkBuffer) } }
+
+    configSpek("prefix.network.buffer")
+})
+
+object DrillDownConfigSpek : SubjectSpek<Config>({
+
+    subject { Config { addSpec(NetworkBuffer) }.at("network") }
+
+    configSpek("buffer")
+})

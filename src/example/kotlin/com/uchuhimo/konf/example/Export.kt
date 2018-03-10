@@ -40,6 +40,6 @@ fun main(args: Array<String>) {
     config.toJson.toFile(file)
     val newConfig = Config {
         addSpec(Server)
-    }.withSourceFrom.json.file(file)
+    }.from.json.file(file)
     check(config == newConfig)
 }

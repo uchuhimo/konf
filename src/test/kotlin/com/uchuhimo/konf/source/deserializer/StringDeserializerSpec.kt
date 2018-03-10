@@ -40,7 +40,7 @@ object StringDeserializerSpec : Spek({
 
     given("a string deserializer") {
         on("deserialize string containing commas") {
-            config.withSourceFrom.map.kv(mapOf("item" to mapOf("string" to "a,b,c"))).apply {
+            config.from.map.kv(mapOf("item" to mapOf("string" to "a,b,c"))).apply {
                 it("should succeed") {
                     assertThat(this@apply[spec.item].string, equalTo("a,b,c"))
                 }
@@ -49,21 +49,21 @@ object StringDeserializerSpec : Spek({
         on("deserialize string containing commas when UNWRAP_SINGLE_VALUE_ARRAYS is enable") {
             config.apply {
                 mapper.enable(DeserializationFeature.UNWRAP_SINGLE_VALUE_ARRAYS)
-            }.withSourceFrom.map.kv(mapOf("item" to mapOf("string" to "a,b,c"))).apply {
+            }.from.map.kv(mapOf("item" to mapOf("string" to "a,b,c"))).apply {
                 it("should succeed") {
                     assertThat(this@apply[spec.item].string, equalTo("a,b,c"))
                 }
             }
         }
         on("deserialize string from number") {
-            config.withSourceFrom.map.kv(mapOf("item" to mapOf("string" to 1))).apply {
+            config.from.map.kv(mapOf("item" to mapOf("string" to 1))).apply {
                 it("should succeed") {
                     assertThat(this@apply[spec.item].string, equalTo("1"))
                 }
             }
         }
         on("deserialize string from list of numbers") {
-            config.withSourceFrom.map.kv(mapOf("item" to mapOf("string" to listOf(1, 2)))).apply {
+            config.from.map.kv(mapOf("item" to mapOf("string" to listOf(1, 2)))).apply {
                 it("should succeed") {
                     assertThat(this@apply[spec.item].string, equalTo("1,2"))
                 }
@@ -72,7 +72,7 @@ object StringDeserializerSpec : Spek({
         on("deserialize string from single value array") {
             config.apply {
                 mapper.enable(DeserializationFeature.UNWRAP_SINGLE_VALUE_ARRAYS)
-            }.withSourceFrom.map.kv(mapOf("item" to mapOf("string" to listOf("a")))).apply {
+            }.from.map.kv(mapOf("item" to mapOf("string" to listOf("a")))).apply {
                 it("should succeed") {
                     assertThat(this@apply[spec.item].string, equalTo("a"))
                 }
@@ -83,7 +83,7 @@ object StringDeserializerSpec : Spek({
                 assertCausedBy<ObjectMappingException> {
                     config.apply {
                         mapper.enable(DeserializationFeature.ACCEPT_EMPTY_ARRAY_AS_NULL_OBJECT)
-                    }.withSourceFrom.map.kv(mapOf("item" to mapOf("string" to listOf<String>())))
+                    }.from.map.kv(mapOf("item" to mapOf("string" to listOf<String>())))
                 }
             }
         }

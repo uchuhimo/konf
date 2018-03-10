@@ -16,71 +16,11 @@
 
 package com.uchuhimo.konf.source
 
-import com.fasterxml.jackson.databind.ObjectMapper
-import com.fasterxml.jackson.databind.SerializationFeature
-import com.fasterxml.jackson.databind.module.SimpleModule
-import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule
-import com.fasterxml.jackson.module.kotlin.jacksonObjectMapper
 import com.typesafe.config.impl.ConfigImplUtil
 import com.uchuhimo.konf.getUnits
-import com.uchuhimo.konf.source.deserializer.DurationDeserializer
-import com.uchuhimo.konf.source.deserializer.OffsetDateTimeDeserializer
-import com.uchuhimo.konf.source.deserializer.StringDeserializer
-import com.uchuhimo.konf.source.deserializer.ZoneDateTimeDeserializer
 import java.time.Duration
-import java.time.OffsetDateTime
-import java.time.ZonedDateTime
 import java.time.format.DateTimeParseException
 import java.util.concurrent.TimeUnit
-
-/**
- * Returns a source backing by specified fallback source.
- *
- * When config fails to retrieve values from this source, it will try to retrieve them from
- * fallback source.
- *
- * @receiver facade source
- * @param fallback fallback source
- * @return a source backing by specified fallback source
- */
-fun Source.withFallback(fallback: Source): Source = object : Source by this {
-    init {
-        addInfo("fallback", fallback.description)
-    }
-
-    override fun contains(path: List<String>): Boolean =
-        this@withFallback.contains(path) || fallback.contains(path)
-
-    override fun get(path: List<String>): Source =
-        this@withFallback.getOrNull(path) ?: fallback[path]
-
-    override fun getOrNull(path: List<String>): Source? =
-        this@withFallback.getOrNull(path) ?: fallback.getOrNull(path)
-
-    override fun contains(prefix: String): Boolean =
-        this@withFallback.contains(prefix) || fallback.contains(prefix)
-
-    override fun get(prefix: String): Source =
-        this@withFallback.getOrNull(prefix) ?: fallback[prefix]
-
-    override fun getOrNull(prefix: String): Source? =
-        this@withFallback.getOrNull(prefix) ?: fallback.getOrNull(prefix)
-}
-
-/**
- * Returns a new default object mapper for config.
- */
-fun createDefaultMapper(): ObjectMapper = jacksonObjectMapper()
-    .disable(SerializationFeature.WRITE_DATES_AS_TIMESTAMPS)
-    .disable(SerializationFeature.WRITE_DURATIONS_AS_TIMESTAMPS)
-    .enable(SerializationFeature.WRITE_DATES_WITH_ZONE_ID)
-    .registerModules(
-        SimpleModule()
-            .addDeserializer(String::class.java, StringDeserializer),
-        JavaTimeModule()
-            .addDeserializer(Duration::class.java, DurationDeserializer)
-            .addDeserializer(OffsetDateTime::class.java, OffsetDateTimeDeserializer)
-            .addDeserializer(ZonedDateTime::class.java, ZoneDateTimeDeserializer))
 
 /**
  * Converts key-value pairs to description in string representation.

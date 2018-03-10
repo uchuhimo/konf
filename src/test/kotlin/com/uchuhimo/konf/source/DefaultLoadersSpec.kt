@@ -38,7 +38,7 @@ object DefaultLoadersSpec : SubjectSpek<DefaultLoaders>({
     subject {
         Config {
             addSpec(DefaultLoadersConfig)
-        }.withSourceFrom
+        }.from
     }
 
     val item = DefaultLoadersConfig.type
@@ -196,25 +196,25 @@ object DefaultLoadersSpec : SubjectSpek<DefaultLoaders>({
     on("load from multiple sources") {
         val afterLoadEnv = subject.env()
         System.setProperty(DefaultLoadersConfig.qualify("type"), "system")
-        val afterLoadSystemProperties = afterLoadEnv.withSourceFrom
+        val afterLoadSystemProperties = afterLoadEnv.from
             .systemProperties()
-        val afterLoadHocon = afterLoadSystemProperties.withSourceFrom
+        val afterLoadHocon = afterLoadSystemProperties.from
             .hocon.string(hoconContent)
-        val afterLoadJson = afterLoadHocon.withSourceFrom
+        val afterLoadJson = afterLoadHocon.from
             .json.string(jsonContent)
-        val afterLoadProperties = afterLoadJson.withSourceFrom
+        val afterLoadProperties = afterLoadJson.from
             .properties.string(propertiesContent)
-        val afterLoadToml = afterLoadProperties.withSourceFrom
+        val afterLoadToml = afterLoadProperties.from
             .toml.string(tomlContent)
-        val afterLoadXml = afterLoadToml.withSourceFrom
+        val afterLoadXml = afterLoadToml.from
             .xml.string(xmlContent)
-        val afterLoadYaml = afterLoadXml.withSourceFrom
+        val afterLoadYaml = afterLoadXml.from
             .yaml.string(yamlContent)
-        val afterLoadFlat = afterLoadYaml.withSourceFrom
+        val afterLoadFlat = afterLoadYaml.from
             .map.flat(mapOf("source.test.type" to "flat"))
-        val afterLoadKv = afterLoadFlat.withSourceFrom.map
+        val afterLoadKv = afterLoadFlat.from.map
             .kv(mapOf("source.test.type" to "kv"))
-        val afterLoadHierarchical = afterLoadKv.withSourceFrom.map
+        val afterLoadHierarchical = afterLoadKv.from.map
             .hierarchical(
                 mapOf("source" to
                     mapOf("test" to

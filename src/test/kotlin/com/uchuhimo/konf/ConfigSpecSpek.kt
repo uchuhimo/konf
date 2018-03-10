@@ -117,7 +117,7 @@ object ConfigSpecSpek : Spek({
                 }
             }
         }
-        val spec = object : ConfigSpec("a.b") {
+        val spec = object : ConfigSpec("a.bb") {
             @Suppress("unused")
             val item by required<Int>("int", "description")
         }
@@ -129,25 +129,28 @@ object ConfigSpecSpek : Spek({
             }
             on("get a valid path") {
                 it("should return a config spec with proper prefix") {
-                    assertThat(spec["a"].prefix, equalTo("b"))
+                    assertThat(spec["a"].prefix, equalTo("bb"))
+                    assertThat(spec["a.bb"].prefix, equalTo(""))
                 }
             }
             on("get an invalid path") {
                 it("should throw NoSuchPathException") {
                     assertThat({ spec["b"] }, throws(has(NoSuchPathException::path, equalTo("b"))))
-                    assertThat({ spec["a."] }, throws(has(NoSuchPathException::path, equalTo("a."))))
+                    assertThat({ spec["a."] }, throws<IllegalStateException>())
+                    assertThat({ spec["a.b"] }, throws(has(NoSuchPathException::path, equalTo("a.b"))))
                 }
             }
         }
         group("prefix operation") {
             on("prefix with an empty path") {
                 it("should return itself") {
-                    assertThat(spec.withPrefix(""), equalTo<Spec>(spec))
+                    assertThat(Prefix("") + spec, equalTo<Spec>(spec))
                 }
             }
             on("prefix with a non-empty path") {
                 it("should return a config spec with proper prefix") {
-                    assertThat(spec.withPrefix("c").prefix, equalTo("c.a.b"))
+                    assertThat((Prefix("c") + spec).prefix, equalTo("c.a.bb"))
+                    assertThat((Prefix("c") + spec["a.bb"]).prefix, equalTo("c"))
                 }
             }
         }

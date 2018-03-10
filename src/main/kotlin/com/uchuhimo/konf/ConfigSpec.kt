@@ -31,6 +31,10 @@ open class ConfigSpec @JvmOverloads constructor(
     override val prefix: String = "",
     items: List<Item<*>> = mutableListOf()
 ) : Spec {
+    init {
+        checkPath(prefix)
+    }
+
     private val _items = items as? MutableList<Item<*>> ?: items.toMutableList()
 
     override val items: List<Item<*>> = _items

@@ -145,6 +145,82 @@ interface Source : SourceInfo {
      */
     operator fun get(prefix: String): Source = get(prefix.toPath())
 
+    fun withPrefix(prefix: Path): Source {
+        return if (prefix.isEmpty()) {
+            this
+        } else {
+            object : Source, SourceInfo by SourceInfo.default() {
+                init {
+                    addInfo("type", "prefix")
+                    addInfo("source", this@Source.description)
+                }
+
+                override fun contains(path: Path): Boolean {
+                    return if (prefix.size >= path.size) {
+                        prefix.subList(0, path.size) == path
+                    } else {
+                        if (path.subList(0, prefix.size) == prefix) {
+                            this@Source.contains(path.subList(prefix.size, path.size))
+                        } else {
+                            false
+                        }
+                    }
+                }
+
+                override fun getOrNull(path: Path): Source? {
+                    return if (prefix.size >= path.size) {
+                        if (prefix.subList(0, path.size) == path) {
+                            this@Source.withPrefix(prefix.subList(path.size, prefix.size))
+                        } else {
+                            null
+                        }
+                    } else {
+                        if (path.subList(0, prefix.size) == prefix) {
+                            this@Source.getOrNull(path.subList(prefix.size, path.size))
+                        } else {
+                            null
+                        }
+                    }
+                }
+            }
+        }
+    }
+
+    fun withPrefix(prefix: String): Source = withPrefix(prefix.toPath())
+
+    /**
+     * Returns a source backing by specified fallback source.
+     *
+     * When config fails to retrieve values from this source, it will try to retrieve them from
+     * fallback source.
+     *
+     * @param fallback fallback source
+     * @return a source backing by specified fallback source
+     */
+    fun withFallback(fallback: Source): Source = object : Source by this {
+        init {
+            addInfo("fallback", fallback.description)
+        }
+
+        override fun contains(path: List<String>): Boolean =
+            this@Source.contains(path) || fallback.contains(path)
+
+        override fun get(path: List<String>): Source =
+            this@Source.getOrNull(path) ?: fallback[path]
+
+        override fun getOrNull(path: List<String>): Source? =
+            this@Source.getOrNull(path) ?: fallback.getOrNull(path)
+
+        override fun contains(prefix: String): Boolean =
+            this@Source.contains(prefix) || fallback.contains(prefix)
+
+        override fun get(prefix: String): Source =
+            this@Source.getOrNull(prefix) ?: fallback[prefix]
+
+        override fun getOrNull(prefix: String): Source? =
+            this@Source.getOrNull(prefix) ?: fallback.getOrNull(prefix)
+    }
+
     /**
      * Whether this source contains a list of values or not.
      *
@@ -532,49 +608,6 @@ interface Source : SourceInfo {
      */
     fun toSizeInBytes(): SizeInBytes = SizeInBytes.parse(toText())
 }
-
-fun Source.withPrefix(prefix: Path): Source {
-    return if (prefix.isEmpty()) {
-        this
-    } else {
-        object : Source, SourceInfo by SourceInfo.default() {
-            init {
-                addInfo("type", "prefix")
-                addInfo("source", this@withPrefix.description)
-            }
-
-            override fun contains(path: Path): Boolean {
-                return if (prefix.size >= path.size) {
-                    prefix.subList(0, path.size) == path
-                } else {
-                    if (path.subList(0, prefix.size) == prefix) {
-                        this@withPrefix.contains(path.subList(prefix.size, path.size))
-                    } else {
-                        false
-                    }
-                }
-            }
-
-            override fun getOrNull(path: Path): Source? {
-                return if (prefix.size >= path.size) {
-                    if (prefix.subList(0, path.size) == path) {
-                        this@withPrefix.withPrefix(prefix.subList(path.size, prefix.size))
-                    } else {
-                        null
-                    }
-                } else {
-                    if (path.subList(0, prefix.size) == prefix) {
-                        this@withPrefix.getOrNull(path.subList(prefix.size, path.size))
-                    } else {
-                        null
-                    }
-                }
-            }
-        }
-    }
-}
-
-fun Source.withPrefix(prefix: String): Source = withPrefix(prefix.toPath())
 
 internal fun Any.toCompatibleValue(mapper: ObjectMapper): Any {
     return when (this) {

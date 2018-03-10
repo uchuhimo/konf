@@ -37,7 +37,7 @@ object LoaderSpec : SubjectSpek<Loader>({
         addSpec(SourceType)
     }
     subject {
-        parentConfig.withSourceFrom.properties
+        parentConfig.from.properties
     }
 
     given("a loader") {

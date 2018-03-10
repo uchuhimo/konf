@@ -40,7 +40,7 @@ object OffsetDateTimeDeserializerSpec : Spek({
 
     given("an OffsetDateTime deserializer") {
         on("deserialize valid string") {
-            config.withSourceFrom.map.kv(mapOf("item" to mapOf("offsetDateTime" to "2007-12-03T10:15:30+01:00"))).apply {
+            config.from.map.kv(mapOf("item" to mapOf("offsetDateTime" to "2007-12-03T10:15:30+01:00"))).apply {
                 it("should succeed") {
                     assertThat(this@apply[spec.item].offsetDateTime,
                         equalTo(OffsetDateTime.parse("2007-12-03T10:15:30+01:00")))
@@ -50,21 +50,21 @@ object OffsetDateTimeDeserializerSpec : Spek({
         on("deserialize empty string") {
             it("should throw LoadException caused by ObjectMappingException") {
                 assertCausedBy<ObjectMappingException> {
-                    config.withSourceFrom.map.kv(mapOf("item" to mapOf("offsetDateTime" to "  ")))
+                    config.from.map.kv(mapOf("item" to mapOf("offsetDateTime" to "  ")))
                 }
             }
         }
         on("deserialize value with invalid type") {
             it("should throw LoadException caused by ObjectMappingException") {
                 assertCausedBy<ObjectMappingException> {
-                    config.withSourceFrom.map.kv(mapOf("item" to mapOf("offsetDateTime" to 1)))
+                    config.from.map.kv(mapOf("item" to mapOf("offsetDateTime" to 1)))
                 }
             }
         }
         on("deserialize value with invalid format") {
             it("should throw LoadException caused by ObjectMappingException") {
                 assertCausedBy<ObjectMappingException> {
-                    config.withSourceFrom.map.kv(mapOf("item" to mapOf("offsetDateTime" to "2007-12-03T10:15:30")))
+                    config.from.map.kv(mapOf("item" to mapOf("offsetDateTime" to "2007-12-03T10:15:30")))
                 }
             }
         }

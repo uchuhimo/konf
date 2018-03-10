@@ -129,7 +129,7 @@ object MultiLayerConfigSpec : SubjectSpek<Config>({
                 val child = parent.withLayer("child")
 
                 assertThat(parent.mapper, sameInstance(child.mapper))
-                assertThat({ child.withSourceFrom.map.kv(mapOf("item" to "string")) },
+                assertThat({ child.from.map.kv(mapOf("item" to "string")) },
                     throws<LoadException>())
             }
             it("should be able to use the specified deserializer after adding") {
@@ -143,7 +143,7 @@ object MultiLayerConfigSpec : SubjectSpek<Config>({
                 parent.mapper.registerModule(SimpleModule().apply {
                     addDeserializer(StringWrapper::class.java, StringWrapperDeserializer())
                 })
-                val afterLoad = child.withSourceFrom.map.kv(mapOf("item" to "string"))
+                val afterLoad = child.from.map.kv(mapOf("item" to "string"))
                 assertThat(child.mapper, sameInstance(afterLoad.mapper))
                 assertThat(afterLoad[spec.item], equalTo(StringWrapper("string")))
             }

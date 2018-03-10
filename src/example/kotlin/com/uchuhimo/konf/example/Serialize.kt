@@ -35,6 +35,6 @@ fun main(args: Array<String>) {
     }
     val newConfig = Config {
         addSpec(Server)
-    }.withSourceFrom.map.kv(newMap)
+    }.from.map.kv(newMap)
     check(config == newConfig)
 }

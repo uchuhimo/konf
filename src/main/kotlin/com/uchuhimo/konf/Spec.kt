@@ -46,28 +46,25 @@ interface Spec {
      */
     val items: List<Item<*>>
 
-    operator fun get(path: String): Spec {
+    operator fun get(path: String): Spec = get(prefix.toPath(), path.toPath())
+
+    private fun get(prefix: Path, path: Path): Spec {
         return if (path.isEmpty()) {
             this
+        } else if (prefix.size >= path.size && prefix.subList(0, path.size) == path) {
+            ConfigSpec(prefix.subList(path.size, prefix.size).name, items)
         } else {
-            if (prefix.startsWith(path)) {
-                val restPrefix = prefix.removePrefix(path)
-                if (restPrefix.startsWith('.')) {
-                    ConfigSpec(restPrefix.removePrefix("."), items)
-                } else {
-                    throw NoSuchPathException(path)
-                }
-            } else {
-                throw NoSuchPathException(path)
-            }
+            throw NoSuchPathException(path.name)
         }
     }
 
-    fun withPrefix(prefix: String): Spec {
-        return if (prefix.isEmpty()) {
+    fun withPrefix(prefix: String): Spec = withPrefix(this.prefix.toPath(), prefix.toPath())
+
+    fun withPrefix(prefix: Path, newPrefix: Path): Spec {
+        return if (newPrefix.isEmpty()) {
             this
         } else {
-            ConfigSpec("$prefix.${this.prefix}", items)
+            ConfigSpec((newPrefix + prefix).name, items)
         }
     }
 }

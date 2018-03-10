@@ -126,6 +126,12 @@ fun String.toPath(): Path {
     }
 }
 
+fun checkPath(path: String) {
+    if (path.isNotEmpty()) {
+        check("" !in path.split('.')) { "$path is not a valid path" }
+    }
+}
+
 /**
  * Required item without default value.
  *

@@ -33,7 +33,7 @@ object FlatSourceLoadSpec : SubjectSpek<Config>({
         Config {
             addSpec(ConfigForLoad)
             addSpec(FlatConfigForLoad)
-        }.withSourceFrom.map.flat(loadContent)
+        }.from.map.flat(loadContent)
     }
 
     itBehavesLike(SourceLoadSpec)
@@ -55,11 +55,11 @@ object FlatSourceReloadSpec : SubjectSpek<Config>({
         val config = Config {
             addSpec(ConfigForLoad)
             addSpec(FlatConfigForLoad)
-        }.withSourceFrom.map.flat(loadContent)
+        }.from.map.flat(loadContent)
         Config {
             addSpec(ConfigForLoad)
             addSpec(FlatConfigForLoad)
-        }.withSourceFrom.map.flat(config.toFlatMap())
+        }.from.map.flat(config.toFlatMap())
     }
 
     itBehavesLike(FlatSourceLoadSpec)

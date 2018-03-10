@@ -125,7 +125,7 @@ open class FlatSource(
  *
  * The returned map contains all items in this config.
  * This map can be loaded into config as [com.uchuhimo.konf.source.base.FlatSource] using
- * `config.withSourceFrom.map.flat(map)`.
+ * `config.from.map.flat(map)`.
  */
 fun Config.toFlatMap(): Map<String, String> {
     fun MutableMap<String, String>.putFlat(key: String, value: Any) {

@@ -63,7 +63,7 @@ open class MapSource(
  *
  * The returned map contains all items in this config.
  * This map can be loaded into config as [com.uchuhimo.konf.source.base.MapSource] using
- * `config.withSourceFrom.map.hierarchical(map)`.
+ * `config.from.map.hierarchical(map)`.
  */
 fun Config.toHierarchicalMap(): Map<String, Any> {
     fun MutableMap<String, Any>.putHierarchically(key: String, value: Any) {

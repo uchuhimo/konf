@@ -40,7 +40,7 @@ object ZonedDateTimeDeserializerSpec : Spek({
 
     given("an ZonedDateTime deserializer") {
         on("deserialize valid string") {
-            config.withSourceFrom.map.kv(mapOf("item" to mapOf("zonedDateTime" to "2007-12-03T10:15:30+01:00[Europe/Paris]"))).apply {
+            config.from.map.kv(mapOf("item" to mapOf("zonedDateTime" to "2007-12-03T10:15:30+01:00[Europe/Paris]"))).apply {
                 it("should succeed") {
                     assertThat(this@apply[spec.item].zonedDateTime,
                         equalTo(ZonedDateTime.parse("2007-12-03T10:15:30+01:00[Europe/Paris]")))
@@ -50,21 +50,21 @@ object ZonedDateTimeDeserializerSpec : Spek({
         on("deserialize empty string") {
             it("should throw LoadException caused by ObjectMappingException") {
                 assertCausedBy<ObjectMappingException> {
-                    config.withSourceFrom.map.kv(mapOf("item" to mapOf("zonedDateTime" to "  ")))
+                    config.from.map.kv(mapOf("item" to mapOf("zonedDateTime" to "  ")))
                 }
             }
         }
         on("deserialize value with invalid type") {
             it("should throw LoadException caused by ObjectMappingException") {
                 assertCausedBy<ObjectMappingException> {
-                    config.withSourceFrom.map.kv(mapOf("item" to mapOf("zonedDateTime" to 1)))
+                    config.from.map.kv(mapOf("item" to mapOf("zonedDateTime" to 1)))
                 }
             }
         }
         on("deserialize value with invalid format") {
             it("should throw LoadException caused by ObjectMappingException") {
                 assertCausedBy<ObjectMappingException> {
-                    config.withSourceFrom.map.kv(mapOf("item" to mapOf("zonedDateTime" to "2007-12-03T10:15:30")))
+                    config.from.map.kv(mapOf("item" to mapOf("zonedDateTime" to "2007-12-03T10:15:30")))
                 }
             }
         }

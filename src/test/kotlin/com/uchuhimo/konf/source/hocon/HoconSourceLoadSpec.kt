@@ -27,7 +27,7 @@ object HoconSourceLoadSpec : SubjectSpek<Config>({
     subject {
         Config {
             addSpec(ConfigForLoad)
-        }.withSourceFrom.hocon.resource("source/source.conf")
+        }.from.hocon.resource("source/source.conf")
     }
 
     itBehavesLike(SourceLoadSpec)
@@ -38,11 +38,11 @@ object HoconSourceReloadSpec : SubjectSpek<Config>({
     subject {
         val config = Config {
             addSpec(ConfigForLoad)
-        }.withSourceFrom.hocon.resource("source/source.conf")
+        }.from.hocon.resource("source/source.conf")
         val hocon = config.toHocon.toText()
         Config {
             addSpec(ConfigForLoad)
-        }.withSourceFrom.hocon.string(hocon)
+        }.from.hocon.string(hocon)
     }
 
     itBehavesLike(SourceLoadSpec)

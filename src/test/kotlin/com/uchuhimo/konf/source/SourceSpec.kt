@@ -24,6 +24,7 @@ import com.natpryce.hamkrest.throws
 import com.uchuhimo.konf.Config
 import com.uchuhimo.konf.ConfigSpec
 import com.uchuhimo.konf.NetworkBuffer
+import com.uchuhimo.konf.Prefix
 import com.uchuhimo.konf.name
 import com.uchuhimo.konf.source.base.ValueSource
 import com.uchuhimo.konf.source.base.asKVSource
@@ -429,7 +430,7 @@ object SourceSpec : Spek({
         }
         group("source with prefix") {
             val source by memoized {
-                mapOf("key" to "value").asSource().withPrefix("level1.level2")
+                Prefix("level1.level2") + mapOf("key" to "value").asSource()
             }
             on("find a valid path") {
                 it("should contain the value") {
@@ -443,6 +444,7 @@ object SourceSpec : Spek({
                     assertTrue("level3" !in source)
                     assertTrue("level1.level3" !in source)
                     assertTrue("level1.level2.level3" !in source)
+                    assertTrue("level1.level3.level2" !in source)
                 }
             }
 
@@ -464,6 +466,7 @@ object SourceSpec : Spek({
                     assertThat(source.getOrNull("level3"), absent())
                     assertThat(source.getOrNull("level1.level3"), absent())
                     assertThat(source.getOrNull("level1.level2.level3"), absent())
+                    assertThat(source.getOrNull("level1.level3.level2"), absent())
                 }
             }
         }

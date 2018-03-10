@@ -28,19 +28,25 @@ import org.jetbrains.spek.api.dsl.given
 import org.jetbrains.spek.api.dsl.it
 import org.jetbrains.spek.api.dsl.on
 import org.jetbrains.spek.subject.SubjectSpek
+import org.jetbrains.spek.subject.dsl.SubjectProviderDsl
 import kotlin.test.assertFalse
 import kotlin.test.assertNull
 import kotlin.test.assertTrue
 
 object ConfigSpek : SubjectSpek<Config>({
+    subject { Config { addSpec(NetworkBuffer) } }
 
+    configSpek()
+})
+
+fun SubjectProviderDsl<Config>.configSpek(prefix: String = "network.buffer") {
     val spec = NetworkBuffer
     val size = NetworkBuffer.size
     val maxSize = NetworkBuffer.maxSize
     val name = NetworkBuffer.name
     val type = NetworkBuffer.type
 
-    subject { Config { addSpec(spec) } }
+    fun qualify(name: String): String = if (prefix.isEmpty()) name else "$prefix.$name"
 
     given("a config") {
         val invalidItem by ConfigSpec("invalid").run { required<Int>() }
@@ -53,7 +59,7 @@ object ConfigSpek : SubjectSpek<Config>({
                 subject.addSpec(newSpec)
                 it("should contain items in new spec") {
                     assertThat(newSpec.minSize in subject, equalTo(true))
-                    assertThat(subject.nameOf(newSpec.minSize) in subject, equalTo(true))
+                    assertThat(spec.qualify(newSpec.minSize.name) in subject, equalTo(true))
                 }
                 it("should contain new spec") {
                     assertThat(newSpec in subject.specs, equalTo(true))
@@ -64,11 +70,11 @@ object ConfigSpek : SubjectSpek<Config>({
                 it("should throw RepeatedItemException") {
                     assertThat({ subject.addSpec(spec) }, throws(has(
                         RepeatedItemException::name,
-                        equalTo(subject.nameOf(size)))))
+                        equalTo(spec.qualify(size.name)))))
                 }
             }
             on("add repeated name") {
-                val newSpec = ConfigSpec(spec.prefix).apply {
+                val newSpec = ConfigSpec(prefix).apply {
                     @Suppress("UNUSED_VARIABLE", "NAME_SHADOWING")
                     val size by required<Int>()
                 }
@@ -77,16 +83,19 @@ object ConfigSpek : SubjectSpek<Config>({
                 }
             }
             on("add conflict name, which is prefix of existed name") {
-                val newSpec = ConfigSpec("network").apply {
+                val newSpec = ConfigSpec().apply {
                     @Suppress("UNUSED_VARIABLE")
                     val buffer by required<Int>()
                 }
                 it("should throw NameConflictException") {
-                    assertThat({ subject.addSpec(newSpec) }, throws<NameConflictException>())
+                    assertThat({
+                        subject.addSpec(
+                            newSpec.withPrefix(prefix.toPath().let { it.subList(0, it.size - 1) }.name))
+                    }, throws<NameConflictException>())
                 }
             }
             on("add conflict name, and an existed name is prefix of it") {
-                val newSpec = ConfigSpec(subject.nameOf(type)).apply {
+                val newSpec = ConfigSpec(qualify(type.name)).apply {
                     @Suppress("UNUSED_VARIABLE")
                     val subType by required<Int>()
                 }
@@ -100,54 +109,32 @@ object ConfigSpek : SubjectSpek<Config>({
                 assertThat(subject.items.toSet(), equalTo(spec.items.toSet()))
             }
         }
-        on("convert to ConfigTree") {
-            val tree = subject.toTree()
-            it("should contain corresponding nodes in tree") {
-                assertThat(tree.path, equalTo(emptyList()))
-                assertFalse(tree.isItem)
-                val networkLevelNode = (tree as ConfigPathNode).children[0] as ConfigPathNode
-                assertThat(networkLevelNode.path, equalTo(listOf("network")))
-                assertFalse(networkLevelNode.isItem)
-                val bufferLevelNodes = networkLevelNode.children[0] as ConfigPathNode
-                assertThat(bufferLevelNodes.path, equalTo(listOf("network", "buffer")))
-                assertFalse(bufferLevelNodes.isItem)
-                @Suppress("UNCHECKED_CAST")
-                val sizeItemNode = bufferLevelNodes.children[0] as ConfigItemNode<Int>
-                assertThat(sizeItemNode.path, equalTo(subject.pathOf(spec.size)))
-                assertTrue(sizeItemNode.isItem)
-                assertThat(sizeItemNode.item, equalTo<Item<Int>>(spec.size))
-                @Suppress("UNCHECKED_CAST")
-                val maxSizeItemNode = bufferLevelNodes.children[1] as ConfigItemNode<Int>
-                assertThat(maxSizeItemNode.item, equalTo<Item<Int>>(spec.maxSize))
-                @Suppress("UNCHECKED_CAST")
-                val nameItemNode = bufferLevelNodes.children[2] as ConfigItemNode<String>
-                assertThat(nameItemNode.item, equalTo<Item<String>>(spec.name))
-                @Suppress("UNCHECKED_CAST")
-                val typeItemNode = bufferLevelNodes.children[3] as ConfigItemNode<NetworkBuffer.Type>
-                assertThat(typeItemNode.item, equalTo<Item<NetworkBuffer.Type>>(spec.type))
+        on("iterate name of items in config") {
+            it("should cover all items in config") {
+                assertThat(subject.nameOfItems.toSet(), equalTo(spec.items.map { qualify(it.name) }.toSet()))
             }
         }
         on("export values to map") {
             it("should not contain unset items in map") {
                 assertThat(subject.toMap(), equalTo(mapOf<String, Any>(
-                    subject.nameOf(spec.name) to "buffer",
-                    subject.nameOf(spec.type) to NetworkBuffer.Type.OFF_HEAP.name)))
+                    qualify(spec.name.name) to "buffer",
+                    qualify(spec.type.name) to NetworkBuffer.Type.OFF_HEAP.name)))
             }
             it("should contain corresponding items in map") {
                 subject[spec.size] = 4
                 subject[spec.type] = NetworkBuffer.Type.ON_HEAP
                 val map = subject.toMap()
                 assertThat(map, equalTo(mapOf(
-                    subject.nameOf(spec.size) to 4,
-                    subject.nameOf(spec.maxSize) to 8,
-                    subject.nameOf(spec.name) to "buffer",
-                    subject.nameOf(spec.type) to NetworkBuffer.Type.ON_HEAP.name)))
+                    qualify(spec.size.name) to 4,
+                    qualify(spec.maxSize.name) to 8,
+                    qualify(spec.name.name) to "buffer",
+                    qualify(spec.type.name) to NetworkBuffer.Type.ON_HEAP.name)))
             }
             it("should recover all items when reloaded from map") {
                 subject[spec.size] = 4
                 subject[spec.type] = NetworkBuffer.Type.ON_HEAP
                 val map = subject.toMap()
-                val newConfig = Config { addSpec(spec) }.withSourceFrom.map.kv(map)
+                val newConfig = Config { addSpec(spec[spec.prefix].withPrefix(prefix)) }.from.map.kv(map)
                 assertThat(newConfig[spec.size], equalTo(4))
                 assertThat(newConfig[spec.maxSize], equalTo(8))
                 assertThat(newConfig[spec.name], equalTo("buffer"))
@@ -156,30 +143,39 @@ object ConfigSpek : SubjectSpek<Config>({
             }
         }
         on("export values to hierarchical map") {
+            fun prefixToMap(prefix: String, value: Map<String, Any>): Map<String, Any> {
+                return if (prefix.isEmpty()) {
+                    value
+                } else if (prefix.contains('.')) {
+                    mapOf<String, Any>(
+                        prefix.substring(0, prefix.indexOf('.')) to
+                            prefixToMap(prefix.substring(prefix.indexOf('.') + 1), value))
+                } else {
+                    mapOf(prefix to value)
+                }
+            }
             it("should not contain unset items in map") {
-                assertThat(subject.toHierarchicalMap(), equalTo(mapOf<String, Any>(
-                    "network" to mapOf(
-                        "buffer" to mapOf(
-                            "name" to "buffer",
-                            "type" to NetworkBuffer.Type.OFF_HEAP.name)))))
+                assertThat(subject.toHierarchicalMap(),
+                    equalTo(prefixToMap(prefix, mapOf(
+                        "name" to "buffer",
+                        "type" to NetworkBuffer.Type.OFF_HEAP.name))))
             }
             it("should contain corresponding items in map") {
                 subject[spec.size] = 4
                 subject[spec.type] = NetworkBuffer.Type.ON_HEAP
                 val map = subject.toHierarchicalMap()
-                assertThat(map, equalTo(mapOf<String, Any>(
-                    "network" to mapOf(
-                        "buffer" to mapOf(
-                            "size" to 4,
-                            "maxSize" to 8,
-                            "name" to "buffer",
-                            "type" to NetworkBuffer.Type.ON_HEAP.name)))))
+                assertThat(map,
+                    equalTo(prefixToMap(prefix, mapOf(
+                        "size" to 4,
+                        "maxSize" to 8,
+                        "name" to "buffer",
+                        "type" to NetworkBuffer.Type.ON_HEAP.name))))
             }
             it("should recover all items when reloaded from map") {
                 subject[spec.size] = 4
                 subject[spec.type] = NetworkBuffer.Type.ON_HEAP
                 val map = subject.toHierarchicalMap()
-                val newConfig = Config { addSpec(spec) }.withSourceFrom.map.hierarchical(map)
+                val newConfig = Config { addSpec(spec[spec.prefix].withPrefix(prefix)) }.from.map.hierarchical(map)
                 assertThat(newConfig[spec.size], equalTo(4))
                 assertThat(newConfig[spec.maxSize], equalTo(8))
                 assertThat(newConfig[spec.name], equalTo("buffer"))
@@ -189,8 +185,8 @@ object ConfigSpek : SubjectSpek<Config>({
         }
         on("object methods") {
             val map = mapOf(
-                subject.nameOf(spec.name) to "buffer",
-                subject.nameOf(spec.type) to NetworkBuffer.Type.OFF_HEAP.name)
+                qualify(spec.name.name) to "buffer",
+                qualify(spec.type.name) to NetworkBuffer.Type.OFF_HEAP.name)
             it("should not equal to object of other class") {
                 assertFalse(subject.equals(1))
             }
@@ -221,7 +217,7 @@ object ConfigSpek : SubjectSpek<Config>({
             }
             on("get with valid name") {
                 it("should return corresponding value") {
-                    assertThat(subject(spec.qualify("name")), equalTo("buffer"))
+                    assertThat(subject(qualify("name")), equalTo("buffer"))
                 }
             }
             on("get with invalid name") {
@@ -276,7 +272,7 @@ object ConfigSpek : SubjectSpek<Config>({
                 }
             }
             on("set with valid name") {
-                subject[spec.qualify("size")] = 1024
+                subject[qualify("size")] = 1024
                 it("should contain the specified value") {
                     assertThat(subject[size], equalTo(1024))
                 }
@@ -289,7 +285,7 @@ object ConfigSpek : SubjectSpek<Config>({
             }
             on("set with incorrect type of value") {
                 it("should throw ClassCastException") {
-                    assertThat({ subject[subject.nameOf(size)] = "1024" }, throws<ClassCastException>())
+                    assertThat({ subject[qualify(size.name)] = "1024" }, throws<ClassCastException>())
                 }
             }
             on("lazy set with valid item") {
@@ -306,16 +302,16 @@ object ConfigSpek : SubjectSpek<Config>({
                 }
             }
             on("lazy set with valid name") {
-                subject.lazySet(subject.nameOf(maxSize)) { it[size] * 4 }
+                subject.lazySet(qualify(maxSize.name)) { it[size] * 4 }
                 subject[size] = 1024
                 it("should contain the specified value") {
                     assertThat(subject[maxSize], equalTo(subject[size] * 4))
                 }
             }
             on("lazy set with valid name and invalid value with incompatible type") {
-                subject.lazySet(subject.nameOf(maxSize)) { "string" }
+                subject.lazySet(qualify(maxSize.name)) { "string" }
                 it("should throw InvalidLazySetException when getting") {
-                    assertThat({ subject[subject.nameOf(maxSize)] }, throws<InvalidLazySetException>())
+                    assertThat({ subject[qualify(maxSize.name)] }, throws<InvalidLazySetException>())
                 }
             }
             on("lazy set with invalid name") {
@@ -337,7 +333,7 @@ object ConfigSpek : SubjectSpek<Config>({
                 }
             }
             on("unset with valid name") {
-                subject.unset(subject.nameOf(type))
+                subject.unset(qualify(type.name))
                 it("should contain `null` when using `getOrNull`") {
                     assertThat(subject.getOrNull(type), absent())
                 }
@@ -369,7 +365,7 @@ object ConfigSpek : SubjectSpek<Config>({
                 }
             }
             on("declare a property by name") {
-                var nameProperty by subject.property<String>(subject.nameOf(name))
+                var nameProperty by subject.property<String>(qualify(name.name))
                 it("should behave same as `get`") {
                     assertThat(nameProperty, equalTo(subject[name]))
                 }
@@ -411,11 +407,11 @@ object ConfigSpek : SubjectSpek<Config>({
             on("export values to map") {
                 it("should contain corresponding items in map") {
                     val map = layer.toMap()
-                    assertThat(map, equalTo(mapOf<String, Any>(subject.nameOf(size) to 4)))
+                    assertThat(map, equalTo(mapOf<String, Any>(qualify(size.name) to 4)))
                 }
             }
             on("object methods") {
-                val map = mapOf(subject.nameOf(spec.size) to 4)
+                val map = mapOf(qualify(spec.size.name) to 4)
                 it("should not equal to object of other class") {
                     assertFalse(layer.equals(1))
                 }
@@ -452,9 +448,9 @@ object ConfigSpek : SubjectSpek<Config>({
                 }
                 on("get with valid name") {
                     it("should return corresponding value") {
-                        assertThat(layer(spec.qualify("size")), equalTo(4))
-                        assertThat(layer.getOrNull(spec.qualify("size")), equalTo(4))
-                        assertTrue(spec.qualify("size") in layer)
+                        assertThat(layer(qualify("size")), equalTo(4))
+                        assertThat(layer.getOrNull(qualify("size")), equalTo(4))
+                        assertTrue(qualify("size") in layer)
                     }
                 }
                 on("get with invalid name") {
@@ -477,4 +473,4 @@ object ConfigSpek : SubjectSpek<Config>({
             }
         }
     }
-})
+}

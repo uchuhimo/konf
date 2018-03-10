@@ -50,7 +50,7 @@ object SourceLoadSpec : SubjectSpek<Config>({
     subject {
         Config {
             addSpec(ConfigForLoad)
-        }.withSourceFrom.map.kv(loadContent)
+        }.from.map.kv(loadContent)
     }
     given("a source") {
         on("load the source into config") {
@@ -231,10 +231,10 @@ object SourceReloadSpec : SubjectSpek<Config>({
     subject {
         val config = Config {
             addSpec(ConfigForLoad)
-        }.withSourceFrom.map.kv(loadContent)
+        }.from.map.kv(loadContent)
         Config {
             addSpec(ConfigForLoad)
-        }.withSourceFrom.map.kv(config.toMap())
+        }.from.map.kv(config.toMap())
     }
 
     itBehavesLike(SourceLoadSpec)
@@ -245,7 +245,7 @@ object SourceReloadFromDiskSpec : SubjectSpek<Config>({
     subject {
         val config = Config {
             addSpec(ConfigForLoad)
-        }.withSourceFrom.map.kv(loadContent)
+        }.from.map.kv(loadContent)
         val map = config.toMap()
         val newMap = createTempFile().run {
             ObjectOutputStream(outputStream()).use {
@@ -258,7 +258,7 @@ object SourceReloadFromDiskSpec : SubjectSpek<Config>({
         }
         Config {
             addSpec(ConfigForLoad)
-        }.withSourceFrom.map.kv(newMap)
+        }.from.map.kv(newMap)
     }
 
     itBehavesLike(SourceLoadSpec)

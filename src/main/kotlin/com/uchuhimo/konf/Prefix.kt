@@ -14,13 +14,14 @@
  * limitations under the License.
  */
 
-package com.uchuhimo.konf.example
+package com.uchuhimo.konf
 
-import com.uchuhimo.konf.Config
+import com.uchuhimo.konf.source.Source
 
-fun main(args: Array<String>) {
-    val config = Config { addSpec(Server) }
-    // values in source is loaded into new layer in child config
-    val childConfig = config.from.env()
-    check(childConfig.parent === config)
+data class Prefix(val path: String = "") {
+    operator fun plus(spec: Spec): Spec = spec.withPrefix(path)
+
+    operator fun plus(config: Config): Config = config.withPrefix(path)
+
+    operator fun plus(source: Source): Source = source.withPrefix(path)
 }
