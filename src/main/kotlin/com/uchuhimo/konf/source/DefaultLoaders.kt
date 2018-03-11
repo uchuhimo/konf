@@ -36,69 +36,82 @@ import kotlin.coroutines.experimental.CoroutineContext
 /**
  * Default loaders for config.
  *
+ * If [transform] is provided, source will be applied the given [transform] function when loaded.
+ *
  * @param config parent config for loader
+ * @param transform the given transformation function
  */
 class DefaultLoaders(
     /**
      * Parent config for loader.
      */
-    val config: Config
+    val config: Config,
+    /**
+     * The given transformation function.
+     */
+    val transform: ((Source) -> Source)? = null
 ) {
+    private fun Provider.wrap(): Provider =
+        if (transform != null) this.map(transform) else this
+
+    private fun Source.wrap(): Source =
+        if (transform != null) transform.invoke(this) else this
+
     /**
      * Loader for HOCON source.
      */
     @JvmField
-    val hocon = Loader(config, HoconProvider)
+    val hocon = Loader(config, HoconProvider.wrap())
 
     /**
      * Loader for JSON source.
      */
     @JvmField
-    val json = Loader(config, JsonProvider)
+    val json = Loader(config, JsonProvider.wrap())
 
     /**
      * Loader for properties source.
      */
     @JvmField
-    val properties = Loader(config, PropertiesProvider)
+    val properties = Loader(config, PropertiesProvider.wrap())
 
     /**
      * Loader for TOML source.
      */
     @JvmField
-    val toml = Loader(config, TomlProvider)
+    val toml = Loader(config, TomlProvider.wrap())
 
     /**
      * Loader for XML source.
      */
     @JvmField
-    val xml = Loader(config, XmlProvider)
+    val xml = Loader(config, XmlProvider.wrap())
 
     /**
      * Loader for YAML source.
      */
     @JvmField
-    val yaml = Loader(config, YamlProvider)
+    val yaml = Loader(config, YamlProvider.wrap())
 
     /**
      * Loader for map source.
      */
     @JvmField
-    val map = MapLoader(config)
+    val map = MapLoader(config, transform)
 
     /**
      * Returns a child config containing values from system environment.
      *
      * @return a child config containing values from system environment
      */
-    fun env(): Config = config.withSource(EnvProvider.fromEnv())
+    fun env(): Config = config.withSource(EnvProvider.fromEnv().wrap())
 
     /**
      * Returns a child config containing values from system properties.
      *
      * @return a child config containing values from system properties
      */
-    fun systemProperties(): Config = config.withSource(PropertiesProvider.fromSystem())
+    fun systemProperties(): Config = config.withSource(PropertiesProvider.fromSystem().wrap())
 
     /**
      * Returns corresponding loader based on extension.
@@ -108,7 +121,7 @@ class DefaultLoaders(
      * @return the corresponding loader based on extension
      */
     fun dispatchExtension(extension: String, source: String = ""): Loader =
-        Loader(config, extensionToProvider[extension]
+        Loader(config, extensionToProvider[extension]?.wrap()
             ?: throw UnsupportedExtensionException(source))
 
     /**
@@ -329,11 +342,21 @@ class DefaultLoaders(
         fun registerExtension(extension: String, provider: Provider) {
             extensionToProvider[extension] = provider
         }
+
+        /**
+         * Unregister the given extension.
+         *
+         * @param extension the file extension
+         */
+        fun unregisterExtension(extension: String): Provider? =
+            extensionToProvider.remove(extension)
     }
 }
 
 /**
  * Loader to load source from map of variant formats.
+ *
+ * If [transform] is provided, source will be applied the given [transform] function when loaded.
  *
  * @param config parent config
  */
@@ -341,15 +364,22 @@ class MapLoader(
     /**
      * Parent config for all child configs loading source in this loader.
      */
-    val config: Config
+    val config: Config,
+    /**
+     * The given transformation function.
+     */
+    val transform: ((Source) -> Source)? = null
 ) {
+    private fun Source.wrap(): Source =
+        if (transform != null) transform.invoke(this) else this
+
     /**
      * Returns a child config containing values from specified hierarchical map.
      *
      * @param map a hierarchical map
      * @return a child config containing values from specified hierarchical map
      */
-    fun hierarchical(map: Map<String, Any>): Config = config.withSource(MapSource(map))
+    fun hierarchical(map: Map<String, Any>): Config = config.withSource(MapSource(map).wrap())
 
     /**
      * Returns a child config containing values from specified map in key-value format.
@@ -357,7 +387,7 @@ class MapLoader(
      * @param map a map in key-value format
      * @return a child config containing values from specified map in key-value format
      */
-    fun kv(map: Map<String, Any>): Config = config.withSource(KVSource(map))
+    fun kv(map: Map<String, Any>): Config = config.withSource(KVSource(map).wrap())
 
     /**
      * Returns a child config containing values from specified map in flat format.
@@ -365,5 +395,5 @@ class MapLoader(
      * @param map a map in flat format
      * @return a child config containing values from specified map in flat format
      */
-    fun flat(map: Map<String, String>): Config = config.withSource(FlatSource(map))
+    fun flat(map: Map<String, String>): Config = config.withSource(FlatSource(map).wrap())
 }

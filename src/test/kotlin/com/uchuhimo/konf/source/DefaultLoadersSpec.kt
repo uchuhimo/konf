@@ -26,10 +26,12 @@ import com.uchuhimo.konf.tempFileOf
 import kotlinx.coroutines.experimental.delay
 import kotlinx.coroutines.experimental.newSingleThreadContext
 import kotlinx.coroutines.experimental.runBlocking
+import org.jetbrains.spek.api.Spek
 import org.jetbrains.spek.api.dsl.given
 import org.jetbrains.spek.api.dsl.it
 import org.jetbrains.spek.api.dsl.on
 import org.jetbrains.spek.subject.SubjectSpek
+import org.jetbrains.spek.subject.itBehavesLike
 import spark.Service
 import java.net.URL
 import java.util.concurrent.TimeUnit
@@ -58,21 +60,13 @@ object DefaultLoadersSpec : SubjectSpek<DefaultLoaders>({
             }
         }
         on("dispatch loader based on extension") {
-            it("should return the corresponding loader") {
-                assertThat(subject.dispatchExtension("conf"), equalTo(subject.hocon))
-                assertThat(subject.dispatchExtension("json"), equalTo(subject.json))
-                assertThat(subject.dispatchExtension("properties"), equalTo(subject.properties))
-                assertThat(subject.dispatchExtension("toml"), equalTo(subject.toml))
-                assertThat(subject.dispatchExtension("xml"), equalTo(subject.xml))
-                assertThat(subject.dispatchExtension("yml"), equalTo(subject.yaml))
-                assertThat(subject.dispatchExtension("yaml"), equalTo(subject.yaml))
-            }
             it("should throw UnsupportedExtensionException when the extension is unsupported") {
                 assertThat({ subject.dispatchExtension("txt") }, throws<UnsupportedExtensionException>())
             }
             it("should return the corresponding loader when the extension is registered") {
                 DefaultLoaders.registerExtension("txt", PropertiesProvider)
-                assertThat(subject.dispatchExtension("txt"), equalTo(subject.properties))
+                subject.dispatchExtension("txt")
+                DefaultLoaders.unregisterExtension("txt")
             }
         }
         on("load from URL") {
@@ -154,11 +148,11 @@ object DefaultLoadersSpec : SubjectSpek<DefaultLoaders>({
                 service.get("/source.properties") { _, _ -> content }
                 service.awaitInitialization()
                 val url = "http://localhost:${service.port()}/source.properties"
-                val config = subject.watchUrl(URL(url), context = context)
+                val config = subject.watchUrl(URL(url), delayTime = 1, context = context)
                 val originalValue = config[item]
                 content = propertiesContent.replace("properties", "newValue")
                 runBlocking(context) {
-                    delay(5, TimeUnit.SECONDS)
+                    delay(1, TimeUnit.SECONDS)
                 }
                 val newValue = config[item]
                 it("should load as auto-detected URL format") {
@@ -177,11 +171,11 @@ object DefaultLoadersSpec : SubjectSpek<DefaultLoaders>({
                 service.get("/source.properties") { _, _ -> content }
                 service.awaitInitialization()
                 val url = "http://localhost:${service.port()}/source.properties"
-                val config = subject.watchUrl(url, context = context)
+                val config = subject.watchUrl(url, delayTime = 1, context = context)
                 val originalValue = config[item]
                 content = propertiesContent.replace("properties", "newValue")
                 runBlocking(context) {
-                    delay(5, TimeUnit.SECONDS)
+                    delay(1, TimeUnit.SECONDS)
                 }
                 val newValue = config[item]
                 it("should load as auto-detected URL format") {
@@ -193,9 +187,26 @@ object DefaultLoadersSpec : SubjectSpek<DefaultLoaders>({
             }
         }
     }
+})
+
+object TransformedDefaultLoadersSpec : SubjectSpek<DefaultLoaders>({
+    subject {
+        Config {
+            addSpec(DefaultLoadersConfig["source"])
+        }.from { it["source"] }
+    }
+
+    itBehavesLike(DefaultLoadersSpec)
+})
+
+object MultipleDefaultLoadersSpec : Spek({
     on("load from multiple sources") {
-        val afterLoadEnv = subject.env()
-        System.setProperty(DefaultLoadersConfig.qualify("type"), "system")
+        val config = Config {
+            addSpec(DefaultLoadersConfig)
+        }
+        val item = DefaultLoadersConfig.type
+        val afterLoadEnv = config.from.env()
+        System.setProperty(config.nameOf(DefaultLoadersConfig.type), "system")
         val afterLoadSystemProperties = afterLoadEnv.from.systemProperties()
         val afterLoadHocon = afterLoadSystemProperties.from.hocon.string(hoconContent)
         val afterLoadJson = afterLoadHocon.from.json.string(jsonContent)

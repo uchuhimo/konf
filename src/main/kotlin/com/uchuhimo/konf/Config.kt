@@ -245,6 +245,17 @@ interface Config : ItemContainer {
     /**
      * Returns default loaders for this config.
      *
+     * Source will be applied the given [transform] function when loaded.
+     *
+     * It is a fluent API for loading source from default loaders.
+     *
+     * @param the given transformation function
+     */
+    fun from(transform: (Source) -> Source): DefaultLoaders = DefaultLoaders(this, transform)
+
+    /**
+     * Returns default loaders for this config.
+     *
      * It is a fluent API for loading source from default loaders.
      */
     @Deprecated("use the shorter API `from` instead", ReplaceWith("from"))

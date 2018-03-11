@@ -143,4 +143,44 @@ interface Provider {
             addContext("resource", resource)
         }
     }
+
+    /**
+     * Returns a provider providing sources that applying the given [transform] function.
+     *
+     * @param transform the given transformation function
+     * @return a provider providing sources that applying the given [transform] function
+     */
+    fun map(transform: (Source) -> Source): Provider {
+        return object : Provider {
+            override fun fromReader(reader: Reader): Source =
+                this@Provider.fromReader(reader).let(transform)
+
+            override fun fromInputStream(inputStream: InputStream): Source =
+                this@Provider.fromInputStream(inputStream).let(transform)
+
+            override fun fromFile(file: File): Source =
+                this@Provider.fromFile(file).let(transform)
+
+            override fun fromFile(file: String): Source =
+                this@Provider.fromFile(file).let(transform)
+
+            override fun fromString(content: String): Source =
+                this@Provider.fromString(content).let(transform)
+
+            override fun fromBytes(content: ByteArray): Source =
+                this@Provider.fromBytes(content).let(transform)
+
+            override fun fromBytes(content: ByteArray, offset: Int, length: Int): Source =
+                this@Provider.fromBytes(content, offset, length).let(transform)
+
+            override fun fromUrl(url: URL): Source =
+                this@Provider.fromUrl(url).let(transform)
+
+            override fun fromUrl(url: String): Source =
+                this@Provider.fromUrl(url).let(transform)
+
+            override fun fromResource(resource: String): Source =
+                this@Provider.fromResource(resource).let(transform)
+        }
+    }
 }
