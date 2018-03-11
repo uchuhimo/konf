@@ -19,7 +19,7 @@ package com.uchuhimo.konf
 class AdHocNetworkBuffer(config: Config) {
     private val root = config.at("network.buffer")
 
-    val size by root.required<Int>(description = "size of buffer in KB")
+    val size: Int by root.required(description = "size of buffer in KB")
 
     val maxSize by root.lazy(name = "max-size", description = "max size of buffer in KB") { size * 2 }
 
