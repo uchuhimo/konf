@@ -16,6 +16,10 @@
 
 package com.uchuhimo.konf
 
+import com.uchuhimo.konf.source.Source
+import com.uchuhimo.konf.source.SourceInfo
+import java.util.ArrayDeque
+import java.util.Deque
 import kotlin.concurrent.read
 
 abstract class RelocatedConfig(parent: BaseConfig, name: String = "") : BaseConfig(name, parent, parent.mapper) {
@@ -61,6 +65,32 @@ abstract class RelocatedConfig(parent: BaseConfig, name: String = "") : BaseConf
         checkNameConflictInLayer(name)
         relocateInOrNull(name)?.let { parent?.checkNameConflict(it) }
     }
+
+    fun Source.relocated(): Source {
+        return object : Source, SourceInfo by SourceInfo.default() {
+            init {
+                addInfo("type", "relocated")
+                addInfo("source", this@relocated.description)
+            }
+
+            override fun contains(path: Path): Boolean =
+                relocateInOrNull(path)?.let { this@relocated.contains(it) } ?: false
+
+            override fun getOrNull(path: Path): Source? =
+                relocateInOrNull(path)?.let { this@relocated.getOrNull(it) }
+        }
+    }
+
+    override val sources: Deque<Source>
+        get() {
+            return lock.read { sourcesInLayer.clone() }.apply {
+                for (source in parent?.sources?.mapTo(ArrayDeque()) {
+                    it.relocated()
+                } ?: ArrayDeque<Source>()) {
+                    addLast(source)
+                }
+            }
+        }
 }
 
 open class DrillDownConfig(val prefix: String, parent: BaseConfig, name: String = "") : RelocatedConfig(parent, name) {

@@ -107,8 +107,8 @@ object MultiLayerConfigSpec : SubjectSpek<Config>({
                 @Suppress("unused")
                 val minSize by optional(1)
             }
-            it("should throw SpecFrozenException") {
-                assertThat({ subject.parent!!.addSpec(spec) }, throws<SpecFrozenException>())
+            it("should throw LayerFrozenException") {
+                assertThat({ subject.parent!!.addSpec(spec) }, throws<LayerFrozenException>())
             }
         }
         on("add source") {

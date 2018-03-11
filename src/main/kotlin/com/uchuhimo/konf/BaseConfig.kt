@@ -322,10 +322,34 @@ open class BaseConfig(
         parent?.checkNameConflict(name)
     }
 
+    override fun addItem(item: Item<*>, prefix: String) {
+        lock.write {
+            if (hasChildren) {
+                throw LayerFrozenException(this)
+            }
+            val path = prefix.toPath() + item.name.toPath()
+            val name = path.name
+            if (item !in this) {
+                checkNameConflict(path)
+                nameByItem[item] = name
+                valueByItem[item] = when (item) {
+                    is OptionalItem -> ValueState.Value(item.default)
+                    is RequiredItem -> ValueState.Unset
+                    is LazyItem -> ValueState.Lazy(item.thunk)
+                }
+                sources.firstOrNull { path in it }?.let { source ->
+                    loadItem(item, path, source)
+                }
+            } else {
+                throw RepeatedItemException(name)
+            }
+        }
+    }
+
     override fun addSpec(spec: Spec) {
         lock.write {
             if (hasChildren) {
-                throw SpecFrozenException(this)
+                throw LayerFrozenException(this)
             }
             val sources = this.sources
             spec.items.forEach { item ->

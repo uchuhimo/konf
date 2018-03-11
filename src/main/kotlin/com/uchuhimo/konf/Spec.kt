@@ -37,7 +37,7 @@ interface Spec {
      * @param name item name without prefix
      * @return qualified item name
      */
-    fun qualify(name: String): String = if (prefix.isEmpty()) name else "$prefix.$name"
+    fun qualify(name: String): String = (prefix.toPath() + name.toPath()).name
 
     fun addItem(item: Item<*>)
 
@@ -65,6 +65,16 @@ interface Spec {
             this
         } else {
             ConfigSpec((newPrefix + prefix).name, items)
+        }
+    }
+
+    companion object {
+        val dummy: Spec = object : Spec {
+            override val prefix: String = ""
+
+            override fun addItem(item: Item<*>) {}
+
+            override val items: List<Item<*>> = emptyList()
         }
     }
 }

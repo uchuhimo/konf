@@ -50,6 +50,7 @@ sealed class Item<T : Any>(
     type: JavaType? = null
 ) {
     init {
+        checkPath(name)
         @Suppress("LeakingThis")
         spec.addItem(this)
     }

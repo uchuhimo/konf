@@ -56,10 +56,10 @@ class NoSuchItemException(val name: String) : ConfigException("cannot find $name
 }
 
 /**
- * Exception indicates that config spec cannot be added to this config because it has child layer.
+ * Exception indicates that item cannot be added to this config because it has child layer.
  */
-class SpecFrozenException(val config: Config) :
-    ConfigException("config ${config.name} has child layer, cannot add new spec")
+class LayerFrozenException(val config: Config) :
+    ConfigException("config ${config.name} has child layer, cannot add new item")
 
 /**
  * Exception indicates that expected value in specified path is not existed in the source.

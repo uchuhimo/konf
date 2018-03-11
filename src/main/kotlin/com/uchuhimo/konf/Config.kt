@@ -16,13 +16,16 @@
 
 package com.uchuhimo.konf
 
+import com.fasterxml.jackson.databind.JavaType
 import com.fasterxml.jackson.databind.ObjectMapper
+import com.fasterxml.jackson.databind.type.TypeFactory
 import com.uchuhimo.konf.annotation.JavaApi
 import com.uchuhimo.konf.source.DefaultLoaders
 import com.uchuhimo.konf.source.Source
 import com.uchuhimo.konf.source.loadBy
 import java.util.Deque
 import kotlin.properties.ReadWriteProperty
+import kotlin.reflect.KProperty
 
 /**
  * Config containing items and associated values.
@@ -164,10 +167,21 @@ interface Config : ItemContainer {
     fun withPrefix(prefix: String): Config
 
     /**
+     * Load item into facade layer with the specified prefix.
+     *
+     * Same item cannot be added twice.
+     * The item cannot have same qualified name with existed items in config.
+     *
+     * @param item config item
+     * @param prefix prefix for the config item
+     */
+    fun addItem(item: Item<*>, prefix: String = "")
+
+    /**
      * Load items in specified config spec into facade layer.
      *
      * Same config spec cannot be added twice.
-     * All items in specified config spec cannot have same name with existed items in config.
+     * All items in specified config spec cannot have same qualified name with existed items in config.
      *
      * @param spec config spec
      */
@@ -305,5 +319,110 @@ interface Config : ItemContainer {
          * @return a new root config
          */
         operator fun invoke(init: Config.() -> Unit): Config = Config().apply(init)
+    }
+}
+
+/**
+ * Returns a property that can read/set associated value for specified required item.
+ *
+ * @param prefix prefix for the config item
+ * @param name item name without prefix
+ * @param description description for this item
+ * @return a property that can read/set associated value for specified required item
+ */
+inline fun <reified T : Any> Config.required(
+    prefix: String = "",
+    name: String? = null,
+    description: String = ""
+) =
+    object : RequiredConfigProperty<T>(this, prefix, name, description) {}
+
+open class RequiredConfigProperty<T : Any>(
+    private val config: Config,
+    private val prefix: String = "",
+    private val name: String? = null,
+    private val description: String
+) {
+    private val type: JavaType = TypeFactory.defaultInstance().constructType(this::class.java)
+        .findSuperType(RequiredConfigProperty::class.java).bindings.typeParameters[0]
+
+    operator fun provideDelegate(thisRef: Any?, property: KProperty<*>):
+        ReadWriteProperty<Any?, T> {
+        val item = object : RequiredItem<T>(Spec.dummy, name
+            ?: property.name, description, type) {}
+        config.addItem(item, prefix)
+        return config.property(item)
+    }
+}
+
+/**
+ * Returns a property that can read/set associated value for specified optional item.
+ *
+ * @param default default value returned before associating this item with specified value
+ * @param prefix prefix for the config item
+ * @param name item name without prefix
+ * @param description description for this item
+ * @return a property that can read/set associated value for specified optional item
+ */
+inline fun <reified T : Any> Config.optional(
+    default: T,
+    prefix: String = "",
+    name: String? = null,
+    description: String = ""
+) =
+    object : OptionalConfigProperty<T>(this, default, prefix, name, description) {}
+
+open class OptionalConfigProperty<T : Any>(
+    private val config: Config,
+    private val default: T,
+    private val prefix: String = "",
+    private val name: String? = null,
+    private val description: String
+) {
+    private val type: JavaType = TypeFactory.defaultInstance().constructType(this::class.java)
+        .findSuperType(OptionalConfigProperty::class.java).bindings.typeParameters[0]
+
+    operator fun provideDelegate(thisRef: Any?, property: KProperty<*>):
+        ReadWriteProperty<Any?, T> {
+        val item = object : OptionalItem<T>(Spec.dummy, name
+            ?: property.name, default, description, type) {}
+        config.addItem(item, prefix)
+        return config.property(item)
+    }
+}
+
+/**
+ * Returns a property that can read/set associated value for specified lazy item.
+ *
+ * @param prefix prefix for the config item
+ * @param name item name without prefix
+ * @param description description for this item
+ * @param thunk thunk used to evaluate value for this item
+ * @return a property that can read/set associated value for specified lazy item
+ */
+inline fun <reified T : Any> Config.lazy(
+    prefix: String = "",
+    name: String? = null,
+    description: String = "",
+    noinline thunk: (config: ItemContainer) -> T
+) =
+    object : LazyConfigProperty<T>(this, thunk, prefix, name, description) {}
+
+open class LazyConfigProperty<T : Any>(
+    private val config: Config,
+    private val thunk: (config: ItemContainer) -> T,
+    private val prefix: String = "",
+    private val name: String? = null,
+    private val description: String
+) {
+    private val type: JavaType = TypeFactory.defaultInstance().constructType(this::class.java)
+        .findSuperType(LazyConfigProperty::class.java).bindings.typeParameters[0]
+
+    operator fun provideDelegate(thisRef: Any?, property: KProperty<*>):
+        ReadWriteProperty<Any?, T> {
+        val item = object : LazyItem<T>(Spec.dummy, name
+            ?: property.name, thunk, description, type) {}
+        config.addItem(item, prefix)
+        return config.property(item)
     }
 }
