@@ -14,28 +14,19 @@
  * limitations under the License.
  */
 
-package com.uchuhimo.konf.example;
+package com.uchuhimo.konf.snippet
 
-import com.uchuhimo.konf.Config;
+import com.uchuhimo.konf.Config
+import com.uchuhimo.konf.ConfigSpec
 
-public class ServerInJava {
-  private String host;
-  private Integer port;
+public data class Server(val host: String, val port: Int) {
+    constructor(config: Config) : this(config[Server.host], config[Server.port])
 
-  public ServerInJava(String host, Integer port) {
-    this.host = host;
-    this.port = port;
-  }
+    fun start() {}
 
-  public ServerInJava(Config config) {
-    this(config.get(ServerSpecInJava.host), config.get(ServerSpecInJava.port));
-  }
-
-  public String getHost() {
-    return host;
-  }
-
-  public Integer getPort() {
-    return port;
-  }
+    companion object : ConfigSpec("server") {
+        val host by optional("0.0.0.0", description = "host IP of server")
+        val port by required<Int>(description = "port of server")
+        val nextPort by lazy { config -> config[port] + 1 }
+    }
 }

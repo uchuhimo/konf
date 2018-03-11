@@ -14,17 +14,28 @@
  * limitations under the License.
  */
 
-package com.uchuhimo.konf.example;
+package com.uchuhimo.konf.snippet;
 
-import com.uchuhimo.konf.ConfigSpec;
-import com.uchuhimo.konf.OptionalItem;
-import com.uchuhimo.konf.RequiredItem;
+import com.uchuhimo.konf.Config;
 
-public class ServerSpecInJava {
-  public static final ConfigSpec spec = new ConfigSpec("server");
+public class ServerInJava {
+  private String host;
+  private Integer port;
 
-  public static final OptionalItem<String> host =
-      new OptionalItem<String>(spec, "host", "0.0.0.0") {};
+  public ServerInJava(String host, Integer port) {
+    this.host = host;
+    this.port = port;
+  }
 
-  public static final RequiredItem<Integer> port = new RequiredItem<Integer>(spec, "port") {};
+  public ServerInJava(Config config) {
+    this(config.get(ServerSpecInJava.host), config.get(ServerSpecInJava.port));
+  }
+
+  public String getHost() {
+    return host;
+  }
+
+  public Integer getPort() {
+    return port;
+  }
 }

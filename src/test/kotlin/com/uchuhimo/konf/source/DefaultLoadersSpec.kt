@@ -196,29 +196,19 @@ object DefaultLoadersSpec : SubjectSpek<DefaultLoaders>({
     on("load from multiple sources") {
         val afterLoadEnv = subject.env()
         System.setProperty(DefaultLoadersConfig.qualify("type"), "system")
-        val afterLoadSystemProperties = afterLoadEnv.from
-            .systemProperties()
-        val afterLoadHocon = afterLoadSystemProperties.from
-            .hocon.string(hoconContent)
-        val afterLoadJson = afterLoadHocon.from
-            .json.string(jsonContent)
-        val afterLoadProperties = afterLoadJson.from
-            .properties.string(propertiesContent)
-        val afterLoadToml = afterLoadProperties.from
-            .toml.string(tomlContent)
-        val afterLoadXml = afterLoadToml.from
-            .xml.string(xmlContent)
-        val afterLoadYaml = afterLoadXml.from
-            .yaml.string(yamlContent)
-        val afterLoadFlat = afterLoadYaml.from
-            .map.flat(mapOf("source.test.type" to "flat"))
-        val afterLoadKv = afterLoadFlat.from.map
-            .kv(mapOf("source.test.type" to "kv"))
-        val afterLoadHierarchical = afterLoadKv.from.map
-            .hierarchical(
-                mapOf("source" to
-                    mapOf("test" to
-                        mapOf("type" to "hierarchical"))))
+        val afterLoadSystemProperties = afterLoadEnv.from.systemProperties()
+        val afterLoadHocon = afterLoadSystemProperties.from.hocon.string(hoconContent)
+        val afterLoadJson = afterLoadHocon.from.json.string(jsonContent)
+        val afterLoadProperties = afterLoadJson.from.properties.string(propertiesContent)
+        val afterLoadToml = afterLoadProperties.from.toml.string(tomlContent)
+        val afterLoadXml = afterLoadToml.from.xml.string(xmlContent)
+        val afterLoadYaml = afterLoadXml.from.yaml.string(yamlContent)
+        val afterLoadFlat = afterLoadYaml.from.map.flat(mapOf("source.test.type" to "flat"))
+        val afterLoadKv = afterLoadFlat.from.map.kv(mapOf("source.test.type" to "kv"))
+        val afterLoadHierarchical = afterLoadKv.from.map.hierarchical(
+            mapOf("source" to
+                mapOf("test" to
+                    mapOf("type" to "hierarchical"))))
         it("should load the corresponding value in each layer") {
             assertThat(afterLoadEnv[item], equalTo("env"))
             assertThat(afterLoadSystemProperties[item], equalTo("system"))

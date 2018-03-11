@@ -14,32 +14,27 @@
  * limitations under the License.
  */
 
-package com.uchuhimo.konf.example
+package com.uchuhimo.konf.snippet
 
 import com.uchuhimo.konf.Config
-import com.uchuhimo.konf.source.base.toFlatMap
-import com.uchuhimo.konf.source.base.toHierarchicalMap
-import com.uchuhimo.konf.source.json.toJson
+import java.io.ObjectInputStream
+import java.io.ObjectOutputStream
 
 fun main(args: Array<String>) {
     val config = Config { addSpec(Server) }
     config[Server.port] = 1000
-    run {
-        val map = config.toMap()
+    val map = config.toMap()
+    val newMap = createTempFile().run {
+        ObjectOutputStream(outputStream()).use {
+            it.writeObject(map)
+        }
+        ObjectInputStream(inputStream()).use {
+            @Suppress("UNCHECKED_CAST")
+            it.readObject() as Map<String, Any>
+        }
     }
-    run {
-        val map = config.layer.toMap()
-    }
-    run {
-        val map = config.toHierarchicalMap()
-    }
-    run {
-        val map = config.toFlatMap()
-    }
-    val file = createTempFile(suffix = ".json")
-    config.toJson.toFile(file)
     val newConfig = Config {
         addSpec(Server)
-    }.from.json.file(file)
+    }.from.map.kv(newMap)
     check(config == newConfig)
 }

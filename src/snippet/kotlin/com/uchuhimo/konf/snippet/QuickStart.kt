@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-package com.uchuhimo.konf.example
+package com.uchuhimo.konf.snippet
 
 import com.uchuhimo.konf.Config
 import com.uchuhimo.konf.ConfigSpec

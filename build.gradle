@@ -55,11 +55,11 @@ task wrapper(type: Wrapper) {
 }
 
 sourceSets {
-    example
+    snippet
 }
 
 configurations {
-    exampleImplementation.extendsFrom implementation
+    snippetImplementation.extendsFrom implementation
 }
 
 dependencyManagement {
@@ -144,8 +144,10 @@ dependencies {
 
     jmhImplementation "org.jetbrains.kotlin:kotlin-stdlib"
 
-    exampleImplementation sourceSets.main.output
+    snippetImplementation sourceSets.main.output
 }
+
+build.dependsOn snippetClasses
 
 sourceCompatibility = JavaVersion.VERSION_1_8
 targetCompatibility = JavaVersion.VERSION_1_8
