@@ -22,14 +22,19 @@ import com.fasterxml.jackson.databind.module.SimpleModule
 import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule
 import com.fasterxml.jackson.module.kotlin.jacksonObjectMapper
 import com.uchuhimo.collections.mutableBiMapOf
+import com.uchuhimo.konf.source.Source
 import com.uchuhimo.konf.source.deserializer.DurationDeserializer
 import com.uchuhimo.konf.source.deserializer.OffsetDateTimeDeserializer
 import com.uchuhimo.konf.source.deserializer.StringDeserializer
 import com.uchuhimo.konf.source.deserializer.ZoneDateTimeDeserializer
+import com.uchuhimo.konf.source.load
+import com.uchuhimo.konf.source.loadItem
 import com.uchuhimo.konf.source.toCompatibleValue
 import java.time.Duration
 import java.time.OffsetDateTime
 import java.time.ZonedDateTime
+import java.util.ArrayDeque
+import java.util.Deque
 import java.util.concurrent.locks.ReentrantReadWriteLock
 import kotlin.concurrent.read
 import kotlin.concurrent.write
@@ -42,6 +47,7 @@ open class BaseConfig(
     override val mapper: ObjectMapper = createDefaultMapper()
 ) : Config {
     protected val specsInLayer = mutableListOf<Spec>()
+    protected val sourcesInLayer = ArrayDeque<Source>()
     protected val valueByItem = mutableMapOf<Item<*>, ValueState>()
     protected val nameByItem = mutableBiMapOf<Item<*>, String>()
 
@@ -78,7 +84,8 @@ open class BaseConfig(
     }
 
     override val itemWithNames: List<Pair<Item<*>, String>>
-        get() = nameByItem.entries.map { it.toPair() } + (parent?.itemWithNames ?: listOf())
+        get() = lock.read { nameByItem.entries }.map { it.toPair() } +
+            (parent?.itemWithNames ?: listOf())
 
     override fun toMap(): Map<String, Any> {
         return mutableMapOf<String, Any>().apply {
@@ -259,7 +266,7 @@ open class BaseConfig(
     }
 
     override fun clear() {
-        valueByItem.clear()
+        lock.write { valueByItem.clear() }
     }
 
     override fun <T : Any> property(item: Item<T>): ReadWriteProperty<Any?, T> {
@@ -286,29 +293,15 @@ open class BaseConfig(
         }
     }
 
-    override val specs: List<Spec>
-        get() = mutableListOf<Spec>().apply {
-            addAll(object : Iterator<Spec> {
-                private var currentConfig = this@BaseConfig
-                private var current = currentConfig.specsInLayer.iterator()
+    override val specs: List<Spec> get() = lock.read { specsInLayer + (parent?.specs ?: listOf()) }
 
-                override tailrec fun hasNext(): Boolean {
-                    return if (current.hasNext()) {
-                        true
-                    } else {
-                        val parent = currentConfig.parent
-                        if (parent != null) {
-                            currentConfig = parent
-                            current = currentConfig.specsInLayer.iterator()
-                            hasNext()
-                        } else {
-                            false
-                        }
-                    }
+    override val sources: Deque<Source>
+        get() {
+            return lock.read { sourcesInLayer.clone() }.apply {
+                for (source in parent?.sources ?: ArrayDeque()) {
+                    addLast(source)
                 }
-
-                override fun next(): Spec = current.next()
-            }.asSequence())
+            }
         }
 
     override val layer: Config = Layer(this)
@@ -334,21 +327,33 @@ open class BaseConfig(
             if (hasChildren) {
                 throw SpecFrozenException(this)
             }
+            val sources = this.sources
             spec.items.forEach { item ->
                 val name = spec.qualify(item.name)
                 if (item !in this) {
-                    checkNameConflict(name.toPath())
+                    val path = name.toPath()
+                    checkNameConflict(path)
                     nameByItem[item] = name
                     valueByItem[item] = when (item) {
                         is OptionalItem -> ValueState.Value(item.default)
                         is RequiredItem -> ValueState.Unset
                         is LazyItem -> ValueState.Lazy(item.thunk)
                     }
+                    sources.firstOrNull { path in it }?.let { source ->
+                        loadItem(item, path, source)
+                    }
                 } else {
                     throw RepeatedItemException(name)
                 }
             }
             specsInLayer += spec
+        }
+    }
+
+    override fun addSource(source: Source) {
+        lock.write {
+            load(this, source)
+            sourcesInLayer.push(source)
         }
     }
 
@@ -384,7 +389,7 @@ open class BaseConfig(
 
         override fun toMap(): Map<String, Any> {
             return mutableMapOf<String, Any>().apply {
-                for (item in config.valueByItem.keys) {
+                for (item in config.lock.read { config.valueByItem.keys }) {
                     if (config.getOrNull(item) != null) {
                         put(nameOf(item), config[item].toCompatibleValue(mapper))
                     }

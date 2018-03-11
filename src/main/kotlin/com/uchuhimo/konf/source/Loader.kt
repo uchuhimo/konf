@@ -257,16 +257,4 @@ class Loader(
      */
     fun resource(resource: String): Config =
         config.withSource(provider.fromResource(resource))
-
-    override fun equals(other: Any?): Boolean {
-        if (this === other) return true
-        if (javaClass != other?.javaClass) return false
-
-        other as Loader
-
-        if (config != other.config) return false
-        if (provider != other.provider) return false
-
-        return true
-    }
 }

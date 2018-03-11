@@ -21,7 +21,7 @@ import com.uchuhimo.konf.annotation.JavaApi
 import com.uchuhimo.konf.source.DefaultLoaders
 import com.uchuhimo.konf.source.Source
 import com.uchuhimo.konf.source.loadBy
-import com.uchuhimo.konf.source.loadFromSource
+import java.util.Deque
 import kotlin.properties.ReadWriteProperty
 
 /**
@@ -150,6 +150,11 @@ interface Config : ItemContainer {
     val specs: List<Spec>
 
     /**
+     * List of sources from all layers of this config.
+     */
+    val sources: Deque<Source>
+
+    /**
      * Facade layer of config.
      */
     val layer: Config
@@ -161,12 +166,19 @@ interface Config : ItemContainer {
     /**
      * Load items in specified config spec into facade layer.
      *
-     * Same config spec cannot be loaded twice.
+     * Same config spec cannot be added twice.
      * All items in specified config spec cannot have same name with existed items in config.
      *
      * @param spec config spec
      */
     fun addSpec(spec: Spec)
+
+    /**
+     * Load values from specified source into facade layer.
+     *
+     * @param source config source
+     */
+    fun addSource(source: Source)
 
     /**
      * Executes the given [action] after locking the facade layer of this config.
@@ -193,7 +205,8 @@ interface Config : ItemContainer {
      * @param source config source
      * @return a child config containing value from specified source
      */
-    fun withSource(source: Source): Config = loadFromSource(source)
+    fun withSource(source: Source): Config =
+        withLayer("source: ${source.description}").apply { addSource(source) }
 
     /**
      * Returns a child config containing values loaded by specified trigger.

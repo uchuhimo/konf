@@ -26,10 +26,13 @@ import com.natpryce.hamkrest.equalTo
 import com.natpryce.hamkrest.sameInstance
 import com.natpryce.hamkrest.throws
 import com.uchuhimo.konf.source.LoadException
+import com.uchuhimo.konf.source.Source
+import com.uchuhimo.konf.source.base.asKVSource
 import org.jetbrains.spek.api.dsl.it
 import org.jetbrains.spek.api.dsl.on
 import org.jetbrains.spek.subject.SubjectSpek
 import org.jetbrains.spek.subject.itBehavesLike
+import java.util.ArrayDeque
 
 object MultiLayerConfigSpec : SubjectSpek<Config>({
 
@@ -106,6 +109,24 @@ object MultiLayerConfigSpec : SubjectSpek<Config>({
             }
             it("should throw SpecFrozenException") {
                 assertThat({ subject.parent!!.addSpec(spec) }, throws<SpecFrozenException>())
+            }
+        }
+        on("add source") {
+            val source1 = mapOf(subject.nameOf(NetworkBuffer.size) to 10).asKVSource()
+            subject.addSource(source1)
+            val source2 = mapOf(subject.nameOf(NetworkBuffer.size) to 20).asKVSource()
+            subject.parent!!.addSource(source2)
+            val source3 = mapOf(subject.nameOf(NetworkBuffer.size) to 30).asKVSource()
+            subject.addSource(source3)
+            it("should load values to the corresponding layers") {
+                assertThat(subject[NetworkBuffer.size], equalTo(30))
+                assertThat(subject.parent!![NetworkBuffer.size], equalTo(20))
+                assertThat(
+                    subject.sources.toList(),
+                    equalTo(ArrayDeque(listOf(source3, source1, source2)).toList<Source>()))
+                assertThat(
+                    subject.parent!!.sources.toList(),
+                    equalTo(ArrayDeque(listOf(source2)).toList<Source>()))
             }
         }
         on("iterate items in config after adding spec") {

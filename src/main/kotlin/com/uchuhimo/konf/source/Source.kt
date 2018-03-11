@@ -39,6 +39,7 @@ import com.fasterxml.jackson.databind.type.MapLikeType
 import com.fasterxml.jackson.databind.type.SimpleType
 import com.fasterxml.jackson.databind.type.TypeFactory
 import com.uchuhimo.konf.Config
+import com.uchuhimo.konf.Item
 import com.uchuhimo.konf.Path
 import com.uchuhimo.konf.SizeInBytes
 import com.uchuhimo.konf.source.base.ValueSource
@@ -656,25 +657,26 @@ internal fun Any.toCompatibleValue(mapper: ObjectMapper): Any {
     }
 }
 
-private fun load(config: Config, source: Source): Config {
+internal fun Config.loadItem(item: Item<*>, path: Path, source: Source) {
+    try {
+        rawSet(item, source[path].toValue(item.type, mapper))
+    } catch (cause: SourceException) {
+        throw LoadException(path, cause)
+    }
+}
+
+internal fun load(config: Config, source: Source): Config {
     return config.apply {
         lock {
             for (item in this) {
                 val path = pathOf(item)
                 if (path in source) {
-                    try {
-                        rawSet(item, source[path].toValue(item.type, mapper))
-                    } catch (cause: SourceException) {
-                        throw LoadException(path, cause)
-                    }
+                    loadItem(item, path, source)
                 }
             }
         }
     }
 }
-
-internal fun Config.loadFromSource(source: Source): Config =
-    load(withLayer("source: ${source.description}"), source)
 
 internal fun Config.loadBy(
     description: String,

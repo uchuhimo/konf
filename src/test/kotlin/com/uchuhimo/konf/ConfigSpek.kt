@@ -23,6 +23,7 @@ import com.natpryce.hamkrest.has
 import com.natpryce.hamkrest.isEmpty
 import com.natpryce.hamkrest.sameInstance
 import com.natpryce.hamkrest.throws
+import com.uchuhimo.konf.source.base.asKVSource
 import com.uchuhimo.konf.source.base.toHierarchicalMap
 import org.jetbrains.spek.api.dsl.given
 import org.jetbrains.spek.api.dsl.it
@@ -56,6 +57,7 @@ fun SubjectProviderDsl<Config>.configSpek(prefix: String = "network.buffer") {
                 val newSpec = object : ConfigSpec(spec.prefix) {
                     val minSize by optional(1)
                 }
+                subject.addSource(mapOf(newSpec.qualify(newSpec.minSize.name) to 2).asKVSource())
                 subject.addSpec(newSpec)
                 it("should contain items in new spec") {
                     assertThat(newSpec.minSize in subject, equalTo(true))
@@ -64,6 +66,9 @@ fun SubjectProviderDsl<Config>.configSpek(prefix: String = "network.buffer") {
                 it("should contain new spec") {
                     assertThat(newSpec in subject.specs, equalTo(true))
                     assertThat(spec in subject.specs, equalTo(true))
+                }
+                it("should load values from the existed sources for items in new spec") {
+                    assertThat(subject[newSpec.minSize], equalTo(2))
                 }
             }
             on("add repeated item") {
