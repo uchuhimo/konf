@@ -162,8 +162,20 @@ interface Config : ItemContainer {
      */
     val layer: Config
 
+    /**
+     * Returns sub-config in the specified path.
+     *
+     * @param path the specified path
+     * @return sub-config in the specified path
+     */
     fun at(path: String): Config
 
+    /**
+     * Returns config with the specified additional prefix.
+     *
+     * @param prefix additional prefix
+     * @return config with the specified additional prefix
+     */
     fun withPrefix(prefix: String): Config
 
     /**

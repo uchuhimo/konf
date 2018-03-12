@@ -146,6 +146,12 @@ interface Source : SourceInfo {
      */
     operator fun get(prefix: String): Source = get(prefix.toPath())
 
+    /**
+     * Returns source with specified additional prefix.
+     *
+     * @param prefix additional prefix
+     * @return source with specified additional prefix
+     */
     fun withPrefix(prefix: Path): Source {
         return if (prefix.isEmpty()) {
             this
@@ -187,6 +193,12 @@ interface Source : SourceInfo {
         }
     }
 
+    /**
+     * Returns source with specified additional prefix.
+     *
+     * @param prefix additional prefix
+     * @return source with specified additional prefix
+     */
     fun withPrefix(prefix: String): Source = withPrefix(prefix.toPath())
 
     /**

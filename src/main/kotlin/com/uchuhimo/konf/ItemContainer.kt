@@ -87,8 +87,20 @@ interface ItemContainer : Iterable<Item<*>> {
      */
     operator fun contains(name: String): Boolean
 
+    /**
+     * Returns the qualified name of the specified item.
+     *
+     * @param item the specified item
+     * @return the qualified name of the specified item
+     */
     fun nameOf(item: Item<*>): String
 
+    /**
+     * Returns the qualified path of the specified item.
+     *
+     * @param item the specified item
+     * @return the qualified path of the specified item
+     */
     fun pathOf(item: Item<*>): Path = nameOf(item).toPath()
 
     /**
@@ -99,7 +111,13 @@ interface ItemContainer : Iterable<Item<*>> {
             addAll(this@ItemContainer.iterator().asSequence())
         }
 
+    /**
+     * List of qualified names of items in this item container.
+     */
     val nameOfItems: List<String> get() = itemWithNames.map { it.second }
 
+    /**
+     * List of items with the corresponding qualified names in this item container.
+     */
     val itemWithNames: List<Pair<Item<*>, String>>
 }

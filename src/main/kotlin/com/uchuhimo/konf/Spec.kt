@@ -21,11 +21,21 @@ import com.fasterxml.jackson.databind.type.TypeFactory
 import kotlin.properties.ReadOnlyProperty
 import kotlin.reflect.KProperty
 
+/**
+ * Config spec is specification for config.
+ *
+ * Config spec describes a group of items with common prefix, which can be loaded into config
+ * together using [Config.addSpec].
+ * Config spec also provides convenient API to specify item in it without hand-written object
+ * declaration.
+ *
+ * @see Config
+ */
 interface Spec {
     /**
      * Common prefix for items in this config spec.
      *
-     * Default value is `""`, which means names of items in this config spec are unqualified.
+     * An empty prefix means names of items in this config spec are unqualified.
      */
     val prefix: String
 
@@ -39,6 +49,11 @@ interface Spec {
      */
     fun qualify(name: String): String = (prefix.toPath() + name.toPath()).name
 
+    /**
+     * Add the specified item into this config spec.
+     *
+     * @param item the specified item
+     */
     fun addItem(item: Item<*>)
 
     /**
@@ -46,6 +61,12 @@ interface Spec {
      */
     val items: List<Item<*>>
 
+    /**
+     * Returns sub-spec in the specified path.
+     *
+     * @param path the specified path
+     * @return sub-source with specified prefix
+     */
     operator fun get(path: String): Spec = get(prefix.toPath(), path.toPath())
 
     private fun get(prefix: Path, path: Path): Spec {
@@ -58,6 +79,12 @@ interface Spec {
         }
     }
 
+    /**
+     * Returns config spec with the specified additional prefix.
+     *
+     * @param prefix additional prefix
+     * @return config spec with the specified additional prefix
+     */
     fun withPrefix(prefix: String): Spec = withPrefix(this.prefix.toPath(), prefix.toPath())
 
     fun withPrefix(prefix: Path, newPrefix: Path): Spec {
@@ -69,6 +96,11 @@ interface Spec {
     }
 
     companion object {
+        /**
+         * A dummy implementation for [Spec].
+         *
+         * It will swallow all items added to it. Used for items belonged to no config spec.
+         */
         val dummy: Spec = object : Spec {
             override val prefix: String = ""
 

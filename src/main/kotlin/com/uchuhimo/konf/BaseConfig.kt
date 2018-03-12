@@ -41,6 +41,9 @@ import kotlin.concurrent.write
 import kotlin.properties.ReadWriteProperty
 import kotlin.reflect.KProperty
 
+/**
+ * The default implementation for [Config].
+ */
 open class BaseConfig(
     override val name: String = "",
     final override val parent: BaseConfig? = null,

@@ -17,15 +17,9 @@
 package com.uchuhimo.konf
 
 /**
- * Config spec is specification for config.
- *
- * Config spec describes a group of items with common prefix, which can be loaded into config
- * together using [Config.addSpec].
- * Config spec also provides convenient API to specify item in it without hand-written object
- * declaration.
+ * The default implementation for [Spec].
  *
  * @param prefix common prefix for items in this config spec
- * @see Config
  */
 open class ConfigSpec @JvmOverloads constructor(
     override val prefix: String = "",
