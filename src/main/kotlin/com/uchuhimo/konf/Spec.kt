@@ -92,7 +92,7 @@ inline fun <reified T : Any> Spec.required(name: String? = null, description: St
 open class RequiredProperty<T : Any>(
     private val spec: Spec,
     private val name: String? = null,
-    private val description: String
+    private val description: String = ""
 ) {
     private val type: JavaType = TypeFactory.defaultInstance().constructType(this::class.java)
         .findSuperType(RequiredProperty::class.java).bindings.typeParameters[0]
@@ -123,7 +123,7 @@ open class OptionalProperty<T : Any>(
     private val spec: Spec,
     private val default: T,
     private val name: String? = null,
-    private val description: String
+    private val description: String = ""
 ) {
     private val type: JavaType = TypeFactory.defaultInstance().constructType(this::class.java)
         .findSuperType(OptionalProperty::class.java).bindings.typeParameters[0]
@@ -157,7 +157,7 @@ open class LazyProperty<T : Any>(
     private val spec: Spec,
     private val thunk: (config: ItemContainer) -> T,
     private val name: String? = null,
-    private val description: String
+    private val description: String = ""
 ) {
     private val type: JavaType = TypeFactory.defaultInstance().constructType(this::class.java)
         .findSuperType(LazyProperty::class.java).bindings.typeParameters[0]

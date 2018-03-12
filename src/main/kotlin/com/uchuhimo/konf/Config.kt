@@ -323,6 +323,14 @@ interface Config : ItemContainer {
 }
 
 /**
+ * Returns a property that can read/set associated value casted from config.
+ *
+ * @return a property that can read/set associated value casted from config
+ */
+inline fun <reified T : Any> Config.cast() =
+    object : RequiredConfigProperty<T>(this, name = "") {}
+
+/**
  * Returns a property that can read/set associated value for specified required item.
  *
  * @param prefix prefix for the config item
@@ -341,7 +349,7 @@ open class RequiredConfigProperty<T : Any>(
     private val config: Config,
     private val prefix: String = "",
     private val name: String? = null,
-    private val description: String
+    private val description: String = ""
 ) {
     private val type: JavaType = TypeFactory.defaultInstance().constructType(this::class.java)
         .findSuperType(RequiredConfigProperty::class.java).bindings.typeParameters[0]
@@ -377,7 +385,7 @@ open class OptionalConfigProperty<T : Any>(
     private val default: T,
     private val prefix: String = "",
     private val name: String? = null,
-    private val description: String
+    private val description: String = ""
 ) {
     private val type: JavaType = TypeFactory.defaultInstance().constructType(this::class.java)
         .findSuperType(OptionalConfigProperty::class.java).bindings.typeParameters[0]
@@ -413,7 +421,7 @@ open class LazyConfigProperty<T : Any>(
     private val thunk: (config: ItemContainer) -> T,
     private val prefix: String = "",
     private val name: String? = null,
-    private val description: String
+    private val description: String = ""
 ) {
     private val type: JavaType = TypeFactory.defaultInstance().constructType(this::class.java)
         .findSuperType(LazyConfigProperty::class.java).bindings.typeParameters[0]

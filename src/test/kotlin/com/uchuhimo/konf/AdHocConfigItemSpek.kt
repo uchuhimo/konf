@@ -36,4 +36,30 @@ object AdHocConfigItemSpek : Spek({
             assertThat(networkBuffer.type, equalTo(AdHocNetworkBuffer.Type.ON_HEAP))
         }
     }
+    val configForCast = Config().from.map.hierarchical(mapOf(
+        "size" to 1,
+        "maxSize" to 2,
+        "name" to "buffer",
+        "type" to "ON_HEAP"
+    ))
+    val networkBufferForCast: NetworkBufferForCast by configForCast.cast()
+    on("cast config to config class") {
+        it("should load correct values") {
+            assertThat(networkBufferForCast.size, equalTo(1))
+            assertThat(networkBufferForCast.maxSize, equalTo(2))
+            assertThat(networkBufferForCast.name, equalTo("buffer"))
+            assertThat(networkBufferForCast.type, equalTo(NetworkBufferForCast.Type.ON_HEAP))
+        }
+    }
 })
+
+data class NetworkBufferForCast(
+    val size: Int,
+    val maxSize: Int,
+    val name: String,
+    val type: Type) {
+
+    enum class Type {
+        ON_HEAP, OFF_HEAP
+    }
+}
