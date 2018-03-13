@@ -22,19 +22,23 @@ package com.uchuhimo.konf
  * @param prefix common prefix for items in this config spec
  */
 open class ConfigSpec @JvmOverloads constructor(
-    override val prefix: String = "",
-    items: List<Item<*>> = mutableListOf()
+    final override val prefix: String = "",
+    items: Set<Item<*>> = mutableSetOf()
 ) : Spec {
     init {
         checkPath(prefix)
     }
 
-    private val _items = items as? MutableList<Item<*>> ?: items.toMutableList()
+    private val _items = items as? MutableSet<Item<*>> ?: items.toMutableSet()
 
-    override val items: List<Item<*>> = _items
+    override val items: Set<Item<*>> = _items
 
     override fun addItem(item: Item<*>) {
-        _items += item
+        if (item !in _items) {
+            _items += item
+        } else {
+            throw RepeatedItemException(item.name)
+        }
     }
 
     /**

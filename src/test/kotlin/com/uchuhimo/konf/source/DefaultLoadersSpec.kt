@@ -53,7 +53,7 @@ object DefaultLoadersSpec : SubjectSpek<DefaultLoaders>({
             }
         }
         on("load from system properties") {
-            System.setProperty(DefaultLoadersConfig.qualify("type"), "system")
+            System.setProperty(DefaultLoadersConfig.qualify(DefaultLoadersConfig.type), "system")
             val config = subject.systemProperties()
             it("should return a config which contains value from system properties") {
                 assertThat(config[item], equalTo("system"))

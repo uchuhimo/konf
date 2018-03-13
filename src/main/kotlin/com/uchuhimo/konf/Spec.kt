@@ -44,10 +44,10 @@ interface Spec {
      *
      * When prefix is empty, original item name will be returned.
      *
-     * @param name item name without prefix
+     * @param item the config item
      * @return qualified item name
      */
-    fun qualify(name: String): String = (prefix.toPath() + name.toPath()).name
+    fun qualify(item: Item<*>): String = (prefix.toPath() + item.path).name
 
     /**
      * Add the specified item into this config spec.
@@ -57,9 +57,40 @@ interface Spec {
     fun addItem(item: Item<*>)
 
     /**
-     * List of specified items in this config spec.
+     * Set of specified items in this config spec.
      */
-    val items: List<Item<*>>
+    val items: Set<Item<*>>
+
+    /**
+     * Returns a config spec overlapped by the specified facade config spec.
+     *
+     * New items will be added to the facade config spec.
+     *
+     * @param spec the facade config spec
+     * @return a config spec overlapped by the specified facade config spec
+     */
+    operator fun plus(spec: Spec): Spec {
+        return object : Spec by spec {
+            override fun addItem(item: Item<*>) {
+                if (item !in this@Spec.items) {
+                    spec.addItem(item)
+                } else {
+                    throw RepeatedItemException(item.name)
+                }
+            }
+
+            override val items: Set<Item<*>>
+                get() = this@Spec.items + spec.items
+
+            override fun qualify(item: Item<*>): String {
+                return if (item in spec.items) {
+                    spec.qualify(item)
+                } else {
+                    this@Spec.qualify(item)
+                }
+            }
+        }
+    }
 
     /**
      * Returns sub-spec in the specified path.
@@ -106,7 +137,7 @@ interface Spec {
 
             override fun addItem(item: Item<*>) {}
 
-            override val items: List<Item<*>> = emptyList()
+            override val items: Set<Item<*>> = emptySet()
         }
     }
 }

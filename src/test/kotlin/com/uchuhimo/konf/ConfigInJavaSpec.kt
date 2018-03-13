@@ -110,16 +110,16 @@ object ConfigInJavaSpec : SubjectSpek<Config>({
             }
             on("get with valid name") {
                 it("should return corresponding value") {
-                    assertThat(subject(spec.qualify("name")), equalTo("buffer"))
+                    assertThat(subject(spec.qualify(name)), equalTo("buffer"))
                 }
             }
             on("get with invalid name") {
                 it("should throw NoSuchItemException when using `get`") {
-                    assertThat({ subject<String>(spec.qualify("invalid")) }, throws(has(
-                        NoSuchItemException::name, equalTo(spec.qualify("invalid")))))
+                    assertThat({ subject<String>(spec.qualify(invalidItem)) }, throws(has(
+                        NoSuchItemException::name, equalTo(spec.qualify(invalidItem)))))
                 }
                 it("should return null when using `getOrNull`") {
-                    assertThat(subject.getOrNull<String>(spec.qualify("invalid")), absent())
+                    assertThat(subject.getOrNull<String>(spec.qualify(invalidItem)), absent())
                 }
             }
             on("get unset item") {
@@ -165,7 +165,7 @@ object ConfigInJavaSpec : SubjectSpek<Config>({
                 }
             }
             on("set with valid name") {
-                subject[spec.qualify("size")] = 1024
+                subject[spec.qualify(size)] = 1024
                 it("should contain the specified value") {
                     assertThat(subject[size], equalTo(1024))
                 }

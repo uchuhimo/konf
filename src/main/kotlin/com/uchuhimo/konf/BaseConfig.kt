@@ -46,7 +46,7 @@ import kotlin.reflect.KProperty
  */
 open class BaseConfig(
     override val name: String = "",
-    final override val parent: BaseConfig? = null,
+    override val parent: BaseConfig? = null,
     override val mapper: ObjectMapper = createDefaultMapper()
 ) : Config {
     protected val specsInLayer = mutableListOf<Spec>()
@@ -175,6 +175,8 @@ open class BaseConfig(
 
     protected fun containsInLayer(item: Item<*>) = lock.read { valueByItem.containsKey(item) }
 
+    protected fun containsInLayer(name: String) = lock.read { nameByItem.containsValue(name) }
+
     override fun contains(name: String): Boolean {
         return if (containsInLayer(name)) {
             true
@@ -183,7 +185,19 @@ open class BaseConfig(
         }
     }
 
-    protected fun containsInLayer(name: String) = lock.read { nameByItem.containsValue(name) }
+    protected fun containsInLayer(path: Path): Boolean {
+        nameByItem.values.forEach {
+            val itemName = it.toPath()
+            if ((path.size >= itemName.size && path.subList(0, itemName.size) == itemName) ||
+                (path.size < itemName.size && itemName.subList(0, path.size) == path)) {
+                return true
+            }
+        }
+        return false
+    }
+
+    override fun contains(path: Path): Boolean =
+        containsInLayer(path) || (parent?.contains(path) ?: false)
 
     override fun nameOf(item: Item<*>): String {
         val name = lock.read { nameByItem[item] }
@@ -309,22 +323,6 @@ open class BaseConfig(
 
     override val layer: Config = Layer(this)
 
-    protected fun checkNameConflictInLayer(name: Path) {
-        nameByItem.values.forEach {
-            val itemName = it.toPath()
-            if ((name.size >= itemName.size && name.subList(0, itemName.size) == itemName) ||
-                (name.size < itemName.size && itemName.subList(0, name.size) == name)) {
-                throw NameConflictException("item ${name.name} cannot be added" +
-                    " since item ${itemName.name} has been added to config")
-            }
-        }
-    }
-
-    open fun checkNameConflict(name: Path) {
-        checkNameConflictInLayer(name)
-        parent?.checkNameConflict(name)
-    }
-
     override fun addItem(item: Item<*>, prefix: String) {
         lock.write {
             if (hasChildren) {
@@ -333,7 +331,9 @@ open class BaseConfig(
             val path = prefix.toPath() + item.name.toPath()
             val name = path.name
             if (item !in this) {
-                checkNameConflict(path)
+                if (path in this) {
+                    throw NameConflictException("item $name cannot be added")
+                }
                 nameByItem[item] = name
                 valueByItem[item] = when (item) {
                     is OptionalItem -> ValueState.Value(item.default)
@@ -356,10 +356,12 @@ open class BaseConfig(
             }
             val sources = this.sources
             spec.items.forEach { item ->
-                val name = spec.qualify(item.name)
+                val name = spec.qualify(item)
                 if (item !in this) {
                     val path = name.toPath()
-                    checkNameConflict(path)
+                    if (path in this) {
+                        throw NameConflictException("item $name cannot be added")
+                    }
                     nameByItem[item] = name
                     valueByItem[item] = when (item) {
                         is OptionalItem -> ValueState.Value(item.default)

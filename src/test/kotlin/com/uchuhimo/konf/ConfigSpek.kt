@@ -23,6 +23,7 @@ import com.natpryce.hamkrest.has
 import com.natpryce.hamkrest.isEmpty
 import com.natpryce.hamkrest.sameInstance
 import com.natpryce.hamkrest.throws
+import com.uchuhimo.konf.source.Source
 import com.uchuhimo.konf.source.base.asKVSource
 import com.uchuhimo.konf.source.base.toHierarchicalMap
 import org.jetbrains.spek.api.dsl.given
@@ -40,7 +41,7 @@ object ConfigSpek : SubjectSpek<Config>({
     configSpek()
 })
 
-fun SubjectProviderDsl<Config>.configSpek(prefix: String = "network.buffer") {
+fun SubjectProviderDsl<Config>.configSpek(prefix: String = "network.buffer", testLayer: Boolean = true) {
     val spec = NetworkBuffer
     val size = NetworkBuffer.size
     val maxSize = NetworkBuffer.maxSize
@@ -57,11 +58,12 @@ fun SubjectProviderDsl<Config>.configSpek(prefix: String = "network.buffer") {
                 val newSpec = object : ConfigSpec(spec.prefix) {
                     val minSize by optional(1)
                 }
-                subject.addSource(mapOf(newSpec.qualify(newSpec.minSize.name) to 2).asKVSource())
+                subject.addSource(mapOf(newSpec.qualify(newSpec.minSize) to 2).asKVSource())
                 subject.addSpec(newSpec)
                 it("should contain items in new spec") {
-                    assertThat(newSpec.minSize in subject, equalTo(true))
-                    assertThat(spec.qualify(newSpec.minSize.name) in subject, equalTo(true))
+                    assertTrue { newSpec.minSize in subject }
+                    assertTrue { spec.qualify(newSpec.minSize) in subject }
+                    assertThat(subject.nameOf(newSpec.minSize), equalTo(spec.qualify(newSpec.minSize)))
                 }
                 it("should contain new spec") {
                     assertThat(newSpec in subject.specs, equalTo(true))
@@ -75,7 +77,7 @@ fun SubjectProviderDsl<Config>.configSpek(prefix: String = "network.buffer") {
                 it("should throw RepeatedItemException") {
                     assertThat({ subject.addSpec(spec) }, throws(has(
                         RepeatedItemException::name,
-                        equalTo(spec.qualify(size.name)))))
+                        equalTo(spec.qualify(size)))))
                 }
             }
             on("add repeated name") {
@@ -107,6 +109,61 @@ fun SubjectProviderDsl<Config>.configSpek(prefix: String = "network.buffer") {
                 it("should throw NameConflictException") {
                     assertThat({ subject.addSpec(newSpec) }, throws<NameConflictException>())
                 }
+            }
+        }
+        group("addItem operation") {
+            on("add orthogonal item") {
+                val minSize by Spec.dummy.optional(1)
+                subject.addSource(mapOf(spec.qualify(minSize) to 2).asKVSource())
+                subject.addItem(minSize, spec.prefix)
+                it("should contain item") {
+                    assertTrue { minSize in subject }
+                    assertTrue { spec.qualify(minSize) in subject }
+                    assertThat(subject.nameOf(minSize), equalTo(spec.qualify(minSize)))
+                }
+                it("should load values from the existed sources for item") {
+                    assertThat(subject[minSize], equalTo(2))
+                }
+            }
+            on("add repeated item") {
+                it("should throw RepeatedItemException") {
+                    assertThat({ subject.addItem(spec.size, spec.prefix) }, throws(has(
+                        RepeatedItemException::name,
+                        equalTo(spec.qualify(size)))))
+                }
+            }
+            on("add repeated name") {
+                @Suppress("NAME_SHADOWING")
+                val size by Spec.dummy.required<Int>()
+                it("should throw NameConflictException") {
+                    assertThat({ subject.addItem(size, prefix) }, throws<NameConflictException>())
+                }
+            }
+            on("add conflict name, which is prefix of existed name") {
+                val buffer by Spec.dummy.required<Int>()
+                it("should throw NameConflictException") {
+                    assertThat({
+                        subject.addItem(
+                            buffer,
+                            prefix.toPath().let { it.subList(0, it.size - 1) }.name)
+                    }, throws<NameConflictException>())
+                }
+            }
+            on("add conflict name, and an existed name is prefix of it") {
+                val subType by Spec.dummy.required<Int>()
+                it("should throw NameConflictException") {
+                    assertThat({ subject.addItem(subType, qualify(type.name)) }, throws<NameConflictException>())
+                }
+            }
+        }
+        on("add source") {
+            val source1 = mapOf(subject.nameOf(size) to 10).asKVSource()
+            subject.addSource(source1)
+            val source2 = mapOf(subject.nameOf(size) to 30).asKVSource()
+            subject.addSource(source2)
+            it("should load values to the corresponding layer") {
+                assertThat(subject[size], equalTo(30))
+                assertThat(subject.sources.toSet(), equalTo(setOf<Source>(source2, source1)))
             }
         }
         on("iterate items in config") {
@@ -205,10 +262,16 @@ fun SubjectProviderDsl<Config>.configSpek(prefix: String = "network.buffer") {
                 assertThat(subject.toString(), equalTo("Config(items=$map)"))
             }
         }
+        on("lock config") {
+            it("should be locked") {
+                subject.lock { }
+            }
+        }
         group("get operation") {
             on("get with valid item") {
                 it("should return corresponding value") {
                     assertThat(subject[name], equalTo("buffer"))
+                    assertTrue { name in subject }
                 }
             }
             on("get with invalid item") {
@@ -218,20 +281,24 @@ fun SubjectProviderDsl<Config>.configSpek(prefix: String = "network.buffer") {
                 }
                 it("should return null when using `getOrNull`") {
                     assertThat(subject.getOrNull(invalidItem), absent())
+                    assertTrue { invalidItem !in subject }
                 }
             }
             on("get with valid name") {
                 it("should return corresponding value") {
                     assertThat(subject(qualify("name")), equalTo("buffer"))
+                    assertThat(subject.getOrNull(qualify("name")), equalTo("buffer"))
+                    assertTrue { qualify("name") in subject }
                 }
             }
             on("get with invalid name") {
                 it("should throw NoSuchItemException when using `get`") {
-                    assertThat({ subject<String>(spec.qualify("invalid")) }, throws(has(
-                        NoSuchItemException::name, equalTo(spec.qualify("invalid")))))
+                    assertThat({ subject<String>(spec.qualify(invalidItem)) }, throws(has(
+                        NoSuchItemException::name, equalTo(spec.qualify(invalidItem)))))
                 }
                 it("should return null when using `getOrNull`") {
-                    assertThat(subject.getOrNull<String>(spec.qualify("invalid")), absent())
+                    assertThat(subject.getOrNull<String>(spec.qualify(invalidItem)), absent())
+                    assertTrue { spec.qualify(invalidItem) !in subject }
                 }
             }
             on("get unset item") {
@@ -242,6 +309,8 @@ fun SubjectProviderDsl<Config>.configSpek(prefix: String = "network.buffer") {
                     assertThat({ subject[maxSize] }, throws(has(
                         UnsetValueException::name,
                         equalTo(size.asName))))
+                    assertTrue { size in subject }
+                    assertTrue { maxSize in subject }
                 }
             }
         }
@@ -256,6 +325,12 @@ fun SubjectProviderDsl<Config>.configSpek(prefix: String = "network.buffer") {
                 subject[name] = "newName"
                 it("should contain the specified value") {
                     assertThat(subject[name], equalTo("newName"))
+                }
+            }
+            on("raw set with valid item") {
+                subject.rawSet(size, 2048)
+                it("should contain the specified value") {
+                    assertThat(subject[size], equalTo(2048))
                 }
             }
             on("set with valid item when corresponding value is lazy") {
@@ -350,6 +425,18 @@ fun SubjectProviderDsl<Config>.configSpek(prefix: String = "network.buffer") {
                 }
             }
         }
+        on("clear operation") {
+            it("should contain no value") {
+                val config = if (subject.name == "multi-layer") {
+                    subject.parent!!
+                } else {
+                    subject
+                }
+                assertTrue { name in config && type in config }
+                config.clear()
+                assertTrue { name !in config && type !in config }
+            }
+        }
         group("item property") {
             on("declare a property by item") {
                 var nameProperty by subject.property(name)
@@ -388,91 +475,93 @@ fun SubjectProviderDsl<Config>.configSpek(prefix: String = "network.buffer") {
                 }
             }
         }
-        group("layer") {
-            val layer by memoized {
-                subject.withLayer("layer").apply {
-                    this[size] = 4
-                    this.unset(maxSize)
-                }.layer
-            }
-            it("should have not parent") {
-                assertNull(layer.parent)
-            }
-            it("should contain specs in this layer") {
-                assertThat(layer.specs, isEmpty)
-            }
-            it("should return itself as its layer") {
-                assertThat(layer.layer, sameInstance(layer))
-            }
-            on("iterate items in layer") {
-                it("should cover all items in layer") {
-                    assertThat(layer.items.toSet(), equalTo(setOf<Item<*>>(size, maxSize)))
+        if (testLayer) {
+            group("layer") {
+                val layer by memoized {
+                    subject.withLayer("layer").apply {
+                        this[size] = 4
+                        this.unset(maxSize)
+                    }.layer
                 }
-            }
-            on("export values to map") {
-                it("should contain corresponding items in map") {
-                    val map = layer.toMap()
-                    assertThat(map, equalTo(mapOf<String, Any>(qualify(size.name) to 4)))
+                it("should have not parent") {
+                    assertNull(layer.parent)
                 }
-            }
-            on("object methods") {
-                val map = mapOf(qualify(spec.size.name) to 4)
-                it("should not equal to object of other class") {
-                    assertFalse(layer.equals(1))
+                it("should contain specs in this layer") {
+                    assertThat(layer.specs, isEmpty)
                 }
-                it("should not equal to config with different items") {
-                    assertTrue(layer != subject)
+                it("should return itself as its layer") {
+                    assertThat(layer.layer, sameInstance(layer))
                 }
-                it("should equal to itself") {
-                    assertThat(layer, equalTo(layer))
-                }
-                it("should have same hash code with map with same content") {
-                    assertThat(layer.hashCode(), equalTo(map.hashCode()))
-                }
-                it("should convert to string in map-like format") {
-                    assertThat(layer.toString(), equalTo("Layer(items=$map)"))
-                }
-            }
-            group("get operation") {
-                on("get with valid item") {
-                    it("should return corresponding value") {
-                        assertThat(layer[size], equalTo(4))
-                        assertThat(layer.getOrNull(size), equalTo(4))
-                        assertTrue(size in layer)
+                on("iterate items in layer") {
+                    it("should cover all items in layer") {
+                        assertThat(layer.items.toSet(), equalTo(setOf<Item<*>>(size, maxSize)))
                     }
                 }
-                on("get with invalid item") {
-                    it("should throw NoSuchItemException when using `get`") {
-                        assertThat({ layer[name] },
-                            throws(has(NoSuchItemException::name, equalTo(name.asName))))
-                    }
-                    it("should return null when using `getOrNull`") {
-                        assertThat(layer.getOrNull(name), absent())
-                        assertFalse(name in layer)
+                on("export values to map") {
+                    it("should contain corresponding items in map") {
+                        val map = layer.toMap()
+                        assertThat(map, equalTo(mapOf<String, Any>(qualify(size.name) to 4)))
                     }
                 }
-                on("get with valid name") {
-                    it("should return corresponding value") {
-                        assertThat(layer(qualify("size")), equalTo(4))
-                        assertThat(layer.getOrNull(qualify("size")), equalTo(4))
-                        assertTrue(qualify("size") in layer)
+                on("object methods") {
+                    val map = mapOf(qualify(spec.size.name) to 4)
+                    it("should not equal to object of other class") {
+                        assertFalse(layer.equals(1))
+                    }
+                    it("should not equal to config with different items") {
+                        assertTrue(layer != subject)
+                    }
+                    it("should equal to itself") {
+                        assertThat(layer, equalTo(layer))
+                    }
+                    it("should have same hash code with map with same content") {
+                        assertThat(layer.hashCode(), equalTo(map.hashCode()))
+                    }
+                    it("should convert to string in map-like format") {
+                        assertThat(layer.toString(), equalTo("Layer(items=$map)"))
                     }
                 }
-                on("get with invalid name") {
-                    it("should throw NoSuchItemException when using `get`") {
-                        assertThat({ layer<Int>(spec.qualify("name")) }, throws(has(
-                            NoSuchItemException::name, equalTo(spec.qualify("name")))))
+                group("get operation") {
+                    on("get with valid item") {
+                        it("should return corresponding value") {
+                            assertThat(layer[size], equalTo(4))
+                            assertThat(layer.getOrNull(size), equalTo(4))
+                            assertTrue(size in layer)
+                        }
                     }
-                    it("should return null when using `getOrNull`") {
-                        assertThat(layer.getOrNull<Int>(spec.qualify("name")), absent())
-                        assertFalse(spec.qualify("name") in layer)
+                    on("get with invalid item") {
+                        it("should throw NoSuchItemException when using `get`") {
+                            assertThat({ layer[name] },
+                                throws(has(NoSuchItemException::name, equalTo(name.asName))))
+                        }
+                        it("should return null when using `getOrNull`") {
+                            assertThat(layer.getOrNull(name), absent())
+                            assertFalse(name in layer)
+                        }
                     }
-                }
-                on("get unset item") {
-                    it("should throw UnsetValueException") {
-                        assertThat({ layer[maxSize] }, throws(has(
-                            UnsetValueException::name,
-                            equalTo(maxSize.asName))))
+                    on("get with valid name") {
+                        it("should return corresponding value") {
+                            assertThat(layer(qualify("size")), equalTo(4))
+                            assertThat(layer.getOrNull(qualify("size")), equalTo(4))
+                            assertTrue(qualify("size") in layer)
+                        }
+                    }
+                    on("get with invalid name") {
+                        it("should throw NoSuchItemException when using `get`") {
+                            assertThat({ layer<Int>(spec.qualify(name)) }, throws(has(
+                                NoSuchItemException::name, equalTo(spec.qualify(name)))))
+                        }
+                        it("should return null when using `getOrNull`") {
+                            assertThat(layer.getOrNull<Int>(spec.qualify(name)), absent())
+                            assertFalse(spec.qualify(name) in layer)
+                        }
+                    }
+                    on("get unset item") {
+                        it("should throw UnsetValueException") {
+                            assertThat({ layer[maxSize] }, throws(has(
+                                UnsetValueException::name,
+                                equalTo(maxSize.asName))))
+                        }
                     }
                 }
             }

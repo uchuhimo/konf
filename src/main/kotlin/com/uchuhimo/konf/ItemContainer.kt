@@ -88,6 +88,14 @@ interface ItemContainer : Iterable<Item<*>> {
     operator fun contains(name: String): Boolean
 
     /**
+     * Whether this item container contains the specified path or not.
+     *
+     * @param path the specified path
+     * @return `true` if this item container contains the specified path, `false` otherwise
+     */
+    operator fun contains(path: Path): Boolean
+
+    /**
      * Returns the qualified name of the specified item.
      *
      * @param item the specified item

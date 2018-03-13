@@ -29,12 +29,12 @@ import org.jetbrains.spek.api.dsl.on
 import kotlin.test.assertFalse
 import kotlin.test.assertTrue
 
-object FallbackSourceSpec : Spek({
-    given("a source with fallback") {
+object FacadeSourceSpec : Spek({
+    given("a source with facade") {
         it("contains facade & fallback info") {
             val facadeSource = 1.asSource()
             val fallbackSource = 2.asSource()
-            val source = facadeSource.withFallback(fallbackSource)
+            val source = fallbackSource + facadeSource
             assertThat(source.info["facade"], equalTo(facadeSource.description))
             assertThat(source.info["fallback"], equalTo(fallbackSource.description))
         }
@@ -43,7 +43,7 @@ object FallbackSourceSpec : Spek({
             val key = path.name
             val fallbackSource = mapOf(key to "fallback").asKVSource()
             val facadeSource = mapOf(key to "facade").asKVSource()
-            val source = facadeSource.withFallback(fallbackSource)
+            val source = fallbackSource + facadeSource
             it("gets value from facade source") {
                 assertTrue(path in source)
                 assertTrue(key in source)
@@ -62,7 +62,7 @@ object FallbackSourceSpec : Spek({
             val facadePath = listOf("a", "c")
             val facadeKey = facadePath.name
             val facadeSource = mapOf(facadeKey to "facade").asKVSource()
-            val source = facadeSource.withFallback(fallbackSource)
+            val source = fallbackSource + facadeSource
             it("gets value from fallback source") {
                 assertTrue(path in source)
                 assertTrue(key in source)

@@ -163,6 +163,17 @@ interface Config : ItemContainer {
     val layer: Config
 
     /**
+     * Returns a config overlapped by the specified facade config.
+     *
+     * All operations will be applied to the facade config first,
+     * and then fall back to this config when necessary.
+     *
+     * @param config the facade config
+     * @return a config overlapped by the specified facade config
+     */
+    operator fun plus(config: Config): Config = MergedConfig(this, config)
+
+    /**
      * Returns sub-config in the specified path.
      *
      * @param path the specified path

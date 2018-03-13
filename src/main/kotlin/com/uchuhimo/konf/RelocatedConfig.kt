@@ -44,6 +44,9 @@ abstract class RelocatedConfig(parent: BaseConfig, name: String = "") : BaseConf
         }
     }
 
+    override fun contains(path: Path): Boolean =
+        containsInLayer(path) || relocateInOrNull(path)?.let { parent?.contains(it) } ?: false
+
     override fun getItemOrNull(name: String): Item<*>? {
         val item = getItemInLayerOrNull(name)
         return item ?: relocateInOrNull(name)?.let { parent?.getItemOrNull(it) }
@@ -59,11 +62,6 @@ abstract class RelocatedConfig(parent: BaseConfig, name: String = "") : BaseConf
         val name = lock.read { nameByItem[item] }
         return name ?: parent?.nameOf(item)?.let { relocateOutOrNull(it) }
         ?: throw NoSuchItemException(item)
-    }
-
-    override fun checkNameConflict(name: Path) {
-        checkNameConflictInLayer(name)
-        relocateInOrNull(name)?.let { parent?.checkNameConflict(it) }
     }
 
     fun Source.relocated(): Source {
@@ -91,6 +89,10 @@ abstract class RelocatedConfig(parent: BaseConfig, name: String = "") : BaseConf
                 }
             }
         }
+
+    override fun clear() {
+        parent?.clear()
+    }
 }
 
 open class DrillDownConfig(val prefix: String, parent: BaseConfig, name: String = "") : RelocatedConfig(parent, name) {

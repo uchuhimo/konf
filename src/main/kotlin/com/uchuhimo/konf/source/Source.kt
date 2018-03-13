@@ -210,29 +210,41 @@ interface Source : SourceInfo {
      * @param fallback fallback source
      * @return a source backing by specified fallback source
      */
-    fun withFallback(fallback: Source): Source = object : Source by this {
+    fun withFallback(fallback: Source): Source = object : Source, SourceInfo by SourceInfo.default() {
         init {
+            addInfo("facade", this@Source.description)
             addInfo("fallback", fallback.description)
         }
 
-        override fun contains(path: List<String>): Boolean =
+        override fun contains(path: Path): Boolean =
             this@Source.contains(path) || fallback.contains(path)
 
-        override fun get(path: List<String>): Source =
-            this@Source.getOrNull(path) ?: fallback[path]
+//        override fun get(path: Path): Source =
+//            this@Source.getOrNull(path) ?: fallback[path]
 
-        override fun getOrNull(path: List<String>): Source? =
+        override fun getOrNull(path: Path): Source? =
             this@Source.getOrNull(path) ?: fallback.getOrNull(path)
 
-        override fun contains(prefix: String): Boolean =
-            this@Source.contains(prefix) || fallback.contains(prefix)
-
-        override fun get(prefix: String): Source =
-            this@Source.getOrNull(prefix) ?: fallback[prefix]
-
-        override fun getOrNull(prefix: String): Source? =
-            this@Source.getOrNull(prefix) ?: fallback.getOrNull(prefix)
+//        override fun contains(prefix: String): Boolean =
+//            this@Source.contains(prefix) || fallback.contains(prefix)
+//
+//        override fun get(prefix: String): Source =
+//            this@Source.getOrNull(prefix) ?: fallback[prefix]
+//
+//        override fun getOrNull(prefix: String): Source? =
+//            this@Source.getOrNull(prefix) ?: fallback.getOrNull(prefix)
     }
+
+    /**
+     * Returns a source overlapped by the specified facade source.
+     *
+     * When config fails to retrieve values from the facade source, it will try to retrieve them
+     * from this source.
+     *
+     * @param facade the facade source
+     * @return a source overlapped by the specified facade source
+     */
+    operator fun plus(facade: Source): Source = facade.withFallback(this)
 
     /**
      * Whether this source contains a list of values or not.
