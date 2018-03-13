@@ -117,6 +117,15 @@ object ConfigSpecSpek : Spek({
                 }
             }
         }
+        on("add repeated item") {
+            val spec = ConfigSpec()
+            val item by Spec.dummy.required<Int>()
+            spec.addItem(item)
+            it("should throw RepeatedItemException") {
+                assertThat({ spec.addItem(item) },
+                    throws(has(RepeatedItemException::name, equalTo("item"))))
+            }
+        }
         val spec = object : ConfigSpec("a.bb") {
             @Suppress("unused")
             val item by required<Int>("int", "description")
@@ -151,6 +160,41 @@ object ConfigSpecSpek : Spek({
                 it("should return a config spec with proper prefix") {
                     assertThat((Prefix("c") + spec).prefix, equalTo("c.a.bb"))
                     assertThat((Prefix("c") + spec["a.bb"]).prefix, equalTo("c"))
+                }
+            }
+        }
+        group("plus operation") {
+            val spec1 = object : ConfigSpec("a") {
+                val item1 by required<Int>()
+            }
+            val spec2 = object : ConfigSpec("b") {
+                val item2 by required<Int>()
+            }
+            @Suppress("NAME_SHADOWING")
+            val spec by memoized { spec1 + spec2 }
+            on("add a valid item") {
+                it("should contains the item in the facade spec") {
+                    val item by Spec.dummy.required<Int>()
+                    spec.addItem(item)
+                    assertThat(item, isIn(spec.items))
+                    assertThat(item, isIn(spec2.items))
+                }
+            }
+            on("add a repeated item") {
+                it("should throw RepeatedItemException") {
+                    assertThat({ spec.addItem(spec1.item1) },
+                        throws(has(RepeatedItemException::name, equalTo("item1"))))
+                }
+            }
+            on("get the list of items") {
+                it("should contains all items in both the facade spec and the fallback spec") {
+                    assertThat(spec.items, equalTo(spec1.items + spec2.items))
+                }
+            }
+            on("qualify item name") {
+                it("should add proper prefix") {
+                    assertThat(spec.qualify(spec1.item1), equalTo("a.item1"))
+                    assertThat(spec.qualify(spec2.item2), equalTo("b.item2"))
                 }
             }
         }
