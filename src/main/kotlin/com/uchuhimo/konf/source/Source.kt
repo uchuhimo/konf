@@ -219,20 +219,8 @@ interface Source : SourceInfo {
         override fun contains(path: Path): Boolean =
             this@Source.contains(path) || fallback.contains(path)
 
-//        override fun get(path: Path): Source =
-//            this@Source.getOrNull(path) ?: fallback[path]
-
         override fun getOrNull(path: Path): Source? =
             this@Source.getOrNull(path) ?: fallback.getOrNull(path)
-
-//        override fun contains(prefix: String): Boolean =
-//            this@Source.contains(prefix) || fallback.contains(prefix)
-//
-//        override fun get(prefix: String): Source =
-//            this@Source.getOrNull(prefix) ?: fallback[prefix]
-//
-//        override fun getOrNull(prefix: String): Source? =
-//            this@Source.getOrNull(prefix) ?: fallback.getOrNull(prefix)
     }
 
     /**

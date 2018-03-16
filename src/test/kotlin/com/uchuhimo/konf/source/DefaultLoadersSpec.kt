@@ -64,9 +64,9 @@ object DefaultLoadersSpec : SubjectSpek<DefaultLoaders>({
                 assertThat({ subject.dispatchExtension("txt") }, throws<UnsupportedExtensionException>())
             }
             it("should return the corresponding loader when the extension is registered") {
-                DefaultLoaders.registerExtension("txt", PropertiesProvider)
+                Provider.registerExtension("txt", PropertiesProvider)
                 subject.dispatchExtension("txt")
-                DefaultLoaders.unregisterExtension("txt")
+                Provider.unregisterExtension("txt")
             }
         }
         on("load from URL") {

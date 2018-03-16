@@ -121,7 +121,7 @@ class DefaultLoaders(
      * @return the corresponding loader based on extension
      */
     fun dispatchExtension(extension: String, source: String = ""): Loader =
-        Loader(config, extensionToProvider[extension]?.wrap()
+        Loader(config, Provider.of(extension)?.wrap()
             ?: throw UnsupportedExtensionException(source))
 
     /**
@@ -321,36 +321,6 @@ class DefaultLoaders(
         unit: TimeUnit = TimeUnit.SECONDS,
         context: CoroutineContext = DefaultDispatcher
     ): Config = watchUrl(URL(url), delayTime, unit, context)
-
-    companion object {
-        private val extensionToProvider = mutableMapOf(
-            "conf" to HoconProvider,
-            "json" to JsonProvider,
-            "properties" to PropertiesProvider,
-            "toml" to TomlProvider,
-            "xml" to XmlProvider,
-            "yml" to YamlProvider,
-            "yaml" to YamlProvider
-        )
-
-        /**
-         * Register extension with the corresponding provider.
-         *
-         * @param extension the file extension
-         * @param provider the corresponding provider
-         */
-        fun registerExtension(extension: String, provider: Provider) {
-            extensionToProvider[extension] = provider
-        }
-
-        /**
-         * Unregister the given extension.
-         *
-         * @param extension the file extension
-         */
-        fun unregisterExtension(extension: String): Provider? =
-            extensionToProvider.remove(extension)
-    }
 }
 
 /**

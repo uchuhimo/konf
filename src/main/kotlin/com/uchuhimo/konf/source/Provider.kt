@@ -16,6 +16,12 @@
 
 package com.uchuhimo.konf.source
 
+import com.uchuhimo.konf.source.hocon.HoconProvider
+import com.uchuhimo.konf.source.json.JsonProvider
+import com.uchuhimo.konf.source.properties.PropertiesProvider
+import com.uchuhimo.konf.source.toml.TomlProvider
+import com.uchuhimo.konf.source.xml.XmlProvider
+import com.uchuhimo.konf.source.yaml.YamlProvider
 import java.io.File
 import java.io.FileInputStream
 import java.io.InputStream
@@ -182,5 +188,46 @@ interface Provider {
             override fun fromResource(resource: String): Source =
                 this@Provider.fromResource(resource).let(transform)
         }
+    }
+
+    companion object {
+        private val extensionToProvider = mutableMapOf(
+            "conf" to HoconProvider,
+            "json" to JsonProvider,
+            "properties" to PropertiesProvider,
+            "toml" to TomlProvider,
+            "xml" to XmlProvider,
+            "yml" to YamlProvider,
+            "yaml" to YamlProvider
+        )
+
+        /**
+         * Register extension with the corresponding provider.
+         *
+         * @param extension the file extension
+         * @param provider the corresponding provider
+         */
+        fun registerExtension(extension: String, provider: Provider) {
+            extensionToProvider[extension] = provider
+        }
+
+        /**
+         * Unregister the given extension.
+         *
+         * @param extension the file extension
+         */
+        fun unregisterExtension(extension: String): Provider? =
+            extensionToProvider.remove(extension)
+
+        /**
+         * Returns corresponding provider based on extension.
+         *
+         * Returns null if the specific extension is unregistered.
+         *
+         * @param extension the file extension
+         * @return the corresponding provider based on extension
+         */
+        fun of(extension: String): Provider? =
+            extensionToProvider[extension]
     }
 }
