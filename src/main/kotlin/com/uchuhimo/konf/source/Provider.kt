@@ -25,6 +25,7 @@ import com.uchuhimo.konf.source.yaml.YamlProvider
 import org.eclipse.jgit.api.Git
 import org.eclipse.jgit.api.TransportCommand
 import org.eclipse.jgit.lib.Constants
+import org.eclipse.jgit.transport.URIish
 import java.io.File
 import java.io.FileInputStream
 import java.io.InputStream
@@ -58,8 +59,12 @@ interface Provider {
      * @param file specified file
      * @return a new source from specified file
      */
-    fun fromFile(file: File): Source = fromInputStream(file.inputStream().buffered()).apply {
-        addContext("file", file.toString())
+    fun fromFile(file: File): Source {
+        return file.inputStream().buffered().use { inputStream ->
+            fromInputStream(inputStream).apply {
+                addContext("file", file.toString())
+            }
+        }
     }
 
     /**
@@ -171,7 +176,7 @@ interface Provider {
         branch: String = Constants.HEAD,
         action: TransportCommand<*, *>.() -> Unit = {}
     ): Source {
-        return (dir?.let(::File) ?: createTempDir()).let { directory ->
+        return (dir?.let(::File) ?: createTempDir(prefix = "local_git_repo")).let { directory ->
             if (directory.list { _, name -> name == ".git" }.isEmpty()) {
                 Git.cloneRepository().apply {
                     setURI(repo)
@@ -181,8 +186,11 @@ interface Provider {
                 }.call().close()
             } else {
                 Git.open(directory).use { git ->
+                    val uri = URIish(repo)
+                    val remoteName = git.remoteList().call().firstOrNull { it.urIs.contains(uri) }?.name
+                        ?: throw InvalidRemoteRepoException(repo, directory.path)
                     git.pull().apply {
-                        remote = repo
+                        remote = remoteName
                         remoteBranchName = branch
                         this.action()
                     }.call()

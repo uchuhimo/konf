@@ -70,8 +70,8 @@ dependencyManagement {
         dependency "org.yaml:snakeyaml:1.20"
         dependency "com.moandjiezana.toml:toml4j:0.7.2"
         dependency "org.dom4j:dom4j:2.1.0"
-        dependency "org.eclipse.jgit:org.eclipse.jgit:4.11.0.201803080745-r"
         dependency "org.jetbrains.kotlinx:kotlinx-coroutines-core:0.22.3"
+        dependency "org.eclipse.jgit:org.eclipse.jgit:4.11.0.201803080745-r"
 
         dependencySet(group: "org.jetbrains.kotlin", version: "1.2.30") {
             entry "kotlin-stdlib"

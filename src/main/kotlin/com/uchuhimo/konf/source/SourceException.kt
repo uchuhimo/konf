@@ -61,6 +61,12 @@ class InvalidWatchKeyException(source: Source) :
     SourceException("watch key for source ${source.description} is no longer valid")
 
 /**
+ * Exception indicates that the given repository is not in the remote list of the local repository.
+ */
+class InvalidRemoteRepoException(repo: String, dir: String) :
+    SourceException("$repo is not in the remote list of $dir")
+
+/**
  * Exception indicates failure to map source to value of specified class.
  */
 class ObjectMappingException(source: Source, clazz: Class<*>, cause: Throwable) :

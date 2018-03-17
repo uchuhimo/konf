@@ -134,7 +134,7 @@ class Loader(
                         }
                     }
                 }
-            }
+            }.withLayer()
         }
     }
 
@@ -231,7 +231,7 @@ class Loader(
                         }
                     }
                 }
-            }
+            }.withLayer()
         }
     }
 
@@ -305,7 +305,7 @@ class Loader(
         context: CoroutineContext = DefaultDispatcher,
         action: TransportCommand<*, *>.() -> Unit = {}
     ): Config {
-        return (dir ?: createTempDir().path).let { directory ->
+        return (dir ?: createTempDir(prefix = "local_git_repo").path).let { directory ->
             provider.fromGit(repo, file, directory, branch, action).let { source ->
                 config.withLoadTrigger("watch ${source.description}") { newConfig, load ->
                     load(source)
@@ -318,7 +318,7 @@ class Loader(
                             }
                         }
                     }
-                }
+                }.withLayer()
             }
         }
     }
