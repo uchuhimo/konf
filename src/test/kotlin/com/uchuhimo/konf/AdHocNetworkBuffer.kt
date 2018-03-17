@@ -36,6 +36,8 @@ class AdHocNetworkBuffer(config: Config) {
             | buffer is off-heap by default.
             """.trimMargin("| "))
 
+    val offset by root.optional<Int?>(null, description = "initial offset of buffer")
+
     enum class Type {
         ON_HEAP, OFF_HEAP
     }

@@ -48,8 +48,8 @@ open class ConfigSpec @JvmOverloads constructor(
      * @param description description for this item
      * @return a property of a required item with prefix of this config spec
      */
-    inline fun <reified T : Any> required(name: String? = null, description: String = "") =
-        object : RequiredProperty<T>(this, name, description) {}
+    inline fun <reified T> required(name: String? = null, description: String = "") =
+        object : RequiredProperty<T>(this, name, description, null is T) {}
 
     /**
      * Specify an optional item in this config spec.
@@ -60,8 +60,8 @@ open class ConfigSpec @JvmOverloads constructor(
      *
      * @return a property of an optional item with prefix of this config spec
      */
-    inline fun <reified T : Any> optional(default: T, name: String? = null, description: String = "") =
-        object : OptionalProperty<T>(this, default, name, description) {}
+    inline fun <reified T> optional(default: T, name: String? = null, description: String = "") =
+        object : OptionalProperty<T>(this, default, name, description, null is T) {}
 
     /**
      * Specify a lazy item in this config spec.
@@ -71,10 +71,10 @@ open class ConfigSpec @JvmOverloads constructor(
      * @param thunk thunk used to evaluate value for this item
      * @return a property of a lazy item with prefix of this config spec
      */
-    inline fun <reified T : Any> lazy(
+    inline fun <reified T> lazy(
         name: String? = null,
         description: String = "",
         noinline thunk: (config: ItemContainer) -> T
     ) =
-        object : LazyProperty<T>(this, thunk, name, description) {}
+        object : LazyProperty<T>(this, thunk, name, description, null is T) {}
 }

@@ -30,7 +30,7 @@ interface ItemContainer : Iterable<Item<*>> {
      * @param item config item
      * @return associated value
      */
-    operator fun <T : Any> get(item: Item<T>): T
+    operator fun <T> get(item: Item<T>): T
 
     /**
      * Get associated value with specified item name.
@@ -38,7 +38,7 @@ interface ItemContainer : Iterable<Item<*>> {
      * @param name item name
      * @return associated value
      */
-    operator fun <T : Any> get(name: String): T
+    operator fun <T> get(name: String): T
 
     /**
      * Returns associated value if specified item exists, `null` otherwise.
@@ -46,7 +46,7 @@ interface ItemContainer : Iterable<Item<*>> {
      * @param item config item
      * @return associated value if specified item exists, `null` otherwise
      */
-    fun <T : Any> getOrNull(item: Item<T>): T?
+    fun <T> getOrNull(item: Item<T>): T?
 
     /**
      * Returns associated value if specified item name exists, `null` otherwise.
@@ -54,7 +54,7 @@ interface ItemContainer : Iterable<Item<*>> {
      * @param name item name
      * @return associated value if specified item name exists, `null` otherwise
      */
-    fun <T : Any> getOrNull(name: String): T?
+    fun <T> getOrNull(name: String): T?
 
     /**
      * Get associated value with specified item name.
@@ -62,7 +62,7 @@ interface ItemContainer : Iterable<Item<*>> {
      * @param name item name
      * @return associated value
      */
-    operator fun <T : Any> invoke(name: String): T = get(name)
+    operator fun <T> invoke(name: String): T = get(name)
 
     /**
      * Returns iterator of items in this item container.

@@ -94,59 +94,84 @@ open class BaseConfig(
         return mutableMapOf<String, Any>().apply {
             val config = this@BaseConfig
             for ((item, name) in config.itemWithNames) {
-                if (config.getOrNull(item) != null) {
-                    put(name, config[item].toCompatibleValue(mapper))
+                try {
+                    put(name, config.getOrNull(item, errorWhenNotFound = true).toCompatibleValue(mapper))
+                } catch (_: UnsetValueException) {
                 }
             }
         }
     }
 
-    override fun <T : Any> get(item: Item<T>): T = getOrNull(item, errorWhenUnset = true)
-        ?: throw NoSuchItemException(item)
+    @Suppress("UNCHECKED_CAST")
+    override fun <T> get(item: Item<T>): T = getOrNull(item, errorWhenNotFound = true) as T
 
-    override fun <T : Any> get(name: String): T = getOrNull(name, errorWhenUnset = true)
-        ?: throw NoSuchItemException(name)
+    @Suppress("UNCHECKED_CAST")
+    override fun <T> get(name: String): T = getOrNull(name, errorWhenNotFound = true) as T
 
-    override fun <T : Any> getOrNull(item: Item<T>): T? =
-        getOrNull(item, errorWhenUnset = false)
+    @Suppress("UNCHECKED_CAST")
+    override fun <T> getOrNull(item: Item<T>): T? = getOrNull(item, errorWhenNotFound = false) as T?
 
-    private fun <T : Any> getOrNull(
-        item: Item<T>,
-        errorWhenUnset: Boolean,
+    private fun getOrNull(
+        item: Item<*>,
+        errorWhenNotFound: Boolean,
         lazyContext: ItemContainer = this
-    ): T? {
+    ): Any? {
         val valueState = lock.read { valueByItem[item] }
         if (valueState != null) {
             @Suppress("UNCHECKED_CAST")
             return when (valueState) {
                 is ValueState.Unset ->
-                    if (errorWhenUnset) {
+                    if (errorWhenNotFound) {
                         throw UnsetValueException(item)
                     } else {
-                        return null
+                        null
                     }
-                is ValueState.Value -> valueState.value as T
+                is ValueState.Null -> null
+                is ValueState.Value -> valueState.value
                 is ValueState.Lazy<*> -> {
                     val value = try {
                         valueState.thunk(lazyContext)
-                    } catch (exception: UnsetValueException) {
-                        if (errorWhenUnset) {
-                            throw exception
-                        } else {
-                            return null
+                    } catch (exception: ConfigException) {
+                        when (exception) {
+                            is UnsetValueException, is NoSuchItemException -> {
+                                if (errorWhenNotFound) {
+                                    throw exception
+                                } else {
+                                    return null
+                                }
+                            }
+                            else -> throw exception
                         }
                     }
-                    if (item.type.rawClass.isInstance(value)) {
-                        value as T
+                    if (value == null) {
+                        if (item.nullable) {
+                            null
+                        } else {
+                            throw InvalidLazySetException(
+                                "fail to cast null to ${item.type.rawClass}" +
+                                    " when getting item ${item.name} in config")
+                        }
                     } else {
-                        throw InvalidLazySetException(
-                            "fail to cast $value with ${value::class} to ${item.type.rawClass}" +
-                                " when getting item ${item.name} in config")
+                        if (item.type.rawClass.isInstance(value)) {
+                            value
+                        } else {
+                            throw InvalidLazySetException(
+                                "fail to cast $value with ${value::class} to ${item.type.rawClass}" +
+                                    " when getting item ${item.name} in config")
+                        }
                     }
                 }
             }
         } else {
-            return parent?.getOrNull(item, errorWhenUnset, lazyContext)
+            return if (parent != null) {
+                parent!!.getOrNull(item, errorWhenNotFound, lazyContext)
+            } else {
+                if (errorWhenNotFound) {
+                    throw NoSuchItemException(item)
+                } else {
+                    null
+                }
+            }
         }
     }
 
@@ -157,12 +182,20 @@ open class BaseConfig(
 
     protected fun getItemInLayerOrNull(name: String) = lock.read { nameByItem.inverse[name] }
 
-    override fun <T : Any> getOrNull(name: String): T? = getOrNull(name, errorWhenUnset = false)
+    @Suppress("UNCHECKED_CAST")
+    override fun <T> getOrNull(name: String): T? = getOrNull(name, errorWhenNotFound = false) as T?
 
-    private fun <T : Any> getOrNull(name: String, errorWhenUnset: Boolean): T? {
-        val item = getItemOrNull(name) ?: return null
-        @Suppress("UNCHECKED_CAST")
-        return getOrNull(item as Item<T>, errorWhenUnset)
+    private fun getOrNull(name: String, errorWhenNotFound: Boolean): Any? {
+        val item = getItemOrNull(name)
+        return if (item != null) {
+            getOrNull(item, errorWhenNotFound)
+        } else {
+            if (errorWhenNotFound) {
+                throw NoSuchItemException(name)
+            } else {
+                null
+            }
+        }
     }
 
     override fun contains(item: Item<*>): Boolean {
@@ -204,32 +237,44 @@ open class BaseConfig(
         return name ?: parent?.nameOf(item) ?: throw NoSuchItemException(item)
     }
 
-    override fun rawSet(item: Item<*>, value: Any) {
-        if (item.type.rawClass.isInstance(value)) {
-            if (item in this) {
-                lock.write {
-                    val valueState = valueByItem[item]
-                    if (valueState is ValueState.Value) {
-                        valueState.value = value
-                    } else {
-                        valueByItem[item] = ValueState.Value(value)
+    override fun rawSet(item: Item<*>, value: Any?) {
+        if (item in this) {
+            if (value == null) {
+                if (item.nullable) {
+                    lock.write {
+                        valueByItem[item] = ValueState.Null
                     }
+                } else {
+                    throw ClassCastException(
+                        "fail to cast null to ${item.type.rawClass}" +
+                            " when setting item ${item.name} in config")
                 }
             } else {
-                throw NoSuchItemException(item)
+                if (item.type.rawClass.isInstance(value)) {
+                    lock.write {
+                        val valueState = valueByItem[item]
+                        if (valueState is ValueState.Value) {
+                            valueState.value = value
+                        } else {
+                            valueByItem[item] = ValueState.Value(value)
+                        }
+                    }
+                } else {
+                    throw ClassCastException(
+                        "fail to cast $value with ${value::class} to ${item.type.rawClass}" +
+                            " when setting item ${item.name} in config")
+                }
             }
         } else {
-            throw ClassCastException(
-                "fail to cast $value with ${value::class} to ${item.type.rawClass}" +
-                    " when setting item ${item.name} in config")
+            throw NoSuchItemException(item)
         }
     }
 
-    override fun <T : Any> set(item: Item<T>, value: T) {
+    override fun <T> set(item: Item<T>, value: T) {
         rawSet(item, value)
     }
 
-    override fun <T : Any> set(name: String, value: T) {
+    override fun <T> set(name: String, value: T) {
         val item = getItemOrNull(name)
         if (item != null) {
             @Suppress("UNCHECKED_CAST")
@@ -239,7 +284,7 @@ open class BaseConfig(
         }
     }
 
-    override fun <T : Any> lazySet(item: Item<T>, thunk: (config: ItemContainer) -> T) {
+    override fun <T> lazySet(item: Item<T>, thunk: (config: ItemContainer) -> T) {
         if (item in this) {
             lock.write {
                 val valueState = valueByItem[item]
@@ -255,7 +300,7 @@ open class BaseConfig(
         }
     }
 
-    override fun <T : Any> lazySet(name: String, thunk: (config: ItemContainer) -> T) {
+    override fun <T> lazySet(name: String, thunk: (config: ItemContainer) -> T) {
         val item = getItemOrNull(name)
         if (item != null) {
             @Suppress("UNCHECKED_CAST")
@@ -286,7 +331,7 @@ open class BaseConfig(
         lock.write { valueByItem.clear() }
     }
 
-    override fun <T : Any> property(item: Item<T>): ReadWriteProperty<Any?, T> {
+    override fun <T> property(item: Item<T>): ReadWriteProperty<Any?, T> {
         if (!contains(item)) {
             throw NoSuchItemException(item)
         }
@@ -298,7 +343,7 @@ open class BaseConfig(
         }
     }
 
-    override fun <T : Any> property(name: String): ReadWriteProperty<Any?, T> {
+    override fun <T> property(name: String): ReadWriteProperty<Any?, T> {
         if (!contains(name)) {
             throw NoSuchItemException(name)
         }
@@ -321,6 +366,7 @@ open class BaseConfig(
             }
         }
 
+    @Suppress("LeakingThis")
     override val layer: Config = Layer(this)
 
     override fun addItem(item: Item<*>, prefix: String) {
@@ -336,7 +382,13 @@ open class BaseConfig(
                 }
                 nameByItem[item] = name
                 valueByItem[item] = when (item) {
-                    is OptionalItem -> ValueState.Value(item.default)
+                    is OptionalItem -> {
+                        if (item.default == null) {
+                            ValueState.Null
+                        } else {
+                            ValueState.Value(item.default)
+                        }
+                    }
                     is RequiredItem -> ValueState.Unset
                     is LazyItem -> ValueState.Lazy(item.thunk)
                 }
@@ -364,7 +416,13 @@ open class BaseConfig(
                     }
                     nameByItem[item] = name
                     valueByItem[item] = when (item) {
-                        is OptionalItem -> ValueState.Value(item.default)
+                        is OptionalItem -> {
+                            if (item.default == null) {
+                                ValueState.Null
+                            } else {
+                                ValueState.Value(item.default)
+                            }
+                        }
                         is RequiredItem -> ValueState.Unset
                         is LazyItem -> ValueState.Lazy(item.thunk)
                     }
@@ -407,7 +465,8 @@ open class BaseConfig(
 
     protected sealed class ValueState {
         object Unset : ValueState()
-        data class Lazy<T : Any>(var thunk: (config: ItemContainer) -> T) : ValueState()
+        object Null : ValueState()
+        data class Lazy<T>(var thunk: (config: ItemContainer) -> T) : ValueState()
         data class Value(var value: Any) : ValueState()
     }
 
@@ -419,26 +478,27 @@ open class BaseConfig(
         override fun toMap(): Map<String, Any> {
             return mutableMapOf<String, Any>().apply {
                 for (item in config.lock.read { config.valueByItem.keys }) {
-                    if (config.getOrNull(item) != null) {
-                        put(nameOf(item), config[item].toCompatibleValue(mapper))
+                    try {
+                        put(nameOf(item), config.getOrNull(item, errorWhenNotFound = true).toCompatibleValue(mapper))
+                    } catch (_: UnsetValueException) {
                     }
                 }
             }
         }
 
-        override fun <T : Any> get(item: Item<T>): T =
+        override fun <T> get(item: Item<T>): T =
             if (contains(item)) config[item] else throw NoSuchItemException(item)
 
-        override fun <T : Any> get(name: String): T =
+        override fun <T> get(name: String): T =
             if (contains(name)) config[name] else throw NoSuchItemException(name)
 
-        override fun <T : Any> getOrNull(item: Item<T>): T? =
+        override fun <T> getOrNull(item: Item<T>): T? =
             if (contains(item)) config.getOrNull(item) else null
 
-        override fun <T : Any> getOrNull(name: String): T? =
+        override fun <T> getOrNull(name: String): T? =
             if (contains(name)) config.getOrNull(name) else null
 
-        override fun <T : Any> invoke(name: String): T = super.invoke(name)
+        override fun <T> invoke(name: String): T = super.invoke(name)
 
         override fun iterator(): Iterator<Item<*>> = config.valueByItem.keys.iterator()
 

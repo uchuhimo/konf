@@ -32,7 +32,7 @@ import kotlin.test.assertTrue
 
 object ConfigSpecSpek : Spek({
     given("a configSpec") {
-        fun testItem(spec: Spec, item: Item<Int>, description: String) {
+        fun testItem(spec: Spec, item: Item<*>, description: String) {
             group("for $description, as an item") {
                 on("add to a configSpec") {
                     it("should be in the spec") {
@@ -67,6 +67,7 @@ object ConfigSpecSpek : Spek({
             val spec = specForRequired
             on("add to a configSpec") {
                 it("should still be a required item") {
+                    assertFalse(spec.item.nullable)
                     assertTrue(spec.item.isRequired)
                     assertFalse(spec.item.isOptional)
                     assertFalse(spec.item.isLazy)
@@ -84,6 +85,7 @@ object ConfigSpecSpek : Spek({
             val spec = specForOptional
             on("add to a configSpec") {
                 it("should still be an optional item") {
+                    assertFalse(spec.item.nullable)
                     assertFalse(spec.item.isRequired)
                     assertTrue(spec.item.isOptional)
                     assertFalse(spec.item.isLazy)
@@ -97,7 +99,7 @@ object ConfigSpecSpek : Spek({
             }
         }
         val specForLazy = object : ConfigSpec("a.b") {
-            val item by lazy("c.int", "description") { 2 }
+            val item by lazy<Int?>("c.int", "description") { 2 }
         }
         val config = Config { addSpec(specForLazy) }
         testItem(specForLazy, specForLazy.item, "a lazy item")
@@ -105,6 +107,7 @@ object ConfigSpecSpek : Spek({
             val spec = specForLazy
             on("add to a configSpec") {
                 it("should still be a lazy item") {
+                    assertTrue(spec.item.nullable)
                     assertFalse(spec.item.isRequired)
                     assertFalse(spec.item.isOptional)
                     assertTrue(spec.item.isLazy)

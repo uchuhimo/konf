@@ -29,7 +29,7 @@ import kotlin.properties.ReadWriteProperty
 class MergedConfig(val fallback: Config, val facade: Config) :
     BaseConfig("merged(facade=${facade.name}, fallback=${fallback.name})") {
 
-    override fun rawSet(item: Item<*>, value: Any) {
+    override fun rawSet(item: Item<*>, value: Any?) {
         if (item in facade) {
             facade.rawSet(item, value)
         } else {
@@ -37,7 +37,7 @@ class MergedConfig(val fallback: Config, val facade: Config) :
         }
     }
 
-    override fun <T : Any> set(item: Item<T>, value: T) {
+    override fun <T> set(item: Item<T>, value: T) {
         if (item in facade) {
             facade[item] = value
         } else {
@@ -45,7 +45,7 @@ class MergedConfig(val fallback: Config, val facade: Config) :
         }
     }
 
-    override fun <T : Any> set(name: String, value: T) {
+    override fun <T> set(name: String, value: T) {
         if (name in facade) {
             facade[name] = value
         } else {
@@ -53,7 +53,7 @@ class MergedConfig(val fallback: Config, val facade: Config) :
         }
     }
 
-    override fun <T : Any> lazySet(item: Item<T>, thunk: (config: ItemContainer) -> T) {
+    override fun <T> lazySet(item: Item<T>, thunk: (config: ItemContainer) -> T) {
         if (item in facade) {
             facade.lazySet(item, thunk)
         } else {
@@ -61,7 +61,7 @@ class MergedConfig(val fallback: Config, val facade: Config) :
         }
     }
 
-    override fun <T : Any> lazySet(name: String, thunk: (config: ItemContainer) -> T) {
+    override fun <T> lazySet(name: String, thunk: (config: ItemContainer) -> T) {
         if (name in facade) {
             facade.lazySet(name, thunk)
         } else {
@@ -137,7 +137,7 @@ class MergedConfig(val fallback: Config, val facade: Config) :
 
     override fun toMap(): Map<String, Any> = fallback.toMap() + facade.toMap()
 
-    override fun <T : Any> get(item: Item<T>): T {
+    override fun <T> get(item: Item<T>): T {
         return if (item in facade) {
             facade[item]
         } else {
@@ -145,7 +145,7 @@ class MergedConfig(val fallback: Config, val facade: Config) :
         }
     }
 
-    override fun <T : Any> get(name: String): T {
+    override fun <T> get(name: String): T {
         return if (name in facade) {
             facade[name]
         } else {
@@ -153,7 +153,7 @@ class MergedConfig(val fallback: Config, val facade: Config) :
         }
     }
 
-    override fun <T : Any> getOrNull(item: Item<T>): T? {
+    override fun <T> getOrNull(item: Item<T>): T? {
         return if (item in facade) {
             facade.getOrNull(item)
         } else {
@@ -161,7 +161,7 @@ class MergedConfig(val fallback: Config, val facade: Config) :
         }
     }
 
-    override fun <T : Any> getOrNull(name: String): T? {
+    override fun <T> getOrNull(name: String): T? {
         return if (name in facade) {
             facade.getOrNull(name)
         } else {
@@ -187,7 +187,7 @@ class MergedConfig(val fallback: Config, val facade: Config) :
     override val itemWithNames: List<Pair<Item<*>, String>>
         get() = facade.itemWithNames + fallback.itemWithNames
 
-    override fun <T : Any> property(item: Item<T>): ReadWriteProperty<Any?, T> {
+    override fun <T> property(item: Item<T>): ReadWriteProperty<Any?, T> {
         return if (item in facade) {
             facade.property(item)
         } else {
@@ -195,7 +195,7 @@ class MergedConfig(val fallback: Config, val facade: Config) :
         }
     }
 
-    override fun <T : Any> property(name: String): ReadWriteProperty<Any?, T> {
+    override fun <T> property(name: String): ReadWriteProperty<Any?, T> {
         return if (name in facade) {
             facade.property(name)
         } else {

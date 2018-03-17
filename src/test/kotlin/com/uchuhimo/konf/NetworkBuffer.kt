@@ -33,6 +33,8 @@ class NetworkBuffer {
                 | - off-heap
                 | buffer is off-heap by default.
                 """.trimMargin("| "))
+
+        val offset by optional<Int?>(null, description = "initial offset of buffer")
     }
 
     enum class Type {

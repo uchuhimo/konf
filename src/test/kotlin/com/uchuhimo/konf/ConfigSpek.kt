@@ -47,6 +47,7 @@ fun SubjectProviderDsl<Config>.configSpek(prefix: String = "network.buffer", tes
     val maxSize = NetworkBuffer.maxSize
     val name = NetworkBuffer.name
     val type = NetworkBuffer.type
+    val offset = NetworkBuffer.offset
 
     fun qualify(name: String): String = if (prefix.isEmpty()) name else "$prefix.$name"
 
@@ -180,27 +181,32 @@ fun SubjectProviderDsl<Config>.configSpek(prefix: String = "network.buffer", tes
             it("should not contain unset items in map") {
                 assertThat(subject.toMap(), equalTo(mapOf<String, Any>(
                     qualify(spec.name.name) to "buffer",
-                    qualify(spec.type.name) to NetworkBuffer.Type.OFF_HEAP.name)))
+                    qualify(spec.type.name) to NetworkBuffer.Type.OFF_HEAP.name,
+                    qualify(spec.offset.name) to "null")))
             }
             it("should contain corresponding items in map") {
                 subject[spec.size] = 4
                 subject[spec.type] = NetworkBuffer.Type.ON_HEAP
+                subject[spec.offset] = 0
                 val map = subject.toMap()
                 assertThat(map, equalTo(mapOf(
                     qualify(spec.size.name) to 4,
                     qualify(spec.maxSize.name) to 8,
                     qualify(spec.name.name) to "buffer",
-                    qualify(spec.type.name) to NetworkBuffer.Type.ON_HEAP.name)))
+                    qualify(spec.type.name) to NetworkBuffer.Type.ON_HEAP.name,
+                    qualify(spec.offset.name) to 0)))
             }
             it("should recover all items when reloaded from map") {
                 subject[spec.size] = 4
                 subject[spec.type] = NetworkBuffer.Type.ON_HEAP
+                subject[spec.offset] = 0
                 val map = subject.toMap()
                 val newConfig = Config { addSpec(spec[spec.prefix].withPrefix(prefix)) }.from.map.kv(map)
                 assertThat(newConfig[spec.size], equalTo(4))
                 assertThat(newConfig[spec.maxSize], equalTo(8))
                 assertThat(newConfig[spec.name], equalTo("buffer"))
                 assertThat(newConfig[spec.type], equalTo(NetworkBuffer.Type.ON_HEAP))
+                assertThat(newConfig[spec.offset], equalTo(0))
                 assertThat(newConfig, equalTo(subject))
             }
         }
@@ -220,35 +226,44 @@ fun SubjectProviderDsl<Config>.configSpek(prefix: String = "network.buffer", tes
                 assertThat(subject.toHierarchicalMap(),
                     equalTo(prefixToMap(prefix, mapOf(
                         "name" to "buffer",
-                        "type" to NetworkBuffer.Type.OFF_HEAP.name))))
+                        "type" to NetworkBuffer.Type.OFF_HEAP.name,
+                        "offset" to "null"
+                    ))))
             }
             it("should contain corresponding items in map") {
                 subject[spec.size] = 4
                 subject[spec.type] = NetworkBuffer.Type.ON_HEAP
+                subject[spec.offset] = 0
                 val map = subject.toHierarchicalMap()
                 assertThat(map,
                     equalTo(prefixToMap(prefix, mapOf(
                         "size" to 4,
                         "maxSize" to 8,
                         "name" to "buffer",
-                        "type" to NetworkBuffer.Type.ON_HEAP.name))))
+                        "type" to NetworkBuffer.Type.ON_HEAP.name,
+                        "offset" to 0
+                    ))))
             }
             it("should recover all items when reloaded from map") {
                 subject[spec.size] = 4
                 subject[spec.type] = NetworkBuffer.Type.ON_HEAP
+                subject[spec.offset] = 0
                 val map = subject.toHierarchicalMap()
                 val newConfig = Config { addSpec(spec[spec.prefix].withPrefix(prefix)) }.from.map.hierarchical(map)
                 assertThat(newConfig[spec.size], equalTo(4))
                 assertThat(newConfig[spec.maxSize], equalTo(8))
                 assertThat(newConfig[spec.name], equalTo("buffer"))
                 assertThat(newConfig[spec.type], equalTo(NetworkBuffer.Type.ON_HEAP))
+                assertThat(newConfig[spec.offset], equalTo(0))
                 assertThat(newConfig, equalTo(subject))
             }
         }
         on("object methods") {
             val map = mapOf(
                 qualify(spec.name.name) to "buffer",
-                qualify(spec.type.name) to NetworkBuffer.Type.OFF_HEAP.name)
+                qualify(spec.type.name) to NetworkBuffer.Type.OFF_HEAP.name,
+                qualify(spec.offset.name) to "null"
+            )
             it("should not equal to object of other class") {
                 assertFalse(subject.equals(1))
             }
@@ -272,6 +287,10 @@ fun SubjectProviderDsl<Config>.configSpek(prefix: String = "network.buffer", tes
                 it("should return corresponding value") {
                     assertThat(subject[name], equalTo("buffer"))
                     assertTrue { name in subject }
+                    assertNull(subject[offset])
+                    assertTrue { offset in subject }
+                    assertNull(subject.getOrNull(maxSize))
+                    assertTrue { maxSize in subject }
                 }
             }
             on("get with invalid item") {
@@ -313,6 +332,22 @@ fun SubjectProviderDsl<Config>.configSpek(prefix: String = "network.buffer", tes
                     assertTrue { maxSize in subject }
                 }
             }
+            on("get with lazy item that returns null when the type is nullable") {
+                it("should return null") {
+                    val lazyItem by Spec.dummy.lazy<Int?> { null }
+                    subject.addItem(lazyItem, prefix)
+                    assertNull(subject[lazyItem])
+                }
+            }
+            on("get with lazy item that returns null when the type is not nullable") {
+                it("should throw InvalidLazySetException") {
+                    @Suppress("UNCHECKED_CAST")
+                    val thunk = { _: ItemContainer -> null } as (ItemContainer) -> Int
+                    val lazyItem by Spec.dummy.lazy(thunk = thunk)
+                    subject.addItem(lazyItem, prefix)
+                    assertThat({ subject[lazyItem] }, throws<InvalidLazySetException>())
+                }
+            }
         }
         group("set operation") {
             on("set with valid item when corresponding value is unset") {
@@ -322,14 +357,18 @@ fun SubjectProviderDsl<Config>.configSpek(prefix: String = "network.buffer", tes
                 }
             }
             on("set with valid item when corresponding value exists") {
-                subject[name] = "newName"
                 it("should contain the specified value") {
+                    subject[name] = "newName"
                     assertThat(subject[name], equalTo("newName"))
+                    subject[offset] = 0
+                    assertThat(subject[offset], equalTo(0))
+                    subject[offset] = null
+                    assertNull(subject[offset])
                 }
             }
             on("raw set with valid item") {
-                subject.rawSet(size, 2048)
                 it("should contain the specified value") {
+                    subject.rawSet(size, 2048)
                     assertThat(subject[size], equalTo(2048))
                 }
             }
@@ -366,6 +405,7 @@ fun SubjectProviderDsl<Config>.configSpek(prefix: String = "network.buffer", tes
             on("set with incorrect type of value") {
                 it("should throw ClassCastException") {
                     assertThat({ subject[qualify(size.name)] = "1024" }, throws<ClassCastException>())
+                    assertThat({ subject[qualify(size.name)] = null }, throws<ClassCastException>())
                 }
             }
             on("lazy set with valid item") {

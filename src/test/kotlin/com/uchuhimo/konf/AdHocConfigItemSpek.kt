@@ -21,11 +21,13 @@ import com.natpryce.hamkrest.equalTo
 import org.jetbrains.spek.api.Spek
 import org.jetbrains.spek.api.dsl.it
 import org.jetbrains.spek.api.dsl.on
+import kotlin.test.assertNull
 
 object AdHocConfigItemSpek : Spek({
     val config = Config().from.map.kv(mapOf(
         "network.buffer.size" to 1,
-        "network.buffer.heap.type" to AdHocNetworkBuffer.Type.ON_HEAP
+        "network.buffer.heap.type" to AdHocNetworkBuffer.Type.ON_HEAP,
+        "network.buffer.offset" to 0
     ))
     val networkBuffer = AdHocNetworkBuffer(config)
     on("load config into ad-hoc config class with ad-hoc config items") {
@@ -34,13 +36,15 @@ object AdHocConfigItemSpek : Spek({
             assertThat(networkBuffer.maxSize, equalTo(2))
             assertThat(networkBuffer.name, equalTo("buffer"))
             assertThat(networkBuffer.type, equalTo(AdHocNetworkBuffer.Type.ON_HEAP))
+            assertThat(networkBuffer.offset, equalTo(0))
         }
     }
     val configForCast = Config().from.map.hierarchical(mapOf(
         "size" to 1,
         "maxSize" to 2,
         "name" to "buffer",
-        "type" to "ON_HEAP"
+        "type" to "ON_HEAP",
+        "offset" to "null"
     ))
     val networkBufferForCast: NetworkBufferForCast by configForCast.cast()
     on("cast config to config class") {
@@ -49,6 +53,7 @@ object AdHocConfigItemSpek : Spek({
             assertThat(networkBufferForCast.maxSize, equalTo(2))
             assertThat(networkBufferForCast.name, equalTo("buffer"))
             assertThat(networkBufferForCast.type, equalTo(NetworkBufferForCast.Type.ON_HEAP))
+            assertNull(networkBufferForCast.offset)
         }
     }
 })
@@ -57,7 +62,8 @@ data class NetworkBufferForCast(
     val size: Int,
     val maxSize: Int,
     val name: String,
-    val type: Type
+    val type: Type,
+    val offset: Int?
 ) {
 
     enum class Type {

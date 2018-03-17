@@ -49,22 +49,27 @@ object MultiLayerConfigSpec : SubjectSpek<Config>({
                 equalTo(subject.parent!![NetworkBuffer.name]))
             assertThat(subject[NetworkBuffer.type],
                 equalTo(subject.parent!![NetworkBuffer.type]))
+            assertThat(subject[NetworkBuffer.offset],
+                equalTo(subject.parent!![NetworkBuffer.offset]))
         }
         on("export values in facade layer to map") {
             val spec = NetworkBuffer
             it("should not contain unset items in map") {
                 assertThat(subject.parent!!.layer.toMap(), equalTo(mapOf<String, Any>(
                     subject.nameOf(spec.name) to "buffer",
-                    subject.nameOf(spec.type) to NetworkBuffer.Type.OFF_HEAP.name)))
+                    subject.nameOf(spec.type) to NetworkBuffer.Type.OFF_HEAP.name,
+                    subject.nameOf(spec.offset) to "null")))
             }
             it("should not contain values from other layers in map") {
                 subject[spec.size] = 4
                 subject[spec.type] = NetworkBuffer.Type.ON_HEAP
+                subject[spec.offset] = 0
                 val layer = subject.layer
                 val map = layer.toMap()
                 assertThat(map, equalTo(mapOf(
                     subject.nameOf(spec.size) to 4,
-                    subject.nameOf(spec.type) to NetworkBuffer.Type.ON_HEAP.name)))
+                    subject.nameOf(spec.type) to NetworkBuffer.Type.ON_HEAP.name,
+                    subject.nameOf(spec.offset) to 0)))
             }
         }
         on("set with item") {
@@ -109,6 +114,12 @@ object MultiLayerConfigSpec : SubjectSpek<Config>({
             }
             it("should throw LayerFrozenException") {
                 assertThat({ subject.parent!!.addSpec(spec) }, throws<LayerFrozenException>())
+            }
+        }
+        on("add item to parent") {
+            val minSize by Spec.dummy.optional(1)
+            it("should throw LayerFrozenException") {
+                assertThat({ subject.parent!!.addItem(minSize) }, throws<LayerFrozenException>())
             }
         }
         on("add source") {

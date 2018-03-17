@@ -622,7 +622,7 @@ interface Source : SourceInfo {
     fun toSizeInBytes(): SizeInBytes = SizeInBytes.parse(toText())
 }
 
-internal fun Any.toCompatibleValue(mapper: ObjectMapper): Any {
+internal fun Any?.toCompatibleValue(mapper: ObjectMapper): Any {
     return when (this) {
         is OffsetTime,
         is OffsetDateTime,
@@ -661,10 +661,14 @@ internal fun Any.toCompatibleValue(mapper: ObjectMapper): Any {
         is Float,
         is BigDecimal -> this
         else -> {
-            val result = mapper.convertValue(this, Map::class.java).mapValues { (_, value) ->
-                value!!.toCompatibleValue(mapper)
+            if (this == null) {
+                "null"
+            } else {
+                val result = mapper.convertValue(this, Map::class.java).mapValues { (_, value) ->
+                    value!!.toCompatibleValue(mapper)
+                }
+                result
             }
-            result
         }
     }
 }
