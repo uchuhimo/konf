@@ -17,6 +17,7 @@
 package com.uchuhimo.konf.source.hocon
 
 import com.typesafe.config.Config
+import com.typesafe.config.ConfigValueFactory
 import com.uchuhimo.konf.Path
 import com.uchuhimo.konf.name
 import com.uchuhimo.konf.source.Source
@@ -33,12 +34,18 @@ class HoconSource(
         addInfo("type", "HOCON")
     }
 
-    override fun contains(path: Path): Boolean = config.hasPath(path.name)
+    override fun contains(path: Path): Boolean = config.hasPathOrNull(path.name)
 
     override fun getOrNull(path: Path): Source? {
         val name = path.name
-        return if (config.hasPath(name)) {
-            HoconValueSource(config.getValue(name), context)
+        return if (config.hasPathOrNull(name)) {
+            if (config.getIsNull(name)) {
+                HoconValueSource(
+                    ConfigValueFactory.fromAnyRef(null, config.origin().description()),
+                    context)
+            } else {
+                HoconValueSource(config.getValue(name), context)
+            }
         } else {
             null
         }

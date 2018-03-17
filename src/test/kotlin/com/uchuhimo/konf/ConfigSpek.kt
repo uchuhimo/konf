@@ -128,7 +128,7 @@ fun SubjectProviderDsl<Config>.configSpek(prefix: String = "network.buffer", tes
             }
             on("add repeated item") {
                 it("should throw RepeatedItemException") {
-                    assertThat({ subject.addItem(spec.size, spec.prefix) }, throws(has(
+                    assertThat({ subject.addItem(size, spec.prefix) }, throws(has(
                         RepeatedItemException::name,
                         equalTo(spec.qualify(size)))))
                 }
@@ -180,33 +180,33 @@ fun SubjectProviderDsl<Config>.configSpek(prefix: String = "network.buffer", tes
         on("export values to map") {
             it("should not contain unset items in map") {
                 assertThat(subject.toMap(), equalTo(mapOf<String, Any>(
-                    qualify(spec.name.name) to "buffer",
-                    qualify(spec.type.name) to NetworkBuffer.Type.OFF_HEAP.name,
-                    qualify(spec.offset.name) to "null")))
+                    qualify(name.name) to "buffer",
+                    qualify(type.name) to NetworkBuffer.Type.OFF_HEAP.name,
+                    qualify(offset.name) to "null")))
             }
             it("should contain corresponding items in map") {
-                subject[spec.size] = 4
-                subject[spec.type] = NetworkBuffer.Type.ON_HEAP
-                subject[spec.offset] = 0
+                subject[size] = 4
+                subject[type] = NetworkBuffer.Type.ON_HEAP
+                subject[offset] = 0
                 val map = subject.toMap()
                 assertThat(map, equalTo(mapOf(
-                    qualify(spec.size.name) to 4,
-                    qualify(spec.maxSize.name) to 8,
-                    qualify(spec.name.name) to "buffer",
-                    qualify(spec.type.name) to NetworkBuffer.Type.ON_HEAP.name,
-                    qualify(spec.offset.name) to 0)))
+                    qualify(size.name) to 4,
+                    qualify(maxSize.name) to 8,
+                    qualify(name.name) to "buffer",
+                    qualify(type.name) to NetworkBuffer.Type.ON_HEAP.name,
+                    qualify(offset.name) to 0)))
             }
             it("should recover all items when reloaded from map") {
-                subject[spec.size] = 4
-                subject[spec.type] = NetworkBuffer.Type.ON_HEAP
-                subject[spec.offset] = 0
+                subject[size] = 4
+                subject[type] = NetworkBuffer.Type.ON_HEAP
+                subject[offset] = 0
                 val map = subject.toMap()
                 val newConfig = Config { addSpec(spec[spec.prefix].withPrefix(prefix)) }.from.map.kv(map)
-                assertThat(newConfig[spec.size], equalTo(4))
-                assertThat(newConfig[spec.maxSize], equalTo(8))
-                assertThat(newConfig[spec.name], equalTo("buffer"))
-                assertThat(newConfig[spec.type], equalTo(NetworkBuffer.Type.ON_HEAP))
-                assertThat(newConfig[spec.offset], equalTo(0))
+                assertThat(newConfig[size], equalTo(4))
+                assertThat(newConfig[maxSize], equalTo(8))
+                assertThat(newConfig[name], equalTo("buffer"))
+                assertThat(newConfig[type], equalTo(NetworkBuffer.Type.ON_HEAP))
+                assertThat(newConfig[offset], equalTo(0))
                 assertThat(newConfig, equalTo(subject))
             }
         }
@@ -231,9 +231,9 @@ fun SubjectProviderDsl<Config>.configSpek(prefix: String = "network.buffer", tes
                     ))))
             }
             it("should contain corresponding items in map") {
-                subject[spec.size] = 4
-                subject[spec.type] = NetworkBuffer.Type.ON_HEAP
-                subject[spec.offset] = 0
+                subject[size] = 4
+                subject[type] = NetworkBuffer.Type.ON_HEAP
+                subject[offset] = 0
                 val map = subject.toHierarchicalMap()
                 assertThat(map,
                     equalTo(prefixToMap(prefix, mapOf(
@@ -245,24 +245,24 @@ fun SubjectProviderDsl<Config>.configSpek(prefix: String = "network.buffer", tes
                     ))))
             }
             it("should recover all items when reloaded from map") {
-                subject[spec.size] = 4
-                subject[spec.type] = NetworkBuffer.Type.ON_HEAP
-                subject[spec.offset] = 0
+                subject[size] = 4
+                subject[type] = NetworkBuffer.Type.ON_HEAP
+                subject[offset] = 0
                 val map = subject.toHierarchicalMap()
                 val newConfig = Config { addSpec(spec[spec.prefix].withPrefix(prefix)) }.from.map.hierarchical(map)
-                assertThat(newConfig[spec.size], equalTo(4))
-                assertThat(newConfig[spec.maxSize], equalTo(8))
-                assertThat(newConfig[spec.name], equalTo("buffer"))
-                assertThat(newConfig[spec.type], equalTo(NetworkBuffer.Type.ON_HEAP))
-                assertThat(newConfig[spec.offset], equalTo(0))
+                assertThat(newConfig[size], equalTo(4))
+                assertThat(newConfig[maxSize], equalTo(8))
+                assertThat(newConfig[name], equalTo("buffer"))
+                assertThat(newConfig[type], equalTo(NetworkBuffer.Type.ON_HEAP))
+                assertThat(newConfig[offset], equalTo(0))
                 assertThat(newConfig, equalTo(subject))
             }
         }
         on("object methods") {
             val map = mapOf(
-                qualify(spec.name.name) to "buffer",
-                qualify(spec.type.name) to NetworkBuffer.Type.OFF_HEAP.name,
-                qualify(spec.offset.name) to "null"
+                qualify(name.name) to "buffer",
+                qualify(type.name) to NetworkBuffer.Type.OFF_HEAP.name,
+                qualify(offset.name) to "null"
             )
             it("should not equal to object of other class") {
                 assertFalse(subject.equals(1))
@@ -544,7 +544,7 @@ fun SubjectProviderDsl<Config>.configSpek(prefix: String = "network.buffer", tes
                     }
                 }
                 on("object methods") {
-                    val map = mapOf(qualify(spec.size.name) to 4)
+                    val map = mapOf(qualify(size.name) to 4)
                     it("should not equal to object of other class") {
                         assertFalse(layer.equals(1))
                     }

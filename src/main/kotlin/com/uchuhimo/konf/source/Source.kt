@@ -29,6 +29,7 @@ import com.fasterxml.jackson.databind.node.FloatNode
 import com.fasterxml.jackson.databind.node.IntNode
 import com.fasterxml.jackson.databind.node.JsonNodeFactory
 import com.fasterxml.jackson.databind.node.LongNode
+import com.fasterxml.jackson.databind.node.NullNode
 import com.fasterxml.jackson.databind.node.ObjectNode
 import com.fasterxml.jackson.databind.node.ShortNode
 import com.fasterxml.jackson.databind.node.TextNode
@@ -233,6 +234,13 @@ interface Source : SourceInfo {
      * @return a source overlapped by the specified facade source
      */
     operator fun plus(facade: Source): Source = facade.withFallback(this)
+
+    /**
+     * Whether this source contains a null value or not.
+     *
+     * @return `true` if this source contains a null value, `false` otherwise
+     */
+    fun isNull(): Boolean = false
 
     /**
      * Whether this source contains a list of values or not.
@@ -665,7 +673,7 @@ internal fun Any?.toCompatibleValue(mapper: ObjectMapper): Any {
                 "null"
             } else {
                 val result = mapper.convertValue(this, Map::class.java).mapValues { (_, value) ->
-                    value!!.toCompatibleValue(mapper)
+                    value.toCompatibleValue(mapper)
                 }
                 result
             }
@@ -675,7 +683,14 @@ internal fun Any?.toCompatibleValue(mapper: ObjectMapper): Any {
 
 internal fun Config.loadItem(item: Item<*>, path: Path, source: Source) {
     try {
-        rawSet(item, source[path].toValue(item.type, mapper))
+        val itemSource = source[path]
+        if (item.nullable
+            && (itemSource.isNull()
+                || (itemSource.isText() && itemSource.toText() == "null"))) {
+            rawSet(item, null)
+        } else {
+            rawSet(item, itemSource.toValue(item.type, mapper))
+        }
     } catch (cause: SourceException) {
         throw LoadException(path, cause)
     }
@@ -826,6 +841,7 @@ private fun Source.toJsonNode(): JsonNode {
         return this.node
     } else {
         return when {
+            isNull() -> NullNode.instance
             isList() -> ArrayNode(
                 JsonNodeFactory.instance,
                 toList().map {

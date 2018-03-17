@@ -45,7 +45,7 @@ class ConfigJavaApiTest {
   @DisplayName("test `Configs.create` with init block")
   void createWithInit() {
     final Config config = Configs.create(it -> it.addSpec(NetworkBufferInJava.spec));
-    assertThat(config.getItems().size(), equalTo(4));
+    assertThat(config.getItems().size(), equalTo(5));
   }
 
   @Test

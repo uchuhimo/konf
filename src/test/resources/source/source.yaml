@@ -1,5 +1,9 @@
 level1:
   level2:
+    empty: "null"
+    literalEmpty: null
+    present: 1
+
     boolean: false
 
     int: 1
@@ -79,6 +83,10 @@ level1:
       second: 2
 
     clazz:
+      empty: "null"
+      literalEmpty: null
+      present: 1
+
       boolean: false
 
       int: 1

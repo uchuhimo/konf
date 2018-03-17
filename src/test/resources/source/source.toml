@@ -1,4 +1,8 @@
 [level1.level2]
+empty = "null"
+literalEmpty = "null"
+present = 1
+
 boolean = false
 
 int = 1
@@ -70,6 +74,10 @@ nested = [[[{ a = 1 }]]]
     second = 2
 
     [level1.level2.clazz]
+    empty = "null"
+    literalEmpty = "null"
+    present = 1
+
     boolean = false
 
     int = 1

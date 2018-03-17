@@ -36,6 +36,10 @@ import java.util.SortedMap
 import java.util.SortedSet
 
 object ConfigForLoad : ConfigSpec("level1.level2") {
+    val empty by required<Int?>()
+    val literalEmpty by required<Int?>()
+    val present by required<Int?>()
+
     val boolean by required<Boolean>()
 
     val int by required<Int>()
@@ -105,6 +109,9 @@ enum class EnumForLoad {
 }
 
 data class ClassForLoad(
+    val empty: Int?,
+    val literalEmpty: Int?,
+    val present: Int?,
     val boolean: Boolean,
     val int: Int,
     val short: Short,

@@ -77,6 +77,8 @@ class HoconValueSource(
 
     override fun getOrNull(path: Path): Source? = hoconSource.getOrNull(path)
 
+    override fun isNull(): Boolean = type == ConfigValueType.NULL
+
     override fun isList(): Boolean = type == ConfigValueType.LIST
 
     override fun toList(): List<Source> {

@@ -43,6 +43,7 @@ import java.time.ZonedDateTime
 import java.util.Arrays
 import java.util.Date
 import java.util.SortedSet
+import kotlin.test.assertNull
 import kotlin.test.assertTrue
 
 object SourceLoadSpec : SubjectSpek<Config>({
@@ -55,6 +56,9 @@ object SourceLoadSpec : SubjectSpek<Config>({
     given("a source") {
         on("load the source into config") {
             it("should contain every value specified in the source") {
+                assertNull(subject[ConfigForLoad.empty])
+                assertNull(subject[ConfigForLoad.literalEmpty])
+                assertThat(subject[ConfigForLoad.present], equalTo(1))
                 assertThat(subject[ConfigForLoad.boolean], equalTo(false))
 
                 assertThat(subject[ConfigForLoad.int], equalTo(1))
@@ -167,6 +171,9 @@ object SourceLoadSpec : SubjectSpek<Config>({
                 assertThat(subject[ConfigForLoad.pair], equalTo(1 to 2))
 
                 val classForLoad = ClassForLoad(
+                    empty = null,
+                    literalEmpty = null,
+                    present = 1,
                     boolean = false,
                     int = 1,
                     short = 2.toShort(),
@@ -194,6 +201,9 @@ object SourceLoadSpec : SubjectSpek<Config>({
                     enum = EnumForLoad.LABEL2,
                     booleanArray = booleanArrayOf(true, false),
                     nested = arrayOf(listOf(setOf(mapOf("a" to 1)))))
+                assertThat(subject[ConfigForLoad.clazz].empty, equalTo(classForLoad.empty))
+                assertThat(subject[ConfigForLoad.clazz].literalEmpty, equalTo(classForLoad.literalEmpty))
+                assertThat(subject[ConfigForLoad.clazz].present, equalTo(classForLoad.present))
                 assertThat(subject[ConfigForLoad.clazz].boolean, equalTo(classForLoad.boolean))
                 assertThat(subject[ConfigForLoad.clazz].int, equalTo(classForLoad.int))
                 assertThat(subject[ConfigForLoad.clazz].short, equalTo(classForLoad.short))
@@ -265,6 +275,10 @@ object SourceReloadFromDiskSpec : SubjectSpek<Config>({
 })
 
 private val loadContent = mapOf<String, Any>(
+    "empty" to "null",
+    "literalEmpty" to "null",
+    "present" to 1,
+
     "boolean" to false,
 
     "int" to 1,
@@ -335,6 +349,10 @@ private val loadContent = mapOf<String, Any>(
     "pair" to mapOf("first" to 1, "second" to 2),
 
     "clazz" to mapOf(
+        "empty" to "null",
+        "literalEmpty" to "null",
+        "present" to 1,
+
         "boolean" to false,
 
         "int" to 1,

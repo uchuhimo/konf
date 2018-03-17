@@ -1,6 +1,18 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <configuration>
     <property>
+        <name>level1.level2.empty</name>
+        <value>null</value>
+    </property>
+    <property>
+        <name>level1.level2.literalEmpty</name>
+        <value>null</value>
+    </property>
+    <property>
+        <name>level1.level2.present</name>
+        <value>1</value>
+    </property>
+    <property>
         <name>level1.level2.boolean</name>
         <value>false</value>
     </property>
@@ -223,6 +235,18 @@
     <property>
         <name>level1.level2.pair.second</name>
         <value>2</value>
+    </property>
+    <property>
+        <name>level1.level2.clazz.empty</name>
+        <value>null</value>
+    </property>
+    <property>
+        <name>level1.level2.clazz.literalEmpty</name>
+        <value>null</value>
+    </property>
+    <property>
+        <name>level1.level2.clazz.present</name>
+        <value>1</value>
     </property>
     <property>
         <name>level1.level2.clazz.boolean</name>

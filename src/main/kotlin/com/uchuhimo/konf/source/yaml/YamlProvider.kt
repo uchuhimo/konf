@@ -20,7 +20,11 @@ import com.uchuhimo.konf.source.Provider
 import com.uchuhimo.konf.source.Source
 import com.uchuhimo.konf.source.base.asSource
 import org.yaml.snakeyaml.Yaml
+import org.yaml.snakeyaml.constructor.AbstractConstruct
 import org.yaml.snakeyaml.constructor.SafeConstructor
+import org.yaml.snakeyaml.nodes.Node
+import org.yaml.snakeyaml.nodes.ScalarNode
+import org.yaml.snakeyaml.nodes.Tag
 import java.io.InputStream
 import java.io.Reader
 
@@ -29,12 +33,23 @@ import java.io.Reader
  */
 object YamlProvider : Provider {
     override fun fromReader(reader: Reader): Source {
-        val yaml = Yaml(SafeConstructor())
+        val yaml = Yaml(YamlConstructor())
         return yaml.load<Any>(reader).asSource("YAML")
     }
 
     override fun fromInputStream(inputStream: InputStream): Source {
-        val yaml = Yaml(SafeConstructor())
+        val yaml = Yaml(YamlConstructor())
         return yaml.load<Any>(inputStream).asSource("YAML")
+    }
+}
+
+class YamlConstructor : SafeConstructor() {
+    init {
+        yamlConstructors[Tag.NULL] = object : AbstractConstruct() {
+            override fun construct(node: Node): Any? {
+                constructScalar(node as ScalarNode)
+                return "null"
+            }
+        }
     }
 }

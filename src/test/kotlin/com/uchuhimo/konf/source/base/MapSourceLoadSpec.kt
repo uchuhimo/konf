@@ -63,6 +63,10 @@ object MapSourceReloadSpec : SubjectSpek<Config>({
 
 private val loadContent = mapOf("level1" to mapOf("level2" to
     mapOf<String, Any>(
+        "empty" to "null",
+        "literalEmpty" to "null",
+        "present" to 1,
+
         "boolean" to false,
 
         "int" to 1,
@@ -137,6 +141,10 @@ private val loadContent = mapOf("level1" to mapOf("level2" to
         "pair" to mapOf("first" to 1, "second" to 2),
 
         "clazz" to mapOf(
+            "empty" to "null",
+            "literalEmpty" to "null",
+            "present" to 1,
+
             "boolean" to false,
 
             "int" to 1,

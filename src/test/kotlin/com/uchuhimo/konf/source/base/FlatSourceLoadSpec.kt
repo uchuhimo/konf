@@ -66,6 +66,9 @@ object FlatSourceReloadSpec : SubjectSpek<Config>({
 })
 
 private val loadContent = mapOf(
+    "empty" to "null",
+    "literalEmpty" to "null",
+    "present" to "1",
     "boolean" to "false",
     "int" to "1",
     "short" to "2",
@@ -122,6 +125,9 @@ private val loadContent = mapOf(
     "array.object.enum" to "LABEL1,LABEL2,LABEL3",
     "pair.first" to "1",
     "pair.second" to "2",
+    "clazz.empty" to "null",
+    "clazz.literalEmpty" to "null",
+    "clazz.present" to "1",
     "clazz.boolean" to "false",
     "clazz.int" to "1",
     "clazz.short" to "2",

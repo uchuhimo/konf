@@ -39,4 +39,7 @@ public class NetworkBufferInJava {
               + "- on-heap\n"
               + "- off-heap\n"
               + "buffer is off-heap by default.") {};
+
+  public static final OptionalItem<Integer> offset =
+      new OptionalItem<Integer>(spec, "offset", null, "initial offset of buffer", null, true) {};
 }
