@@ -169,6 +169,25 @@ object ProviderSpec : SubjectSpek<Provider>({
                 }
             }
         }
+        on("create source from invalid git repository") {
+            createTempDir().let { dir ->
+                Git.init().apply {
+                    setDirectory(dir)
+                }.call().use { git ->
+                    Paths.get(dir.path, "test").toFile().writeText("type = git")
+                    git.add().apply {
+                        addFilepattern("test")
+                    }.call()
+                    git.commit().apply {
+                        message = "init commit"
+                    }.call()
+                }
+                it("should throw InvalidRemoteRepoException") {
+                    assertThat({ subject.fromGit(createTempDir().path, "test", dir = dir.path) },
+                        throws<InvalidRemoteRepoException>())
+                }
+            }
+        }
     }
 })
 
