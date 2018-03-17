@@ -260,7 +260,7 @@ object LoaderSpec : SubjectSpek<Loader>({
                     val repo = dir.toURI()
                     val config = subject.watchGit(
                         repo.toString(), "test",
-                        period = 1, unit = TimeUnit.SECONDS)
+                        period = 1, unit = TimeUnit.SECONDS, context = context)
                     val originalValue = config[SourceType.type]
                     file.writeText("type = newValue")
                     Git.open(dir).use { git ->
@@ -303,7 +303,7 @@ object LoaderSpec : SubjectSpek<Loader>({
                     val config = subject.watchGit(
                         repo.toString(), "test",
                         dir = createTempDir(prefix = "local_git_repo").path,
-                        period = 1, unit = TimeUnit.SECONDS)
+                        period = 1, unit = TimeUnit.SECONDS, context = context)
                     val originalValue = config[SourceType.type]
                     file.writeText("type = newValue")
                     Git.open(dir).use { git ->
