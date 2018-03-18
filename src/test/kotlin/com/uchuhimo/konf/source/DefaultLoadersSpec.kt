@@ -26,6 +26,7 @@ import com.uchuhimo.konf.tempFileOf
 import kotlinx.coroutines.experimental.delay
 import kotlinx.coroutines.experimental.newSingleThreadContext
 import kotlinx.coroutines.experimental.runBlocking
+import org.eclipse.jgit.api.Git
 import org.jetbrains.spek.api.Spek
 import org.jetbrains.spek.api.dsl.given
 import org.jetbrains.spek.api.dsl.it
@@ -34,6 +35,7 @@ import org.jetbrains.spek.subject.SubjectSpek
 import org.jetbrains.spek.subject.itBehavesLike
 import spark.Service
 import java.net.URL
+import java.nio.file.Paths
 import java.util.concurrent.TimeUnit
 
 object DefaultLoadersSpec : SubjectSpek<DefaultLoaders>({
@@ -183,6 +185,68 @@ object DefaultLoadersSpec : SubjectSpek<DefaultLoaders>({
                 }
                 it("should load new value after URL content has been changed") {
                     assertThat(newValue, equalTo("newValue"))
+                }
+            }
+        }
+        on("load from git repository") {
+            createTempDir().let { dir ->
+                Git.init().apply {
+                    setDirectory(dir)
+                }.call().use { git ->
+                    Paths.get(dir.path, "source.properties").toFile().writeText(propertiesContent)
+                    git.add().apply {
+                        addFilepattern("source.properties")
+                    }.call()
+                    git.commit().apply {
+                        message = "init commit"
+                    }.call()
+                }
+                val repo = dir.toURI()
+                val config = subject.git(repo.toString(), "source.properties")
+                it("should load as auto-detected file format") {
+                    assertThat(config[item], equalTo("properties"))
+                }
+            }
+        }
+        on("load from watched git repository") {
+            newSingleThreadContext("context").use { context ->
+                createTempDir(prefix = "remote_git_repo", suffix = ".git").let { dir ->
+                    val file = Paths.get(dir.path, "source.properties").toFile()
+                    Git.init().apply {
+                        setDirectory(dir)
+                    }.call().use { git ->
+                        file.writeText(propertiesContent)
+                        git.add().apply {
+                            addFilepattern("source.properties")
+                        }.call()
+                        git.commit().apply {
+                            message = "init commit"
+                        }.call()
+                    }
+                    val repo = dir.toURI()
+                    val config = subject.watchGit(
+                        repo.toString(), "source.properties",
+                        period = 1, unit = TimeUnit.SECONDS, context = context)
+                    val originalValue = config[item]
+                    file.writeText(propertiesContent.replace("properties", "newValue"))
+                    Git.open(dir).use { git ->
+                        git.add().apply {
+                            addFilepattern("source.properties")
+                        }.call()
+                        git.commit().apply {
+                            message = "update value"
+                        }.call()
+                    }
+                    runBlocking(context) {
+                        delay(1, TimeUnit.SECONDS)
+                    }
+                    val newValue = config[item]
+                    it("should load as auto-detected file format") {
+                        assertThat(originalValue, equalTo("properties"))
+                    }
+                    it("should load new value after file content in git repository has been changed") {
+                        assertThat(newValue, equalTo("newValue"))
+                    }
                 }
             }
         }
