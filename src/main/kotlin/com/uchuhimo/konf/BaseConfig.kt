@@ -198,6 +198,8 @@ open class BaseConfig(
         }
     }
 
+    protected fun containsInLayer(item: Item<*>) = lock.read { valueByItem.containsKey(item) }
+
     override fun contains(item: Item<*>): Boolean {
         return if (containsInLayer(item)) {
             true
@@ -205,8 +207,6 @@ open class BaseConfig(
             parent?.contains(item) ?: false
         }
     }
-
-    protected fun containsInLayer(item: Item<*>) = lock.read { valueByItem.containsKey(item) }
 
     protected fun containsInLayer(name: String) = lock.read { nameByItem.containsValue(name) }
 

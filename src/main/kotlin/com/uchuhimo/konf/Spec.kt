@@ -118,7 +118,7 @@ interface Spec {
      */
     fun withPrefix(prefix: String): Spec = withPrefix(this.prefix.toPath(), prefix.toPath())
 
-    fun withPrefix(prefix: Path, newPrefix: Path): Spec {
+    private fun withPrefix(prefix: Path, newPrefix: Path): Spec {
         return if (newPrefix.isEmpty()) {
             this
         } else {
@@ -158,6 +158,7 @@ open class RequiredProperty<T>(
     private val description: String = "",
     private val nullable: Boolean = false
 ) {
+    @Suppress("LeakingThis")
     private val type: JavaType = TypeFactory.defaultInstance().constructType(this::class.java)
         .findSuperType(RequiredProperty::class.java).bindings.typeParameters[0]
 
@@ -190,6 +191,7 @@ open class OptionalProperty<T>(
     private val description: String = "",
     private val nullable: Boolean = false
 ) {
+    @Suppress("LeakingThis")
     private val type: JavaType = TypeFactory.defaultInstance().constructType(this::class.java)
         .findSuperType(OptionalProperty::class.java).bindings.typeParameters[0]
 
@@ -225,6 +227,7 @@ open class LazyProperty<T>(
     private val description: String = "",
     private val nullable: Boolean = false
 ) {
+    @Suppress("LeakingThis")
     private val type: JavaType = TypeFactory.defaultInstance().constructType(this::class.java)
         .findSuperType(LazyProperty::class.java).bindings.typeParameters[0]
 

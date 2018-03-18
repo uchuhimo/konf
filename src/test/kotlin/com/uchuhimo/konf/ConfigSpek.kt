@@ -212,14 +212,13 @@ fun SubjectProviderDsl<Config>.configSpek(prefix: String = "network.buffer", tes
         }
         on("export values to hierarchical map") {
             fun prefixToMap(prefix: String, value: Map<String, Any>): Map<String, Any> {
-                return if (prefix.isEmpty()) {
-                    value
-                } else if (prefix.contains('.')) {
-                    mapOf<String, Any>(
-                        prefix.substring(0, prefix.indexOf('.')) to
-                            prefixToMap(prefix.substring(prefix.indexOf('.') + 1), value))
-                } else {
-                    mapOf(prefix to value)
+                return when {
+                    prefix.isEmpty() -> value
+                    prefix.contains('.') ->
+                        mapOf<String, Any>(
+                            prefix.substring(0, prefix.indexOf('.')) to
+                                prefixToMap(prefix.substring(prefix.indexOf('.') + 1), value))
+                    else -> mapOf(prefix to value)
                 }
             }
             it("should not contain unset items in map") {

@@ -299,7 +299,7 @@ interface Config : ItemContainer {
      *
      * It is a fluent API for loading source from default loaders.
      *
-     * @param the given transformation function
+     * @param transform the given transformation function
      */
     fun from(transform: (Source) -> Source): DefaultLoaders = DefaultLoaders(this, transform)
 
@@ -375,6 +375,7 @@ open class RequiredConfigProperty<T>(
     private val description: String = "",
     private val nullable: Boolean = false
 ) {
+    @Suppress("LeakingThis")
     private val type: JavaType = TypeFactory.defaultInstance().constructType(this::class.java)
         .findSuperType(RequiredConfigProperty::class.java).bindings.typeParameters[0]
 
@@ -412,6 +413,7 @@ open class OptionalConfigProperty<T>(
     private val description: String = "",
     private val nullable: Boolean = false
 ) {
+    @Suppress("LeakingThis")
     private val type: JavaType = TypeFactory.defaultInstance().constructType(this::class.java)
         .findSuperType(OptionalConfigProperty::class.java).bindings.typeParameters[0]
 
@@ -449,6 +451,7 @@ open class LazyConfigProperty<T>(
     private val description: String = "",
     private val nullable: Boolean = false
 ) {
+    @Suppress("LeakingThis")
     private val type: JavaType = TypeFactory.defaultInstance().constructType(this::class.java)
         .findSuperType(LazyConfigProperty::class.java).bindings.typeParameters[0]
 

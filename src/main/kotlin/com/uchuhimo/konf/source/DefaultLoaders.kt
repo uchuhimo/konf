@@ -54,8 +54,7 @@ class DefaultLoaders(
     private fun Provider.wrap(): Provider =
         if (transform != null) this.map(transform) else this
 
-    private fun Source.wrap(): Source =
-        if (transform != null) transform.invoke(this) else this
+    private fun Source.wrap(): Source = transform?.invoke(this) ?: this
 
     /**
      * Loader for HOCON source.
@@ -340,8 +339,7 @@ class MapLoader(
      */
     val transform: ((Source) -> Source)? = null
 ) {
-    private fun Source.wrap(): Source =
-        if (transform != null) transform.invoke(this) else this
+    private fun Source.wrap(): Source = transform?.invoke(this) ?: this
 
     /**
      * Returns a child config containing values from specified hierarchical map.

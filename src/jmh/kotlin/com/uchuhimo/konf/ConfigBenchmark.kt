@@ -26,10 +26,7 @@ import java.util.concurrent.TimeUnit.NANOSECONDS
 
 class Buffer {
     companion object : ConfigSpec("network.buffer") {
-        val name = optional(
-            name = "name",
-            default = "buffer",
-            description = "name of buffer")
+        val name by optional("buffer", description = "name of buffer")
     }
 }
 

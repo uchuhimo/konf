@@ -63,7 +63,7 @@ interface SourceInfo {
             override val info: Map<String, String> get() = _info
 
             override fun addInfo(name: String, value: String) {
-                _info.put(name, value)
+                _info[name] = value
             }
 
             private val _context: MutableMap<String, String> = context.toMutableMap()
@@ -71,7 +71,7 @@ interface SourceInfo {
             override val context: Map<String, String> get() = _context
 
             override fun addContext(name: String, value: String) {
-                _context.put(name, value)
+                _context[name] = value
             }
         }
 

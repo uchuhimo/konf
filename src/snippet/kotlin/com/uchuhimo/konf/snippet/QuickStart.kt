@@ -19,7 +19,7 @@ package com.uchuhimo.konf.snippet
 import com.uchuhimo.konf.Config
 import com.uchuhimo.konf.ConfigSpec
 
-public object ServerSpec : ConfigSpec("server") {
+object ServerSpec : ConfigSpec("server") {
     val host by optional("0.0.0.0")
     val port by required<Int>()
 }

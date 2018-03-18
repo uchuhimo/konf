@@ -198,6 +198,8 @@ allOpen {
 }
 
 jmh {
+    // TODO: fix failed JMH
+    //jvmArgs = ['-Djmh.separateClasspathJAR=true']
     iterations = 10 // Number of measurement iterations to do.
     //benchmarkMode = ["thrpt"] // Benchmark mode. Available modes are: [Throughput/thrpt, AverageTime/avgt, SampleTime/sample, SingleShotTime/ss, All/all]
     batchSize = 1
@@ -208,6 +210,7 @@ jmh {
     threads = 4 // Number of worker threads to run with.
     timeout = "10s" // Timeout for benchmark iteration.
     //timeUnit = "ns" // Output time unit. Available time units are: [m, s, ms, us, ns].
+    verbosity = 'NORMAL' // Verbosity mode. Available modes are: [SILENT, NORMAL, EXTRA]
     warmup = "1s" // Time to spend at each warmup iteration.
     warmupBatchSize = 1 // Warmup batch size: number of benchmark method calls per operation.
     //warmupForks = 0 // How many warmup forks to make for a single benchmark. 0 to disable warmup forks.
