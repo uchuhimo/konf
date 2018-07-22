@@ -55,7 +55,7 @@ Add dependencies:
 <dependency>
   <groupId>com.uchuhimo</groupId>
   <artifactId>konf</artifactId>
-  <version>0.10</version>
+  <version>0.11</version>
   <type>pom</type>
 </dependency>
 ```
@@ -73,7 +73,7 @@ repositories {
 Add dependencies:
 
 ```groovy
-compile 'com.uchuhimo:konf:0.10'
+compile 'com.uchuhimo:konf:0.11'
 ```
 
 ### Maven (master snapshot)
@@ -405,6 +405,8 @@ HOCON/JSON/properties/TOML/XML/YAML source can be loaded from a variety of input
 - From string: `config.withSourceFrom.properties.string("server.port = 8080")`
 - From URL: `config.withSourceFrom.properties.url("http://localhost:8080/source.properties")`
 - From watched URL: `config.withSourceFrom.properties.watchUrl("http://localhost:8080/source.properties", 1, TimeUnit.MINUTES)`
+- From Git repository: `config.withSourceFrom.properties.git("https://github.com/uchuhimo/konf.git", "/path/to/source.properties", branch = "dev")`
+- From watched Git repository: `config.withSourceFrom.properties.watchGit("https://github.com/uchuhimo/konf.git", "/path/to/source.properties", period = 1, unit = TimeUnit.MINUTES)`
 - From resource: `config.withSourceFrom.properties.resource("source.properties")`
 - From reader: `config.withSourceFrom.properties.reader(reader)`
 - From input stream: `config.withSourceFrom.properties.inputStream(inputStream)`
