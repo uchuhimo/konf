@@ -19,6 +19,7 @@ buildscript {
         maven { url "https://dl.bintray.com/kotlin/kotlin-eap" }
     }
     dependencies {
+        classpath "com.jfrog.bintray.gradle:gradle-bintray-plugin:1.8.4"
         classpath "com.novoda:bintray-release:0.8.1"
     }
 }
@@ -38,6 +39,7 @@ plugins {
 apply plugin: "java"
 apply plugin: "jacoco"
 apply plugin: "com.novoda.bintray-release"
+apply plugin: "com.jfrog.bintray"
 
 group "com.uchuhimo"
 version "0.11"
@@ -184,7 +186,6 @@ allOpen {
 }
 
 jmh {
-    // TODO: fix failed JMH
     //jvmArgs = ["-Djmh.separateClasspathJAR=true"]
     iterations = 10 // Number of measurement iterations to do.
     //benchmarkMode = ["thrpt"] // Benchmark mode. Available modes are: [Throughput/thrpt, AverageTime/avgt, SampleTime/sample, SingleShotTime/ss, All/all]
