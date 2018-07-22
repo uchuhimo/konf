@@ -1,7 +1,7 @@
 buildscript {
     ext {
         aliyunMavenUrl = "http://maven.aliyun.com/nexus/content/groups/public"
-        junitPlatformVersion = "1.1.0"
+        junitPlatformVersion = "1.2.0"
 
         if (project.rootProject.file("private.properties").exists()) {
             Properties properties = new Properties()
@@ -19,26 +19,24 @@ buildscript {
         maven { url "https://dl.bintray.com/kotlin/kotlin-eap" }
     }
     dependencies {
-        classpath "org.junit.platform:junit-platform-gradle-plugin:$junitPlatformVersion"
-        classpath "com.novoda:bintray-release:0.8.0"
+        classpath "com.novoda:bintray-release:0.8.1"
     }
 }
 
 plugins {
-    id "com.gradle.build-scan" version "1.12.1"
+    id "com.gradle.build-scan" version "1.15.1"
     id "com.dorongold.task-tree" version "1.3"
-    id "org.jetbrains.kotlin.jvm" version "1.2.30"
-    id "org.jetbrains.kotlin.plugin.allopen" version "1.2.30"
-    id "me.champeau.gradle.jmh" version "0.4.5"
-    id "com.diffplug.gradle.spotless" version "3.10.0"
-    id "io.spring.dependency-management" version "1.0.4.RELEASE"
-    id "com.github.ben-manes.versions" version "0.17.0"
-    id "org.jetbrains.dokka" version "0.9.16"
+    id "org.jetbrains.kotlin.jvm" version "1.2.51"
+    id "org.jetbrains.kotlin.plugin.allopen" version "1.2.51"
+    id "me.champeau.gradle.jmh" version "0.4.7"
+    id "com.diffplug.gradle.spotless" version "3.13.0"
+    id "io.spring.dependency-management" version "1.0.6.RELEASE"
+    id "com.github.ben-manes.versions" version "0.20.0"
+    id "org.jetbrains.dokka" version "0.9.17"
 }
 
 apply plugin: "java"
 apply plugin: "jacoco"
-apply plugin: "org.junit.platform.gradle.plugin"
 apply plugin: "com.novoda.bintray-release"
 
 group "com.uchuhimo"
@@ -49,8 +47,8 @@ repositories {
     jcenter()
 }
 
-task wrapper(type: Wrapper) {
-    gradleVersion = "4.5.1"
+wrapper {
+    gradleVersion = "4.9"
     distributionType = Wrapper.DistributionType.ALL
 }
 
@@ -67,19 +65,19 @@ dependencyManagement {
         dependency "com.uchuhimo:kotlinx-bimap:1.0"
         dependency "org.apiguardian:apiguardian-api:1.0.0"
         dependency "com.typesafe:config:1.3.3"
-        dependency "org.yaml:snakeyaml:1.20"
+        dependency "org.yaml:snakeyaml:1.21"
         dependency "com.moandjiezana.toml:toml4j:0.7.2"
         dependency "org.dom4j:dom4j:2.1.0"
-        dependency "org.jetbrains.kotlinx:kotlinx-coroutines-core:0.22.3"
-        dependency "org.eclipse.jgit:org.eclipse.jgit:4.11.0.201803080745-r"
+        dependency "org.jetbrains.kotlinx:kotlinx-coroutines-core:0.23.4"
+        dependency "org.eclipse.jgit:org.eclipse.jgit:5.0.1.201806211838-r"
 
-        dependencySet(group: "org.jetbrains.kotlin", version: "1.2.30") {
+        dependencySet(group: "org.jetbrains.kotlin", version: "1.2.51") {
             entry "kotlin-stdlib"
             entry "kotlin-reflect"
             entry "kotlin-stdlib-jdk8"
         }
 
-        def jacksonVersion = "2.9.4"
+        def jacksonVersion = "2.9.6"
         dependencySet(group: "com.fasterxml.jackson.core", version: jacksonVersion) {
             entry "jackson-core"
             entry "jackson-annotations"
@@ -91,14 +89,14 @@ dependencyManagement {
 
     testImplementation {
         dependencies {
-            dependency "org.jetbrains.kotlin:kotlin-test:1.2.30"
+            dependency "org.jetbrains.kotlin:kotlin-test:1.2.51"
             dependency "com.natpryce:hamkrest:1.4.2.2"
             dependency "org.hamcrest:hamcrest-all:1.3"
-            dependency "com.sparkjava:spark-core:2.7.1"
+            dependency "com.sparkjava:spark-core:2.7.2"
             dependency "org.slf4j:slf4j-simple:1.7.25"
 
             dependency "org.junit.platform:junit-platform-launcher:$junitPlatformVersion"
-            dependencySet(group: "org.junit.jupiter", version: "5.1.0") {
+            dependencySet(group: "org.junit.jupiter", version: "5.2.0") {
                 entry "junit-jupiter-api"
                 entry "junit-jupiter-engine"
             }
@@ -160,26 +158,14 @@ kotlin {
     }
 }
 
-junitPlatform {
-    filters {
-        engines {
-            include "spek", "junit-jupiter"
-        }
-    }
+test {
+    useJUnitPlatform()
+    testLogging.showStandardStreams = true
+    environment "SOURCE_TEST_TYPE", "env"
 }
 
 tasks.withType(JavaCompile) {
     options.encoding = "UTF-8"
-}
-
-afterEvaluate {
-    junitPlatformTest {
-        environment "SOURCE_TEST_TYPE", "env"
-    }
-}
-
-tasks.withType(Test) {
-    testLogging.showStandardStreams = true
 }
 
 import org.jetbrains.kotlin.gradle.tasks.KotlinCompile
@@ -199,7 +185,7 @@ allOpen {
 
 jmh {
     // TODO: fix failed JMH
-    //jvmArgs = ['-Djmh.separateClasspathJAR=true']
+    //jvmArgs = ["-Djmh.separateClasspathJAR=true"]
     iterations = 10 // Number of measurement iterations to do.
     //benchmarkMode = ["thrpt"] // Benchmark mode. Available modes are: [Throughput/thrpt, AverageTime/avgt, SampleTime/sample, SingleShotTime/ss, All/all]
     batchSize = 1
@@ -210,18 +196,18 @@ jmh {
     threads = 4 // Number of worker threads to run with.
     timeout = "10s" // Timeout for benchmark iteration.
     //timeUnit = "ns" // Output time unit. Available time units are: [m, s, ms, us, ns].
-    verbosity = 'NORMAL' // Verbosity mode. Available modes are: [SILENT, NORMAL, EXTRA]
+    verbosity = "NORMAL" // Verbosity mode. Available modes are: [SILENT, NORMAL, EXTRA]
     warmup = "1s" // Time to spend at each warmup iteration.
     warmupBatchSize = 1 // Warmup batch size: number of benchmark method calls per operation.
     //warmupForks = 0 // How many warmup forks to make for a single benchmark. 0 to disable warmup forks.
     warmupIterations = 10 // Number of warmup iterations to do.
     zip64 = false // Use ZIP64 format for bigger archives
-    jmhVersion = "1.20" // Specifies JMH version
+    jmhVersion = "1.21" // Specifies JMH version
 }
 
 spotless {
     java {
-        googleJavaFormat("1.5")
+        googleJavaFormat("1.6")
         trimTrailingWhitespace()
         endWithNewline()
         // licenseHeaderFile will fail with an empty line after license header,
@@ -229,7 +215,7 @@ spotless {
         //licenseHeaderFile rootProject.file("config/spotless/apache-license-2.0.java")
     }
     kotlin {
-        ktlint("0.18.0")
+        ktlint("0.24.0")
         trimTrailingWhitespace()
         endWithNewline()
         // licenseHeaderFile is unstable for Kotlin
@@ -238,25 +224,18 @@ spotless {
     }
 }
 
-afterEvaluate {
-    jacoco {
-        toolVersion = "0.8.0"
-        applyTo junitPlatformTest
-    }
-
-    task jacocoJunitPlatformReport(type: JacocoReport) {
-        executionData junitPlatformTest
-        sourceSets sourceSets.main
-        sourceDirectories = files(project.sourceSets.main.allSource.srcDirs)
-        classDirectories = files(project.sourceSets.main.output)
-        reports {
-            xml.enabled = true
-            html.enabled = true
-        }
-    }
-
-    check.dependsOn jacocoJunitPlatformReport
+jacoco {
+    toolVersion = "0.8.1"
 }
+
+jacocoTestReport {
+    reports {
+        xml.enabled true
+        html.enabled true
+    }
+}
+
+check.dependsOn jacocoTestReport
 
 dokka {
     outputFormat = "html"
@@ -289,19 +268,12 @@ publish {
     dryRun = false
 }
 
-afterEvaluate {
-    mavenJavadocJar.dependsOn dokka
-    bintrayUpload.dependsOn(jar, mavenJavadocJar, mavenSourcesJar, check)
-}
-
 task install
 
-tasks.whenTaskAdded { task ->
-    if (task.name == "generatePomFileForMavenPublication") {
-        bintrayUpload.dependsOn task
-    } else if (task.name == "publishToMavenLocal") {
-        install.dependsOn task
-    }
+afterEvaluate {
+    mavenJavadocJar.dependsOn dokka
+    install.dependsOn publishToMavenLocal
+    bintrayUpload.dependsOn(check, install)
 }
 
 dependencyUpdates {

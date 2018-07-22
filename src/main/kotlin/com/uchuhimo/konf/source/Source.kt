@@ -684,9 +684,9 @@ internal fun Any?.toCompatibleValue(mapper: ObjectMapper): Any {
 internal fun Config.loadItem(item: Item<*>, path: Path, source: Source) {
     try {
         val itemSource = source[path]
-        if (item.nullable
-            && (itemSource.isNull()
-                || (itemSource.isText() && itemSource.toText() == "null"))) {
+        if (item.nullable &&
+            (itemSource.isNull() ||
+                (itemSource.isText() && itemSource.toText() == "null"))) {
             rawSet(item, null)
         } else {
             rawSet(item, itemSource.toValue(item.type, mapper))

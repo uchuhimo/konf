@@ -37,11 +37,13 @@ class ConfigBenchmark {
     @State(Scope.Thread)
     class ConfigState {
         val config = Config { addSpec(Buffer) }
+        val path = Buffer.qualify(Buffer.name)
     }
 
     @State(Scope.Benchmark)
     class MultiThreadConfigState {
         val config = Config { addSpec(Buffer) }
+        val path = Buffer.qualify(Buffer.name)
     }
 
     @Benchmark
@@ -61,20 +63,19 @@ class ConfigBenchmark {
     }
 
     @Benchmark
-    fun getWithName(state: ConfigState) = state.config<String>(Buffer.name.name)
+    fun getWithPath(state: ConfigState) = state.config<String>(state.path)
 
     @Benchmark
-    fun getWithNameFromMultiThread(state: MultiThreadConfigState) =
-        state.config<String>(Buffer.name.name)
+    fun getWithPathFromMultiThread(state: MultiThreadConfigState) = state.config<String>(state.path)
 
     @Benchmark
-    fun setWithName(state: ConfigState) {
-        state.config[Buffer.name.name] = "newName"
+    fun setWithPath(state: ConfigState) {
+        state.config[state.path] = "newName"
     }
 
     @Benchmark
-    fun setWithNameFromMultiThread(state: MultiThreadConfigState) {
-        state.config[Buffer.name.name] = "newName"
+    fun setWithPathFromMultiThread(state: MultiThreadConfigState) {
+        state.config[state.path] = "newName"
     }
 }
 
@@ -85,11 +86,13 @@ class MultiLevelConfigBenchmark {
     @State(Scope.Thread)
     class ConfigState {
         val config = Config { addSpec(Buffer) }.withLayer().withLayer().withLayer().withLayer()
+        val path = Buffer.qualify(Buffer.name)
     }
 
     @State(Scope.Benchmark)
     class MultiThreadConfigState {
         val config = Config { addSpec(Buffer) }.withLayer().withLayer().withLayer().withLayer()
+        val path = Buffer.qualify(Buffer.name)
     }
 
     @Benchmark
@@ -109,19 +112,18 @@ class MultiLevelConfigBenchmark {
     }
 
     @Benchmark
-    fun getWithName(state: ConfigState) = state.config<String>(Buffer.name.name)
+    fun getWithPath(state: ConfigState) = state.config<String>(state.path)
 
     @Benchmark
-    fun getWithNameFromMultiThread(state: MultiThreadConfigState) =
-        state.config<String>(Buffer.name.name)
+    fun getWithPathFromMultiThread(state: MultiThreadConfigState) = state.config<String>(state.path)
 
     @Benchmark
-    fun setWithName(state: ConfigState) {
-        state.config[Buffer.name.name] = "newName"
+    fun setWithPath(state: ConfigState) {
+        state.config[state.path] = "newName"
     }
 
     @Benchmark
-    fun setWithNameFromMultiThread(state: MultiThreadConfigState) {
-        state.config[Buffer.name.name] = "newName"
+    fun setWithPathFromMultiThread(state: MultiThreadConfigState) {
+        state.config[state.path] = "newName"
     }
 }
