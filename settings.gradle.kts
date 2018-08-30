@@ -1,9 +1,7 @@
 pluginManagement {
     repositories {
         jcenter()
-        maven {
-            url "http://maven.aliyun.com/nexus/content/repositories/gradle-plugin"
-        }
+        maven(url = "https://maven.aliyun.com/repository/gradle-plugin")
         gradlePluginPortal()
     }
 }
