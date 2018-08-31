@@ -11,30 +11,18 @@ import java.util.Properties
 import org.jetbrains.kotlin.gradle.tasks.KotlinCompile
 import java.net.URL
 
-fun getPrivateProperty(key: String): String {
-    return if (project.rootProject.file("private.properties").exists()) {
-        val properties = Properties()
-        properties.load(File("private.properties").inputStream())
-        properties.getProperty(key)
-    } else {
-        ""
-    }
-}
-
-val junitPlatformVersion by extra { "1.2.0" }
 val bintrayUserProperty by extra { getPrivateProperty("bintrayUser") }
 val bintrayKeyProperty by extra { getPrivateProperty("bintrayKey") }
 
 buildscript {
     repositories {
-        val aliyunMavenUrl by extra { "https://maven.aliyun.com/repository/central" }
-        maven(url = aliyunMavenUrl)
+        aliyunMaven()
         jcenter()
         maven(url = "https://dl.bintray.com/kotlin/kotlin-eap")
     }
     dependencies {
-        classpath("com.jfrog.bintray.gradle:gradle-bintray-plugin:1.8.4")
-        classpath("com.novoda:bintray-release:0.8.1")
+        classpath("com.jfrog.bintray.gradle:gradle-bintray-plugin:${Versions.bintrayPlugin}")
+        classpath("com.novoda:bintray-release:${Versions.bintrayRelease}")
     }
 }
 
@@ -42,14 +30,14 @@ plugins {
     `build-scan`
     java
     jacoco
-    kotlin("jvm") version "1.2.61"
-    kotlin("plugin.allopen") version "1.2.61"
-    id("com.dorongold.task-tree") version "1.3"
-    id("me.champeau.gradle.jmh") version "0.4.7"
-    id("com.diffplug.gradle.spotless") version "3.13.0"
-    id("io.spring.dependency-management") version "1.0.6.RELEASE"
-    id("com.github.ben-manes.versions") version "0.20.0"
-    id("org.jetbrains.dokka") version "0.9.17"
+    kotlin("jvm") version Versions.kotlin
+    kotlin("plugin.allopen") version Versions.kotlin
+    id("com.dorongold.task-tree") version Versions.taskTree
+    id("me.champeau.gradle.jmh") version Versions.jmhPlugin
+    id("com.diffplug.gradle.spotless") version Versions.spotless
+    id("io.spring.dependency-management") version Versions.dependencyManagement
+    id("com.github.ben-manes.versions") version Versions.dependencyUpdate
+    id("org.jetbrains.dokka") version Versions.dokka
 }
 
 apply(plugin = "com.novoda.bintray-release")
@@ -59,11 +47,12 @@ group = "com.uchuhimo"
 version = "0.11"
 
 repositories {
-    maven(url = extra.get("aliyunMavenUrl") as String)
+    aliyunMaven()
     jcenter()
 }
 
-tasks.register<Wrapper>("wrapper") {
+val wrapper by tasks.registering(Wrapper::class)
+wrapper {
     gradleVersion = "4.10"
     distributionType = Wrapper.DistributionType.ALL
 }
@@ -82,100 +71,90 @@ fun DependenciesHandler.dependencySet(group: String, version: String, action: De
 
 configure<DependencyManagementExtension> {
     dependencies {
-        dependency("com.uchuhimo:kotlinx-bimap:1.0")
-        dependency("org.apiguardian:apiguardian-api:1.0.0")
-        dependency("com.typesafe:config:1.3.3")
-        dependency("org.yaml:snakeyaml:1.21")
-        dependency("com.moandjiezana.toml:toml4j:0.7.2")
-        dependency("org.dom4j:dom4j:2.1.0")
-        dependency("org.jetbrains.kotlinx:kotlinx-coroutines-core:0.23.4")
-        dependency("org.eclipse.jgit:org.eclipse.jgit:5.0.1.201806211838-r")
+        dependency("com.uchuhimo:kotlinx-bimap:${Versions.bimap}")
+        dependency("org.apiguardian:apiguardian-api:${Versions.apiguardian}")
+        dependency("com.typesafe:config:${Versions.hocon}")
+        dependency("org.yaml:snakeyaml:${Versions.yaml}")
+        dependency("com.moandjiezana.toml:toml4j:${Versions.toml4j}")
+        dependency("org.dom4j:dom4j:${Versions.dom4j}")
+        dependency("org.jetbrains.kotlinx:kotlinx-coroutines-core:${Versions.coroutines}")
+        dependency("org.eclipse.jgit:org.eclipse.jgit:${Versions.jgit}")
 
-        dependencySet(group = "org.jetbrains.kotlin", version = "1.2.61") {
-            entry("kotlin-stdlib")
-            entry("kotlin-reflect")
-            entry("kotlin-stdlib-jdk8")
+        arrayOf("stdlib", "reflect", "stdlib-jdk8").forEach { name ->
+            dependency(kotlin(name, Versions.kotlin))
         }
 
-        val jacksonVersion = "2.9.6"
-        dependencySet(group = "com.fasterxml.jackson.core", version = jacksonVersion) {
-            entry("jackson-core")
-            entry("jackson-annotations")
-            entry("jackson-databind")
+        arrayOf("core", "annotations", "databind").forEach { name ->
+            dependency(jacksonCore(name, Versions.jackson))
         }
-        dependency("com.fasterxml.jackson.module:jackson-module-kotlin:$jacksonVersion")
-        dependency("com.fasterxml.jackson.datatype:jackson-datatype-jsr310:$jacksonVersion")
+        dependency(jackson("module", "kotlin", Versions.jackson))
+        dependency(jackson("datatype", "jsr310", Versions.jackson))
     }
 
     val testImplementation by configurations
     testImplementation.withDependencies {
         dependencies {
-            dependency("org.jetbrains.kotlin:kotlin-test:1.2.61")
-            dependency("com.natpryce:hamkrest:1.4.2.2")
-            dependency("org.hamcrest:hamcrest-all:1.3")
-            dependency("com.sparkjava:spark-core:2.7.2")
-            dependency("org.slf4j:slf4j-simple:1.7.25")
+            dependency(kotlin("test", Versions.kotlin))
+            dependency("com.natpryce:hamkrest:${Versions.hamkrest}")
+            dependency("org.hamcrest:hamcrest-all:${Versions.hamcrest}")
+            dependency("com.sparkjava:spark-core:${Versions.spark}")
+            dependency("org.slf4j:slf4j-simple:${Versions.slf4j}")
 
-            dependency("org.junit.platform:junit-platform-launcher:$junitPlatformVersion")
-            dependencySet(group = "org.junit.jupiter", version = "5.2.0") {
-                entry("junit-jupiter-api")
-                entry("junit-jupiter-engine")
-            }
+            dependency(junit("platform", "launcher", Versions.junitPlatform))
+            dependency(junit("jupiter", "api", Versions.junit))
+            dependency(junit("jupiter", "engine", Versions.junit))
 
-            dependencySet(group = "org.jetbrains.spek", version = "1.1.5") {
-                entry("spek-api")
-                entry("spek-data-driven-extension")
-                entry("spek-subject-extension")
-                entry("spek-junit-platform-engine")
+            arrayOf("api", "data-driven-extension", "subject-extension", "junit-platform-engine").forEach { name ->
+                dependency(spek(name, Versions.spek))
             }
         }
     }
 }
 
 dependencies {
-    implementation("org.jetbrains.kotlin:kotlin-stdlib-jdk8")
-    implementation("org.jetbrains.kotlin:kotlin-reflect")
+    implementation(kotlin("stdlib-jdk8"))
+    implementation(kotlin("reflect"))
     implementation("org.jetbrains.kotlinx:kotlinx-coroutines-core")
     implementation("org.apiguardian:apiguardian-api")
-    implementation("com.uchuhimo:kotlinx-bimap:1.0")
+    implementation("com.uchuhimo:kotlinx-bimap:${Versions.bimap}")
     implementation("com.typesafe:config")
-    implementation("com.fasterxml.jackson.core:jackson-core")
-    implementation("com.fasterxml.jackson.core:jackson-annotations")
-    implementation("com.fasterxml.jackson.core:jackson-databind")
-    implementation("com.fasterxml.jackson.module:jackson-module-kotlin")
-    implementation("com.fasterxml.jackson.datatype:jackson-datatype-jsr310")
     implementation("org.yaml:snakeyaml")
     implementation("com.moandjiezana.toml:toml4j")
     implementation("org.dom4j:dom4j")
     implementation("org.eclipse.jgit:org.eclipse.jgit")
+    arrayOf("core", "annotations", "databind").forEach { name ->
+        implementation(jacksonCore(name))
+    }
+    implementation(jackson("module", "kotlin"))
+    implementation(jackson("datatype", "jsr310"))
 
-    testImplementation("org.jetbrains.kotlin:kotlin-test")
+    testImplementation(kotlin("test"))
     testImplementation("com.natpryce:hamkrest")
     testImplementation("org.hamcrest:hamcrest-all")
-    testImplementation("org.junit.jupiter:junit-jupiter-api")
-    testImplementation("org.jetbrains.spek:spek-api")
-    testImplementation("org.jetbrains.spek:spek-data-driven-extension")
-    testImplementation("org.jetbrains.spek:spek-subject-extension")
+    testImplementation(junit("jupiter", "api"))
+    testImplementation(spek("api"))
+    testImplementation(spek("data-driven-extension"))
+    testImplementation(spek("subject-extension"))
     testImplementation("com.sparkjava:spark-core")
 
-    testRuntimeOnly("org.junit.platform:junit-platform-launcher")
-    testRuntimeOnly("org.junit.jupiter:junit-jupiter-engine")
-    testRuntimeOnly("org.jetbrains.spek:spek-junit-platform-engine")
+    testRuntimeOnly(junit("platform", "launcher"))
+    testRuntimeOnly(junit("jupiter", "engine"))
+    testRuntimeOnly(spek("junit-platform-engine"))
     testRuntimeOnly("org.slf4j:slf4j-simple")
 
-    jmhImplementation("org.jetbrains.kotlin:kotlin-stdlib")
+    jmhImplementation(kotlin("stdlib"))
 
     val main by sourceSets
     snippetImplementation(main.output)
 }
 
-tasks.named("build").configure {
-    dependsOn(tasks.named("snippetClasses"))
-}
+val build by tasks.existing
+val snippetClasses by tasks.existing
+build { dependsOn(snippetClasses) }
 
 java {
-    sourceCompatibility = JavaVersion.VERSION_1_8
-    targetCompatibility = JavaVersion.VERSION_1_8
+    sourceCompatibility = Versions.java
+    targetCompatibility = Versions.java
 }
 
 kotlin {
@@ -184,7 +163,8 @@ kotlin {
     }
 }
 
-tasks.named<Test>("test") {
+val test by tasks.existing(Test::class)
+test {
     useJUnitPlatform()
     testLogging.showStandardStreams = true
     environment("SOURCE_TEST_TYPE", "env")
@@ -196,9 +176,9 @@ tasks.withType<JavaCompile> {
 
 tasks.withType<KotlinCompile> {
     kotlinOptions {
-        jvmTarget = "1.8"
-        apiVersion = "1.2"
-        languageVersion = "1.2"
+        jvmTarget = Versions.java.toString()
+        apiVersion = Versions.kotlinApi
+        languageVersion = Versions.kotlinApi
     }
 }
 
@@ -225,12 +205,12 @@ jmh {
     //warmupForks = 0 // How many warmup forks to make for a single benchmark. 0 to disable warmup forks.
     warmupIterations = 10 // Number of warmup iterations to do.
     isZip64 = false // Use ZIP64 format for bigger archives
-    jmhVersion = "1.21" // Specifies JMH version
+    jmhVersion = Versions.jmh // Specifies JMH version
 }
 
 spotless {
     java {
-        googleJavaFormat("1.6")
+        googleJavaFormat(Versions.googleJavaFormat)
         trimTrailingWhitespace()
         endWithNewline()
         // licenseHeaderFile will fail with an empty line after license header,
@@ -238,7 +218,7 @@ spotless {
         //licenseHeaderFile rootProject.file("config/spotless/apache-license-2.0.java")
     }
     kotlin {
-        ktlint("0.24.0")
+        ktlint(Versions.ktlint)
         trimTrailingWhitespace()
         endWithNewline()
         // licenseHeaderFile is unstable for Kotlin
@@ -248,7 +228,7 @@ spotless {
 }
 
 jacoco {
-    toolVersion = "0.8.1"
+    toolVersion = Versions.jacoco
 }
 
 val jacocoTestReport by tasks.existing(JacocoReport::class) {
@@ -267,7 +247,7 @@ val dokka by tasks.existing(DokkaTask::class) {
     val javadoc: Javadoc by tasks
     outputDirectory = javadoc.destinationDir!!.path
     jdkVersion = 8
-    kotlinTasks(closureOf<Any> {
+    kotlinTasks(closureOf<Any?> {
         val compileKotlin by tasks
         listOf(compileKotlin)
     })
@@ -277,7 +257,7 @@ val dokka by tasks.existing(DokkaTask::class) {
         suffix = "#L"
     })
     externalDocumentationLink(delegateClosureOf<DokkaConfiguration.ExternalDocumentationLink.Builder> {
-        url = URL("http://fasterxml.github.io/jackson-databind/javadoc/2.8/")
+        url = URL("http://fasterxml.github.io/jackson-databind/javadoc/${Versions.jacksonMinor}/")
     })
 }
 
@@ -298,13 +278,17 @@ configure<PublishExtension> {
 tasks {
     val install by registering
     afterEvaluate {
-        named("mavenJavadocJar").configure { dependsOn(dokka) }
-        install.configure { dependsOn(named("publishToMavenLocal")) }
-        named("bintrayUpload").configure { dependsOn(check, install) }
+        val mavenJavadocJar by existing
+        val publishToMavenLocal by existing
+        val bintrayUpload by existing
+        mavenJavadocJar { dependsOn(dokka) }
+        install.configure { dependsOn(publishToMavenLocal) }
+        bintrayUpload { dependsOn(check, install) }
     }
 }
 
-tasks.named<DependencyUpdatesTask>("dependencyUpdates").configure {
+val dependencyUpdates by tasks.existing(DependencyUpdatesTask::class)
+dependencyUpdates {
     revision = "release"
     outputFormatter = "plain"
 }
