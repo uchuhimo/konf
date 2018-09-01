@@ -18,7 +18,7 @@ object Versions {
     val dependencyManagement = "1.0.6.RELEASE"
     val dependencyUpdate = "0.20.0"
     val dokka = "0.9.17"
-    val bimap = "1.0"
+    val bimap = "1.1"
     val apiguardian = "1.0.0"
     val hocon = "1.3.3"
     val yaml = "1.23"

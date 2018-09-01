@@ -116,7 +116,7 @@ dependencies {
     implementation(kotlin("reflect"))
     implementation("org.jetbrains.kotlinx:kotlinx-coroutines-core")
     implementation("org.apiguardian:apiguardian-api")
-    implementation("com.uchuhimo:kotlinx-bimap:${Versions.bimap}")
+    implementation("com.uchuhimo:kotlinx-bimap")
     implementation("com.typesafe:config")
     implementation("org.yaml:snakeyaml")
     implementation("com.moandjiezana.toml:toml4j")
@@ -132,10 +132,10 @@ dependencies {
     testImplementation("com.natpryce:hamkrest")
     testImplementation("org.hamcrest:hamcrest-all")
     testImplementation(junit("jupiter", "api"))
-    testImplementation(spek("api"))
-    testImplementation(spek("data-driven-extension"))
-    testImplementation(spek("subject-extension"))
     testImplementation("com.sparkjava:spark-core")
+    arrayOf("api", "data-driven-extension", "subject-extension").forEach { name ->
+        testImplementation(spek(name))
+    }
 
     testRuntimeOnly(junit("platform", "launcher"))
     testRuntimeOnly(junit("jupiter", "engine"))
@@ -247,10 +247,6 @@ val dokka by tasks.existing(DokkaTask::class) {
     val javadoc: Javadoc by tasks
     outputDirectory = javadoc.destinationDir!!.path
     jdkVersion = 8
-    kotlinTasks(closureOf<Any?> {
-        val compileKotlin by tasks
-        listOf(compileKotlin)
-    })
     linkMapping(delegateClosureOf<LinkMapping> {
         dir = project.rootDir.toPath().resolve("src/main/kotlin").toFile().path
         url = "https://github.com/uchuhimo/konf/blob/v${project.version}/src/main/kotlin"
@@ -266,7 +262,7 @@ configure<PublishExtension> {
     groupId = project.group as String
     artifactId = rootProject.name
     publishVersion = project.version as String
-    licences[0] = "Apache-2.0"
+    setLicences("Apache-2.0")
     desc = "A type-safe cascading configuration library for Kotlin/Java," +
         " supporting most configuration formats"
     website = "https://github.com/uchuhimo/konf"
