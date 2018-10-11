@@ -128,10 +128,10 @@ compile 'com.github.uchuhimo:konf:master-SNAPSHOT'
 
     ```kotlin
     val config = Config { addSpec(ServerSpec) }
-            .withSourceFrom.yaml.file("/path/to/server.yml")
-            .withSourceFrom.json.resource("server.json")
-            .withSourceFrom.env()
-            .withSourceFrom.systemProperties()
+            .from.yaml.file("/path/to/server.yml")
+            .from.json.resource("server.json")
+            .from.env()
+            .from.systemProperties()
     ```
 
     This config contains all items defined in `ServerSpec`, and load values from 4 different sources. Values in resource file `server.json` will override those in file `/path/to/server.yml`, values from system environment will override those in `server.json`, and values from system properties will override those from system environment.
@@ -140,10 +140,10 @@ compile 'com.github.uchuhimo:konf:master-SNAPSHOT'
 
     ```kotlin
     val config = Config { addSpec(ServerSpec) }
-            .withSourceFrom.yaml.watchFile("/path/to/server.yml")
-            .withSourceFrom.json.resource("server.json")
-            .withSourceFrom.env()
-            .withSourceFrom.systemProperties()
+            .from.yaml.watchFile("/path/to/server.yml")
+            .from.json.resource("server.json")
+            .from.env()
+            .from.systemProperties()
     ```
 
 3. Define values in source. You can define in any of these sources:
@@ -368,12 +368,12 @@ check(childConfig[Server.port] == 3000)
 
 ## Load values from source
 
-Use `withSourceFrom` to load values from source doesn't affect values in config, it will return a new child config by loading all values into new layer in child config:
+Use `from` to load values from source doesn't affect values in config, it will return a new child config by loading all values into new layer in child config:
 
 ```kotlin
 val config = Config { addSpec(Server) }
 // values in source is loaded into new layer in child config
-val childConfig = config.withSourceFrom.env()
+val childConfig = config.from.env()
 check(childConfig.parent === config)
 ```
 
@@ -400,20 +400,20 @@ Format of system properties source is same with that of properties source. Syste
 
 HOCON/JSON/properties/TOML/XML/YAML source can be loaded from a variety of input format. Use properties source as example:
 
-- From file: `config.withSourceFrom.properties.file("/path/to/file")`
-- From watched file: `config.withSourceFrom.properties.watchFile("/path/to/file", 100, TimeUnit.MILLISECONDS)`
-- From string: `config.withSourceFrom.properties.string("server.port = 8080")`
-- From URL: `config.withSourceFrom.properties.url("http://localhost:8080/source.properties")`
-- From watched URL: `config.withSourceFrom.properties.watchUrl("http://localhost:8080/source.properties", 1, TimeUnit.MINUTES)`
-- From Git repository: `config.withSourceFrom.properties.git("https://github.com/uchuhimo/konf.git", "/path/to/source.properties", branch = "dev")`
-- From watched Git repository: `config.withSourceFrom.properties.watchGit("https://github.com/uchuhimo/konf.git", "/path/to/source.properties", period = 1, unit = TimeUnit.MINUTES)`
-- From resource: `config.withSourceFrom.properties.resource("source.properties")`
-- From reader: `config.withSourceFrom.properties.reader(reader)`
-- From input stream: `config.withSourceFrom.properties.inputStream(inputStream)`
-- From byte array: `config.withSourceFrom.properties.bytes(bytes)`
-- From portion of byte array: `config.withSourceFrom.properties.bytes(bytes, 1, 12)`
+- From file: `config.from.properties.file("/path/to/file")`
+- From watched file: `config.from.properties.watchFile("/path/to/file", 100, TimeUnit.MILLISECONDS)`
+- From string: `config.from.properties.string("server.port = 8080")`
+- From URL: `config.from.properties.url("http://localhost:8080/source.properties")`
+- From watched URL: `config.from.properties.watchUrl("http://localhost:8080/source.properties", 1, TimeUnit.MINUTES)`
+- From Git repository: `config.from.properties.git("https://github.com/uchuhimo/konf.git", "/path/to/source.properties", branch = "dev")`
+- From watched Git repository: `config.from.properties.watchGit("https://github.com/uchuhimo/konf.git", "/path/to/source.properties", period = 1, unit = TimeUnit.MINUTES)`
+- From resource: `config.from.properties.resource("source.properties")`
+- From reader: `config.from.properties.reader(reader)`
+- From input stream: `config.from.properties.inputStream(inputStream)`
+- From byte array: `config.from.properties.bytes(bytes)`
+- From portion of byte array: `config.from.properties.bytes(bytes, 1, 12)`
 
-If source is from file, file extension can be auto detected. Thus, you can use `config.withSourceFrom.file("/path/to/source.json")` instead of `config.withSourceFrom.json.file("/path/to/source.json")`, or use `config.withSourceFrom.watchFile("/path/to/source.json")` instead of `config.withSourceFrom.json.watchFile("/path/to/source.json")`. Source from URL also support auto-detected extension (use `config.withSourceFrom.url` or `config.withSourceFrom.watchUrl`). The following file extensions can be supported:
+If source is from file, file extension can be auto detected. Thus, you can use `config.from.file("/path/to/source.json")` instead of `config.from.json.file("/path/to/source.json")`, or use `config.from.watchFile("/path/to/source.json")` instead of `config.from.json.watchFile("/path/to/source.json")`. Source from URL also support auto-detected extension (use `config.from.url` or `config.from.watchUrl`). The following file extensions can be supported:
 
 | Type | Extension |
 | - | - |
@@ -464,7 +464,7 @@ Reload values from JSON:
 ```kotlin
 val newConfig = Config {
     addSpec(Server)
-}.withSourceFrom.json.file(file)
+}.from.json.file(file)
 check(config == newConfig)
 ```
 
