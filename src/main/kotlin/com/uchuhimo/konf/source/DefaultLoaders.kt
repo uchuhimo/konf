@@ -27,7 +27,7 @@ import com.uchuhimo.konf.source.properties.PropertiesProvider
 import com.uchuhimo.konf.source.toml.TomlProvider
 import com.uchuhimo.konf.source.xml.XmlProvider
 import com.uchuhimo.konf.source.yaml.YamlProvider
-import kotlinx.coroutines.experimental.DefaultDispatcher
+import kotlinx.coroutines.experimental.Dispatchers
 import org.eclipse.jgit.api.TransportCommand
 import org.eclipse.jgit.lib.Constants
 import java.io.File
@@ -217,7 +217,7 @@ class DefaultLoaders(
         file: File,
         delayTime: Long = 5,
         unit: TimeUnit = TimeUnit.SECONDS,
-        context: CoroutineContext = DefaultDispatcher
+        context: CoroutineContext = Dispatchers.Default
     ): Config = dispatchExtension(file.extension, file.name)
         .watchFile(file, delayTime, unit, context)
 
@@ -247,7 +247,7 @@ class DefaultLoaders(
         file: String,
         delayTime: Long = 5,
         unit: TimeUnit = TimeUnit.SECONDS,
-        context: CoroutineContext = DefaultDispatcher
+        context: CoroutineContext = Dispatchers.Default
     ): Config = watchFile(File(file), delayTime, unit, context)
 
     /**
@@ -316,7 +316,7 @@ class DefaultLoaders(
         url: URL,
         delayTime: Long = 5,
         unit: TimeUnit = TimeUnit.SECONDS,
-        context: CoroutineContext = DefaultDispatcher
+        context: CoroutineContext = Dispatchers.Default
     ): Config = dispatchExtension(File(url.path).extension, url.toString())
         .watchUrl(url, delayTime, unit, context)
 
@@ -346,7 +346,7 @@ class DefaultLoaders(
         url: String,
         delayTime: Long = 5,
         unit: TimeUnit = TimeUnit.SECONDS,
-        context: CoroutineContext = DefaultDispatcher
+        context: CoroutineContext = Dispatchers.Default
     ): Config = watchUrl(URL(url), delayTime, unit, context)
 
     /**
@@ -413,7 +413,7 @@ class DefaultLoaders(
         branch: String = Constants.HEAD,
         period: Long = 1,
         unit: TimeUnit = TimeUnit.MINUTES,
-        context: CoroutineContext = DefaultDispatcher,
+        context: CoroutineContext = Dispatchers.Default,
         action: TransportCommand<*, *>.() -> Unit = {}
     ): Config = dispatchExtension(File(file).extension, "{repo: $repo, file: $file}")
         .watchGit(repo, file, dir, branch, period, unit, context, action)

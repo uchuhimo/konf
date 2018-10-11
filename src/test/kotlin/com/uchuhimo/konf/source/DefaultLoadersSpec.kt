@@ -113,7 +113,7 @@ object DefaultLoadersSpec : SubjectSpek<DefaultLoaders>({
                 val originalValue = config[item]
                 file.writeText(propertiesContent.replace("properties", "newValue"))
                 runBlocking(context) {
-                    delay(1, TimeUnit.SECONDS)
+                    delay(TimeUnit.SECONDS.toMillis(1))
                 }
                 val newValue = config[item]
                 it("should load as auto-detected file format") {
@@ -131,7 +131,7 @@ object DefaultLoadersSpec : SubjectSpek<DefaultLoaders>({
                 val originalValue = config[item]
                 file.writeText(propertiesContent.replace("properties", "newValue"))
                 runBlocking(context) {
-                    delay(1, TimeUnit.SECONDS)
+                    delay(TimeUnit.SECONDS.toMillis(1))
                 }
                 val newValue = config[item]
                 it("should load as auto-detected file format") {
@@ -154,7 +154,7 @@ object DefaultLoadersSpec : SubjectSpek<DefaultLoaders>({
                 val originalValue = config[item]
                 content = propertiesContent.replace("properties", "newValue")
                 runBlocking(context) {
-                    delay(1, TimeUnit.SECONDS)
+                    delay(TimeUnit.SECONDS.toMillis(1))
                 }
                 val newValue = config[item]
                 it("should load as auto-detected URL format") {
@@ -177,7 +177,7 @@ object DefaultLoadersSpec : SubjectSpek<DefaultLoaders>({
                 val originalValue = config[item]
                 content = propertiesContent.replace("properties", "newValue")
                 runBlocking(context) {
-                    delay(1, TimeUnit.SECONDS)
+                    delay(TimeUnit.SECONDS.toMillis(1))
                 }
                 val newValue = config[item]
                 it("should load as auto-detected URL format") {
@@ -238,7 +238,7 @@ object DefaultLoadersSpec : SubjectSpek<DefaultLoaders>({
                         }.call()
                     }
                     runBlocking(context) {
-                        delay(1, TimeUnit.SECONDS)
+                        delay(TimeUnit.SECONDS.toMillis(1))
                     }
                     val newValue = config[item]
                     it("should load as auto-detected file format") {

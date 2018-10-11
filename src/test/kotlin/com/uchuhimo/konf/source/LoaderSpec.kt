@@ -78,7 +78,7 @@ object LoaderSpec : SubjectSpek<Loader>({
                 val originalValue = config[SourceType.type]
                 file.writeText("type = newValue")
                 runBlocking(context) {
-                    delay(5, TimeUnit.SECONDS)
+                    delay(TimeUnit.SECONDS.toMillis(5))
                 }
                 val newValue = config[SourceType.type]
                 it("should return a config which contains value in file") {
@@ -96,7 +96,7 @@ object LoaderSpec : SubjectSpek<Loader>({
                 val originalValue = config[SourceType.type]
                 file.writeText("type = newValue")
                 runBlocking(context) {
-                    delay(5, TimeUnit.SECONDS)
+                    delay(TimeUnit.SECONDS.toMillis(5))
                 }
                 val newValue = config[SourceType.type]
                 it("should return a config which contains value in file") {
@@ -162,7 +162,7 @@ object LoaderSpec : SubjectSpek<Loader>({
                 val originalValue = config[SourceType.type]
                 content = "type = newValue"
                 runBlocking(context) {
-                    delay(5, TimeUnit.SECONDS)
+                    delay(TimeUnit.SECONDS.toMillis(5))
                 }
                 val newValue = config[SourceType.type]
                 it("should return a config which contains value in URL") {
@@ -180,7 +180,7 @@ object LoaderSpec : SubjectSpek<Loader>({
                 val originalValue = config[SourceType.type]
                 file.writeText("type = newValue")
                 runBlocking(context) {
-                    delay(5, TimeUnit.SECONDS)
+                    delay(TimeUnit.SECONDS.toMillis(5))
                 }
                 val newValue = config[SourceType.type]
                 it("should return a config which contains value in URL") {
@@ -199,7 +199,7 @@ object LoaderSpec : SubjectSpek<Loader>({
                 val originalValue = config[SourceType.type]
                 file.writeText("type = newValue")
                 runBlocking(context) {
-                    delay(5, TimeUnit.SECONDS)
+                    delay(TimeUnit.SECONDS.toMillis(5))
                 }
                 val newValue = config[SourceType.type]
                 it("should return a config which contains value in URL") {
@@ -272,7 +272,7 @@ object LoaderSpec : SubjectSpek<Loader>({
                         }.call()
                     }
                     runBlocking(context) {
-                        delay(1, TimeUnit.SECONDS)
+                        delay(TimeUnit.SECONDS.toMillis(1))
                     }
                     val newValue = config[SourceType.type]
                     it("should return a config which contains value in git repository") {
@@ -315,7 +315,7 @@ object LoaderSpec : SubjectSpek<Loader>({
                         }.call()
                     }
                     runBlocking(context) {
-                        delay(1, TimeUnit.SECONDS)
+                        delay(TimeUnit.SECONDS.toMillis(1))
                     }
                     val newValue = config[SourceType.type]
                     it("should return a config which contains value in git repository") {

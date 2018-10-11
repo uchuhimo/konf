@@ -17,7 +17,8 @@
 package com.uchuhimo.konf.source
 
 import com.uchuhimo.konf.Config
-import kotlinx.coroutines.experimental.DefaultDispatcher
+import kotlinx.coroutines.experimental.Dispatchers
+import kotlinx.coroutines.experimental.GlobalScope
 import kotlinx.coroutines.experimental.delay
 import kotlinx.coroutines.experimental.launch
 import org.eclipse.jgit.api.TransportCommand
@@ -98,7 +99,7 @@ class Loader(
         file: File,
         delayTime: Long = 5,
         unit: TimeUnit = TimeUnit.SECONDS,
-        context: CoroutineContext = DefaultDispatcher
+        context: CoroutineContext = Dispatchers.Default
     ): Config {
         return provider.fromFile(file).let { source ->
             config.withLoadTrigger("watch ${source.description}") { newConfig, load ->
@@ -106,9 +107,9 @@ class Loader(
                 val watcher = FileSystems.getDefault().newWatchService()
                 val path = file.toPath().parent
                 path.register(watcher, StandardWatchEventKinds.ENTRY_MODIFY)
-                launch(context) {
+                GlobalScope.launch(context) {
                     while (true) {
-                        delay(delayTime, unit)
+                        delay(unit.toMillis(delayTime))
                         val key = watcher.poll()
                         if (key != null) {
                             for (event in key.pollEvents()) {
@@ -152,7 +153,7 @@ class Loader(
         file: String,
         delayTime: Long = 5,
         unit: TimeUnit = TimeUnit.SECONDS,
-        context: CoroutineContext = DefaultDispatcher
+        context: CoroutineContext = Dispatchers.Default
     ): Config =
         watchFile(File(file), delayTime, unit, context)
 
@@ -217,14 +218,14 @@ class Loader(
         url: URL,
         period: Long = 5,
         unit: TimeUnit = TimeUnit.SECONDS,
-        context: CoroutineContext = DefaultDispatcher
+        context: CoroutineContext = Dispatchers.Default
     ): Config {
         return provider.fromUrl(url).let { source ->
             config.withLoadTrigger("watch ${source.description}") { newConfig, load ->
                 load(source)
-                launch(context) {
+                GlobalScope.launch(context) {
                     while (true) {
-                        delay(period, unit)
+                        delay(unit.toMillis(period))
                         newConfig.lock {
                             newConfig.clear()
                             load(provider.fromUrl(url))
@@ -249,7 +250,7 @@ class Loader(
         url: String,
         period: Long = 5,
         unit: TimeUnit = TimeUnit.SECONDS,
-        context: CoroutineContext = DefaultDispatcher
+        context: CoroutineContext = Dispatchers.Default
     ): Config =
         watchUrl(URL(url), period, unit, context)
 
@@ -302,16 +303,16 @@ class Loader(
         branch: String = Constants.HEAD,
         period: Long = 1,
         unit: TimeUnit = TimeUnit.MINUTES,
-        context: CoroutineContext = DefaultDispatcher,
+        context: CoroutineContext = Dispatchers.Default,
         action: TransportCommand<*, *>.() -> Unit = {}
     ): Config {
         return (dir ?: createTempDir(prefix = "local_git_repo").path).let { directory ->
             provider.fromGit(repo, file, directory, branch, action).let { source ->
                 config.withLoadTrigger("watch ${source.description}") { newConfig, load ->
                     load(source)
-                    launch(context) {
+                    GlobalScope.launch(context) {
                         while (true) {
-                            delay(period, unit)
+                            delay(unit.toMillis(period))
                             newConfig.lock {
                                 newConfig.clear()
                                 load(provider.fromGit(repo, file, directory, branch, action))
