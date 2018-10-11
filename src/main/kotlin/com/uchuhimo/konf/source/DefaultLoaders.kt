@@ -68,7 +68,6 @@ class DefaultLoaders(
         transform(it.orMapped())
     }
 
-
     /**
      * Returns default loaders where sources have specified additional prefix.
      *
@@ -84,7 +83,6 @@ class DefaultLoaders(
      * @return the default loaders where sources are scoped in specified path
      */
     fun scoped(path: String): DefaultLoaders = mapped { it[path] }
-
 
     /**
      * Loader for HOCON source.
