@@ -301,7 +301,8 @@ interface Config : ItemContainer {
      *
      * @param transform the given transformation function
      */
-    fun from(transform: (Source) -> Source): DefaultLoaders = DefaultLoaders(this, transform)
+    @Deprecated("use the clearer API `from.mapped` instead", ReplaceWith("from.mapped(transform)"))
+    fun from(transform: (Source) -> Source): DefaultLoaders = DefaultLoaders(this).mapped(transform)
 
     /**
      * Returns default loaders for this config.

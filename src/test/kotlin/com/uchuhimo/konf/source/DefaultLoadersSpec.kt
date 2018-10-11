@@ -253,11 +253,31 @@ object DefaultLoadersSpec : SubjectSpek<DefaultLoaders>({
     }
 })
 
-object TransformedDefaultLoadersSpec : SubjectSpek<DefaultLoaders>({
+object MappedDefaultLoadersSpec : SubjectSpek<DefaultLoaders>({
     subject {
         Config {
             addSpec(DefaultLoadersConfig["source"])
-        }.from { it["source"] }
+        }.from.mapped { it["source"] }
+    }
+
+    itBehavesLike(DefaultLoadersSpec)
+})
+
+object PrefixedDefaultLoadersSpec : SubjectSpek<DefaultLoaders>({
+    subject {
+        Config {
+            addSpec(DefaultLoadersConfig.withPrefix("prefix"))
+        }.from.prefixed("prefix")
+    }
+
+    itBehavesLike(DefaultLoadersSpec)
+})
+
+object ScopedDefaultLoadersSpec : SubjectSpek<DefaultLoaders>({
+    subject {
+        Config {
+            addSpec(DefaultLoadersConfig["source"])
+        }.from.scoped("source")
     }
 
     itBehavesLike(DefaultLoadersSpec)

@@ -127,25 +127,25 @@ interface Source : SourceInfo {
     operator fun contains(prefix: String): Boolean = contains(prefix.toPath())
 
     /**
-     * Returns sub-source with specified prefix if this source contains value(s) in specified prefix,
+     * Returns sub-source in specified path if this source contains value(s) in specified path,
      * `null` otherwise.
      *
-     * @param prefix item prefix
-     * @return sub-source with specified prefix if this source contains value(s) in specified prefix,
+     * @param path item path
+     * @return sub-source in specified path if this source contains value(s) in specified path,
      * `null` otherwise
      */
-    fun getOrNull(prefix: String): Source? = getOrNull(prefix.toPath())
+    fun getOrNull(path: String): Source? = getOrNull(path.toPath())
 
     /**
-     * Returns sub-source with specified prefix.
+     * Returns sub-source in specified path.
      *
-     * Throws [NoSuchPathException] if there is no value with specified prefix.
+     * Throws [NoSuchPathException] if there is no value in specified path.
      *
-     * @param prefix item prefix
-     * @return sub-source with specified prefix
+     * @param path item path
+     * @return sub-source in specified path
      * @throws NoSuchPathException
      */
-    operator fun get(prefix: String): Source = get(prefix.toPath())
+    operator fun get(path: String): Source = get(path.toPath())
 
     /**
      * Returns source with specified additional prefix.
