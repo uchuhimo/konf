@@ -1,4 +1,5 @@
 import com.github.benmanes.gradle.versions.updates.DependencyUpdatesTask
+import com.jfrog.bintray.gradle.BintrayExtension
 import com.novoda.gradle.release.PublishExtension
 import io.spring.gradle.dependencymanagement.dsl.DependenciesHandler
 import io.spring.gradle.dependencymanagement.dsl.DependencyManagementExtension
@@ -13,6 +14,9 @@ import java.net.URL
 
 val bintrayUserProperty by extra { getPrivateProperty("bintrayUser") }
 val bintrayKeyProperty by extra { getPrivateProperty("bintrayKey") }
+val ossUserToken by extra { getPrivateProperty("ossUserToken") }
+val ossUserPassword by extra { getPrivateProperty("ossUserPassword") }
+val gpgPassphrase by extra { getPrivateProperty("gpgPassphrase") }
 
 buildscript {
     repositories {
@@ -30,6 +34,7 @@ plugins {
     `build-scan`
     java
     jacoco
+    `maven-publish`
     kotlin("jvm") version Versions.kotlin
     kotlin("plugin.allopen") version Versions.kotlin
     id("com.dorongold.task-tree") version Versions.taskTree
@@ -44,7 +49,7 @@ apply(plugin = "com.novoda.bintray-release")
 apply(plugin = "com.jfrog.bintray")
 
 group = "com.uchuhimo"
-version = "0.11"
+version = "0.12"
 
 repositories {
     aliyunMaven()
@@ -257,18 +262,81 @@ val dokka by tasks.existing(DokkaTask::class) {
     })
 }
 
+val projectDescription = "A type-safe cascading configuration library for Kotlin/Java, " +
+    "supporting most configuration formats"
+val projectGroup = project.group as String
+val projectName = rootProject.name
+val projectVersion = project.version as String
+val projectUrl = "https://github.com/uchuhimo/konf"
+
 configure<PublishExtension> {
     userOrg = "uchuhimo"
-    groupId = project.group as String
-    artifactId = rootProject.name
-    publishVersion = project.version as String
+    groupId = projectGroup
+    artifactId = projectName
+    publishVersion = projectVersion
     setLicences("Apache-2.0")
-    desc = "A type-safe cascading configuration library for Kotlin/Java," +
-        " supporting most configuration formats"
-    website = "https://github.com/uchuhimo/konf"
+    desc = projectDescription
+    website = projectUrl
     bintrayUser = bintrayUserProperty
     bintrayKey = bintrayKeyProperty
     dryRun = false
+    override = false
+}
+
+configure<PublishingExtension> {
+    publications {
+        afterEvaluate {
+            getByName<MavenPublication>("maven") {
+                pom.withXml {
+                    val root = asElement()
+                    root.apply {
+                        appendNode("description", projectDescription)
+                        appendNode("name", rootProject.name)
+                        appendNode("url", projectUrl)
+                        appendNode("licenses") {
+                            appendNode("license") {
+                                appendNode("name", "The Apache Software License, Version 2.0")
+                                appendNode("url", "http://www.apache.org/licenses/LICENSE-2.0.txt")
+                            }
+                        }
+                        appendNode("developers") {
+                            appendNode("developer") {
+                                appendNode("name", "uchuhimo")
+                                appendNode("email", "uchuhimo@outlook.com")
+                            }
+                        }
+                        appendNode("scm") {
+                            appendNode("url", projectUrl)
+                        }
+                    }
+                }
+            }
+        }
+    }
+}
+
+configure<BintrayExtension> {
+    pkg.apply {
+        setLabels("kotlin", "config")
+        publicDownloadNumbers = true
+
+        //Optional version descriptor
+        version.apply {
+            vcsTag = "v$projectVersion"
+            //Optional configuration for GPG signing
+            gpg.apply {
+                sign = true //Determines whether to GPG sign the files. The default is false
+                passphrase = gpgPassphrase //Optional. The passphrase for GPG signing'
+            }
+            //Optional configuration for Maven Central sync of the version
+            mavenCentralSync.apply {
+                sync = true //[Default: true] Determines whether to sync the version to Maven Central.
+                user = ossUserToken //OSS user token: mandatory
+                password = ossUserPassword //OSS user password: mandatory
+                close = "1" //Optional property. By default the staging repository is closed and artifacts are released to Maven Central. You can optionally turn this behaviour off (by puting 0 as value) and release the version manually.
+            }
+        }
+    }
 }
 
 tasks {
