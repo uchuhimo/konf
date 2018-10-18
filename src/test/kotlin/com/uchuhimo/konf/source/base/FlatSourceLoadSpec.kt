@@ -19,6 +19,7 @@ package com.uchuhimo.konf.source.base
 import com.natpryce.hamkrest.assertion.assertThat
 import com.natpryce.hamkrest.equalTo
 import com.uchuhimo.konf.Config
+import com.uchuhimo.konf.Feature
 import com.uchuhimo.konf.source.ConfigForLoad
 import com.uchuhimo.konf.source.SourceLoadSpec
 import org.jetbrains.spek.api.dsl.given
@@ -33,6 +34,7 @@ object FlatSourceLoadSpec : SubjectSpek<Config>({
         Config {
             addSpec(ConfigForLoad)
             addSpec(FlatConfigForLoad)
+            enable(Feature.FAIL_ON_UNKNOWN_PATH)
         }.from.map.flat(loadContent)
     }
 

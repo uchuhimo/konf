@@ -17,6 +17,7 @@
 package com.uchuhimo.konf.source.json
 
 import com.uchuhimo.konf.Config
+import com.uchuhimo.konf.Feature
 import com.uchuhimo.konf.source.ConfigForLoad
 import com.uchuhimo.konf.source.SourceLoadSpec
 import org.jetbrains.spek.subject.SubjectSpek
@@ -27,6 +28,7 @@ object JsonSourceLoadSpec : SubjectSpek<Config>({
     subject {
         Config {
             addSpec(ConfigForLoad)
+            enable(Feature.FAIL_ON_UNKNOWN_PATH)
         }.from.json.resource("source/source.json")
     }
 

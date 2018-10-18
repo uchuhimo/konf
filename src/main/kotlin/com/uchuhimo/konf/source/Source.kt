@@ -40,12 +40,18 @@ import com.fasterxml.jackson.databind.type.MapLikeType
 import com.fasterxml.jackson.databind.type.SimpleType
 import com.fasterxml.jackson.databind.type.TypeFactory
 import com.uchuhimo.konf.Config
+import com.uchuhimo.konf.ContainerNode
+import com.uchuhimo.konf.EmptyNode
+import com.uchuhimo.konf.Feature
 import com.uchuhimo.konf.Item
 import com.uchuhimo.konf.Path
 import com.uchuhimo.konf.SizeInBytes
+import com.uchuhimo.konf.TreeNode
+import com.uchuhimo.konf.ValueNode
 import com.uchuhimo.konf.source.base.ValueSource
 import com.uchuhimo.konf.source.json.JsonSource
 import com.uchuhimo.konf.toPath
+import com.uchuhimo.konf.toTree
 import com.uchuhimo.konf.unsupported
 import java.lang.reflect.InvocationTargetException
 import java.math.BigDecimal
@@ -234,6 +240,30 @@ interface Source : SourceInfo {
      * @return a source overlapped by the specified facade source
      */
     operator fun plus(facade: Source): Source = facade.withFallback(this)
+
+    /**
+     * Returns a new source that enables the specified feature.
+     *
+     * @param feature the specified feature
+     * @return a new source
+     */
+    fun enabled(feature: Feature): Source = FeaturedSource(this, feature, true)
+
+    /**
+     * Returns a new source that disables the specified feature.
+     *
+     * @param feature the specified feature
+     * @return a new source
+     */
+    fun disabled(feature: Feature): Source = FeaturedSource(this, feature, false)
+
+    /**
+     * Check whether the specified feature is enabled or not.
+     *
+     * @param feature the specified feature
+     * @return whether the specified feature is enabled or not
+     */
+    fun isEnabled(feature: Feature): Boolean = feature.enabledByDefault
 
     /**
      * Whether this source contains a null value or not.
@@ -630,6 +660,19 @@ interface Source : SourceInfo {
     fun toSizeInBytes(): SizeInBytes = SizeInBytes.parse(toText())
 }
 
+/**
+ * Source with the specified feature enabled/disabled.
+ */
+class FeaturedSource(
+    source: Source,
+    private val feature: Feature,
+    private val isEnabled: Boolean
+) : Source by source {
+    override fun isEnabled(feature: Feature): Boolean {
+        return if (feature == this.feature) isEnabled else super.isEnabled(feature)
+    }
+}
+
 internal fun Any?.toCompatibleValue(mapper: ObjectMapper): Any {
     return when (this) {
         is OffsetTime,
@@ -705,6 +748,17 @@ internal fun load(config: Config, source: Source): Config {
                     loadItem(item, path, source)
                 }
             }
+            if (source.isEnabled(Feature.FAIL_ON_UNKNOWN_PATH) ||
+                config.isEnabled(Feature.FAIL_ON_UNKNOWN_PATH)) {
+                val treeFromSource = source.toTree()
+                check(!treeFromSource.isLeaf())
+                val treeFromConfig = config.toTree()
+                val diffTree = treeFromSource - treeFromConfig
+                if (diffTree != EmptyNode) {
+                    val unknownPaths = diffTree.paths
+                    throw UnknownPathsException(source, unknownPaths)
+                }
+            }
         }
     }
 }
@@ -720,6 +774,19 @@ internal fun Config.loadBy(
         trigger(this) { source ->
             load(this, source)
         }
+    }
+}
+
+/**
+ * Convert the source to a tree node.
+ *
+ * @return a tree node
+ */
+fun Source.toTree(): TreeNode {
+    return if (isMap()) {
+        ContainerNode(toMap().mapValues { it.value.toTree() })
+    } else {
+        ValueNode()
     }
 }
 

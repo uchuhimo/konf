@@ -53,6 +53,7 @@ open class BaseConfig(
     protected val sourcesInLayer = ArrayDeque<Source>()
     protected val valueByItem = mutableMapOf<Item<*>, ValueState>()
     protected val nameByItem = mutableBiMapOf<Item<*>, String>()
+    protected val featuresInLayer = mutableMapOf<Feature, Boolean>()
 
     private var hasChildren = false
 
@@ -365,6 +366,22 @@ open class BaseConfig(
                 }
             }
         }
+
+    override fun enable(feature: Feature): Config {
+        return apply {
+            featuresInLayer[feature] = true
+        }
+    }
+
+    override fun disable(feature: Feature): Config {
+        return apply {
+            featuresInLayer[feature] = false
+        }
+    }
+
+    override fun isEnabled(feature: Feature): Boolean {
+        return featuresInLayer[feature] ?: parent?.isEnabled(feature) ?: feature.enabledByDefault
+    }
 
     @Suppress("LeakingThis")
     override val layer: Config = Layer(this)

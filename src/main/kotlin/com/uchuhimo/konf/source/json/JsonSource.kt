@@ -85,6 +85,8 @@ class JsonSource(
         }
     }
 
+    override fun isMap(): Boolean = node.isObject
+
     override fun toMap(): Map<String, Source> {
         if (node.isObject) {
             return mutableMapOf<String, JsonNode>().apply {

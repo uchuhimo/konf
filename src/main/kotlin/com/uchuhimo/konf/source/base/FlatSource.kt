@@ -102,16 +102,22 @@ open class FlatSource(
     override fun isMap(): Boolean = toMap().isNotEmpty()
 
     override fun toMap(): Map<String, Source> {
-        return map.keys.filter {
-            it.startsWith("$prefix.")
-        }.map {
-            it.removePrefix("$prefix.")
-        }.filter {
-            it.isNotEmpty()
-        }.map {
+        val keys = if (prefix.isEmpty()) {
+            map.keys
+        } else {
+            map.keys.asSequence().filter {
+                it.startsWith("$prefix.")
+            }.map {
+                it.removePrefix("$prefix.")
+            }.filter {
+                it.isNotEmpty()
+            }.toList()
+        }
+        return keys.map {
             it.takeWhile { it != '.' }
         }.toSet().associate {
-            it to FlatSource(map, "$prefix.$it", context = context).apply {
+            val newPrefix = if (prefix.isEmpty()) it else "$prefix.$it"
+            it to FlatSource(map, newPrefix, context = context).apply {
                 addInfo("inMap", this@FlatSource.info.toDescription())
             }
         }

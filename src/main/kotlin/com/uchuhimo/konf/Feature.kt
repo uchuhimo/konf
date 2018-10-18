@@ -14,21 +14,18 @@
  * limitations under the License.
  */
 
-package com.uchuhimo.konf.source.hocon
-
-import com.typesafe.config.ConfigFactory
-import com.uchuhimo.konf.source.Provider
-import com.uchuhimo.konf.source.Source
-import java.io.InputStream
-import java.io.Reader
+package com.uchuhimo.konf
 
 /**
- * Provider for HOCON source.
+ * Enumeration that defines simple on/off features.
  */
-object HoconProvider : Provider {
-    override fun fromReader(reader: Reader): Source =
-        HoconSource(ConfigFactory.parseReader(reader).root())
-
-    override fun fromInputStream(inputStream: InputStream): Source =
-        fromReader(inputStream.reader())
+enum class Feature(val enabledByDefault: Boolean) {
+    /**
+     * Feature that determines what happens when unknown paths appear in the source.
+     * If enabled, an exception is thrown when loading from the source
+     * to indicate it contains unknown paths.
+     *
+     * Feature is disabled by default.
+     */
+    FAIL_ON_UNKNOWN_PATH(false)
 }

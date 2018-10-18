@@ -85,6 +85,13 @@ class LoadException(val path: Path, cause: Throwable) :
     SourceException("fail to load ${path.name}", cause)
 
 /**
+ * Exception indicates that the source contains unknown paths.
+ */
+class UnknownPathsException(source: Source, val paths: List<String>) :
+    SourceException("source ${source.description} contains the following unknown paths:\n" +
+        paths.joinToString("\n"))
+
+/**
  * Exception indicates that specified source is not found.
  */
 class SourceNotFoundException(message: String) : SourceException(message)

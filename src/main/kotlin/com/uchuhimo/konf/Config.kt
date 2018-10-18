@@ -22,7 +22,10 @@ import com.fasterxml.jackson.databind.type.TypeFactory
 import com.uchuhimo.konf.annotation.JavaApi
 import com.uchuhimo.konf.source.DefaultLoaders
 import com.uchuhimo.konf.source.Source
+import com.uchuhimo.konf.source.base.MapSource
+import com.uchuhimo.konf.source.base.toHierarchicalMap
 import com.uchuhimo.konf.source.loadBy
+import com.uchuhimo.konf.source.toTree
 import java.util.Deque
 import kotlin.properties.ReadWriteProperty
 import kotlin.reflect.KProperty
@@ -328,6 +331,30 @@ interface Config : ItemContainer {
      */
     fun toMap(): Map<String, Any>
 
+    /**
+     * Enables the specified feature and returns this config.
+     *
+     * @param feature the specified feature
+     * @return this config
+     */
+    fun enable(feature: Feature): Config
+
+    /**
+     * Disables the specified feature and returns this config.
+     *
+     * @param feature the specified feature
+     * @return this config
+     */
+    fun disable(feature: Feature): Config
+
+    /**
+     * Check whether the specified feature is enabled or not.
+     *
+     * @param feature the specified feature
+     * @return whether the specified feature is enabled or not
+     */
+    fun isEnabled(feature: Feature): Boolean
+
     companion object {
         /**
          * Create a new root config.
@@ -463,4 +490,13 @@ open class LazyConfigProperty<T>(
         config.addItem(item, prefix)
         return config.property(item)
     }
+}
+
+/**
+ * Convert the config to a tree node.
+ *
+ * @return a tree node
+ */
+fun Config.toTree(): TreeNode {
+    return MapSource(toHierarchicalMap()).toTree()
 }

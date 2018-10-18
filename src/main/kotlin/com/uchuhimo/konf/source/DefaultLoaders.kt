@@ -17,6 +17,7 @@
 package com.uchuhimo.konf.source
 
 import com.uchuhimo.konf.Config
+import com.uchuhimo.konf.Feature
 import com.uchuhimo.konf.source.base.FlatSource
 import com.uchuhimo.konf.source.base.KVSource
 import com.uchuhimo.konf.source.base.MapSource
@@ -83,6 +84,10 @@ class DefaultLoaders(
      * @return the default loaders where sources are scoped in specified path
      */
     fun scoped(path: String): DefaultLoaders = mapped { it[path] }
+
+    fun enabled(feature: Feature): DefaultLoaders = mapped { it.enabled(feature) }
+
+    fun disabled(feature: Feature): DefaultLoaders = mapped { it.disabled(feature) }
 
     /**
      * Loader for HOCON source.

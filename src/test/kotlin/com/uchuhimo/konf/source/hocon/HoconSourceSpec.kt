@@ -41,7 +41,7 @@ object HoconSourceSpec : SubjectSpek<HoconSource>({
                 assertTrue("key".toPath() in subject)
             }
             it("should contain the corresponding value") {
-                assertThat((subject["key".toPath()] as HoconValueSource).toInt(), equalTo(1))
+                assertThat((subject["key".toPath()] as HoconSource).toInt(), equalTo(1))
             }
         }
         on("get an non-existed key") {
