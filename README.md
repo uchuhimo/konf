@@ -1,6 +1,7 @@
 # Konf
 
 [![Java 8+](https://img.shields.io/badge/Java-8+-4c7e9f.svg)](http://java.oracle.com)
+[![Maven metadata URL](https://img.shields.io/maven-metadata/v/http/central.maven.org/maven2/com/uchuhimo/konf/maven-metadata.xml.svg)](https://search.maven.org/artifact/com.uchuhimo/konf)
 [![Bintray](https://api.bintray.com/packages/uchuhimo/maven/konf/images/download.svg)](https://bintray.com/uchuhimo/maven/konf/_latestVersion)
 [![JitPack](https://jitpack.io/v/uchuhimo/konf.svg)](https://jitpack.io/#uchuhimo/konf)
 [![Build Status](https://travis-ci.org/uchuhimo/konf.svg?branch=master)](https://travis-ci.org/uchuhimo/konf)
@@ -36,44 +37,28 @@ A type-safe cascading configuration library for Kotlin/Java, supporting most con
 
 ## Use in your projects
 
-This library are published to [JCenter](https://bintray.com/uchuhimo/maven/konf) and [JitPack](https://jitpack.io/#uchuhimo/konf).
+This library are published to [Maven Central](https://search.maven.org/artifact/com.uchuhimo/konf), [JCenter](https://bintray.com/uchuhimo/maven/konf) and [JitPack](https://jitpack.io/#uchuhimo/konf).
 
 ### Maven
-
-Add Bintray JCenter repository to `<repositories>` section:
-
-```xml
-<repository>
-    <id>central</id>
-    <url>http://jcenter.bintray.com</url>
-</repository>
-```
-
-Add dependencies:
 
 ```xml
 <dependency>
   <groupId>com.uchuhimo</groupId>
   <artifactId>konf</artifactId>
   <version>0.12</version>
-  <type>pom</type>
 </dependency>
 ```
 
 ### Gradle
 
-Add Bintray JCenter repository:
-
-```groovy
-repositories {
-    jcenter()
-}
-```
-
-Add dependencies:
-
 ```groovy
 compile 'com.uchuhimo:konf:0.12'
+```
+
+### Gradle Kotlin DSL
+
+```kotlin
+compile(group = "com.uchuhimo", name = "konf", version = "0.12")
 ```
 
 ### Maven (master snapshot)
@@ -425,6 +410,23 @@ If source is from file, file extension can be auto detected. Thus, you can use `
 | YAML | yml, yaml |
 
 You can also implement [`Source`](https://github.com/uchuhimo/konf/blob/master/src/main/kotlin/com/uchuhimo/konf/source/Source.kt) to customize your new source, which can be loaded into config by `config.withSource(source)`.
+
+### Strict parsing when loading
+
+By default, Konf extracts desired paths from sources and ignores other unknown paths in sources. If you want Konf to throws exception when unknown paths are found, you can enable `FAIL_ON_UNKNOWN_PATH` feature:
+
+```kotlin
+config.enable(Feature.FAIL_ON_UNKNOWN_PATH)
+    .from.properties.file("server.properties")
+    .from.json.resource("server.json")
+```
+
+Then `config` will validate paths from both the properties file and the JSON resource. Furthermore, If you want to validate the properties file only, you can use:
+
+```kotlin
+config.from.enable(Feature.FAIL_ON_UNKNOWN_PATH).properties.file("/path/to/file")
+    .from.json.resource("server.json")
+```
 
 ## Export/Reload values in config
 
