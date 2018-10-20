@@ -30,6 +30,12 @@ open class ConfigException : RuntimeException {
 class RepeatedItemException(val name: String) : ConfigException("item $name has been added")
 
 /**
+ * Exception indicates that there is existed inner spec in config.
+ */
+class RepeatedInnerSpecException(val spec: Spec) :
+    ConfigException("spec ${spec.javaClass.simpleName}(prefix=\"${spec.prefix}\") has been added")
+
+/**
  * Exception indicates that there is existed item with conflicted name in config.
  */
 class NameConflictException(message: String) : ConfigException(message)

@@ -20,6 +20,7 @@ import com.fasterxml.jackson.databind.type.TypeFactory
 import com.natpryce.hamkrest.assertion.assertThat
 import com.natpryce.hamkrest.equalTo
 import com.natpryce.hamkrest.has
+import com.natpryce.hamkrest.isEmpty
 import com.natpryce.hamkrest.isIn
 import com.natpryce.hamkrest.sameInstance
 import com.natpryce.hamkrest.throws
@@ -129,10 +130,19 @@ object ConfigSpecSpek : Spek({
                     throws(has(RepeatedItemException::name, equalTo("item"))))
             }
         }
-        val spec = object : ConfigSpec("a.bb") {
-            @Suppress("unused")
-            val item by required<Int>("int", "description")
+        on("add inner spec") {
+            val spec = ConfigSpec()
+            val innerSpec: Spec = ConfigSpec()
+            spec.addInnerSpec(innerSpec)
+            it("should contain the added spec") {
+                assertThat(spec.innerSpecs, equalTo(setOf(innerSpec)))
+            }
+            it("should throw RepeatedInnerSpecException when adding repeated spec") {
+                assertThat({ spec.addInnerSpec(innerSpec) },
+                    throws(has(RepeatedInnerSpecException::spec, equalTo(innerSpec))))
+            }
         }
+        val spec = Nested
         group("get operation") {
             on("get an empty path") {
                 it("should return itself") {
@@ -144,12 +154,25 @@ object ConfigSpecSpek : Spek({
                     assertThat(spec["a"].prefix, equalTo("bb"))
                     assertThat(spec["a.bb"].prefix, equalTo(""))
                 }
+                it("should return a config spec with the proper items and inner specs") {
+                    assertThat(spec["a"].items, equalTo(spec.items))
+                    assertThat(spec["a"].innerSpecs, equalTo(spec.innerSpecs))
+                    assertThat(spec["a.bb.inner"].items, isEmpty)
+                    assertThat(spec["a.bb.inner"].innerSpecs.size, equalTo(1))
+                    assertThat(spec["a.bb.inner"].innerSpecs.toList()[0].prefix, equalTo(""))
+                    assertThat(spec["a.bb.inner2"].items, isEmpty)
+                    assertThat(spec["a.bb.inner2"].innerSpecs.size, equalTo(1))
+                    assertThat(spec["a.bb.inner2"].innerSpecs.toList()[0].prefix, equalTo("level2"))
+                }
             }
             on("get an invalid path") {
                 it("should throw NoSuchPathException") {
                     assertThat({ spec["b"] }, throws(has(NoSuchPathException::path, equalTo("b"))))
                     assertThat({ spec["a."] }, throws<IllegalStateException>())
                     assertThat({ spec["a.b"] }, throws(has(NoSuchPathException::path, equalTo("a.b"))))
+                    assertThat({
+                        spec["a.bb.inner3"]
+                    }, throws(has(NoSuchPathException::path, equalTo("a.bb.inner3"))))
                 }
             }
         }
@@ -163,6 +186,10 @@ object ConfigSpecSpek : Spek({
                 it("should return a config spec with proper prefix") {
                     assertThat((Prefix("c") + spec).prefix, equalTo("c.a.bb"))
                     assertThat((Prefix("c") + spec["a.bb"]).prefix, equalTo("c"))
+                }
+                it("should return a config spec with the same items and inner specs") {
+                    assertThat((Prefix("c") + spec).items, equalTo(spec.items))
+                    assertThat((Prefix("c") + spec).innerSpecs, equalTo(spec.innerSpecs))
                 }
             }
         }
@@ -201,5 +228,72 @@ object ConfigSpecSpek : Spek({
                 }
             }
         }
+        group("prefix inference") {
+            val configSpecInstance = ConfigSpec()
+            on("instance of `ConfigSpec` class") {
+                it("should inference prefix as \"\"") {
+                    assertThat(configSpecInstance.prefix, equalTo(""))
+                }
+            }
+            on("anonymous class") {
+                it("should inference prefix as \"\"") {
+                    assertThat(AnonymousConfigSpec.spec.prefix, equalTo(""))
+                }
+            }
+            val objectExpression = object : ConfigSpec() {}
+            on("object expression") {
+                it("should inference prefix as \"\"") {
+                    assertThat(objectExpression.prefix, equalTo(""))
+                }
+            }
+            on("class with uppercase capital") {
+                it("should inference prefix as the class name with lowercase capital") {
+                    assertThat(Uppercase.prefix, equalTo("uppercase"))
+                }
+            }
+            on("class with uppercase name") {
+                it("should inference prefix as the lowercase class name") {
+                    assertThat(OK.prefix, equalTo("ok"))
+                }
+            }
+            on("class with uppercase first word") {
+                it("should inference prefix as the class name with lowercase first word") {
+                    assertThat(TCPService.prefix, equalTo("tcpService"))
+                }
+            }
+            on("class with lowercase capital") {
+                it("should inference prefix as the class name") {
+                    assertThat(lowercase.prefix, equalTo("lowercase"))
+                }
+            }
+            on("class with \"Spec\" suffix") {
+                it("should inference prefix as the class name without the suffix") {
+                    assertThat(SuffixSpec.prefix, equalTo("suffix"))
+                }
+            }
+        }
     }
 })
+
+object Nested : ConfigSpec("a.bb") {
+    val item by required<Int>("int", "description")
+
+    object Inner : ConfigSpec() {
+        val item by required<Int>()
+    }
+
+    object Inner2 : ConfigSpec("inner2.level2") {
+        val item by required<Int>()
+    }
+}
+
+object Uppercase : ConfigSpec()
+
+object OK : ConfigSpec()
+
+object TCPService : ConfigSpec()
+
+@Suppress("ClassName")
+object lowercase : ConfigSpec()
+
+object SuffixSpec : ConfigSpec()

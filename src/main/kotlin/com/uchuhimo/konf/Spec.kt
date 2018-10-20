@@ -62,6 +62,18 @@ interface Spec {
     val items: Set<Item<*>>
 
     /**
+     * Add the specified inner spec into this config spec.
+     *
+     * @param spec the specified spec
+     */
+    fun addInnerSpec(spec: Spec)
+
+    /**
+     * Set of inner specs in this config spec.
+     */
+    val innerSpecs: Set<Spec>
+
+    /**
      * Returns a config spec overlapped by the specified facade config spec.
      *
      * New items will be added to the facade config spec.
@@ -104,9 +116,25 @@ interface Spec {
         return if (path.isEmpty()) {
             this
         } else if (prefix.size >= path.size && prefix.subList(0, path.size) == path) {
-            ConfigSpec(prefix.subList(path.size, prefix.size).name, items)
+            ConfigSpec(prefix.subList(path.size, prefix.size).name, items, innerSpecs)
         } else {
-            throw NoSuchPathException(path.name)
+            if (prefix.size < path.size && path.subList(0, prefix.size) == prefix) {
+                val pathForInnerSpec = path.subList(prefix.size, path.size).name
+                val filteredInnerSpecs = innerSpecs.mapNotNull { spec ->
+                    try {
+                        spec[pathForInnerSpec]
+                    } catch (_: NoSuchPathException) {
+                        null
+                    }
+                }
+                if (filteredInnerSpecs.isEmpty()) {
+                    throw NoSuchPathException(path.name)
+                } else {
+                    ConfigSpec("", emptySet(), filteredInnerSpecs.toMutableSet())
+                }
+            } else {
+                throw NoSuchPathException(path.name)
+            }
         }
     }
 
@@ -122,7 +150,7 @@ interface Spec {
         return if (newPrefix.isEmpty()) {
             this
         } else {
-            ConfigSpec((newPrefix + prefix).name, items)
+            ConfigSpec((newPrefix + prefix).name, items, innerSpecs)
         }
     }
 
@@ -138,6 +166,10 @@ interface Spec {
             override fun addItem(item: Item<*>) {}
 
             override val items: Set<Item<*>> = emptySet()
+
+            override fun addInnerSpec(spec: Spec) {}
+
+            override val innerSpecs: Set<Spec> = emptySet()
         }
     }
 }

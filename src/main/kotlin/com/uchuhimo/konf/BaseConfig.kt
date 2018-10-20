@@ -369,18 +369,24 @@ open class BaseConfig(
 
     override fun enable(feature: Feature): Config {
         return apply {
-            featuresInLayer[feature] = true
+            lock {
+                featuresInLayer[feature] = true
+            }
         }
     }
 
     override fun disable(feature: Feature): Config {
         return apply {
-            featuresInLayer[feature] = false
+            lock {
+                featuresInLayer[feature] = false
+            }
         }
     }
 
     override fun isEnabled(feature: Feature): Boolean {
-        return featuresInLayer[feature] ?: parent?.isEnabled(feature) ?: feature.enabledByDefault
+        return lock {
+            featuresInLayer[feature] ?: parent?.isEnabled(feature) ?: feature.enabledByDefault
+        }
     }
 
     @Suppress("LeakingThis")
@@ -449,6 +455,9 @@ open class BaseConfig(
                 } else {
                     throw RepeatedItemException(name)
                 }
+            }
+            spec.innerSpecs.forEach { innerSpec ->
+                addSpec(innerSpec.withPrefix(spec.prefix))
             }
             specsInLayer += spec
         }

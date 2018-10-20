@@ -23,6 +23,7 @@ import com.natpryce.hamkrest.has
 import com.natpryce.hamkrest.throws
 import com.uchuhimo.konf.Config
 import com.uchuhimo.konf.ConfigSpec
+import com.uchuhimo.konf.Feature
 import com.uchuhimo.konf.NetworkBuffer
 import com.uchuhimo.konf.Prefix
 import com.uchuhimo.konf.name
@@ -386,6 +387,28 @@ object SourceSpec : Spek({
                     assertCausedBy<ParseException> {
                         load<Person>(mapOf("name" to DumbSource()))
                     }
+                }
+            }
+        }
+        group("feature operation") {
+            on("enable feature") {
+                val source = DumbSource().enabled(Feature.FAIL_ON_UNKNOWN_PATH)
+                it("should let the feature be enabled") {
+                    assertTrue { source.isEnabled(Feature.FAIL_ON_UNKNOWN_PATH) }
+                }
+            }
+            on("disable feature") {
+                val source = DumbSource().disabled(Feature.FAIL_ON_UNKNOWN_PATH)
+                it("should let the feature be disabled") {
+                    assertFalse { source.isEnabled(Feature.FAIL_ON_UNKNOWN_PATH) }
+                }
+            }
+            on("by default") {
+                val source = DumbSource()
+                it("should use the feature's default setting") {
+                    assertThat(
+                        source.isEnabled(Feature.FAIL_ON_UNKNOWN_PATH),
+                        equalTo(Feature.FAIL_ON_UNKNOWN_PATH.enabledByDefault))
                 }
             }
         }

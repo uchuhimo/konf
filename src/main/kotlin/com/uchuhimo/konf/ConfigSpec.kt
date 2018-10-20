@@ -16,17 +16,50 @@
 
 package com.uchuhimo.konf
 
+import com.fasterxml.jackson.module.kotlin.isKotlinClass
+
 /**
  * The default implementation for [Spec].
  *
  * @param prefix common prefix for items in this config spec
  */
 open class ConfigSpec @JvmOverloads constructor(
-    final override val prefix: String = "",
-    items: Set<Item<*>> = mutableSetOf()
+    prefix: String? = null,
+    items: Set<Item<*>> = mutableSetOf(),
+    innerSpecs: Set<Spec> = mutableSetOf()
 ) : Spec {
+    final override val prefix: String = prefix ?: {
+        if (javaClass == ConfigSpec::class.java || javaClass.isAnonymousClass) {
+            ""
+        } else {
+            javaClass.simpleName.let { name ->
+                if (name == null || name.contains('$')) {
+                    ""
+                } else {
+                    if (name.all { it.isUpperCase() }) {
+                        name.toLowerCase()
+                    } else {
+                        val firstLowerCaseIndex = name.indexOfFirst { it.isLowerCase() }
+                        when (firstLowerCaseIndex) {
+                            0 -> name
+                            1 -> name[0].toLowerCase() + name.drop(1)
+                            else -> name.substring(0, firstLowerCaseIndex - 1).toLowerCase() +
+                                name.substring(firstLowerCaseIndex - 1)
+                        }
+                    }
+                }
+            }.let { name ->
+                if (name.endsWith("Spec")) {
+                    name.removeSuffix("Spec")
+                } else {
+                    name
+                }
+            }
+        }
+    }()
+
     init {
-        checkPath(prefix)
+        checkPath(this.prefix)
     }
 
     private val _items = items as? MutableSet<Item<*>> ?: items.toMutableSet()
@@ -38,6 +71,28 @@ open class ConfigSpec @JvmOverloads constructor(
             _items += item
         } else {
             throw RepeatedItemException(item.name)
+        }
+    }
+
+    private val _innerSpecs = innerSpecs as? MutableSet<Spec> ?: innerSpecs.toMutableSet()
+
+    override val innerSpecs: Set<Spec> = _innerSpecs
+
+    override fun addInnerSpec(spec: Spec) {
+        if (spec !in _innerSpecs) {
+            _innerSpecs += spec
+        } else {
+            throw RepeatedInnerSpecException(spec)
+        }
+    }
+
+    init {
+        if (javaClass.isKotlinClass()) {
+            javaClass.kotlin.nestedClasses.map {
+                it.objectInstance
+            }.filterIsInstance<Spec>().forEach { spec ->
+                addInnerSpec(spec)
+            }
         }
     }
 

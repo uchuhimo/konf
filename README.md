@@ -37,7 +37,7 @@ A type-safe cascading configuration library for Kotlin/Java, supporting most con
 
 ## Use in your projects
 
-This library are published to [Maven Central](https://search.maven.org/artifact/com.uchuhimo/konf), [JCenter](https://bintray.com/uchuhimo/maven/konf) and [JitPack](https://jitpack.io/#uchuhimo/konf).
+This library has been published to [Maven Central](https://search.maven.org/artifact/com.uchuhimo/konf), [JCenter](https://bintray.com/uchuhimo/maven/konf) and [JitPack](https://jitpack.io/#uchuhimo/konf).
 
 ### Maven
 
@@ -553,4 +553,4 @@ gradlew clean install
 
 # License
 
-© uchuhimo, 2017. Licensed under an [Apache 2.0](./LICENSE) license.
+© uchuhimo, 2017-2018. Licensed under an [Apache 2.0](./LICENSE) license.

@@ -330,6 +330,6 @@ object LoaderSpec : SubjectSpek<Loader>({
     }
 })
 
-private object SourceType : ConfigSpec() {
+private object SourceType : ConfigSpec("") {
     val type by required<String>()
 }

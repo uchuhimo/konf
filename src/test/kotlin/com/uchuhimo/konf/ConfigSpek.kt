@@ -54,6 +54,27 @@ fun SubjectProviderDsl<Config>.configSpek(prefix: String = "network.buffer", tes
     given("a config") {
         val invalidItem by ConfigSpec("invalid").run { required<Int>() }
         val invalidItemName = "invalid.invalidItem"
+        group("feature operation") {
+            on("enable feature") {
+                subject.enable(Feature.FAIL_ON_UNKNOWN_PATH)
+                it("should let the feature be enabled") {
+                    assertTrue { subject.isEnabled(Feature.FAIL_ON_UNKNOWN_PATH) }
+                }
+            }
+            on("disable feature") {
+                subject.disable(Feature.FAIL_ON_UNKNOWN_PATH)
+                it("should let the feature be disabled") {
+                    assertFalse { subject.isEnabled(Feature.FAIL_ON_UNKNOWN_PATH) }
+                }
+            }
+            on("by default") {
+                it("should use the feature's default setting") {
+                    assertThat(
+                        subject.isEnabled(Feature.FAIL_ON_UNKNOWN_PATH),
+                        equalTo(Feature.FAIL_ON_UNKNOWN_PATH.enabledByDefault))
+                }
+            }
+        }
         group("addSpec operation") {
             on("add orthogonal spec") {
                 val newSpec = object : ConfigSpec(spec.prefix) {
@@ -72,6 +93,55 @@ fun SubjectProviderDsl<Config>.configSpek(prefix: String = "network.buffer", tes
                 }
                 it("should load values from the existed sources for items in new spec") {
                     assertThat(subject[newSpec.minSize], equalTo(2))
+                }
+            }
+            on("add spec with inner specs") {
+                subject.addSpec(Service)
+                it("should contain items in new spec") {
+                    assertTrue { Service.name in subject }
+                    assertTrue { Service.UI.host in subject }
+                    assertTrue { Service.UI.port in subject }
+                    assertTrue { Service.Backend.host in subject }
+                    assertTrue { Service.Backend.port in subject }
+                    assertTrue { Service.Backend.Login.user in subject }
+                    assertTrue { Service.Backend.Login.password in subject }
+                    assertTrue { "service.name" in subject }
+                    assertTrue { "service.ui.host" in subject }
+                    assertTrue { "service.ui.port" in subject }
+                    assertTrue { "service.backend.host" in subject }
+                    assertTrue { "service.backend.port" in subject }
+                    assertTrue { "service.backend.login.user" in subject }
+                    assertTrue { "service.backend.login.password" in subject }
+                }
+                it("should contain new spec") {
+                    assertTrue { Service in subject.specs }
+                }
+                it("should not contain inner specs in new spec") {
+                    assertFalse { Service.UI in subject.specs }
+                    assertFalse { Service.Backend in subject.specs }
+                    assertFalse { Service.Backend.Login in subject.specs }
+                }
+            }
+            on("add nested spec") {
+                subject.addSpec(Service.Backend)
+                it("should contain items in the nested spec") {
+                    assertTrue { Service.Backend.host in subject }
+                    assertTrue { Service.Backend.port in subject }
+                    assertTrue { Service.Backend.Login.user in subject }
+                    assertTrue { Service.Backend.Login.password in subject }
+                }
+                it("should not contain items in the outer spec") {
+                    assertFalse { Service.name in subject }
+                    assertFalse { Service.UI.host in subject }
+                    assertFalse { Service.UI.port in subject }
+                }
+                it("should contain the nested spec") {
+                    assertTrue { Service.Backend in subject.specs }
+                }
+                it("should not contain the outer spec or inner specs in the nested spec") {
+                    assertFalse { Service in subject.specs }
+                    assertFalse { Service.UI in subject.specs }
+                    assertFalse { Service.Backend.Login in subject.specs }
                 }
             }
             on("add repeated item") {
@@ -605,5 +675,24 @@ fun SubjectProviderDsl<Config>.configSpek(prefix: String = "network.buffer", tes
                 }
             }
         }
+    }
+}
+
+object Service : ConfigSpec() {
+    val name by optional("test")
+
+    object Backend : ConfigSpec() {
+        val host by optional("127.0.0.1")
+        val port by optional(7777)
+
+        object Login : ConfigSpec() {
+            val user by optional("admin")
+            val password by optional("123456")
+        }
+    }
+
+    object UI : ConfigSpec() {
+        val host by optional("127.0.0.1")
+        val port by optional(8888)
     }
 }

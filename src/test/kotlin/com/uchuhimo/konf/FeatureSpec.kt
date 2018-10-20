@@ -41,8 +41,8 @@ object FailOnUnknownPathSpec : Spek({
                 addSpec(Valid)
             }
             it("should ignore unknown paths") {
-                val config = config.from.hocon.string(source)
-                assertThat(config[Valid.valid], equalTo("value1"))
+                val conf = config.from.hocon.string(source)
+                assertThat(conf[Valid.valid], equalTo("value1"))
             }
         }
         on("the feature is enabled on config") {
