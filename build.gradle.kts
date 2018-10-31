@@ -7,7 +7,6 @@ import io.spring.gradle.dependencymanagement.dsl.DependencySetHandler
 import org.jetbrains.dokka.DokkaConfiguration
 import org.jetbrains.dokka.gradle.DokkaTask
 import org.jetbrains.dokka.gradle.LinkMapping
-import org.jetbrains.kotlin.gradle.dsl.Coroutines
 import java.util.Properties
 import org.jetbrains.kotlin.gradle.tasks.KotlinCompile
 import java.net.URL
@@ -160,12 +159,6 @@ build { dependsOn(snippetClasses) }
 java {
     sourceCompatibility = Versions.java
     targetCompatibility = Versions.java
-}
-
-kotlin {
-    experimental {
-        coroutines = Coroutines.ENABLE
-    }
 }
 
 val test by tasks.existing(Test::class)
