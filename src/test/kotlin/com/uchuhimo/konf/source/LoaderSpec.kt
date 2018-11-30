@@ -22,8 +22,8 @@ import com.natpryce.hamkrest.throws
 import com.uchuhimo.konf.Config
 import com.uchuhimo.konf.ConfigSpec
 import com.uchuhimo.konf.tempFileOf
+import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.delay
-import kotlinx.coroutines.newSingleThreadContext
 import kotlinx.coroutines.runBlocking
 import org.eclipse.jgit.api.Git
 import org.jetbrains.spek.api.dsl.given
@@ -72,39 +72,35 @@ object LoaderSpec : SubjectSpek<Loader>({
             }
         }
         on("load from watched file") {
-            newSingleThreadContext("context").use { context ->
-                val file = tempFileOf("type = originalValue")
-                val config = subject.watchFile(file, context = context)
-                val originalValue = config[SourceType.type]
-                file.writeText("type = newValue")
-                runBlocking(context) {
-                    delay(TimeUnit.SECONDS.toMillis(5))
-                }
-                val newValue = config[SourceType.type]
-                it("should return a config which contains value in file") {
-                    assertThat(originalValue, equalTo("originalValue"))
-                }
-                it("should load new value when file has been changed") {
-                    assertThat(newValue, equalTo("newValue"))
-                }
+            val file = tempFileOf("type = originalValue")
+            val config = subject.watchFile(file, context = Dispatchers.Sequential)
+            val originalValue = config[SourceType.type]
+            file.writeText("type = newValue")
+            runBlocking(Dispatchers.Sequential) {
+                delay(TimeUnit.SECONDS.toMillis(5))
+            }
+            val newValue = config[SourceType.type]
+            it("should return a config which contains value in file") {
+                assertThat(originalValue, equalTo("originalValue"))
+            }
+            it("should load new value when file has been changed") {
+                assertThat(newValue, equalTo("newValue"))
             }
         }
         on("load from watched file path") {
-            newSingleThreadContext("context").use { context ->
-                val file = tempFileOf("type = originalValue")
-                val config = subject.watchFile(file.toString(), context = context)
-                val originalValue = config[SourceType.type]
-                file.writeText("type = newValue")
-                runBlocking(context) {
-                    delay(TimeUnit.SECONDS.toMillis(5))
-                }
-                val newValue = config[SourceType.type]
-                it("should return a config which contains value in file") {
-                    assertThat(originalValue, equalTo("originalValue"))
-                }
-                it("should load new value when file has been changed") {
-                    assertThat(newValue, equalTo("newValue"))
-                }
+            val file = tempFileOf("type = originalValue")
+            val config = subject.watchFile(file.toString(), context = Dispatchers.Sequential)
+            val originalValue = config[SourceType.type]
+            file.writeText("type = newValue")
+            runBlocking(Dispatchers.Sequential) {
+                delay(TimeUnit.SECONDS.toMillis(5))
+            }
+            val newValue = config[SourceType.type]
+            it("should return a config which contains value in file") {
+                assertThat(originalValue, equalTo("originalValue"))
+            }
+            it("should load new value when file has been changed") {
+                assertThat(newValue, equalTo("newValue"))
             }
         }
         on("load from string") {
@@ -151,63 +147,57 @@ object LoaderSpec : SubjectSpek<Loader>({
             }
         }
         on("load from watched HTTP URL") {
-            newSingleThreadContext("context").use { context ->
-                var content = "type = originalValue"
-                val service = Service.ignite()
-                service.port(0)
-                service.get("/source") { _, _ -> content }
-                service.awaitInitialization()
-                val url = "http://localhost:${service.port()}/source"
-                val config = subject.watchUrl(url, context = context)
-                val originalValue = config[SourceType.type]
-                content = "type = newValue"
-                runBlocking(context) {
-                    delay(TimeUnit.SECONDS.toMillis(5))
-                }
-                val newValue = config[SourceType.type]
-                it("should return a config which contains value in URL") {
-                    assertThat(originalValue, equalTo("originalValue"))
-                }
-                it("should load new value after URL content has been changed") {
-                    assertThat(newValue, equalTo("newValue"))
-                }
+            var content = "type = originalValue"
+            val service = Service.ignite()
+            service.port(0)
+            service.get("/source") { _, _ -> content }
+            service.awaitInitialization()
+            val url = "http://localhost:${service.port()}/source"
+            val config = subject.watchUrl(url, context = Dispatchers.Sequential)
+            val originalValue = config[SourceType.type]
+            content = "type = newValue"
+            runBlocking(Dispatchers.Sequential) {
+                delay(TimeUnit.SECONDS.toMillis(5))
+            }
+            val newValue = config[SourceType.type]
+            it("should return a config which contains value in URL") {
+                assertThat(originalValue, equalTo("originalValue"))
+            }
+            it("should load new value after URL content has been changed") {
+                assertThat(newValue, equalTo("newValue"))
             }
         }
         on("load from watched file URL") {
-            newSingleThreadContext("context").use { context ->
-                val file = tempFileOf("type = originalValue")
-                val config = subject.watchUrl(file.toURI().toURL(), context = context)
-                val originalValue = config[SourceType.type]
-                file.writeText("type = newValue")
-                runBlocking(context) {
-                    delay(TimeUnit.SECONDS.toMillis(5))
-                }
-                val newValue = config[SourceType.type]
-                it("should return a config which contains value in URL") {
-                    assertThat(originalValue, equalTo("originalValue"))
-                }
-                it("should load new value after URL content has been changed") {
-                    assertThat(newValue, equalTo("newValue"))
-                }
+            val file = tempFileOf("type = originalValue")
+            val config = subject.watchUrl(file.toURI().toURL(), context = Dispatchers.Sequential)
+            val originalValue = config[SourceType.type]
+            file.writeText("type = newValue")
+            runBlocking(Dispatchers.Sequential) {
+                delay(TimeUnit.SECONDS.toMillis(5))
+            }
+            val newValue = config[SourceType.type]
+            it("should return a config which contains value in URL") {
+                assertThat(originalValue, equalTo("originalValue"))
+            }
+            it("should load new value after URL content has been changed") {
+                assertThat(newValue, equalTo("newValue"))
             }
         }
         on("load from watched file URL string") {
-            newSingleThreadContext("context").use { context ->
-                val file = tempFileOf("type = originalValue")
-                val url = file.toURI().toURL()
-                val config = subject.watchUrl(url.toString(), context = context)
-                val originalValue = config[SourceType.type]
-                file.writeText("type = newValue")
-                runBlocking(context) {
-                    delay(TimeUnit.SECONDS.toMillis(5))
-                }
-                val newValue = config[SourceType.type]
-                it("should return a config which contains value in URL") {
-                    assertThat(originalValue, equalTo("originalValue"))
-                }
-                it("should load new value after URL content has been changed") {
-                    assertThat(newValue, equalTo("newValue"))
-                }
+            val file = tempFileOf("type = originalValue")
+            val url = file.toURI().toURL()
+            val config = subject.watchUrl(url.toString(), context = Dispatchers.Sequential)
+            val originalValue = config[SourceType.type]
+            file.writeText("type = newValue")
+            runBlocking(Dispatchers.Sequential) {
+                delay(TimeUnit.SECONDS.toMillis(5))
+            }
+            val newValue = config[SourceType.type]
+            it("should return a config which contains value in URL") {
+                assertThat(originalValue, equalTo("originalValue"))
+            }
+            it("should load new value after URL content has been changed") {
+                assertThat(newValue, equalTo("newValue"))
             }
         }
         on("load from resource") {
@@ -243,87 +233,83 @@ object LoaderSpec : SubjectSpek<Loader>({
             }
         }
         on("load from watched git repository") {
-            newSingleThreadContext("context").use { context ->
-                createTempDir(prefix = "remote_git_repo", suffix = ".git").let { dir ->
-                    val file = Paths.get(dir.path, "test").toFile()
-                    Git.init().apply {
-                        setDirectory(dir)
-                    }.call().use { git ->
-                        file.writeText("type = originalValue")
-                        git.add().apply {
-                            addFilepattern("test")
-                        }.call()
-                        git.commit().apply {
-                            message = "init commit"
-                        }.call()
-                    }
-                    val repo = dir.toURI()
-                    val config = subject.watchGit(
-                        repo.toString(), "test",
-                        period = 1, unit = TimeUnit.SECONDS, context = context)
-                    val originalValue = config[SourceType.type]
-                    file.writeText("type = newValue")
-                    Git.open(dir).use { git ->
-                        git.add().apply {
-                            addFilepattern("test")
-                        }.call()
-                        git.commit().apply {
-                            message = "update value"
-                        }.call()
-                    }
-                    runBlocking(context) {
-                        delay(TimeUnit.SECONDS.toMillis(1))
-                    }
-                    val newValue = config[SourceType.type]
-                    it("should return a config which contains value in git repository") {
-                        assertThat(originalValue, equalTo("originalValue"))
-                    }
-                    it("should load new value when content of git repository has been changed") {
-                        assertThat(newValue, equalTo("newValue"))
-                    }
+            createTempDir(prefix = "remote_git_repo", suffix = ".git").let { dir ->
+                val file = Paths.get(dir.path, "test").toFile()
+                Git.init().apply {
+                    setDirectory(dir)
+                }.call().use { git ->
+                    file.writeText("type = originalValue")
+                    git.add().apply {
+                        addFilepattern("test")
+                    }.call()
+                    git.commit().apply {
+                        message = "init commit"
+                    }.call()
+                }
+                val repo = dir.toURI()
+                val config = subject.watchGit(
+                    repo.toString(), "test",
+                    period = 1, unit = TimeUnit.SECONDS, context = Dispatchers.Sequential)
+                val originalValue = config[SourceType.type]
+                file.writeText("type = newValue")
+                Git.open(dir).use { git ->
+                    git.add().apply {
+                        addFilepattern("test")
+                    }.call()
+                    git.commit().apply {
+                        message = "update value"
+                    }.call()
+                }
+                runBlocking(Dispatchers.Sequential) {
+                    delay(TimeUnit.SECONDS.toMillis(1))
+                }
+                val newValue = config[SourceType.type]
+                it("should return a config which contains value in git repository") {
+                    assertThat(originalValue, equalTo("originalValue"))
+                }
+                it("should load new value when content of git repository has been changed") {
+                    assertThat(newValue, equalTo("newValue"))
                 }
             }
         }
         on("load from watched git repository to the given directory") {
-            newSingleThreadContext("context").use { context ->
-                createTempDir(prefix = "remote_git_repo", suffix = ".git").let { dir ->
-                    val file = Paths.get(dir.path, "test").toFile()
-                    Git.init().apply {
-                        setDirectory(dir)
-                    }.call().use { git ->
-                        file.writeText("type = originalValue")
-                        git.add().apply {
-                            addFilepattern("test")
-                        }.call()
-                        git.commit().apply {
-                            message = "init commit"
-                        }.call()
-                    }
-                    val repo = dir.toURI()
-                    val config = subject.watchGit(
-                        repo.toString(), "test",
-                        dir = createTempDir(prefix = "local_git_repo").path,
-                        period = 1, unit = TimeUnit.SECONDS, context = context)
-                    val originalValue = config[SourceType.type]
-                    file.writeText("type = newValue")
-                    Git.open(dir).use { git ->
-                        git.add().apply {
-                            addFilepattern("test")
-                        }.call()
-                        git.commit().apply {
-                            message = "update value"
-                        }.call()
-                    }
-                    runBlocking(context) {
-                        delay(TimeUnit.SECONDS.toMillis(1))
-                    }
-                    val newValue = config[SourceType.type]
-                    it("should return a config which contains value in git repository") {
-                        assertThat(originalValue, equalTo("originalValue"))
-                    }
-                    it("should load new value when content of git repository has been changed") {
-                        assertThat(newValue, equalTo("newValue"))
-                    }
+            createTempDir(prefix = "remote_git_repo", suffix = ".git").let { dir ->
+                val file = Paths.get(dir.path, "test").toFile()
+                Git.init().apply {
+                    setDirectory(dir)
+                }.call().use { git ->
+                    file.writeText("type = originalValue")
+                    git.add().apply {
+                        addFilepattern("test")
+                    }.call()
+                    git.commit().apply {
+                        message = "init commit"
+                    }.call()
+                }
+                val repo = dir.toURI()
+                val config = subject.watchGit(
+                    repo.toString(), "test",
+                    dir = createTempDir(prefix = "local_git_repo").path,
+                    period = 1, unit = TimeUnit.SECONDS, context = Dispatchers.Sequential)
+                val originalValue = config[SourceType.type]
+                file.writeText("type = newValue")
+                Git.open(dir).use { git ->
+                    git.add().apply {
+                        addFilepattern("test")
+                    }.call()
+                    git.commit().apply {
+                        message = "update value"
+                    }.call()
+                }
+                runBlocking(Dispatchers.Sequential) {
+                    delay(TimeUnit.SECONDS.toMillis(1))
+                }
+                val newValue = config[SourceType.type]
+                it("should return a config which contains value in git repository") {
+                    assertThat(originalValue, equalTo("originalValue"))
+                }
+                it("should load new value when content of git repository has been changed") {
+                    assertThat(newValue, equalTo("newValue"))
                 }
             }
         }

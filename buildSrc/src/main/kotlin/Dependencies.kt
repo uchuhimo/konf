@@ -2,16 +2,16 @@ import org.gradle.api.JavaVersion
 
 object Versions {
     val java = JavaVersion.VERSION_1_8
-    val kotlin = "1.3.0"
+    val kotlin = "1.3.10"
     val kotlinApi = "1.3"
-    val junit = "5.3.1"
-    val junitPlatform = "1.3.1"
+    val junit = "5.3.2"
+    val junitPlatform = "1.3.2"
     val spek = "1.2.1"
     val jacksonMinor = "2.9"
-    val jackson = "$jacksonMinor.6"
+    val jackson = "$jacksonMinor.7"
     val bintrayPlugin = "1.8.4"
-    val bintrayRelease = "0.8.1"
-    val taskTree = "1.3"
+    val bintrayRelease = "0.9"
+    val taskTree = "1.3.1"
     val jmh = "1.21"
     val jmhPlugin = "0.4.7"
     val spotless = "3.16.0"
@@ -23,8 +23,9 @@ object Versions {
     val hocon = "1.3.3"
     val yaml = "1.23"
     val toml4j = "0.7.2"
+    // don't upgrade to 2.1.1
     val dom4j = "2.1.0"
-    val coroutines = "1.0.0"
+    val coroutines = "1.0.1"
     val jgit = "5.1.2.201810061102-r"
     val hamkrest = "1.6.0.0"
     val hamcrest = "1.3"

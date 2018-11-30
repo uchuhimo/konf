@@ -23,8 +23,8 @@ import com.uchuhimo.konf.Config
 import com.uchuhimo.konf.ConfigSpec
 import com.uchuhimo.konf.source.properties.PropertiesProvider
 import com.uchuhimo.konf.tempFileOf
+import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.delay
-import kotlinx.coroutines.newSingleThreadContext
 import kotlinx.coroutines.runBlocking
 import org.eclipse.jgit.api.Git
 import org.jetbrains.spek.api.Spek
@@ -107,85 +107,77 @@ object DefaultLoadersSpec : SubjectSpek<DefaultLoaders>({
             }
         }
         on("load from watched file") {
-            newSingleThreadContext("context").use { context ->
-                val file = tempFileOf(propertiesContent, suffix = ".properties")
-                val config = subject.watchFile(file, 1, context = context)
-                val originalValue = config[item]
-                file.writeText(propertiesContent.replace("properties", "newValue"))
-                runBlocking(context) {
-                    delay(TimeUnit.SECONDS.toMillis(1))
-                }
-                val newValue = config[item]
-                it("should load as auto-detected file format") {
-                    assertThat(originalValue, equalTo("properties"))
-                }
-                it("should load new value when file has been changed") {
-                    assertThat(newValue, equalTo("newValue"))
-                }
+            val file = tempFileOf(propertiesContent, suffix = ".properties")
+            val config = subject.watchFile(file, 1, context = Dispatchers.Sequential)
+            val originalValue = config[item]
+            file.writeText(propertiesContent.replace("properties", "newValue"))
+            runBlocking(Dispatchers.Sequential) {
+                delay(TimeUnit.SECONDS.toMillis(1))
+            }
+            val newValue = config[item]
+            it("should load as auto-detected file format") {
+                assertThat(originalValue, equalTo("properties"))
+            }
+            it("should load new value when file has been changed") {
+                assertThat(newValue, equalTo("newValue"))
             }
         }
         on("load from watched file path") {
-            newSingleThreadContext("context").use { context ->
-                val file = tempFileOf(propertiesContent, suffix = ".properties")
-                val config = subject.watchFile(file.path, 1, context = context)
-                val originalValue = config[item]
-                file.writeText(propertiesContent.replace("properties", "newValue"))
-                runBlocking(context) {
-                    delay(TimeUnit.SECONDS.toMillis(1))
-                }
-                val newValue = config[item]
-                it("should load as auto-detected file format") {
-                    assertThat(originalValue, equalTo("properties"))
-                }
-                it("should load new value when file has been changed") {
-                    assertThat(newValue, equalTo("newValue"))
-                }
+            val file = tempFileOf(propertiesContent, suffix = ".properties")
+            val config = subject.watchFile(file.path, 1, context = Dispatchers.Sequential)
+            val originalValue = config[item]
+            file.writeText(propertiesContent.replace("properties", "newValue"))
+            runBlocking(Dispatchers.Sequential) {
+                delay(TimeUnit.SECONDS.toMillis(1))
+            }
+            val newValue = config[item]
+            it("should load as auto-detected file format") {
+                assertThat(originalValue, equalTo("properties"))
+            }
+            it("should load new value when file has been changed") {
+                assertThat(newValue, equalTo("newValue"))
             }
         }
         on("load from watched URL") {
-            newSingleThreadContext("context").use { context ->
-                var content = propertiesContent
-                val service = Service.ignite()
-                service.port(0)
-                service.get("/source.properties") { _, _ -> content }
-                service.awaitInitialization()
-                val url = "http://localhost:${service.port()}/source.properties"
-                val config = subject.watchUrl(URL(url), delayTime = 1, context = context)
-                val originalValue = config[item]
-                content = propertiesContent.replace("properties", "newValue")
-                runBlocking(context) {
-                    delay(TimeUnit.SECONDS.toMillis(1))
-                }
-                val newValue = config[item]
-                it("should load as auto-detected URL format") {
-                    assertThat(originalValue, equalTo("properties"))
-                }
-                it("should load new value after URL content has been changed") {
-                    assertThat(newValue, equalTo("newValue"))
-                }
+            var content = propertiesContent
+            val service = Service.ignite()
+            service.port(0)
+            service.get("/source.properties") { _, _ -> content }
+            service.awaitInitialization()
+            val url = "http://localhost:${service.port()}/source.properties"
+            val config = subject.watchUrl(URL(url), delayTime = 1, context = Dispatchers.Sequential)
+            val originalValue = config[item]
+            content = propertiesContent.replace("properties", "newValue")
+            runBlocking(Dispatchers.Sequential) {
+                delay(TimeUnit.SECONDS.toMillis(1))
+            }
+            val newValue = config[item]
+            it("should load as auto-detected URL format") {
+                assertThat(originalValue, equalTo("properties"))
+            }
+            it("should load new value after URL content has been changed") {
+                assertThat(newValue, equalTo("newValue"))
             }
         }
         on("load from watched URL string") {
-            newSingleThreadContext("context").use { context ->
-                var content = propertiesContent
-                val service = Service.ignite()
-                service.port(0)
-                service.get("/source.properties") { _, _ -> content }
-                service.awaitInitialization()
-                val url = "http://localhost:${service.port()}/source.properties"
-                val config = subject.watchUrl(url, delayTime = 1, context = context)
-                val originalValue = config[item]
-                content = propertiesContent.replace("properties", "newValue")
-                runBlocking(context) {
-                    delay(TimeUnit.SECONDS.toMillis(1))
-                }
-                val newValue = config[item]
-                it("should load as auto-detected URL format") {
-                    assertThat(originalValue, equalTo("properties"))
-                }
-                it("should load new value after URL content has been changed") {
-                    assertThat(newValue, equalTo("newValue"))
-                }
+            var content = propertiesContent
+            val service = Service.ignite()
+            service.port(0)
+            service.get("/source.properties") { _, _ -> content }
+            service.awaitInitialization()
+            val url = "http://localhost:${service.port()}/source.properties"
+            val config = subject.watchUrl(url, delayTime = 1, context = Dispatchers.Sequential)
+            val originalValue = config[item]
+            content = propertiesContent.replace("properties", "newValue")
+            runBlocking(Dispatchers.Sequential) {
+                delay(TimeUnit.SECONDS.toMillis(1))
+            }
+            val newValue = config[item]
+            it("should load as auto-detected URL format") {
+                assertThat(originalValue, equalTo("properties"))
+            }
+            it("should load new value after URL content has been changed") {
+                assertThat(newValue, equalTo("newValue"))
             }
         }
         on("load from git repository") {
@@ -209,44 +201,42 @@ object DefaultLoadersSpec : SubjectSpek<DefaultLoaders>({
             }
         }
         on("load from watched git repository") {
-            newSingleThreadContext("context").use { context ->
-                createTempDir(prefix = "remote_git_repo", suffix = ".git").let { dir ->
-                    val file = Paths.get(dir.path, "source.properties").toFile()
-                    Git.init().apply {
-                        setDirectory(dir)
-                    }.call().use { git ->
-                        file.writeText(propertiesContent)
-                        git.add().apply {
-                            addFilepattern("source.properties")
-                        }.call()
-                        git.commit().apply {
-                            message = "init commit"
-                        }.call()
-                    }
-                    val repo = dir.toURI()
-                    val config = subject.watchGit(
-                        repo.toString(), "source.properties",
-                        period = 1, unit = TimeUnit.SECONDS, context = context)
-                    val originalValue = config[item]
-                    file.writeText(propertiesContent.replace("properties", "newValue"))
-                    Git.open(dir).use { git ->
-                        git.add().apply {
-                            addFilepattern("source.properties")
-                        }.call()
-                        git.commit().apply {
-                            message = "update value"
-                        }.call()
-                    }
-                    runBlocking(context) {
-                        delay(TimeUnit.SECONDS.toMillis(1))
-                    }
-                    val newValue = config[item]
-                    it("should load as auto-detected file format") {
-                        assertThat(originalValue, equalTo("properties"))
-                    }
-                    it("should load new value after file content in git repository has been changed") {
-                        assertThat(newValue, equalTo("newValue"))
-                    }
+            createTempDir(prefix = "remote_git_repo", suffix = ".git").let { dir ->
+                val file = Paths.get(dir.path, "source.properties").toFile()
+                Git.init().apply {
+                    setDirectory(dir)
+                }.call().use { git ->
+                    file.writeText(propertiesContent)
+                    git.add().apply {
+                        addFilepattern("source.properties")
+                    }.call()
+                    git.commit().apply {
+                        message = "init commit"
+                    }.call()
+                }
+                val repo = dir.toURI()
+                val config = subject.watchGit(
+                    repo.toString(), "source.properties",
+                    period = 1, unit = TimeUnit.SECONDS, context = Dispatchers.Sequential)
+                val originalValue = config[item]
+                file.writeText(propertiesContent.replace("properties", "newValue"))
+                Git.open(dir).use { git ->
+                    git.add().apply {
+                        addFilepattern("source.properties")
+                    }.call()
+                    git.commit().apply {
+                        message = "update value"
+                    }.call()
+                }
+                runBlocking(Dispatchers.Sequential) {
+                    delay(TimeUnit.SECONDS.toMillis(1))
+                }
+                val newValue = config[item]
+                it("should load as auto-detected file format") {
+                    assertThat(originalValue, equalTo("properties"))
+                }
+                it("should load new value after file content in git repository has been changed") {
+                    assertThat(newValue, equalTo("newValue"))
                 }
             }
         }

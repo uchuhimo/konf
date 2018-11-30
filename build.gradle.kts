@@ -55,9 +55,9 @@ repositories {
     jcenter()
 }
 
-val wrapper by tasks.registering(Wrapper::class)
+val wrapper by tasks.existing(Wrapper::class)
 wrapper {
-    gradleVersion = "4.10"
+    gradleVersion = "5.0"
     distributionType = Wrapper.DistributionType.ALL
 }
 
@@ -276,31 +276,29 @@ configure<PublishExtension> {
     override = false
 }
 
-configure<PublishingExtension> {
+publishing {
     publications {
         afterEvaluate {
             getByName<MavenPublication>("maven") {
-                pom.withXml {
-                    val root = asElement()
-                    root.apply {
-                        appendNode("description", projectDescription)
-                        appendNode("name", rootProject.name)
-                        appendNode("url", projectUrl)
-                        appendNode("licenses") {
-                            appendNode("license") {
-                                appendNode("name", "The Apache Software License, Version 2.0")
-                                appendNode("url", "http://www.apache.org/licenses/LICENSE-2.0.txt")
-                            }
+                pom {
+                    name.set(rootProject.name)
+                    description.set(projectDescription)
+                    url.set(projectUrl)
+                    licenses {
+                        license {
+                            name.set("The Apache Software License, Version 2.0")
+                            url.set("http://www.apache.org/licenses/LICENSE-2.0.txt")
                         }
-                        appendNode("developers") {
-                            appendNode("developer") {
-                                appendNode("name", "uchuhimo")
-                                appendNode("email", "uchuhimo@outlook.com")
-                            }
+                    }
+                    developers {
+                        developer {
+                            id.set("uchuhimo")
+                            name.set("uchuhimo")
+                            email.set("uchuhimo@outlook.com")
                         }
-                        appendNode("scm") {
-                            appendNode("url", projectUrl)
-                        }
+                    }
+                    scm {
+                        url.set(projectUrl)
                     }
                 }
             }
@@ -335,10 +333,9 @@ configure<BintrayExtension> {
 tasks {
     val install by registering
     afterEvaluate {
-        val mavenJavadocJar by existing
         val publishToMavenLocal by existing
         val bintrayUpload by existing
-        mavenJavadocJar { dependsOn(dokka) }
+        publishToMavenLocal { dependsOn(dokka) }
         install.configure { dependsOn(publishToMavenLocal) }
         bintrayUpload { dependsOn(check, install) }
     }
@@ -351,6 +348,6 @@ dependencyUpdates {
 }
 
 buildScan {
-    setTermsOfServiceUrl("https://gradle.com/terms-of-service")
+    termsOfServiceUrl = "https://gradle.com/terms-of-service"
     setTermsOfServiceAgree("yes")
 }
