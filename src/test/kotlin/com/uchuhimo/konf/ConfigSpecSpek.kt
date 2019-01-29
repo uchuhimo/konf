@@ -271,6 +271,11 @@ object ConfigSpecSpek : Spek({
                     assertThat(SuffixSpec.prefix, equalTo("suffix"))
                 }
             }
+            on("companion object of a class") {
+                it("should inference prefix as the class name") {
+                    assertThat(OriginalSpec.prefix, equalTo("original"))
+                }
+            }
         }
     }
 })
@@ -297,3 +302,7 @@ object TCPService : ConfigSpec()
 object lowercase : ConfigSpec()
 
 object SuffixSpec : ConfigSpec()
+
+class OriginalSpec {
+    companion object : ConfigSpec()
+}

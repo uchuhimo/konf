@@ -32,7 +32,9 @@ open class ConfigSpec @JvmOverloads constructor(
         if (javaClass == ConfigSpec::class.java || javaClass.isAnonymousClass) {
             ""
         } else {
-            javaClass.simpleName.let { name ->
+            javaClass.let { clazz ->
+                if (this::class.isCompanion) clazz.declaringClass else clazz
+            }.simpleName.let { name ->
                 if (name == null || name.contains('$')) {
                     ""
                 } else {
