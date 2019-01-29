@@ -48,7 +48,7 @@ apply(plugin = "com.novoda.bintray-release")
 apply(plugin = "com.jfrog.bintray")
 
 group = "com.uchuhimo"
-version = "0.12"
+version = "0.13"
 
 repositories {
     aliyunMaven()

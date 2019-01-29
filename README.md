@@ -64,20 +64,20 @@ This library has been published to [Maven Central](https://search.maven.org/arti
 <dependency>
   <groupId>com.uchuhimo</groupId>
   <artifactId>konf</artifactId>
-  <version>0.12</version>
+  <version>0.13</version>
 </dependency>
 ```
 
 ### Gradle
 
 ```groovy
-compile 'com.uchuhimo:konf:0.12'
+compile 'com.uchuhimo:konf:0.13'
 ```
 
 ### Gradle Kotlin DSL
 
 ```kotlin
-compile(group = "com.uchuhimo", name = "konf", version = "0.12")
+compile(group = "com.uchuhimo", name = "konf", version = "0.13")
 ```
 
 ### Maven (master snapshot)
