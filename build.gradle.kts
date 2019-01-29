@@ -57,7 +57,7 @@ repositories {
 
 val wrapper by tasks.existing(Wrapper::class)
 wrapper {
-    gradleVersion = "5.0"
+    gradleVersion = "5.1.1"
     distributionType = Wrapper.DistributionType.ALL
 }
 
