@@ -165,7 +165,11 @@ val test by tasks.existing(Test::class)
 test {
     useJUnitPlatform()
     testLogging.showStandardStreams = true
-    environment("SOURCE_TEST_TYPE", "env")
+    val properties = Properties()
+    properties.load(File("src/test/kotlin/com/uchuhimo/konf/source/env/env.properties").inputStream())
+    properties.forEach { key, value ->
+        environment(key as String, value)
+    }
 }
 
 tasks.withType<JavaCompile> {

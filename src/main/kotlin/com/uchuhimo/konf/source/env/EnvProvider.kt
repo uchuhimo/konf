@@ -16,6 +16,7 @@
 
 package com.uchuhimo.konf.source.env
 
+import com.uchuhimo.konf.Feature
 import com.uchuhimo.konf.source.Source
 import com.uchuhimo.konf.source.base.FlatSource
 
@@ -33,6 +34,6 @@ object EnvProvider {
             System.getenv().mapKeys { (key, _) ->
                 key.toLowerCase().replace('_', '.')
             },
-            type = "system-environment")
+            type = "system-environment").enabled(Feature.LOAD_KEYS_CASE_INSENSITIVELY)
     }
 }

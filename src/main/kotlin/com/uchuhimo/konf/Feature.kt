@@ -27,5 +27,11 @@ enum class Feature(val enabledByDefault: Boolean) {
      *
      * Feature is disabled by default.
      */
-    FAIL_ON_UNKNOWN_PATH(false)
+    FAIL_ON_UNKNOWN_PATH(false),
+    /**
+     * Feature that determines whether loading keys from sources case-insensitively.
+     *
+     * Feature is disabled by default.
+     */
+    LOAD_KEYS_CASE_INSENSITIVELY(false)
 }

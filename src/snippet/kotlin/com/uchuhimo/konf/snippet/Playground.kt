@@ -35,15 +35,49 @@ object Outer : ConfigSpec() {
     }
 }
 
+val text = """
+datasets:
+  hive:
+    - key: transactions
+      uri: /user/somepath
+      format: parquet
+      database: transations_daily
+      table: transx
+
+    - key: second_transactions
+      uri: /seconduser/somepath
+      format: avro
+      database: transations_monthly
+      table: avro_table
+  file:
+    - key: users
+      uri: s3://filestore
+      format: parquet
+      mode: overwrite
+""".trimIndent()
+
+object DatasetsSpec : ConfigSpec() {
+    val file by optional<List<FileDS>>(default = emptyList())
+    val hive by optional<List<HiveDS>>(default = emptyList())
+}
+
+data class FileDS(val key: String, val uri: String, val format: String = "parquet", val mode: String = "append")
+
+data class HiveDS(val key: String, val uri: String, val database: String, val table: String, val format: String = "parquet", val mode: String = "append")
+
 fun main(args: Array<String>) {
-    val config = Config {
-        addSpec(Outer)
-    }.from.map.kv(mapOf(
-        "outer.inner.host" to "127.0.0.1",
-        "outer.inner.port" to 8080))
-    check(config[Outer.Inner.host] == "127.0.0.1")
-    check(config[Outer.Inner.port] == 8080)
-    check(config[Outer.Inner.Login.user] == "admin")
-    check(config[Outer.Inner.Login.password] == "123456")
-    check(config[Outer.Inner2.port] == 8000)
+//    val config = Config {
+//        addSpec(Outer)
+//    }.from.map.kv(mapOf(
+//        "outer.inner.host" to "127.0.0.1",
+//        "outer.inner.port" to 8080))
+//    check(config[Outer.Inner.host] == "127.0.0.1")
+//    check(config[Outer.Inner.port] == 8080)
+//    check(config[Outer.Inner.Login.user] == "admin")
+//    check(config[Outer.Inner.Login.password] == "123456")
+//    check(config[Outer.Inner2.port] == 8000)
+
+    val config = Config { addSpec(DatasetsSpec) }.from.yaml.string(text)
+    check(config[DatasetsSpec.file][0].key == "users")
+    check(config[DatasetsSpec.hive][1].database == "transations_monthly")
 }

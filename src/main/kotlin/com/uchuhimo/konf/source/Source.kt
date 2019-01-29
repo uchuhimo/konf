@@ -743,7 +743,13 @@ internal fun load(config: Config, source: Source): Config {
     return config.apply {
         lock {
             for (item in this) {
-                val path = pathOf(item)
+                val path = pathOf(item).let { path ->
+                    if (source.isEnabled(Feature.LOAD_KEYS_CASE_INSENSITIVELY)) {
+                        path.map { it.toLowerCase() }
+                    } else {
+                        path
+                    }
+                }
                 if (path in source) {
                     loadItem(item, path, source)
                 }
