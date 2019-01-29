@@ -22,15 +22,33 @@ A type-safe cascading configuration library for Kotlin/Java, supporting most con
 
 ## Contents
 
-- [Prerequisites](#prerequisites)
-- [Use in your projects](#use-in-your-projects)
-- [Quick start](#quick-start)
-- [Define items](#define-items)
-- [Use config](#use-config)
-- [Load values from source](#load-values-from-source)
-- [Export/Reload values in config](#exportreload-values-in-config)
-- [Supported item types](#supported-item-types)
-- [Build from source](#build-from-source)
+- [Konf](#konf)
+  - [Features](#features)
+  - [Contents](#contents)
+  - [Prerequisites](#prerequisites)
+  - [Use in your projects](#use-in-your-projects)
+    - [Maven](#maven)
+    - [Gradle](#gradle)
+    - [Gradle Kotlin DSL](#gradle-kotlin-dsl)
+    - [Maven (master snapshot)](#maven-master-snapshot)
+    - [Gradle (master snapshot)](#gradle-master-snapshot)
+  - [Quick start](#quick-start)
+  - [Define items](#define-items)
+  - [Use config](#use-config)
+    - [Create config](#create-config)
+    - [Add config spec](#add-config-spec)
+    - [Retrieve value from config](#retrieve-value-from-config)
+    - [Check whether value exists in config or not](#check-whether-value-exists-in-config-or-not)
+    - [Modify value in config](#modify-value-in-config)
+    - [Export value in config as property](#export-value-in-config-as-property)
+    - [Fork from another config](#fork-from-another-config)
+  - [Load values from source](#load-values-from-source)
+    - [Strict parsing when loading](#strict-parsing-when-loading)
+  - [Export/Reload values in config](#exportreload-values-in-config)
+  - [Supported item types](#supported-item-types)
+  - [Optional features](#optional-features)
+  - [Build from source](#build-from-source)
+- [License](#license)
 
 ## Prerequisites
 
@@ -104,7 +122,7 @@ compile 'com.github.uchuhimo:konf:master-SNAPSHOT'
 1. Define items in config spec:
 
     ```kotlin
-    object ServerSpec : ConfigSpec("server") {
+    object ServerSpec : ConfigSpec() {
         val host by optional("0.0.0.0")
         val port by required<Int>()
     }
@@ -169,7 +187,7 @@ compile 'com.github.uchuhimo:konf:master-SNAPSHOT'
 Config items is declared in config spec, added to config by `Config#addSpec`. All items in same config spec have same prefix. Define a config spec with prefix `local.server`:
 
 ```kotlin
-object ServerSpec : ConfigSpec("local.server") {
+object ServerSpec : ConfigSpec("server") {
 }
 ```
 
@@ -180,6 +198,36 @@ class Server {
     companion object : ConfigSpec("server") {
         val host by optional("0.0.0.0")
         val port by required<Int>()
+    }
+}
+```
+
+The config spec prefix can be automatically inferred from the class name, leading to further simplification like:
+
+```kotlin
+object ServerSpec : ConfigSpec() {
+}
+```
+
+or
+
+```kotlin
+class Server {
+    companion object : ConfigSpec() {
+    }
+}
+```
+
+Here are some examples showing the inference convention: `Uppercase` to `uppercase`, `lowercase` to `lowercase`, `SuffixSpec` to `suffix`, `TCPService` to `tcpService`.
+
+The config spec can also be nested. For example, the path of `Service.Backend.Login.user` in the following example will be inferred as "service.backend.login.user":
+
+```kotlin
+object Service : ConfigSpec() {
+    object Backend : ConfigSpec() {
+        object Login : ConfigSpec() {
+            val user by optional("admin")
+        }
     }
 }
 ```
@@ -529,6 +577,15 @@ Konf uses [Jackson](https://github.com/FasterXML/jackson) to support Kotlin Buil
 - Jackson core modules
 - `JavaTimeModule` in [jackson-modules-java8](https://github.com/FasterXML/jackson-modules-java8)
 - [jackson-module-kotlin](https://github.com/FasterXML/jackson-module-kotlin)
+
+## Optional features
+
+There are some optional features that you can enable/disable in the config scope or the source scope by `Config#enable(Feature)`/`Config#disable(Feature)` or `Source#enabled(Feature)`/`Source#disable(Feature)`. You can use `Config#isEnabled()` or `Source#isEnabled()` to check whether a feature is enabled.
+
+These features include:
+
+- `FAIL_ON_UNKNOWN_PATH`: feature that determines what happens when unknown paths appear in the source. If enabled, an exception is thrown when loading from the source to indicate it contains unknown paths. This feature is disabled by default.
+- `LOAD_KEYS_CASE_INSENSITIVELY`: feature that determines whether loading keys from sources case-insensitively. This feature is disabled by default except for system environment.
 
 ## Build from source
 
