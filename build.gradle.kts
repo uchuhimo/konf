@@ -1,15 +1,14 @@
 import com.github.benmanes.gradle.versions.updates.DependencyUpdatesTask
 import com.jfrog.bintray.gradle.BintrayExtension
-import com.novoda.gradle.release.PublishExtension
 import io.spring.gradle.dependencymanagement.dsl.DependenciesHandler
 import io.spring.gradle.dependencymanagement.dsl.DependencyManagementExtension
 import io.spring.gradle.dependencymanagement.dsl.DependencySetHandler
 import org.jetbrains.dokka.DokkaConfiguration
 import org.jetbrains.dokka.gradle.DokkaTask
 import org.jetbrains.dokka.gradle.LinkMapping
-import java.util.Properties
 import org.jetbrains.kotlin.gradle.tasks.KotlinCompile
 import java.net.URL
+import java.util.Properties
 
 val bintrayUserProperty by extra { getPrivateProperty("bintrayUser") }
 val bintrayKeyProperty by extra { getPrivateProperty("bintrayKey") }
@@ -25,7 +24,6 @@ buildscript {
     }
     dependencies {
         classpath("com.jfrog.bintray.gradle:gradle-bintray-plugin:${Versions.bintrayPlugin}")
-        classpath("com.novoda:bintray-release:${Versions.bintrayRelease}")
     }
 }
 
@@ -44,11 +42,10 @@ plugins {
     id("org.jetbrains.dokka") version Versions.dokka
 }
 
-apply(plugin = "com.novoda.bintray-release")
 apply(plugin = "com.jfrog.bintray")
 
 group = "com.uchuhimo"
-version = "0.13"
+version = "0.13.1"
 
 repositories {
     aliyunMaven()
@@ -245,9 +242,8 @@ val check by tasks.existing {
 }
 
 val dokka by tasks.existing(DokkaTask::class) {
-    outputFormat = "html"
-    val javadoc: Javadoc by tasks
-    outputDirectory = javadoc.destinationDir!!.path
+    outputFormat = "javadoc"
+    outputDirectory = tasks.javadoc.get().destinationDir!!.path
     jdkVersion = 8
     linkMapping(delegateClosureOf<LinkMapping> {
         dir = project.rootDir.toPath().resolve("src/main/kotlin").toFile().path
@@ -259,6 +255,16 @@ val dokka by tasks.existing(DokkaTask::class) {
     })
 }
 
+val sourcesJar by tasks.registering(Jar::class) {
+    archiveClassifier.set("sources")
+    from(sourceSets.main.get().allSource)
+}
+
+val javadocJar by tasks.registering(Jar::class) {
+    archiveClassifier.set("javadoc")
+    from(dokka)
+}
+
 val projectDescription = "A type-safe cascading configuration library for Kotlin/Java, " +
     "supporting most configuration formats"
 val projectGroup = project.group as String
@@ -266,44 +272,35 @@ val projectName = rootProject.name
 val projectVersion = project.version as String
 val projectUrl = "https://github.com/uchuhimo/konf"
 
-configure<PublishExtension> {
-    userOrg = "uchuhimo"
-    groupId = projectGroup
-    artifactId = projectName
-    publishVersion = projectVersion
-    setLicences("Apache-2.0")
-    desc = projectDescription
-    website = projectUrl
-    bintrayUser = bintrayUserProperty
-    bintrayKey = bintrayKeyProperty
-    dryRun = false
-    override = false
-}
-
 publishing {
     publications {
-        afterEvaluate {
-            getByName<MavenPublication>("maven") {
-                pom {
-                    name.set(rootProject.name)
-                    description.set(projectDescription)
+        create<MavenPublication>("maven") {
+            from(components["java"])
+            artifact(sourcesJar.get())
+            artifact(javadocJar.get())
+
+            groupId = projectGroup
+            artifactId = projectName
+            version = projectVersion
+            pom {
+                name.set(rootProject.name)
+                description.set(projectDescription)
+                url.set(projectUrl)
+                licenses {
+                    license {
+                        name.set("The Apache Software License, Version 2.0")
+                        url.set("http://www.apache.org/licenses/LICENSE-2.0.txt")
+                    }
+                }
+                developers {
+                    developer {
+                        id.set("uchuhimo")
+                        name.set("uchuhimo")
+                        email.set("uchuhimo@outlook.com")
+                    }
+                }
+                scm {
                     url.set(projectUrl)
-                    licenses {
-                        license {
-                            name.set("The Apache Software License, Version 2.0")
-                            url.set("http://www.apache.org/licenses/LICENSE-2.0.txt")
-                        }
-                    }
-                    developers {
-                        developer {
-                            id.set("uchuhimo")
-                            name.set("uchuhimo")
-                            email.set("uchuhimo@outlook.com")
-                        }
-                    }
-                    scm {
-                        url.set(projectUrl)
-                    }
                 }
             }
         }
@@ -311,12 +308,28 @@ publishing {
 }
 
 configure<BintrayExtension> {
+    user = bintrayUserProperty
+    key = bintrayKeyProperty
+    publish = true
+    dryRun = false
+    override = false
+    setPublications("maven")
+
     pkg.apply {
         setLabels("kotlin", "config")
         publicDownloadNumbers = true
+        repo = "maven"
+        userOrg = "uchuhimo"
+        name = projectName
+        desc = projectDescription
+        websiteUrl = projectUrl
+        issueTrackerUrl = "$projectUrl/issues"
+        vcsUrl = "$projectUrl.git"
+        setLicenses("Apache-2.0")
 
         //Optional version descriptor
         version.apply {
+            name = projectVersion
             vcsTag = "v$projectVersion"
             //Optional configuration for GPG signing
             gpg.apply {
@@ -339,7 +352,6 @@ tasks {
     afterEvaluate {
         val publishToMavenLocal by existing
         val bintrayUpload by existing
-        publishToMavenLocal { dependsOn(dokka) }
         install.configure { dependsOn(publishToMavenLocal) }
         bintrayUpload { dependsOn(check, install) }
     }

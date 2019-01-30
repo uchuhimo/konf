@@ -10,7 +10,6 @@ object Versions {
     val jacksonMinor = "2.9"
     val jackson = "$jacksonMinor.8"
     val bintrayPlugin = "1.8.4"
-    val bintrayRelease = "0.9"
     val taskTree = "1.3.1"
     val jmh = "1.21"
     val jmhPlugin = "0.4.8"

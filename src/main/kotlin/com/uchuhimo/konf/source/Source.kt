@@ -724,15 +724,25 @@ internal fun Any?.toCompatibleValue(mapper: ObjectMapper): Any {
     }
 }
 
-internal fun Config.loadItem(item: Item<*>, path: Path, source: Source) {
+internal fun Config.loadItem(item: Item<*>, path: Path, source: Source): Boolean {
     try {
-        val itemSource = source[path]
-        if (item.nullable &&
-            (itemSource.isNull() ||
-                (itemSource.isText() && itemSource.toText() == "null"))) {
-            rawSet(item, null)
+        val uniformPath = if (source.isEnabled(Feature.LOAD_KEYS_CASE_INSENSITIVELY)) {
+            path.map { it.toLowerCase() }
         } else {
-            rawSet(item, itemSource.toValue(item.type, mapper))
+            path
+        }
+        val itemSource = source.getOrNull(uniformPath)
+        if (itemSource != null) {
+            if (item.nullable &&
+                (itemSource.isNull() ||
+                    (itemSource.isText() && itemSource.toText() == "null"))) {
+                rawSet(item, null)
+            } else {
+                rawSet(item, itemSource.toValue(item.type, mapper))
+            }
+            return true
+        } else {
+            return false
         }
     } catch (cause: SourceException) {
         throw LoadException(path, cause)
@@ -743,16 +753,7 @@ internal fun load(config: Config, source: Source): Config {
     return config.apply {
         lock {
             for (item in this) {
-                val path = pathOf(item).let { path ->
-                    if (source.isEnabled(Feature.LOAD_KEYS_CASE_INSENSITIVELY)) {
-                        path.map { it.toLowerCase() }
-                    } else {
-                        path
-                    }
-                }
-                if (path in source) {
-                    loadItem(item, path, source)
-                }
+                loadItem(item, pathOf(item), source)
             }
             if (source.isEnabled(Feature.FAIL_ON_UNKNOWN_PATH) ||
                 config.isEnabled(Feature.FAIL_ON_UNKNOWN_PATH)) {

@@ -415,9 +415,7 @@ open class BaseConfig(
                     is RequiredItem -> ValueState.Unset
                     is LazyItem -> ValueState.Lazy(item.thunk)
                 }
-                sources.firstOrNull { path in it }?.let { source ->
-                    loadItem(item, path, source)
-                }
+                sources.firstOrNull { loadItem(item, path, it) }
             } else {
                 throw RepeatedItemException(name)
             }
@@ -449,9 +447,7 @@ open class BaseConfig(
                         is RequiredItem -> ValueState.Unset
                         is LazyItem -> ValueState.Lazy(item.thunk)
                     }
-                    sources.firstOrNull { path in it }?.let { source ->
-                        loadItem(item, path, source)
-                    }
+                    sources.firstOrNull { loadItem(item, path, it) }
                 } else {
                     throw RepeatedItemException(name)
                 }

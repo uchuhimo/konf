@@ -40,6 +40,11 @@ object EnvProviderSpec : SubjectSpek<EnvProvider>({
                 assertThat(config[SourceSpec.Test.type], equalTo("env"))
                 assertTrue { config[SourceSpec.camelCase] }
             }
+            it("should return a case-insensitive source") {
+                val config = Config().withSource(source).apply { addSpec(SourceSpec) }
+                assertThat(config[SourceSpec.Test.type], equalTo("env"))
+                assertTrue { config[SourceSpec.camelCase] }
+            }
         }
     }
 })
