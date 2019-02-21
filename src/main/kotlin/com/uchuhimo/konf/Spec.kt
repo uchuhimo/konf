@@ -154,6 +154,16 @@ interface Spec {
         }
     }
 
+    /**
+     * Creates a nested spec with the specified prefix.
+     *
+     * @param prefix inner spec prefix
+     * @return nested spec with the specified prefix
+     */
+    fun nestedSpec(prefix: String): Spec {
+        return ConfigSpec(prefix).also(this::addInnerSpec)
+    }
+
     companion object {
         /**
          * A dummy implementation for [Spec].
