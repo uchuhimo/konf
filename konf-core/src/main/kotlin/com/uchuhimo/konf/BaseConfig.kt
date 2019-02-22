@@ -33,7 +33,8 @@ import com.uchuhimo.konf.source.toCompatibleValue
 import java.time.Duration
 import java.time.OffsetDateTime
 import java.time.ZonedDateTime
-import java.util.*
+import java.util.ArrayDeque
+import java.util.Deque
 import java.util.concurrent.locks.ReentrantReadWriteLock
 import kotlin.concurrent.read
 import kotlin.concurrent.write

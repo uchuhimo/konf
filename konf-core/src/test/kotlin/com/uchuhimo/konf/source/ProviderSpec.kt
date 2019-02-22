@@ -21,8 +21,6 @@ import com.natpryce.hamkrest.equalTo
 import com.natpryce.hamkrest.throws
 import com.uchuhimo.konf.source.properties.PropertiesProvider
 import com.uchuhimo.konf.tempFileOf
-import org.eclipse.jgit.api.Git
-import org.eclipse.jgit.lib.Constants
 import org.jetbrains.spek.api.dsl.given
 import org.jetbrains.spek.api.dsl.it
 import org.jetbrains.spek.api.dsl.on
@@ -30,7 +28,6 @@ import org.jetbrains.spek.subject.SubjectSpek
 import org.jetbrains.spek.subject.itBehavesLike
 import spark.Service
 import java.net.URL
-import java.nio.file.Paths
 
 object ProviderSpec : SubjectSpek<Provider>({
     subject { PropertiesProvider }
@@ -144,6 +141,7 @@ object ProviderSpec : SubjectSpek<Provider>({
                     throws<SourceNotFoundException>())
             }
         }
+        /* TODO: Move to konf-jgit
         on("create source from git repository") {
             createTempDir().let { dir ->
                 Git.init().apply {
@@ -188,6 +186,7 @@ object ProviderSpec : SubjectSpek<Provider>({
                 }
             }
         }
+        */
     }
 })
 

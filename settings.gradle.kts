@@ -8,4 +8,6 @@ pluginManagement {
 
 rootProject.name = "konf"
 
-include("konf-core", "konf-toml")
+include("konf-core",
+        "konf-toml",
+        "konf-jgit")

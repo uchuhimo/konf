@@ -25,13 +25,11 @@ import com.uchuhimo.konf.tempFileOf
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.runBlocking
-import org.eclipse.jgit.api.Git
 import org.jetbrains.spek.api.dsl.given
 import org.jetbrains.spek.api.dsl.it
 import org.jetbrains.spek.api.dsl.on
 import org.jetbrains.spek.subject.SubjectSpek
 import spark.Service
-import java.nio.file.Paths
 import java.util.concurrent.TimeUnit
 
 object LoaderSpec : SubjectSpek<Loader>({
@@ -212,6 +210,7 @@ object LoaderSpec : SubjectSpek<Loader>({
                     throws<SourceNotFoundException>())
             }
         }
+        /* TODO: Move to konf-jgit
         on("load from git repository") {
             createTempDir().let { dir ->
                 Git.init().apply {
@@ -313,6 +312,7 @@ object LoaderSpec : SubjectSpek<Loader>({
                 }
             }
         }
+        */
     }
 })
 

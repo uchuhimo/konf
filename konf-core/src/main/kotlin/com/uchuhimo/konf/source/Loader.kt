@@ -21,8 +21,6 @@ import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.GlobalScope
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
-import org.eclipse.jgit.api.TransportCommand
-import org.eclipse.jgit.lib.Constants
 import java.io.File
 import java.io.InputStream
 import java.io.Reader
@@ -262,65 +260,4 @@ class Loader(
      */
     fun resource(resource: String): Config =
         config.withSource(provider.fromResource(resource))
-
-    /**
-     * Returns a child config containing values from a specified git repository.
-     *
-     * @param repo git repository
-     * @param file file in the git repository
-     * @param dir local directory of the git repository
-     * @param branch the initial branch
-     * @param action additional action when cloning/pulling
-     * @return a child config containing values from a specified git repository
-     */
-    fun git(
-        repo: String,
-        file: String,
-        dir: String? = null,
-        branch: String = Constants.HEAD,
-        action: TransportCommand<*, *>.() -> Unit = {}
-    ): Config =
-        config.withSource(provider.fromGit(repo, file, dir, branch, action))
-
-    /**
-     * Returns a child config containing values from a specified git repository,
-     * and reloads values periodically.
-     *
-     * @param repo git repository
-     * @param file file in the git repository
-     * @param dir local directory of the git repository
-     * @param branch the initial branch
-     * @param period reload period. The default value is 1.
-     * @param unit time unit of reload period. The default value is [TimeUnit.MINUTES].
-     * @param context context of the coroutine. The default value is [DefaultDispatcher].
-     * @param action additional action when cloning/pulling
-     * @return a child config containing values from a specified git repository
-     */
-    fun watchGit(
-        repo: String,
-        file: String,
-        dir: String? = null,
-        branch: String = Constants.HEAD,
-        period: Long = 1,
-        unit: TimeUnit = TimeUnit.MINUTES,
-        context: CoroutineContext = Dispatchers.Default,
-        action: TransportCommand<*, *>.() -> Unit = {}
-    ): Config {
-        return (dir ?: createTempDir(prefix = "local_git_repo").path).let { directory ->
-            provider.fromGit(repo, file, directory, branch, action).let { source ->
-                config.withLoadTrigger("watch ${source.description}") { newConfig, load ->
-                    load(source)
-                    GlobalScope.launch(context) {
-                        while (true) {
-                            delay(unit.toMillis(period))
-                            newConfig.lock {
-                                newConfig.clear()
-                                load(provider.fromGit(repo, file, directory, branch, action))
-                            }
-                        }
-                    }
-                }.withLayer()
-            }
-        }
-    }
 }

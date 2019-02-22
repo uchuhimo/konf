@@ -9,11 +9,10 @@ repositories {
 }
 
 dependencies {
-    implementation(Dependencies.stdlibJdk8)
     implementation(project(":konf-core"))
-    implementation(Dependencies.toml)
-
-    //testImplementation(project(":konf-core", "test"))
+    implementation(Dependencies.stdlibJdk8)
+    implementation(Dependencies.coroutines)
+    implementation(Dependencies.jgit)
 }
 
 applyTestDependencies()

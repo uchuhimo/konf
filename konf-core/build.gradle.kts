@@ -62,9 +62,7 @@ dependencies {
     implementation(Dependencies.bimap)
     implementation(Dependencies.hocon)
     implementation(Dependencies.yaml)
-    //implementation(Dependencies.toml)
     implementation(Dependencies.dom4j)
-    implementation(Dependencies.jgit)
 
     // Jackson
     implementation(Dependencies.jacksonCore)
@@ -101,7 +99,7 @@ val build by tasks.existing
 val snippetClasses by tasks.existing
 build { dependsOn(snippetClasses) }
 
-java {
+configure<JavaPluginConvention> {
     sourceCompatibility = Versions.java
     targetCompatibility = Versions.java
 }
@@ -110,13 +108,11 @@ val test by tasks.existing(Test::class)
 test {
     useJUnitPlatform()
     testLogging.showStandardStreams = true
-    /*
-    val properties = Properties()
-    properties.load(File("src/test/kotlin/com/uchuhimo/konf/source/env/env.properties").inputStream())
-    properties.forEach { key, value ->
-        environment(key as String, value)
-    }
-    */
+
+    environment(mapOf(
+            "SOURCE_TEST_TYPE" to "env",
+            "SOURCE_CAMELCASE" to true
+    ))
 }
 
 tasks.withType<JavaCompile> {

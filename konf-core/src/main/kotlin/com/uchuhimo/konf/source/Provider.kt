@@ -21,16 +21,11 @@ import com.uchuhimo.konf.source.json.JsonProvider
 import com.uchuhimo.konf.source.properties.PropertiesProvider
 import com.uchuhimo.konf.source.xml.XmlProvider
 import com.uchuhimo.konf.source.yaml.YamlProvider
-import org.eclipse.jgit.api.Git
-import org.eclipse.jgit.api.TransportCommand
-import org.eclipse.jgit.lib.Constants
-import org.eclipse.jgit.transport.URIish
 import java.io.File
 import java.io.FileInputStream
 import java.io.InputStream
 import java.io.Reader
 import java.net.URL
-import java.nio.file.Paths
 
 /**
  * Provides source from various input format.
@@ -155,52 +150,6 @@ interface Provider {
         }
         return sources.reduce(Source::withFallback).apply {
             addContext("resource", resource)
-        }
-    }
-
-    /**
-     * Returns a new source from a specified git repository.
-     *
-     * @param repo git repository
-     * @param file file in the git repository
-     * @param dir local directory of the git repository
-     * @param branch the initial branch
-     * @param action additional action when cloning/pulling
-     * @return a new source from a specified git repository
-     */
-    fun fromGit(
-        repo: String,
-        file: String,
-        dir: String? = null,
-        branch: String = Constants.HEAD,
-        action: TransportCommand<*, *>.() -> Unit = {}
-    ): Source {
-        return (dir?.let(::File) ?: createTempDir(prefix = "local_git_repo")).let { directory ->
-            if (directory.list { _, name -> name == ".git" }.isEmpty()) {
-                Git.cloneRepository().apply {
-                    setURI(repo)
-                    setDirectory(directory)
-                    setBranch(branch)
-                    this.action()
-                }.call().close()
-            } else {
-                Git.open(directory).use { git ->
-                    val uri = URIish(repo)
-                    val remoteName = git.remoteList().call().firstOrNull { it.urIs.contains(uri) }?.name
-                        ?: throw InvalidRemoteRepoException(repo, directory.path)
-                    git.pull().apply {
-                        remote = remoteName
-                        remoteBranchName = branch
-                        this.action()
-                    }.call()
-                }
-            }
-            fromFile(Paths.get(directory.path, file).toFile()).apply {
-                addContext("repo", repo)
-                addContext("file", file)
-                addContext("dir", directory.path)
-                addContext("branch", branch)
-            }
         }
     }
 

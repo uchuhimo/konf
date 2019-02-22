@@ -28,8 +28,6 @@ import com.uchuhimo.konf.source.properties.PropertiesProvider
 import com.uchuhimo.konf.source.xml.XmlProvider
 import com.uchuhimo.konf.source.yaml.YamlProvider
 import kotlinx.coroutines.Dispatchers
-import org.eclipse.jgit.api.TransportCommand
-import org.eclipse.jgit.lib.Constants
 import java.io.File
 import java.net.URL
 import java.util.concurrent.TimeUnit
@@ -338,73 +336,6 @@ class DefaultLoaders(
         unit: TimeUnit = TimeUnit.SECONDS,
         context: CoroutineContext = Dispatchers.Default
     ): Config = watchUrl(URL(url), delayTime, unit, context)
-
-    /**
-     * Returns a child config containing values from a specified git repository.
-     *
-     * Format of the url is auto-detected from the url extension.
-     * Supported url formats and the corresponding extensions:
-     * - HOCON: conf
-     * - JSON: json
-     * - Properties: properties
-     * - XML: xml
-     * - YAML: yml, yaml
-     *
-     * Throws [UnsupportedExtensionException] if the url extension is unsupported.
-     *
-     * @param repo git repository
-     * @param file file in the git repository
-     * @param dir local directory of the git repository
-     * @param branch the initial branch
-     * @param action additional action when cloning/pulling
-     * @return a child config containing values from a specified git repository
-     * @throws UnsupportedExtensionException
-     */
-    fun git(
-        repo: String,
-        file: String,
-        dir: String? = null,
-        branch: String = Constants.HEAD,
-        action: TransportCommand<*, *>.() -> Unit = {}
-    ): Config = dispatchExtension(File(file).extension, "{repo: $repo, file: $file}")
-        .git(repo, file, dir, branch, action)
-
-    /**
-     * Returns a child config containing values from a specified git repository,
-     * and reloads values periodically.
-     *
-     * Format of the url is auto-detected from the url extension.
-     * Supported url formats and the corresponding extensions:
-     * - HOCON: conf
-     * - JSON: json
-     * - Properties: properties
-     * - XML: xml
-     * - YAML: yml, yaml
-     *
-     * Throws [UnsupportedExtensionException] if the url extension is unsupported.
-     *
-     * @param repo git repository
-     * @param file file in the git repository
-     * @param dir local directory of the git repository
-     * @param branch the initial branch
-     * @param period reload period. The default value is 1.
-     * @param unit time unit of reload period. The default value is [TimeUnit.MINUTES].
-     * @param context context of the coroutine. The default value is [DefaultDispatcher].
-     * @param action additional action when cloning/pulling
-     * @return a child config containing values from a specified git repository
-     * @throws UnsupportedExtensionException
-     */
-    fun watchGit(
-        repo: String,
-        file: String,
-        dir: String? = null,
-        branch: String = Constants.HEAD,
-        period: Long = 1,
-        unit: TimeUnit = TimeUnit.MINUTES,
-        context: CoroutineContext = Dispatchers.Default,
-        action: TransportCommand<*, *>.() -> Unit = {}
-    ): Config = dispatchExtension(File(file).extension, "{repo: $repo, file: $file}")
-        .watchGit(repo, file, dir, branch, period, unit, context, action)
 }
 
 /**

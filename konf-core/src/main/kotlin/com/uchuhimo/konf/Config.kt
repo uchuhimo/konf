@@ -26,7 +26,7 @@ import com.uchuhimo.konf.source.base.MapSource
 import com.uchuhimo.konf.source.base.toHierarchicalMap
 import com.uchuhimo.konf.source.loadBy
 import com.uchuhimo.konf.source.toTree
-import java.util.*
+import java.util.Deque
 import kotlin.properties.ReadWriteProperty
 import kotlin.reflect.KProperty
 

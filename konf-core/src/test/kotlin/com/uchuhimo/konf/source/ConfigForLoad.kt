@@ -21,8 +21,19 @@ import com.uchuhimo.konf.SizeInBytes
 import java.io.Serializable
 import java.math.BigDecimal
 import java.math.BigInteger
-import java.time.*
-import java.util.*
+import java.time.Duration
+import java.time.Instant
+import java.time.LocalDate
+import java.time.LocalDateTime
+import java.time.LocalTime
+import java.time.OffsetDateTime
+import java.time.OffsetTime
+import java.time.Year
+import java.time.YearMonth
+import java.time.ZonedDateTime
+import java.util.Date
+import java.util.SortedMap
+import java.util.SortedSet
 
 object ConfigForLoad : ConfigSpec("level1.level2") {
     val empty by required<Int?>()
