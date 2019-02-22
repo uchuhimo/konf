@@ -19,7 +19,6 @@ package com.uchuhimo.konf.source
 import com.uchuhimo.konf.source.hocon.HoconProvider
 import com.uchuhimo.konf.source.json.JsonProvider
 import com.uchuhimo.konf.source.properties.PropertiesProvider
-import com.uchuhimo.konf.source.yaml.YamlProvider
 import java.io.File
 import java.io.FileInputStream
 import java.io.InputStream
@@ -196,9 +195,7 @@ interface Provider {
         private val extensionToProvider = mutableMapOf(
             "conf" to HoconProvider,
             "json" to JsonProvider,
-            "properties" to PropertiesProvider,
-            "yml" to YamlProvider,
-            "yaml" to YamlProvider
+            "properties" to PropertiesProvider
         )
 
         /**

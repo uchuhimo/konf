@@ -25,7 +25,6 @@ import com.uchuhimo.konf.source.env.EnvProvider
 import com.uchuhimo.konf.source.hocon.HoconProvider
 import com.uchuhimo.konf.source.json.JsonProvider
 import com.uchuhimo.konf.source.properties.PropertiesProvider
-import com.uchuhimo.konf.source.yaml.YamlProvider
 import kotlinx.coroutines.Dispatchers
 import java.io.File
 import java.net.URL
@@ -104,12 +103,6 @@ class DefaultLoaders(
     val properties = Loader(config, PropertiesProvider.orMapped())
 
     /**
-     * Loader for YAML source.
-     */
-    @JvmField
-    val yaml = Loader(config, YamlProvider.orMapped())
-
-    /**
      * Loader for map source.
      */
     @JvmField
@@ -148,7 +141,6 @@ class DefaultLoaders(
      * - HOCON: conf
      * - JSON: json
      * - Properties: properties
-     * - YAML: yml, yaml
      *
      * Throws [UnsupportedExtensionException] if the file extension is unsupported.
      *
@@ -166,7 +158,6 @@ class DefaultLoaders(
      * - HOCON: conf
      * - JSON: json
      * - Properties: properties
-     * - YAML: yml, yaml
      *
      * Throws [UnsupportedExtensionException] if the file extension is unsupported.
      *
@@ -185,7 +176,6 @@ class DefaultLoaders(
      * - HOCON: conf
      * - JSON: json
      * - Properties: properties
-     * - YAML: yml, yaml
      *
      * Throws [UnsupportedExtensionException] if the file extension is unsupported.
      *
@@ -213,7 +203,6 @@ class DefaultLoaders(
      * - HOCON: conf
      * - JSON: json
      * - Properties: properties
-     * - YAML: yml, yaml
      *
      * Throws [UnsupportedExtensionException] if the file extension is unsupported.
      *
@@ -239,7 +228,6 @@ class DefaultLoaders(
      * - HOCON: conf
      * - JSON: json
      * - Properties: properties
-     * - YAML: yml, yaml
      *
      * Throws [UnsupportedExtensionException] if the url extension is unsupported.
      *
@@ -257,7 +245,6 @@ class DefaultLoaders(
      * - HOCON: conf
      * - JSON: json
      * - Properties: properties
-     * - YAML: yml, yaml
      *
      * Throws [UnsupportedExtensionException] if the url extension is unsupported.
      *
@@ -276,7 +263,6 @@ class DefaultLoaders(
      * - HOCON: conf
      * - JSON: json
      * - Properties: properties
-     * - YAML: yml, yaml
      *
      * Throws [UnsupportedExtensionException] if the url extension is unsupported.
      *
@@ -304,7 +290,6 @@ class DefaultLoaders(
      * - HOCON: conf
      * - JSON: json
      * - Properties: properties
-     * - YAML: yml, yaml
      *
      * Throws [UnsupportedExtensionException] if the url extension is unsupported.
      *

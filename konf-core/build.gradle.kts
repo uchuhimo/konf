@@ -63,7 +63,6 @@ dependencies {
     implementation(Dependencies.apiGuardian)
     implementation(Dependencies.bimap)
     implementation(Dependencies.hocon)
-    implementation(Dependencies.yaml)
 
     // Jackson
     implementation(Dependencies.jacksonCore)

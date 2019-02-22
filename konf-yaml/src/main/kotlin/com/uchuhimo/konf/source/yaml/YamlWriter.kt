@@ -17,6 +17,8 @@
 package com.uchuhimo.konf.source.yaml
 
 import com.uchuhimo.konf.Config
+import com.uchuhimo.konf.source.DefaultLoaders
+import com.uchuhimo.konf.source.Loader
 import com.uchuhimo.konf.source.Writer
 import com.uchuhimo.konf.source.base.toHierarchicalMap
 import org.yaml.snakeyaml.DumperOptions
@@ -47,3 +49,9 @@ class YamlWriter(val config: Config) : Writer {
  * Returns writer for YAML source.
  */
 val Config.toYaml: Writer get() = YamlWriter(this)
+
+/**
+ * Loader for YAML source.
+ */
+val DefaultLoaders.yaml: Loader
+    get() = Loader(config, YamlProvider.orMapped())

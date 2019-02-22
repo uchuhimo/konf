@@ -27,7 +27,6 @@ import kotlin.coroutines.CoroutineContext
  * - HOCON: conf
  * - JSON: json
  * - Properties: properties
- * - YAML: yml, yaml
  *
  * Throws [UnsupportedExtensionException] if the url extension is unsupported.
  *
@@ -57,7 +56,6 @@ fun DefaultLoaders.git(
  * - HOCON: conf
  * - JSON: json
  * - Properties: properties
- * - YAML: yml, yaml
  *
  * Throws [UnsupportedExtensionException] if the url extension is unsupported.
  *
