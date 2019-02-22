@@ -1,54 +1,84 @@
-import org.gradle.api.JavaVersion
+import org.gradle.api.Project
+import org.gradle.kotlin.dsl.dependencies
 
-object Versions {
-    val java = JavaVersion.VERSION_1_8
-    val kotlin = "1.3.20"
-    val kotlinApi = "1.3"
-    val junit = "5.3.2"
-    val junitPlatform = "1.3.2"
-    val spek = "1.2.1"
-    val jacksonMinor = "2.9"
-    val jackson = "$jacksonMinor.8"
-    val bintrayPlugin = "1.8.4"
-    val taskTree = "1.3.1"
-    val jmh = "1.21"
-    val jmhPlugin = "0.4.8"
-    val spotless = "3.17.0"
-    val dependencyManagement = "1.0.6.RELEASE"
-    val dependencyUpdate = "0.20.0"
-    val dokka = "0.9.17"
-    val bimap = "1.2"
-    val apiguardian = "1.0.0"
-    val hocon = "1.3.3"
-    val yaml = "1.23"
-    val toml4j = "0.7.2"
-    // don't upgrade to 2.1.1
-    val dom4j = "2.1.0"
-    val coroutines = "1.1.1"
-    val jgit = "5.2.1.201812262042-r"
-    val hamkrest = "1.7.0.0"
-    val hamcrest = "1.3"
-    val spark = "2.8.0"
-    val slf4j = "1.7.25"
+object Dependencies {
 
-    val googleJavaFormat = "1.6"
-    val ktlint = "0.29.0"
-    val jacoco = "0.8.2"
+    // Kotlin
+    val stdlib = kotlin("stdlib", Versions.kotlin)
+    val stdlibJdk8 = kotlin("stdlib-jdk8", Versions.kotlin)
+    val reflect = kotlin("reflect", Versions.kotlin)
+    val coroutines = "org.jetbrains.kotlinx:kotlinx-coroutines-core:${Versions.coroutines}"
+
+    // Other
+    val bimap = "com.uchuhimo:kotlinx-bimap:${Versions.bimap}"
+    val jgit = "org.eclipse.jgit:org.eclipse.jgit:${Versions.jgit}"
+    val apiGuardian = "org.apiguardian:apiguardian-api:${Versions.apiguardian}"
+
+    // Jackson
+    val jacksonCore = jacksonCore("core", Versions.jackson)
+    val jacksonAnnotations = jacksonCore("annotations", Versions.jackson)
+    val jacksonDatabind = jacksonCore("databind", Versions.jackson)
+
+    val jacksonKotlin = jackson("module", "kotlin", Versions.jackson)
+    val jacksonJsr310 = jackson("datatype", "jsr310", Versions.jackson)
+
+    // Formats
+    val hocon = "com.typesafe:config:${Versions.hocon}"
+    val yaml = "org.yaml:snakeyaml:${Versions.yaml}"
+    val toml = "com.moandjiezana.toml:toml4j:${Versions.toml4j}"
+    val dom4j = "org.dom4j:dom4j:${Versions.dom4j}"
+
+    // --- Testing
+
+    val kotlinTest = kotlin("test", Versions.kotlin)
+    val hamkrest = "com.natpryce:hamkrest:${Versions.hamkrest}"
+    val hamcrest = "org.hamcrest:hamcrest-all:${Versions.hamcrest}"
+    val sparkJava = "com.sparkjava:spark-core:${Versions.spark}"
+    val slf4j = "org.slf4j:slf4j-simple:${Versions.slf4j}"
+
+    // Junit
+    val junitLauncher = junit("platform", "launcher", Versions.junitPlatform)
+    val junitApi = junit("jupiter", "api", Versions.junit)
+    val junitEngine = junit("jupiter", "engine", Versions.junit)
+
+    // Spek
+    val spekApi = spek("api", Versions.spek)
+    val spekDataDriven = spek("data-driven-extension", Versions.spek)
+    val spekSubject = spek("subject-extension", Versions.spek)
+    val spekPlatformEngine = spek("junit-platform-engine", Versions.spek)
 }
 
-fun String?.withColon() = this?.let { ":$this" } ?: ""
+fun Project.applyTestDependencies() {
+    dependencies {
+        "testImplementation"(Dependencies.kotlinTest)
+        "testImplementation"(Dependencies.hamkrest)
+        "testImplementation"(Dependencies.hamcrest)
+        "testImplementation"(Dependencies.sparkJava)
 
-fun kotlin(module: String, version: String? = null) =
-    "org.jetbrains.kotlin:kotlin-$module${version.withColon()}"
+        "testImplementation"(Dependencies.junitApi)
+        "testImplementation"(Dependencies.spekApi)
+        "testImplementation"(Dependencies.spekDataDriven)
+        "testImplementation"(Dependencies.spekSubject)
 
-fun spek(module: String, version: String? = null) =
-    "org.jetbrains.spek:spek-$module${version.withColon()}"
+        // Runtime
+        "testRuntimeOnly"(Dependencies.junitLauncher)
+        "testRuntimeOnly"(Dependencies.junitEngine)
+        "testRuntimeOnly"(Dependencies.spekPlatformEngine)
+        "testRuntimeOnly"(Dependencies.slf4j)
+    }
+}
 
-fun jackson(scope: String, module: String, version: String? = null) =
-    "com.fasterxml.jackson.$scope:jackson-$scope-$module${version.withColon()}"
+fun kotlin(module: String, version: String) =
+    "org.jetbrains.kotlin:kotlin-$module:$version"
 
-fun jacksonCore(module: String = "core", version: String? = null) =
-    "com.fasterxml.jackson.core:jackson-$module${version.withColon()}"
+fun spek(module: String, version: String) =
+    "org.jetbrains.spek:spek-$module:$version"
 
-fun junit(scope: String, module: String, version: String? = null) =
-    "org.junit.$scope:junit-$scope-$module${version.withColon()}"
+fun jackson(scope: String, module: String, version: String) =
+    "com.fasterxml.jackson.$scope:jackson-$scope-$module:$version"
+
+fun jacksonCore(module: String, version: String) =
+    "com.fasterxml.jackson.core:jackson-$module:$version"
+
+fun junit(scope: String, module: String, version: String) =
+    "org.junit.$scope:junit-$scope-$module:$version"
