@@ -35,13 +35,13 @@ import kotlin.test.assertFalse
 import kotlin.test.assertNull
 import kotlin.test.assertTrue
 
-object ConfigSpek : SubjectSpek<Config>({
+object ConfigTestSpec : SubjectSpek<Config>({
     subject { Config { addSpec(NetworkBuffer) } }
 
-    configSpek()
+    configTestSpec()
 })
 
-fun SubjectProviderDsl<Config>.configSpek(prefix: String = "network.buffer", testLayer: Boolean = true) {
+fun SubjectProviderDsl<Config>.configTestSpec(prefix: String = "network.buffer", testLayer: Boolean = true) {
     val spec = NetworkBuffer
     val size = NetworkBuffer.size
     val maxSize = NetworkBuffer.maxSize

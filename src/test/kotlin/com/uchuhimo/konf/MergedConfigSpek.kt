@@ -18,14 +18,14 @@ package com.uchuhimo.konf
 
 import org.jetbrains.spek.subject.SubjectSpek
 
-object FacadeConfigSpek : SubjectSpek<Config>({
+object FacadeConfigSpec : SubjectSpek<Config>({
     subject { Config() + Config { addSpec(NetworkBuffer) } }
 
-    configSpek(testLayer = false)
+    configTestSpec(testLayer = false)
 })
 
-object FallbackConfigSpek : SubjectSpek<Config>({
+object FallbackConfigSpec : SubjectSpek<Config>({
     subject { Config { addSpec(NetworkBuffer) } + Config() }
 
-    configSpek(testLayer = false)
+    configTestSpec(testLayer = false)
 })

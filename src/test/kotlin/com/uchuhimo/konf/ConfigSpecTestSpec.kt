@@ -31,7 +31,7 @@ import org.jetbrains.spek.api.dsl.on
 import kotlin.test.assertFalse
 import kotlin.test.assertTrue
 
-object ConfigSpecSpek : Spek({
+object ConfigSpecTestSpec : Spek({
     given("a configSpec") {
         fun testItem(spec: Spec, item: Item<*>, description: String) {
             group("for $description, as an item") {

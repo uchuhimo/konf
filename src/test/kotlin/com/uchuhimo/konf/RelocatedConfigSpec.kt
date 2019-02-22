@@ -18,23 +18,23 @@ package com.uchuhimo.konf
 
 import org.jetbrains.spek.subject.SubjectSpek
 
-object RelocatedConfigSpek : SubjectSpek<Config>({
+object RelocatedConfigSpec : SubjectSpek<Config>({
 
     subject { Prefix("network.buffer") + Config { addSpec(NetworkBuffer) }.at("network.buffer") }
 
-    configSpek()
+    configTestSpec()
 })
 
-object RollUpConfigSpek : SubjectSpek<Config>({
+object RollUpConfigSpec : SubjectSpek<Config>({
 
     subject { Prefix("prefix") + Config { addSpec(NetworkBuffer) } }
 
-    configSpek("prefix.network.buffer")
+    configTestSpec("prefix.network.buffer")
 })
 
-object DrillDownConfigSpek : SubjectSpek<Config>({
+object DrillDownConfigSpec : SubjectSpek<Config>({
 
     subject { Config { addSpec(NetworkBuffer) }.at("network") }
 
-    configSpek("buffer")
+    configTestSpec("buffer")
 })

@@ -23,7 +23,7 @@ import org.jetbrains.spek.api.dsl.it
 import org.jetbrains.spek.api.dsl.on
 import kotlin.test.assertNull
 
-object AdHocConfigItemSpek : Spek({
+object AdHocConfigItemSpec : Spek({
     val config = Config().from.map.kv(mapOf(
         "network.buffer.size" to 1,
         "network.buffer.heap.type" to AdHocNetworkBuffer.Type.ON_HEAP,
