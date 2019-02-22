@@ -17,6 +17,8 @@
 package com.uchuhimo.konf.source.xml
 
 import com.uchuhimo.konf.Config
+import com.uchuhimo.konf.source.DefaultLoaders
+import com.uchuhimo.konf.source.Loader
 import com.uchuhimo.konf.source.Writer
 import com.uchuhimo.konf.source.base.toFlatMap
 import org.dom4j.Document
@@ -61,3 +63,9 @@ class XmlWriter(val config: Config) : Writer {
  * Returns writer for XML source.
  */
 val Config.toXml: Writer get() = XmlWriter(this)
+
+/**
+ * Loader for XML source.
+ */
+val DefaultLoaders.xml: Loader
+    get() = Loader(config, XmlProvider.orMapped())

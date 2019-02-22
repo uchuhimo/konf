@@ -28,6 +28,11 @@ import java.io.Reader
  * Provider for XML source.
  */
 object XmlProvider : Provider {
+
+    fun register() {
+        Provider.registerExtension("xml", this)
+    }
+
     private fun Document.toMap(): Map<String, String> {
         val rootElement = this.rootElement
         val propertyNodes = rootElement.selectNodes("/configuration/property")

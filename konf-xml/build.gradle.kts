@@ -11,7 +11,7 @@ repositories {
 dependencies {
     implementation(Dependencies.stdlibJdk8)
     implementation(project(":konf-core"))
-    implementation(Dependencies.toml)
+    implementation(Dependencies.dom4j)
 }
 
 applyTestDependencies()

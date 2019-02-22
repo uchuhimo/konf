@@ -11,12 +11,12 @@ import kotlinx.coroutines.GlobalScope
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
 import org.eclipse.jgit.api.Git
-import java.io.File
-import java.util.concurrent.TimeUnit
 import org.eclipse.jgit.api.TransportCommand
 import org.eclipse.jgit.lib.Constants
 import org.eclipse.jgit.transport.URIish
+import java.io.File
 import java.nio.file.Paths
+import java.util.concurrent.TimeUnit
 import kotlin.coroutines.CoroutineContext
 
 /**
@@ -27,7 +27,6 @@ import kotlin.coroutines.CoroutineContext
  * - HOCON: conf
  * - JSON: json
  * - Properties: properties
- * - XML: xml
  * - YAML: yml, yaml
  *
  * Throws [UnsupportedExtensionException] if the url extension is unsupported.
@@ -58,7 +57,6 @@ fun DefaultLoaders.git(
  * - HOCON: conf
  * - JSON: json
  * - Properties: properties
- * - XML: xml
  * - YAML: yml, yaml
  *
  * Throws [UnsupportedExtensionException] if the url extension is unsupported.

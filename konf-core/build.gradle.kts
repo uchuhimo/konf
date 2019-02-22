@@ -54,6 +54,8 @@ val implementation by configurations
 val snippetImplementation by configurations
 snippetImplementation.extendsFrom(implementation)
 
+applyTestDependencies()
+
 dependencies {
     implementation(Dependencies.stdlibJdk8)
     implementation(Dependencies.reflect)
@@ -62,7 +64,6 @@ dependencies {
     implementation(Dependencies.bimap)
     implementation(Dependencies.hocon)
     implementation(Dependencies.yaml)
-    implementation(Dependencies.dom4j)
 
     // Jackson
     implementation(Dependencies.jacksonCore)
@@ -73,21 +74,7 @@ dependencies {
 
     // --- Testing
 
-    testImplementation(Dependencies.kotlinTest)
-    testImplementation(Dependencies.hamkrest)
-    testImplementation(Dependencies.hamcrest)
     testImplementation(Dependencies.sparkJava)
-
-    testImplementation(Dependencies.junitApi)
-    testImplementation(Dependencies.spekApi)
-    testImplementation(Dependencies.spekDataDriven)
-    testImplementation(Dependencies.spekSubject)
-
-    // Runtime
-    testRuntimeOnly(Dependencies.junitLauncher)
-    testRuntimeOnly(Dependencies.junitEngine)
-    testRuntimeOnly(Dependencies.spekPlatformEngine)
-    testRuntimeOnly(Dependencies.slf4j)
 
     jmhImplementation(Dependencies.stdlib)
 

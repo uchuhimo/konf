@@ -10,4 +10,5 @@ rootProject.name = "konf"
 
 include("konf-core",
         "konf-toml",
+        "konf-xml",
         "konf-jgit")
