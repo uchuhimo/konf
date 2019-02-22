@@ -26,7 +26,7 @@ import org.jetbrains.spek.api.dsl.given
 import org.jetbrains.spek.api.dsl.it
 import org.jetbrains.spek.api.dsl.on
 
-object TomlValueSourceSpec : Spek({
+object TomlValueSourceSpek : Spek({
     given("a TOML source") {
         on("get integer from long source") {
             it("should succeed") {

@@ -23,7 +23,7 @@ import com.uchuhimo.konf.source.SourceLoadSpec
 import org.jetbrains.spek.subject.SubjectSpek
 import org.jetbrains.spek.subject.itBehavesLike
 
-object TomlSourceLoadSpec : SubjectSpek<Config>({
+object TomlSourceLoadSpek : SubjectSpek<Config>({
 
     subject {
         Config {
@@ -35,7 +35,7 @@ object TomlSourceLoadSpec : SubjectSpek<Config>({
     itBehavesLike(SourceLoadSpec)
 })
 
-object TomlSourceReloadSpec : SubjectSpek<Config>({
+object TomlSourceReloadSpek : SubjectSpek<Config>({
 
     subject {
         val config = Config {

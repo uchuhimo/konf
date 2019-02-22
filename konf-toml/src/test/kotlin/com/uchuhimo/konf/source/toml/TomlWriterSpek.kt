@@ -28,7 +28,7 @@ import org.jetbrains.spek.subject.SubjectSpek
 import java.io.ByteArrayOutputStream
 import java.io.StringWriter
 
-object TomlWriterSpec : SubjectSpek<Writer>({
+object TomlWriterSpek : SubjectSpek<Writer>({
     subject {
         val config = Config {
             addSpec(object : ConfigSpec() {
