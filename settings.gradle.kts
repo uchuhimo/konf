@@ -7,3 +7,5 @@ pluginManagement {
 }
 
 rootProject.name = "konf"
+
+include("konf-core", "konf-toml")
