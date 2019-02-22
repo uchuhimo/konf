@@ -26,9 +26,14 @@ import java.io.Reader
  * Provider for HOCON source.
  */
 object HoconProvider : Provider {
+
+    fun register() {
+        Provider.registerExtension("conf", this)
+    }
+
     override fun fromReader(reader: Reader): Source =
-        HoconSource(ConfigFactory.parseReader(reader).root())
+            HoconSource(ConfigFactory.parseReader(reader).root())
 
     override fun fromInputStream(inputStream: InputStream): Source =
-        fromReader(inputStream.reader())
+            fromReader(inputStream.reader())
 }

@@ -16,7 +16,6 @@
 
 package com.uchuhimo.konf.source
 
-import com.uchuhimo.konf.source.hocon.HoconProvider
 import com.uchuhimo.konf.source.json.JsonProvider
 import com.uchuhimo.konf.source.properties.PropertiesProvider
 import java.io.File
@@ -193,7 +192,6 @@ interface Provider {
 
     companion object {
         private val extensionToProvider = mutableMapOf(
-            "conf" to HoconProvider,
             "json" to JsonProvider,
             "properties" to PropertiesProvider
         )

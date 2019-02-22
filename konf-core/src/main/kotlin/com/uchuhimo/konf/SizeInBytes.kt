@@ -18,8 +18,8 @@ package com.uchuhimo.konf
 
 import com.fasterxml.jackson.annotation.JsonCreator
 import com.fasterxml.jackson.annotation.JsonValue
-import com.typesafe.config.impl.ConfigImplUtil
 import com.uchuhimo.konf.source.ParseException
+import com.uchuhimo.konf.source.unicodeTrim
 import java.io.Serializable
 import java.math.BigDecimal
 import java.math.BigInteger
@@ -49,10 +49,9 @@ data class SizeInBytes(
         @JsonCreator
         @JvmStatic
         fun parse(input: String): SizeInBytes {
-            val s = ConfigImplUtil.unicodeTrim(input)
+            val s = unicodeTrim(input)
             val unitString = getUnits(s)
-            val numberString = ConfigImplUtil.unicodeTrim(s.substring(0,
-                s.length - unitString.length))
+            val numberString = unicodeTrim(s.substring(0, s.length - unitString.length))
 
             // this would be caught later anyway, but the error message
             // is more helpful if we check it here.

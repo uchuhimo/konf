@@ -24,7 +24,6 @@ import kotlin.coroutines.CoroutineContext
  *
  * Format of the url is auto-detected from the url extension.
  * Supported url formats and the corresponding extensions:
- * - HOCON: conf
  * - JSON: json
  * - Properties: properties
  *
@@ -53,7 +52,6 @@ fun DefaultLoaders.git(
  *
  * Format of the url is auto-detected from the url extension.
  * Supported url formats and the corresponding extensions:
- * - HOCON: conf
  * - JSON: json
  * - Properties: properties
  *

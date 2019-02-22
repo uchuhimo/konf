@@ -9,6 +9,7 @@ pluginManagement {
 rootProject.name = "konf"
 
 include("konf-core",
+        "konf-hocon",
         "konf-toml",
         "konf-xml",
         "konf-yaml",

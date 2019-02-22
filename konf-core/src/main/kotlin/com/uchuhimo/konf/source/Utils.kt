@@ -16,8 +16,8 @@
 
 package com.uchuhimo.konf.source
 
-import com.typesafe.config.impl.ConfigImplUtil
 import com.uchuhimo.konf.getUnits
+import java.lang.Character.isWhitespace
 import java.time.Duration
 import java.time.format.DateTimeParseException
 import java.util.concurrent.TimeUnit
@@ -54,10 +54,10 @@ fun String.toDuration(): Duration {
  * @return duration in nanoseconds
  */
 internal fun parseDuration(input: String): Long {
-    val s = ConfigImplUtil.unicodeTrim(input)
+    val s = unicodeTrim(input)
     val originalUnitString = getUnits(s)
     var unitString = originalUnitString
-    val numberString = ConfigImplUtil.unicodeTrim(s.substring(0, s.length - unitString.length))
+    val numberString = unicodeTrim(s.substring(0, s.length - unitString.length))
 
     // this would be caught later anyway, but the error message
     // is more helpful if we check it here.
@@ -69,7 +69,7 @@ internal fun parseDuration(input: String): Long {
 
     // note that this is deliberately case-sensitive
     val units = if (unitString == "" || unitString == "ms" || unitString == "millis" ||
-        unitString == "milliseconds") {
+            unitString == "milliseconds") {
         TimeUnit.MILLISECONDS
     } else if (unitString == "us" || unitString == "micros" || unitString == "microseconds") {
         TimeUnit.MICROSECONDS
@@ -100,4 +100,51 @@ internal fun parseDuration(input: String): Long {
     } catch (e: NumberFormatException) {
         throw ParseException("Could not parse duration number '$numberString'")
     }
+}
+
+// From Lightbend config (HOCON) ConfigImplUtil#unicodeTrim
+fun unicodeTrim(s: String): String {
+    // this is dumb because it looks like there aren't any whitespace
+    // characters that need surrogate encoding. But, points for
+    // pedantic correctness! It's future-proof or something.
+    // String.trim() actually is broken, since there are plenty of
+    // non-ASCII whitespace characters.
+    val length = s.length
+    if (length == 0)
+        return s
+    var start = 0
+    while (start < length) {
+        val c = s.get(start)
+        if (c == ' ' || c == '\n') {
+            start += 1
+        } else {
+            val cp = s.codePointAt(start)
+            if (isWhitespace(cp))
+                start += Character.charCount(cp)
+            else
+                break
+        }
+    }
+    var end = length
+    while (end > start) {
+        val c = s.get(end - 1)
+        if (c == ' ' || c == '\n') {
+            --end
+        } else {
+            val cp: Int
+            val delta: Int
+            if (Character.isLowSurrogate(c)) {
+                cp = s.codePointAt(end - 2)
+                delta = 2
+            } else {
+                cp = s.codePointAt(end - 1)
+                delta = 1
+            }
+            if (isWhitespace(cp))
+                end -= delta
+            else
+                break
+        }
+    }
+    return s.substring(start, end)
 }

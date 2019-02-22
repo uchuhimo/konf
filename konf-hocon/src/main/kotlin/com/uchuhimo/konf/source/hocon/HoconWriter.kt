@@ -19,6 +19,8 @@ package com.uchuhimo.konf.source.hocon
 import com.typesafe.config.ConfigRenderOptions
 import com.typesafe.config.ConfigValueFactory
 import com.uchuhimo.konf.Config
+import com.uchuhimo.konf.source.DefaultLoaders
+import com.uchuhimo.konf.source.Loader
 import com.uchuhimo.konf.source.Writer
 import com.uchuhimo.konf.source.base.toHierarchicalMap
 import java.io.OutputStream
@@ -52,3 +54,9 @@ class HoconWriter(val config: Config) : Writer {
  * Returns writer for HOCON source.
  */
 val Config.toHocon: Writer get() = HoconWriter(this)
+
+/**
+ * Loader for HOCON source.
+ */
+val DefaultLoaders.hocon: Loader
+    get() = Loader(config, HoconProvider.orMapped())

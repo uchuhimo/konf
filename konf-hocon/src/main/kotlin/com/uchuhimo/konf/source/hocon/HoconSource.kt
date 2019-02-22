@@ -83,8 +83,8 @@ class HoconSource(
         return if (config.hasPathOrNull(name)) {
             if (config.getIsNull(name)) {
                 HoconSource(
-                    ConfigValueFactory.fromAnyRef(null, config.origin().description()),
-                    context)
+                        ConfigValueFactory.fromAnyRef(null, config.origin().description()),
+                        context)
             } else {
                 HoconSource(config.getValue(name), context)
             }

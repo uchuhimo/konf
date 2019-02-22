@@ -22,7 +22,6 @@ import com.uchuhimo.konf.source.base.FlatSource
 import com.uchuhimo.konf.source.base.KVSource
 import com.uchuhimo.konf.source.base.MapSource
 import com.uchuhimo.konf.source.env.EnvProvider
-import com.uchuhimo.konf.source.hocon.HoconProvider
 import com.uchuhimo.konf.source.json.JsonProvider
 import com.uchuhimo.konf.source.properties.PropertiesProvider
 import kotlinx.coroutines.Dispatchers
@@ -85,12 +84,6 @@ class DefaultLoaders(
     fun disabled(feature: Feature): DefaultLoaders = mapped { it.disabled(feature) }
 
     /**
-     * Loader for HOCON source.
-     */
-    @JvmField
-    val hocon = Loader(config, HoconProvider.orMapped())
-
-    /**
      * Loader for JSON source.
      */
     @JvmField
@@ -138,7 +131,6 @@ class DefaultLoaders(
      *
      * Format of the file is auto-detected from the file extension.
      * Supported file formats and the corresponding extensions:
-     * - HOCON: conf
      * - JSON: json
      * - Properties: properties
      *
@@ -155,7 +147,6 @@ class DefaultLoaders(
      *
      * Format of the file is auto-detected from the file extension.
      * Supported file formats and the corresponding extensions:
-     * - HOCON: conf
      * - JSON: json
      * - Properties: properties
      *
@@ -173,7 +164,6 @@ class DefaultLoaders(
      *
      * Format of the file is auto-detected from the file extension.
      * Supported file formats and the corresponding extensions:
-     * - HOCON: conf
      * - JSON: json
      * - Properties: properties
      *
@@ -200,7 +190,6 @@ class DefaultLoaders(
      *
      * Format of the file is auto-detected from the file extension.
      * Supported file formats and the corresponding extensions:
-     * - HOCON: conf
      * - JSON: json
      * - Properties: properties
      *
@@ -225,7 +214,6 @@ class DefaultLoaders(
      *
      * Format of the url is auto-detected from the url extension.
      * Supported url formats and the corresponding extensions:
-     * - HOCON: conf
      * - JSON: json
      * - Properties: properties
      *
@@ -242,7 +230,6 @@ class DefaultLoaders(
      *
      * Format of the url is auto-detected from the url extension.
      * Supported url formats and the corresponding extensions:
-     * - HOCON: conf
      * - JSON: json
      * - Properties: properties
      *
@@ -260,7 +247,6 @@ class DefaultLoaders(
      *
      * Format of the url is auto-detected from the url extension.
      * Supported url formats and the corresponding extensions:
-     * - HOCON: conf
      * - JSON: json
      * - Properties: properties
      *
@@ -287,7 +273,6 @@ class DefaultLoaders(
      *
      * Format of the url is auto-detected from the url extension.
      * Supported url formats and the corresponding extensions:
-     * - HOCON: conf
      * - JSON: json
      * - Properties: properties
      *
