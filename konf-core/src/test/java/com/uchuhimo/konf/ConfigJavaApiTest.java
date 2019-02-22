@@ -16,13 +16,14 @@
 
 package com.uchuhimo.konf;
 
-import static org.hamcrest.MatcherAssert.assertThat;
-import static org.hamcrest.Matchers.equalTo;
-
-import java.util.HashMap;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
+
+import java.util.HashMap;
+
+import static org.hamcrest.MatcherAssert.assertThat;
+import static org.hamcrest.Matchers.equalTo;
 
 @DisplayName("test Java API of Config")
 class ConfigJavaApiTest {
@@ -61,7 +62,7 @@ class ConfigJavaApiTest {
   @DisplayName("test fluent API to load from loader")
   void loadFromLoader() {
     final Config newConfig =
-        config.from().hocon.string(config.nameOf(NetworkBufferInJava.size) + " = 1024");
+        config.from().properties.string(config.nameOf(NetworkBufferInJava.size) + ": 1024");
     assertThat(newConfig.get(NetworkBufferInJava.size), equalTo(1024));
   }
 

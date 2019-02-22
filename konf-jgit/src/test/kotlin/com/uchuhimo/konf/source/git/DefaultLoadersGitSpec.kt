@@ -3,10 +3,9 @@ package com.uchuhimo.konf.source.git
 import com.natpryce.hamkrest.assertion.assertThat
 import com.natpryce.hamkrest.equalTo
 import com.uchuhimo.konf.Config
+import com.uchuhimo.konf.ConfigSpec
 import com.uchuhimo.konf.source.DefaultLoaders
-import com.uchuhimo.konf.source.DefaultLoadersConfig
 import com.uchuhimo.konf.source.Sequential
-import com.uchuhimo.konf.source.propertiesContent
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.runBlocking
@@ -90,3 +89,9 @@ object DefaultLoadersGitSpec : SubjectSpek<DefaultLoaders>({
         }
     }
 })
+
+private object DefaultLoadersConfig : ConfigSpec("source.test") {
+    val type by required<String>()
+}
+
+private const val propertiesContent = "source.test.type = properties"

@@ -3,9 +3,9 @@ package com.uchuhimo.konf.source.git
 import com.natpryce.hamkrest.assertion.assertThat
 import com.natpryce.hamkrest.equalTo
 import com.uchuhimo.konf.Config
+import com.uchuhimo.konf.ConfigSpec
 import com.uchuhimo.konf.source.Loader
 import com.uchuhimo.konf.source.Sequential
-import com.uchuhimo.konf.source.SourceType
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.runBlocking
@@ -129,3 +129,7 @@ object LoaderGitSpec : SubjectSpek<Loader>({
         }
     }
 })
+
+private object SourceType : ConfigSpec("") {
+    val type by SourceType.required<String>()
+}

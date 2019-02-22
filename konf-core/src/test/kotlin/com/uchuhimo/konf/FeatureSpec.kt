@@ -28,20 +28,23 @@ import org.jetbrains.spek.api.dsl.on
 
 object FailOnUnknownPathSpec : Spek({
     val source = """
-        level1 {
-          level2 {
-            valid = value1
-            invalid = value2
-          }
-        }
-    """.trimIndent()
+        |{
+        |  "level1": {
+        |    "level2": {
+        |      "valid": "value1",
+        |      "invalid": "value2"
+        |    }
+        |  }
+        |}
+    """.trimMargin()
+
     given("a config") {
         on("the feature is disabled") {
             val config = Config {
                 addSpec(Valid)
             }
             it("should ignore unknown paths") {
-                val conf = config.from.hocon.string(source)
+                val conf = config.from.json.string(source)
                 assertThat(conf[Valid.valid], equalTo("value1"))
             }
         }
@@ -50,7 +53,7 @@ object FailOnUnknownPathSpec : Spek({
                 addSpec(Valid)
             }.enable(Feature.FAIL_ON_UNKNOWN_PATH)
             it("should throws UnknownPathsException and reports the unknown paths") {
-                assertThat({ config.from.hocon.string(source) }, throws(has(
+                assertThat({ config.from.json.string(source) }, throws(has(
                     UnknownPathsException::paths,
                     equalTo(listOf("level1.level2.invalid")))))
             }
@@ -61,7 +64,7 @@ object FailOnUnknownPathSpec : Spek({
             }
             it("should throws UnknownPathsException and reports the unknown paths") {
                 assertThat({
-                    config.from.enabled(Feature.FAIL_ON_UNKNOWN_PATH).hocon.string(source)
+                    config.from.enabled(Feature.FAIL_ON_UNKNOWN_PATH).json.string(source)
                 }, throws(has(
                     UnknownPathsException::paths,
                     equalTo(listOf("level1.level2.invalid")))))

@@ -4,7 +4,6 @@ import com.jfrog.bintray.gradle.BintrayExtension
 import org.jetbrains.dokka.DokkaConfiguration
 import org.jetbrains.dokka.gradle.DokkaTask
 import org.jetbrains.dokka.gradle.LinkMapping
-import org.jetbrains.kotlin.gradle.tasks.KotlinCompile
 import java.net.URL
 
 val bintrayUserProperty by extra { getPrivateProperty("bintrayUser") }
@@ -98,18 +97,6 @@ test {
             "SOURCE_TEST_TYPE" to "env",
             "SOURCE_CAMELCASE" to true
     ))
-}
-
-tasks.withType<JavaCompile> {
-    options.encoding = "UTF-8"
-}
-
-tasks.withType<KotlinCompile> {
-    kotlinOptions {
-        jvmTarget = Versions.java.toString()
-        apiVersion = Versions.kotlinApi
-        languageVersion = Versions.kotlinApi
-    }
 }
 
 allOpen {
