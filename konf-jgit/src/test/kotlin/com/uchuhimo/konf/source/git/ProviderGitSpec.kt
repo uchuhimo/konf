@@ -14,7 +14,7 @@ import org.jetbrains.spek.api.dsl.on
 import org.jetbrains.spek.subject.SubjectSpek
 import java.nio.file.Paths
 
-object ProviderGitSpek : SubjectSpek<Provider>({
+object ProviderGitSpec : SubjectSpek<Provider>({
     subject { PropertiesProvider }
 
     given("a provider") {

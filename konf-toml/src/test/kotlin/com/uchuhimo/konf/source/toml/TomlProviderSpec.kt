@@ -24,7 +24,7 @@ import org.jetbrains.spek.api.dsl.it
 import org.jetbrains.spek.api.dsl.on
 import org.jetbrains.spek.subject.SubjectSpek
 
-object TomlProviderSpek : SubjectSpek<TomlProvider>({
+object TomlProviderSpec : SubjectSpek<TomlProvider>({
     subject { TomlProvider }
 
     given("a TOML provider") {

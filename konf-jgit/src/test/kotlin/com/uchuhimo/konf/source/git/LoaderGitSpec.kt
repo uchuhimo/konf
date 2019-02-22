@@ -17,7 +17,7 @@ import org.jetbrains.spek.subject.SubjectSpek
 import java.nio.file.Paths
 import java.util.concurrent.TimeUnit
 
-object LoaderGitSpek : SubjectSpek<Loader>({
+object LoaderGitSpec : SubjectSpek<Loader>({
     val parentConfig = Config {
         addSpec(SourceType)
     }

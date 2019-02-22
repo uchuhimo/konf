@@ -18,7 +18,7 @@ import org.jetbrains.spek.subject.SubjectSpek
 import java.nio.file.Paths
 import java.util.concurrent.TimeUnit
 
-object DefaultLoadersGitSpek : SubjectSpek<DefaultLoaders>({
+object DefaultLoadersGitSpec : SubjectSpek<DefaultLoaders>({
     subject {
         Config {
             addSpec(DefaultLoadersConfig)
