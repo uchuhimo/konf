@@ -160,12 +160,7 @@ interface Spec {
      * @param prefix inner spec prefix
      * @return nested spec with the specified prefix
      */
-    fun nestedSpec(prefix: String? = null): ReadOnlyProperty<Any?, Spec> {
-        return object : ReadOnlyProperty<Any?, Spec> {
-            override fun getValue(thisRef: Any?, property: KProperty<*>): Spec =
-                    ConfigSpec(prefix ?: property.name).also(this@Spec::addInnerSpec)
-        }
-    }
+    fun nestedSpec(prefix: String? = null) = NestedSpecProperty(this, prefix)
 
     companion object {
         /**
@@ -282,6 +277,19 @@ open class LazyProperty<T>(
             ?: property.name, thunk, description, type, nullable) {}
         return object : ReadOnlyProperty<Any?, LazyItem<T>> {
             override fun getValue(thisRef: Any?, property: KProperty<*>): LazyItem<T> = item
+        }
+    }
+}
+
+class NestedSpecProperty(
+        val spec: Spec,
+        val prefix: String?
+) {
+    operator fun provideDelegate(thisRef: Any?, property: KProperty<*>): ReadOnlyProperty<Any?, Spec> {
+        val spec = ConfigSpec(prefix ?: property.name).also(spec::addInnerSpec)
+
+        return object : ReadOnlyProperty<Any?, Spec> {
+            override fun getValue(thisRef: Any?, property: KProperty<*>) = spec
         }
     }
 }
