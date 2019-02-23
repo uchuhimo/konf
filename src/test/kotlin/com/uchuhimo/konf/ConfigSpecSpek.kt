@@ -163,6 +163,13 @@ object ConfigSpecSpek : Spek({
                     assertThat(spec["a.bb.inner2"].items, isEmpty)
                     assertThat(spec["a.bb.inner2"].innerSpecs.size, equalTo(1))
                     assertThat(spec["a.bb.inner2"].innerSpecs.toList()[0].prefix, equalTo("level2"))
+
+                    // TODO: Help wanted to make these test (issue on GitHub)
+                    assertThat(spec["a.bb.nested"].items.size, equalTo(1))
+                    assertThat(spec["a.bb.nested"].innerSpecs.size, equalTo(1))
+                    assertThat(spec["a.bb.nested"].innerSpecs.toList()[0].prefix, equalTo("nested2"))
+                    assertThat(spec["a.bb.nested.nested2"].items, isEmpty)
+                    assertThat(spec["a.bb.nested.nested2"].innerSpecs, isEmpty)
                 }
             }
             on("get an invalid path") {
@@ -282,6 +289,11 @@ object ConfigSpecSpek : Spek({
 
 object Nested : ConfigSpec("a.bb") {
     val item by required<Int>("int", "description")
+
+    val nested by nestedSpec()
+    val nestedItem by nested.required<Int>()
+
+    val nested2 by nested.nestedSpec()
 
     object Inner : ConfigSpec() {
         val item by required<Int>()
