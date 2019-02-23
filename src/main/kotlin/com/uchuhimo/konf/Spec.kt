@@ -160,8 +160,11 @@ interface Spec {
      * @param prefix inner spec prefix
      * @return nested spec with the specified prefix
      */
-    fun nestedSpec(prefix: String): Spec {
-        return ConfigSpec(prefix).also(this::addInnerSpec)
+    fun nestedSpec(prefix: String? = null): ReadOnlyProperty<Any?, Spec> {
+        return object : ReadOnlyProperty<Any?, Spec> {
+            override fun getValue(thisRef: Any?, property: KProperty<*>): Spec =
+                    ConfigSpec(prefix ?: property.name).also(this@Spec::addInnerSpec)
+        }
     }
 
     companion object {
