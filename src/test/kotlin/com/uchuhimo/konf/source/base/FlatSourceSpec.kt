@@ -120,6 +120,11 @@ object FlatSourceSpec : SubjectSpek<FlatSource>({
         fun configFromSystemProperties() = Config {
             addSpec(spec)
         }.from.systemProperties()
+        it("should work with an empty list") {
+            System.setProperty(parameterName, "")
+            assertThat(configFromSystemProperties()[spec.list], equalTo(listOf()))
+            System.clearProperty(parameterName)
+        }
         it("should work with a single element") {
             System.setProperty(parameterName, "a")
             assertThat(configFromSystemProperties()[spec.list], equalTo(listOf("a")))
