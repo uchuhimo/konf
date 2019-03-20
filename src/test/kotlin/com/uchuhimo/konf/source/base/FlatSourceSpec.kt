@@ -112,6 +112,25 @@ object FlatSourceSpec : SubjectSpek<FlatSource>({
         }
     }
 
+    given("a config that contains a required list of strings") {
+        val parameterName = "flatsourcespeclist"
+        val spec = object : ConfigSpec() {
+            val list by required<List<String>>(name = parameterName)
+        }
+        fun configFromSystemProperties() = Config {
+            addSpec(spec)
+        }.from.systemProperties()
+        it("should work with a single element") {
+            System.setProperty(parameterName, "a")
+            assertThat(configFromSystemProperties()[spec.list], equalTo(listOf("a")))
+            System.clearProperty(parameterName)
+        }
+        it("should work with multiple elements") {
+            System.setProperty(parameterName, "a,b")
+            assertThat(configFromSystemProperties()[spec.list], equalTo(listOf("a", "b")))
+            System.clearProperty(parameterName)
+        }
+    }
     given("a config that contains list of strings with commas") {
         val spec = object : ConfigSpec() {
             @Suppress("unused")

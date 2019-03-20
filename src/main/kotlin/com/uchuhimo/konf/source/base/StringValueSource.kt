@@ -51,7 +51,7 @@ interface StringValueSource : Source, SourceInfo {
 
     override fun toList(): List<Source> {
         val value = getValue()
-        if (value.isNotEmpty() && value.contains(',')) {
+        if (value.isNotEmpty()) {
             return value.split(',').map { SingleStringValueSource(it, context = context) }
         } else {
             throw ParseException("$value cannot be parsed to a list")
