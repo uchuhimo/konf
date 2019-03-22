@@ -246,7 +246,7 @@ val dokka by tasks.existing(DokkaTask::class) {
     outputDirectory = tasks.javadoc.get().destinationDir!!.path
     jdkVersion = 8
     linkMapping(delegateClosureOf<LinkMapping> {
-        dir = project.rootDir.toPath().resolve("src/main/kotlin").toFile().path
+        dir = project.rootDir.toPath().resolve("src/main/kotlin").toFile().path.replace('\\', '/')
         url = "https://github.com/uchuhimo/konf/blob/v${project.version}/src/main/kotlin"
         suffix = "#L"
     })
@@ -361,6 +361,18 @@ val dependencyUpdates by tasks.existing(DependencyUpdatesTask::class)
 dependencyUpdates {
     revision = "release"
     outputFormatter = "plain"
+    resolutionStrategy {
+        componentSelection {
+            all {
+                val rejected = listOf("alpha", "beta", "rc", "cr", "m", "preview", "b", "ea", "eap")
+                    .map { qualifier -> Regex("(?i).*[.-]$qualifier[.\\d-+]*") }
+                    .any { it.matches(candidate.version) }
+                if (rejected) {
+                    reject("Release candidate")
+                }
+            }
+        }
+    }
 }
 
 buildScan {

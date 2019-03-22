@@ -143,9 +143,9 @@ data class SizeInBytes(
                                     }
                                 }
                                 Radix.KIBI -> {
-                                    put(first, unit)             // 512m
-                                    put(firstUpper, unit)        // 512M
-                                    put(firstUpper + "i", unit)  // 512Mi
+                                    put(first, unit) // 512m
+                                    put(firstUpper, unit) // 512M
+                                    put(firstUpper + "i", unit) // 512Mi
                                     put(firstUpper + "iB", unit) // 512MiB
                                 }
                             }
