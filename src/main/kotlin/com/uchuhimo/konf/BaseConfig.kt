@@ -16,6 +16,7 @@
 
 package com.uchuhimo.konf
 
+import com.fasterxml.jackson.databind.DeserializationFeature
 import com.fasterxml.jackson.databind.ObjectMapper
 import com.fasterxml.jackson.databind.SerializationFeature
 import com.fasterxml.jackson.databind.module.SimpleModule
@@ -24,6 +25,7 @@ import com.fasterxml.jackson.module.kotlin.jacksonObjectMapper
 import com.uchuhimo.collections.mutableBiMapOf
 import com.uchuhimo.konf.source.Source
 import com.uchuhimo.konf.source.deserializer.DurationDeserializer
+import com.uchuhimo.konf.source.deserializer.EmptyStringToCollectionDeserializerModifier
 import com.uchuhimo.konf.source.deserializer.OffsetDateTimeDeserializer
 import com.uchuhimo.konf.source.deserializer.StringDeserializer
 import com.uchuhimo.konf.source.deserializer.ZoneDateTimeDeserializer
@@ -562,9 +564,11 @@ fun createDefaultMapper(): ObjectMapper = jacksonObjectMapper()
     .disable(SerializationFeature.WRITE_DATES_AS_TIMESTAMPS)
     .disable(SerializationFeature.WRITE_DURATIONS_AS_TIMESTAMPS)
     .enable(SerializationFeature.WRITE_DATES_WITH_ZONE_ID)
+    .enable(DeserializationFeature.ACCEPT_SINGLE_VALUE_AS_ARRAY)
     .registerModules(
         SimpleModule()
-            .addDeserializer(String::class.java, StringDeserializer),
+            .addDeserializer(String::class.java, StringDeserializer)
+            .setDeserializerModifier(EmptyStringToCollectionDeserializerModifier),
         JavaTimeModule()
             .addDeserializer(Duration::class.java, DurationDeserializer)
             .addDeserializer(OffsetDateTime::class.java, OffsetDateTimeDeserializer)

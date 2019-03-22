@@ -80,9 +80,9 @@ open class FlatSource(
     override fun getValue(): String =
         map[prefix] ?: throw NoSuchPathException(this, prefix.toPath())
 
-    override fun toList(): List<Source> {
+    override fun toRegularList(): List<Source> {
         try {
-            return super.toList()
+            return super.toRegularList()
         } catch (e: Exception) {
             val list = generateSequence(0) { it + 1 }.map {
                 getOrNull(it.toString().toPath())
@@ -154,6 +154,8 @@ fun Config.toFlatMap(): Map<String, String> {
                             }
                         }
                     }
+                } else {
+                    put(key, "")
                 }
             }
             is Map<*, *> ->

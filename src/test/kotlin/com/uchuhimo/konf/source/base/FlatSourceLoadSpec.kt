@@ -27,6 +27,8 @@ import org.jetbrains.spek.api.dsl.it
 import org.jetbrains.spek.api.dsl.on
 import org.jetbrains.spek.subject.SubjectSpek
 import org.jetbrains.spek.subject.itBehavesLike
+import java.util.Arrays
+import kotlin.test.assertTrue
 
 object FlatSourceLoadSpec : SubjectSpek<Config>({
 
@@ -43,7 +45,21 @@ object FlatSourceLoadSpec : SubjectSpek<Config>({
     given("a flat source") {
         on("load the source into config") {
             it("should contain every value specified in the source") {
-                val classForLoad = ClassForLoad(stringWithComma = "string,with,comma")
+                val classForLoad = ClassForLoad(
+                    stringWithComma = "string,with,comma",
+                    emptyList = listOf(),
+                    emptySet = setOf(),
+                    emptyArray = intArrayOf(),
+                    emptyObjectArray = arrayOf(),
+                    singleElementList = listOf(1),
+                    multipleElementsList = listOf(1, 2)
+                )
+                assertThat(subject[FlatConfigForLoad.emptyList], equalTo(listOf()))
+                assertThat(subject[FlatConfigForLoad.emptySet], equalTo(setOf()))
+                assertTrue(Arrays.equals(subject[FlatConfigForLoad.emptyArray], intArrayOf()))
+                assertTrue(Arrays.equals(subject[FlatConfigForLoad.emptyObjectArray], arrayOf()))
+                assertThat(subject[FlatConfigForLoad.singleElementList], equalTo(listOf(1)))
+                assertThat(subject[FlatConfigForLoad.multipleElementsList], equalTo(listOf(1, 2)))
                 assertThat(subject[FlatConfigForLoad.flatClass].stringWithComma,
                     equalTo(classForLoad.stringWithComma))
             }
@@ -157,5 +173,17 @@ private val loadContent = mapOf(
     "clazz.enum" to "LABEL2",
     "clazz.booleanArray" to "true,false",
     "clazz.nested.0.0.0.a" to "1",
-    "flatClass.stringWithComma" to "string,with,comma"
+    "emptyList" to "",
+    "emptySet" to "",
+    "emptyArray" to "",
+    "emptyObjectArray" to "",
+    "singleElementList" to "1",
+    "multipleElementsList" to "1,2",
+    "flatClass.stringWithComma" to "string,with,comma",
+    "flatClass.emptyList" to "",
+    "flatClass.emptySet" to "",
+    "flatClass.emptyArray" to "",
+    "flatClass.emptyObjectArray" to "",
+    "flatClass.singleElementList" to "1",
+    "flatClass.multipleElementsList" to "1,2"
 ).mapKeys { (key, _) -> "level1.level2.$key" }

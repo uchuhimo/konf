@@ -360,4 +360,56 @@
         <name>level1.level2.flatClass.stringWithComma</name>
         <value>string,with,comma</value>
     </property>
+    <property>
+        <name>level1.level2.emptyList</name>
+        <value></value>
+    </property>
+    <property>
+        <name>level1.level2.emptySet</name>
+        <value></value>
+    </property>
+    <property>
+        <name>level1.level2.emptyArray</name>
+        <value></value>
+    </property>
+    <property>
+        <name>level1.level2.emptyObjectArray</name>
+        <value></value>
+    </property>
+    <property>
+        <name>level1.level2.singleElementList</name>
+        <value>1</value>
+    </property>
+    <property>
+        <name>level1.level2.multipleElementsList</name>
+        <value>1,2</value>
+    </property>
+    <property>
+        <name>level1.level2.flatClass.stringWithComma</name>
+        <value>string,with,comma</value>
+    </property>
+    <property>
+        <name>level1.level2.flatClass.emptyList</name>
+        <value></value>
+    </property>
+    <property>
+        <name>level1.level2.flatClass.emptySet</name>
+        <value></value>
+    </property>
+    <property>
+        <name>level1.level2.flatClass.emptyArray</name>
+        <value></value>
+    </property>
+    <property>
+        <name>level1.level2.flatClass.emptyObjectArray</name>
+        <value></value>
+    </property>
+    <property>
+        <name>level1.level2.flatClass.singleElementList</name>
+        <value>1</value>
+    </property>
+    <property>
+        <name>level1.level2.flatClass.multipleElementsList</name>
+        <value>1,2</value>
+    </property>
 </configuration>

@@ -20,9 +20,21 @@ import com.uchuhimo.konf.ConfigSpec
 import java.io.Serializable
 
 object FlatConfigForLoad : ConfigSpec("level1.level2") {
+    val emptyList by required<List<Int>>()
+    val emptySet by required<Set<Int>>()
+    val emptyArray by required<IntArray>()
+    val emptyObjectArray by required<Array<Int>>()
+    val singleElementList by required<List<Int>>()
+    val multipleElementsList by required<List<Int>>()
     val flatClass by required<ClassForLoad>()
 }
 
 data class ClassForLoad(
-    val stringWithComma: String
+    val stringWithComma: String,
+    val emptyList: List<Int>,
+    val emptySet: Set<Int>,
+    val emptyArray: IntArray,
+    val emptyObjectArray: Array<Int>,
+    val singleElementList: List<Int>,
+    val multipleElementsList: List<Int>
 ) : Serializable

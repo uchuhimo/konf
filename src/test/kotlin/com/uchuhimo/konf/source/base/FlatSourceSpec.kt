@@ -57,6 +57,37 @@ object FlatSourceSpec : SubjectSpek<FlatSource>({
                 }
             }
         }
+        group("get operation for list value") {
+            val source by memoized {
+                FlatSource(map = mapOf(
+                    "empty" to "",
+                    "single" to "a",
+                    "multiple" to "a,b"
+                ))
+            }
+            on("empty string value") {
+                it("should return an empty list") {
+                    assertTrue { source["empty"].isList() }
+                    assertThat(source["empty"].toList(), equalTo(listOf()))
+                }
+            }
+            on("string value without commas") {
+                it("should return a list containing a single element") {
+                    assertTrue { source["single"].isList() }
+                    assertThat(
+                        source["single"].toList().map { (it as SingleStringValueSource).getValue() },
+                        equalTo(listOf("a")))
+                }
+            }
+            on("string value with commas") {
+                it("should return a list containing multiple elements") {
+                    assertTrue { source["multiple"].isList() }
+                    assertThat(
+                        source["multiple"].toList().map { (it as SingleStringValueSource).getValue() },
+                        equalTo(listOf("a", "b")))
+                }
+            }
+        }
         on("contain invalid key") {
             val source = FlatSource(
                 map = mapOf("level1.level2.key." to "value"),
@@ -109,31 +140,6 @@ object FlatSourceSpec : SubjectSpek<FlatSource>({
                     assertThat({ source.toLong() }, throws<ParseException>())
                 }
             }
-        }
-    }
-
-    given("a config that contains a required list of strings") {
-        val parameterName = "flatsourcespeclist"
-        val spec = object : ConfigSpec() {
-            val list by required<List<String>>(name = parameterName)
-        }
-        fun configFromSystemProperties() = Config {
-            addSpec(spec)
-        }.from.systemProperties()
-        it("should work with an empty list") {
-            System.setProperty(parameterName, "")
-            assertThat(configFromSystemProperties()[spec.list], equalTo(listOf()))
-            System.clearProperty(parameterName)
-        }
-        it("should work with a single element") {
-            System.setProperty(parameterName, "a")
-            assertThat(configFromSystemProperties()[spec.list], equalTo(listOf("a")))
-            System.clearProperty(parameterName)
-        }
-        it("should work with multiple elements") {
-            System.setProperty(parameterName, "a,b")
-            assertThat(configFromSystemProperties()[spec.list], equalTo(listOf("a", "b")))
-            System.clearProperty(parameterName)
         }
     }
     given("a config that contains list of strings with commas") {

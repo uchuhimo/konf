@@ -48,6 +48,7 @@ import com.uchuhimo.konf.Path
 import com.uchuhimo.konf.SizeInBytes
 import com.uchuhimo.konf.TreeNode
 import com.uchuhimo.konf.ValueNode
+import com.uchuhimo.konf.source.base.StringValueSource
 import com.uchuhimo.konf.source.base.ValueSource
 import com.uchuhimo.konf.source.json.JsonSource
 import com.uchuhimo.konf.toPath
@@ -910,21 +911,26 @@ private fun Source.toValue(type: JavaType, mapper: ObjectMapper): Any {
 private fun Source.toListValue(type: JavaType, mapper: ObjectMapper) =
     toList().map { it.toValue(type, mapper) }
 
-private fun Source.toJsonNode(): JsonNode {
+private fun Source.toJsonNode(canBeList: Boolean = true): JsonNode {
     if (this is JsonSource) {
         return this.node
     } else {
         return when {
             isNull() -> NullNode.instance
-            isList() -> ArrayNode(
-                JsonNodeFactory.instance,
-                toList().map {
-                    it.toJsonNode()
-                })
+            isList() && canBeList ->
+                if (this is StringValueSource && !isRegularList()) {
+                    toJsonNode(canBeList = false)
+                } else {
+                    ArrayNode(
+                        JsonNodeFactory.instance,
+                        toList().map {
+                            it.toJsonNode(canBeList = canBeList)
+                        })
+                }
             isMap() -> ObjectNode(
                 JsonNodeFactory.instance,
                 toMap().mapValues { (_, value) ->
-                    value.toJsonNode()
+                    value.toJsonNode(canBeList = canBeList)
                 }
             )
             isBoolean() -> BooleanNode.valueOf(toBoolean())

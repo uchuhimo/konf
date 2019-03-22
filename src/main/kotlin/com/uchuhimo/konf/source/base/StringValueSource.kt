@@ -44,17 +44,52 @@ interface StringValueSource : Source, SourceInfo {
         return try {
             toList()
             true
-        } catch (_: ParseException) {
-            false
+        } catch (e: Exception) {
+            when (e) {
+                is ParseException, is NoSuchPathException -> false
+                else -> throw e
+            }
         }
     }
 
-    override fun toList(): List<Source> {
+    fun isRegularList(): Boolean {
+        return try {
+            toRegularList()
+            true
+        } catch (e: Exception) {
+            when (e) {
+                is ParseException, is NoSuchPathException -> false
+                else -> throw e
+            }
+        }
+    }
+
+    fun toRegularList(): List<Source> {
+        val value = getValue()
+        if (value.isNotEmpty() && value.contains(',')) {
+            return value.split(',').map { SingleStringValueSource(it, context = context) }
+        } else {
+            throw ParseException("$value cannot be parsed to a list")
+        }
+    }
+
+    fun toFakeList(): List<Source> {
         val value = getValue()
         return if (value.isEmpty()) {
             listOf()
         } else {
-            value.split(',').map { SingleStringValueSource(it, context = context) }
+            listOf(SingleStringValueSource(value, context = context))
+        }
+    }
+
+    override fun toList(): List<Source> {
+        return try {
+            toRegularList()
+        } catch (e: Exception) {
+            when (e) {
+                is ParseException, is NoSuchPathException -> toFakeList()
+                else -> throw e
+            }
         }
     }
 
@@ -113,4 +148,10 @@ open class SingleStringValueSource(
     }
 
     override fun getValue(): String = value
+
+    override fun isList(): Boolean = false
+
+    override fun toList(): List<Source> {
+        throw ParseException("$value cannot be parsed to a list since it has been an element of a list")
+    }
 }
