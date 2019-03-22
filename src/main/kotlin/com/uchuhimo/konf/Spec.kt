@@ -129,6 +129,8 @@ interface Spec {
                 }
                 if (filteredInnerSpecs.isEmpty()) {
                     throw NoSuchPathException(path.name)
+                } else if (filteredInnerSpecs.size == 1) {
+                    return filteredInnerSpecs[0]
                 } else {
                     ConfigSpec("", emptySet(), filteredInnerSpecs.toMutableSet())
                 }

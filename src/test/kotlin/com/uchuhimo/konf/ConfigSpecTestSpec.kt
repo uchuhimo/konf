@@ -20,7 +20,6 @@ import com.fasterxml.jackson.databind.type.TypeFactory
 import com.natpryce.hamkrest.assertion.assertThat
 import com.natpryce.hamkrest.equalTo
 import com.natpryce.hamkrest.has
-import com.natpryce.hamkrest.isEmpty
 import com.natpryce.hamkrest.isIn
 import com.natpryce.hamkrest.sameInstance
 import com.natpryce.hamkrest.throws
@@ -157,12 +156,16 @@ object ConfigSpecTestSpec : Spek({
                 it("should return a config spec with the proper items and inner specs") {
                     assertThat(spec["a"].items, equalTo(spec.items))
                     assertThat(spec["a"].innerSpecs, equalTo(spec.innerSpecs))
-                    assertThat(spec["a.bb.inner"].items, isEmpty)
-                    assertThat(spec["a.bb.inner"].innerSpecs.size, equalTo(1))
-                    assertThat(spec["a.bb.inner"].innerSpecs.toList()[0].prefix, equalTo(""))
-                    assertThat(spec["a.bb.inner2"].items, isEmpty)
-                    assertThat(spec["a.bb.inner2"].innerSpecs.size, equalTo(1))
-                    assertThat(spec["a.bb.inner2"].innerSpecs.toList()[0].prefix, equalTo("level2"))
+                    assertThat(spec["a.bb.inner"].items, equalTo(Nested.Inner.items))
+                    assertThat(spec["a.bb.inner"].innerSpecs.size, equalTo(0))
+                    assertThat(spec["a.bb.inner"].prefix, equalTo(""))
+                    assertThat(spec["a.bb.inner2"].items, equalTo(Nested.Inner2.items))
+                    assertThat(spec["a.bb.inner2"].innerSpecs.size, equalTo(0))
+                    assertThat(spec["a.bb.inner2"].prefix, equalTo("level2"))
+                    assertThat(spec["a.bb.inner3"].items.size, equalTo(0))
+                    assertThat(spec["a.bb.inner3"].innerSpecs.size, equalTo(2))
+                    assertThat(spec["a.bb.inner3"].innerSpecs.toList()[0].prefix, equalTo("a"))
+                    assertThat(spec["a.bb.inner3"].innerSpecs.toList()[1].prefix, equalTo("b"))
                 }
             }
             on("get an invalid path") {
@@ -171,8 +174,8 @@ object ConfigSpecTestSpec : Spek({
                     assertThat({ spec["a."] }, throws<IllegalStateException>())
                     assertThat({ spec["a.b"] }, throws(has(NoSuchPathException::path, equalTo("a.b"))))
                     assertThat({
-                        spec["a.bb.inner3"]
-                    }, throws(has(NoSuchPathException::path, equalTo("a.bb.inner3"))))
+                        spec["a.bb.inner4"]
+                    }, throws(has(NoSuchPathException::path, equalTo("a.bb.inner4"))))
                 }
             }
         }
@@ -288,6 +291,14 @@ object Nested : ConfigSpec("a.bb") {
     }
 
     object Inner2 : ConfigSpec("inner2.level2") {
+        val item by required<Int>()
+    }
+
+    object Inner3a : ConfigSpec("inner3.a") {
+        val item by required<Int>()
+    }
+
+    object Inner3b : ConfigSpec("inner3.b") {
         val item by required<Int>()
     }
 }
