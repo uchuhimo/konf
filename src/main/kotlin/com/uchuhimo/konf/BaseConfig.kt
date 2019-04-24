@@ -22,7 +22,6 @@ import com.fasterxml.jackson.databind.SerializationFeature
 import com.fasterxml.jackson.databind.module.SimpleModule
 import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule
 import com.fasterxml.jackson.module.kotlin.jacksonObjectMapper
-import com.uchuhimo.collections.mutableBiMapOf
 import com.uchuhimo.konf.source.Source
 import com.uchuhimo.konf.source.deserializer.DurationDeserializer
 import com.uchuhimo.konf.source.deserializer.EmptyStringToCollectionDeserializerModifier
@@ -54,7 +53,7 @@ open class BaseConfig(
     protected val specsInLayer = mutableListOf<Spec>()
     protected val sourcesInLayer = ArrayDeque<Source>()
     protected val valueByItem = mutableMapOf<Item<*>, ValueState>()
-    protected val nameByItem = mutableBiMapOf<Item<*>, String>()
+    protected val nameByItem = mutableMapOf<Item<*>, String>()
     protected val featuresInLayer = mutableMapOf<Feature, Boolean>()
 
     private var hasChildren = false
@@ -183,7 +182,7 @@ open class BaseConfig(
         return item ?: parent?.getItemOrNull(name)
     }
 
-    protected fun getItemInLayerOrNull(name: String) = lock.read { nameByItem.inverse[name] }
+    protected fun getItemInLayerOrNull(name: String) = lock.read { nameByItem.entries.singleOrNull { it.value == name }?.key }
 
     @Suppress("UNCHECKED_CAST")
     override fun <T> getOrNull(name: String): T? = getOrNull(name, errorWhenNotFound = false) as T?

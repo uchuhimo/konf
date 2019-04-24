@@ -72,7 +72,6 @@ fun DependenciesHandler.dependencySet(group: String, version: String, action: De
 
 configure<DependencyManagementExtension> {
     dependencies {
-        dependency("com.uchuhimo:kotlinx-bimap:${Versions.bimap}")
         dependency("org.apiguardian:apiguardian-api:${Versions.apiguardian}")
         dependency("com.typesafe:config:${Versions.hocon}")
         dependency("org.yaml:snakeyaml:${Versions.yaml}")
@@ -117,7 +116,6 @@ dependencies {
     implementation(kotlin("reflect"))
     implementation("org.jetbrains.kotlinx:kotlinx-coroutines-core")
     implementation("org.apiguardian:apiguardian-api")
-    implementation("com.uchuhimo:kotlinx-bimap")
     implementation("com.typesafe:config")
     implementation("org.yaml:snakeyaml")
     implementation("com.moandjiezana.toml:toml4j")
