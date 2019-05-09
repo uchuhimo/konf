@@ -733,7 +733,7 @@ internal fun Config.loadItem(item: Item<*>, path: Path, source: Source): Boolean
             path
         }
         val itemSource = source.getOrNull(uniformPath)
-        if (itemSource != null) {
+        return if (itemSource != null) {
             if (item.nullable &&
                 (itemSource.isNull() ||
                     (itemSource.isText() && itemSource.toText() == "null"))) {
@@ -741,9 +741,9 @@ internal fun Config.loadItem(item: Item<*>, path: Path, source: Source): Boolean
             } else {
                 rawSet(item, itemSource.toValue(item.type, mapper))
             }
-            return true
+            true
         } else {
-            return false
+            false
         }
     } catch (cause: SourceException) {
         throw LoadException(path, cause)

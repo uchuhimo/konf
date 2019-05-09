@@ -97,6 +97,32 @@ sealed class Item<T>(
      * Cast this item to a lazy item.
      */
     val asLazyItem: LazyItem<T> get() = this as LazyItem<T>
+
+    private val onSetFunctions: MutableList<Item<T>.(T) -> Unit> = mutableListOf()
+
+    fun onSet(onSetFunction: Item<T>.(T) -> Unit): Handler {
+        onSetFunctions += onSetFunction
+        return object : Handler {
+            override fun cancel() {
+                onSetFunctions.remove(onSetFunction)
+            }
+        }
+    }
+
+    fun notifySet(value: Any?) {
+        for (onSetFunction in onSetFunctions) {
+            @Suppress("UNCHECKED_CAST")
+            onSetFunction(this, value as T)
+        }
+    }
+}
+
+interface Handler : AutoCloseable {
+    fun cancel()
+
+    override fun close() {
+        cancel()
+    }
 }
 
 /**

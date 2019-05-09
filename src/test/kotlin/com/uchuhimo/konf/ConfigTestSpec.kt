@@ -477,6 +477,32 @@ fun SubjectProviderDsl<Config>.configTestSpec(prefix: String = "network.buffer",
                     assertThat({ subject[qualify(size.name)] = null }, throws<ClassCastException>())
                 }
             }
+            on("set when onSet subscriber is defined") {
+                var counter = 0
+                size.onSet { counter += 1 }.use {
+                    subject[size] = 1
+                    subject[size] = 16
+                    subject[size] = 256
+                    subject[size] = 1024
+                    it("should notify subscriber") {
+                        assertThat(counter, equalTo(4))
+                    }
+                }
+            }
+            on("set when multiple onSet subscribers are defined") {
+                var counter = 0
+                size.onSet { counter += 1 }.use {
+                    size.onSet { counter += 2 }.use {
+                        subject[size] = 1
+                        subject[size] = 16
+                        subject[size] = 256
+                        subject[size] = 1024
+                        it("should notify all subscribers") {
+                            assertThat(counter, equalTo(12))
+                        }
+                    }
+                }
+            }
             on("lazy set with valid item") {
                 subject.lazySet(maxSize) { it[size] * 4 }
                 subject[size] = 1024

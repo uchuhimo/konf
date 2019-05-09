@@ -22,7 +22,6 @@ import com.fasterxml.jackson.databind.SerializationFeature
 import com.fasterxml.jackson.databind.module.SimpleModule
 import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule
 import com.fasterxml.jackson.module.kotlin.jacksonObjectMapper
-import com.uchuhimo.collections.mutableBiMapOf
 import com.uchuhimo.konf.source.Source
 import com.uchuhimo.konf.source.deserializer.DurationDeserializer
 import com.uchuhimo.konf.source.deserializer.EmptyStringToCollectionDeserializerModifier
@@ -54,7 +53,8 @@ open class BaseConfig(
     protected val specsInLayer = mutableListOf<Spec>()
     protected val sourcesInLayer = ArrayDeque<Source>()
     protected val valueByItem = mutableMapOf<Item<*>, ValueState>()
-    protected val nameByItem = mutableBiMapOf<Item<*>, String>()
+    protected val nameByItem = mutableMapOf<Item<*>, String>()
+    protected val itemByName = mutableMapOf<String, Item<*>>()
     protected val featuresInLayer = mutableMapOf<Feature, Boolean>()
 
     private var hasChildren = false
@@ -183,7 +183,7 @@ open class BaseConfig(
         return item ?: parent?.getItemOrNull(name)
     }
 
-    protected fun getItemInLayerOrNull(name: String) = lock.read { nameByItem.inverse[name] }
+    protected fun getItemInLayerOrNull(name: String) = lock.read { itemByName[name] }
 
     @Suppress("UNCHECKED_CAST")
     override fun <T> getOrNull(name: String): T? = getOrNull(name, errorWhenNotFound = false) as T?
@@ -244,6 +244,7 @@ open class BaseConfig(
         if (item in this) {
             if (value == null) {
                 if (item.nullable) {
+                    item.notifySet(null)
                     lock.write {
                         valueByItem[item] = ValueState.Null
                     }
@@ -254,6 +255,7 @@ open class BaseConfig(
                 }
             } else {
                 if (item.type.rawClass.isInstance(value)) {
+                    item.notifySet(value)
                     lock.write {
                         val valueState = valueByItem[item]
                         if (valueState is ValueState.Value) {
@@ -406,6 +408,7 @@ open class BaseConfig(
                     throw NameConflictException("item $name cannot be added")
                 }
                 nameByItem[item] = name
+                itemByName[name] = item
                 valueByItem[item] = when (item) {
                     is OptionalItem -> {
                         if (item.default == null) {
@@ -438,6 +441,7 @@ open class BaseConfig(
                         throw NameConflictException("item $name cannot be added")
                     }
                     nameByItem[item] = name
+                    itemByName[name] = item
                     valueByItem[item] = when (item) {
                         is OptionalItem -> {
                             if (item.default == null) {
