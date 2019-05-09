@@ -45,7 +45,7 @@ plugins {
 apply(plugin = "com.jfrog.bintray")
 
 group = "com.uchuhimo"
-version = "0.13.2"
+version = "0.13.3"
 
 repositories {
     aliyunMaven()
