@@ -20,11 +20,15 @@ import com.natpryce.hamkrest.assertion.assertThat
 import com.natpryce.hamkrest.equalTo
 import com.natpryce.hamkrest.has
 import com.natpryce.hamkrest.throws
+import com.uchuhimo.konf.source.EmptySource
+import com.uchuhimo.konf.source.SourceNotFoundException
 import com.uchuhimo.konf.source.UnknownPathsException
 import org.jetbrains.spek.api.Spek
 import org.jetbrains.spek.api.dsl.given
 import org.jetbrains.spek.api.dsl.it
 import org.jetbrains.spek.api.dsl.on
+import java.io.FileNotFoundException
+import kotlin.test.assertTrue
 
 object FailOnUnknownPathSpec : Spek({
     val source = """
@@ -73,3 +77,39 @@ object FailOnUnknownPathSpec : Spek({
 private object Valid : ConfigSpec("level1.level2") {
     val valid by required<String>()
 }
+
+object FailOnUnfoundSource : Spek ({
+    given("a config") {
+        on("the feature is enabled by default") {
+            val config = Config {
+                addSpec(Valid)
+            }
+            it ("should fail when loading unfound resources") {
+                assertThat({ config.from.yaml.resource("does_not_exist.yml") }, throws<SourceNotFoundException>())
+                assertThat({ config.from.xml.resource("does_not_exist.xml") }, throws<SourceNotFoundException>())
+                assertThat({ config.from.toml.resource("does_not_exist.toml") }, throws<SourceNotFoundException>())
+                assertThat({ config.from.json.resource("does_not_exist.json") }, throws<SourceNotFoundException>())
+                assertThat({ config.from.properties.resource("does_not_exist.json") }, throws<SourceNotFoundException>())
+            }
+            it("should fail when loading unfound files") {
+                assertThat({ config.from.file("does_not_exist.yml") }, throws<FileNotFoundException>())
+                assertThat({ config.from.watchFile("does_not_exist.yml") }, throws<FileNotFoundException>())
+            }
+        }
+        on ("the feature is disabled in config") {
+            val config = Config {
+                addSpec(Valid)
+            }.disable(Feature.FAIL_ON_UNFOUND_SOURCES)
+            it("should silently ignore when loading unfound resources") {
+                assertTrue { config.from.yaml.resource("does_not_exist.yml").sources.contains(EmptySource) }
+                assertTrue { config.from.xml.resource("does_not_exist.yml").sources.contains(EmptySource) }
+                assertTrue { config.from.toml.resource("does_not_exist.yml").sources.contains(EmptySource) }
+                assertTrue { config.from.json.resource("does_not_exist.yml").sources.contains(EmptySource) }
+                assertTrue { config.from.properties.resource("does_not_exist.yml").sources.contains(EmptySource) }
+            }
+            it("should silentely ignore when loading unfound files") {
+                assertTrue { config.from.file("does_not_exist.yml").sources.contains(EmptySource) }
+            }
+        }
+    }
+})

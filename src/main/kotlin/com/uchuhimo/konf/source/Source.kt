@@ -970,3 +970,22 @@ private fun implOf(clazz: Class<*>): Class<*> =
         SortedMap::class.java -> TreeMap::class.java
         else -> clazz
     }
+
+object EmptySource : Source {
+    override fun contains(path: Path) = false
+
+    override fun getOrNull(path: Path): Source? = null
+
+    override val context = mutableMapOf<String,String>()
+
+    override fun addContext(name: String, value: String) {
+        context[name] = value
+    }
+
+    override val info = mutableMapOf<String,String>()
+
+    override fun addInfo(name: String, value: String) {
+        info[name] = value
+    }
+
+}

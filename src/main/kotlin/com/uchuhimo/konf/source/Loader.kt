@@ -17,6 +17,7 @@
 package com.uchuhimo.konf.source
 
 import com.uchuhimo.konf.Config
+import com.uchuhimo.konf.Feature
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.GlobalScope
 import kotlinx.coroutines.delay
@@ -24,6 +25,7 @@ import kotlinx.coroutines.launch
 import org.eclipse.jgit.api.TransportCommand
 import org.eclipse.jgit.lib.Constants
 import java.io.File
+import java.io.FileNotFoundException
 import java.io.InputStream
 import java.io.Reader
 import java.net.URL
@@ -74,7 +76,15 @@ class Loader(
      * @return a child config containing values from specified file
      */
     fun file(file: File): Config =
-        config.withSource(provider.fromFile(file))
+            if(config.isEnabled(Feature.FAIL_ON_UNFOUND_SOURCES)) {
+                config.withSource(provider.fromFile(file))
+            } else {
+                try {
+                    config.withSource(provider.fromFile(file))
+                } catch (e: FileNotFoundException) {
+                    config.withSource(EmptySource)
+                }
+            }
 
     /**
      * Returns a child config containing values from specified file path.
@@ -83,7 +93,15 @@ class Loader(
      * @return a child config containing values from specified file path
      */
     fun file(file: String): Config =
-        config.withSource(provider.fromFile(file))
+            if(config.isEnabled(Feature.FAIL_ON_UNFOUND_SOURCES)) {
+                config.withSource(provider.fromFile(file))
+            } else {
+                try {
+                    config.withSource(provider.fromFile(file))
+                } catch (e: FileNotFoundException) {
+                    config.withSource(EmptySource)
+                }
+            }
 
     /**
      * Returns a child config containing values from specified file,
@@ -261,7 +279,15 @@ class Loader(
      * @return a child config containing values from specified resource
      */
     fun resource(resource: String): Config =
-        config.withSource(provider.fromResource(resource))
+            if(config.isEnabled(Feature.FAIL_ON_UNFOUND_SOURCES)) {
+                config.withSource(provider.fromResource(resource))
+            } else {
+                try {
+                    config.withSource(provider.fromResource(resource))
+                } catch (e: SourceNotFoundException) {
+                    config.withSource(EmptySource)
+                }
+            }
 
     /**
      * Returns a child config containing values from a specified git repository.

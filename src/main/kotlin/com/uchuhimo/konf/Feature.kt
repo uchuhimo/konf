@@ -33,5 +33,16 @@ enum class Feature(val enabledByDefault: Boolean) {
      *
      * Feature is disabled by default.
      */
-    LOAD_KEYS_CASE_INSENSITIVELY(false)
+    LOAD_KEYS_CASE_INSENSITIVELY(false),
+
+    /**
+     * Feature that determines what happens when unfound sources are requested
+     * while loading configuration values.
+     * If enabled, exceptions will be thrown when trying to ouse unfound
+     * resources or files to indicate sources cannot be found.
+     * If disabled, unfound sources will silently be ignored.
+     *
+     * Feature is enabled by default.
+     */
+    FAIL_ON_UNFOUND_SOURCES(true)
 }
