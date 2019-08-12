@@ -16,8 +16,9 @@ object Versions {
     val spotless = "3.24.0"
     val dependencyManagement = "1.0.8.RELEASE"
     val dependencyUpdate = "0.22.0"
-    // don't upgrade to 0.9.18
-    val dokka = "0.9.18"
+    // don't upgrade to 0.9.18 (issue: https://github.com/Kotlin/dokka/issues/464)
+    // wait for 0.9.20 if using JDK11 (issue: https://github.com/Kotlin/dokka/issues/428)
+    val dokka = "0.9.17"
     val apiguardian = "1.1.0"
     val hocon = "1.3.4"
     val yaml = "1.24"
