@@ -123,6 +123,20 @@ interface Config : ItemContainer {
     fun clear()
 
     /**
+     * Whether all required items have values or not.
+     *
+     * @return `true` if all required items have values, `false` otherwise
+     */
+    fun containsRequired(): Boolean
+
+    /**
+     * Validate whether all required items have values or not. If not, throws [UnsetValueException].
+     *
+     * @return the current config
+     */
+    fun validateRequired(): Config
+
+    /**
      * Returns a property that can read/set associated value for specified item.
      *
      * @param item config item

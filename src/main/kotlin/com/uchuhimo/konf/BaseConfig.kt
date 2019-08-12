@@ -70,15 +70,23 @@ open class BaseConfig(
     override fun iterator(): Iterator<Item<*>> = object : Iterator<Item<*>> {
         private var currentConfig = this@BaseConfig
         private var current = currentConfig.nameByItem.keys.iterator()
+        private var lock = currentConfig.lock
+
+        init {
+            lock.readLock().lock()
+        }
 
         override tailrec fun hasNext(): Boolean {
             return if (current.hasNext()) {
                 true
             } else {
+                lock.readLock().unlock()
                 val parent = currentConfig.parent
                 if (parent != null) {
                     currentConfig = parent
                     current = currentConfig.nameByItem.keys.iterator()
+                    lock = currentConfig.lock
+                    lock.readLock().lock()
                     hasNext()
                 } else {
                     false
@@ -114,7 +122,7 @@ open class BaseConfig(
     @Suppress("UNCHECKED_CAST")
     override fun <T> getOrNull(item: Item<T>): T? = getOrNull(item, errorWhenNotFound = false) as T?
 
-    private fun getOrNull(
+    open fun getOrNull(
         item: Item<*>,
         errorWhenNotFound: Boolean,
         lazyContext: ItemContainer = this
@@ -336,6 +344,22 @@ open class BaseConfig(
         lock.write { valueByItem.clear() }
     }
 
+    override fun containsRequired(): Boolean = try {
+        validateRequired()
+        true
+    } catch (ex: UnsetValueException) {
+        false
+    }
+
+    override fun validateRequired(): Config {
+        for (item in this) {
+            if (item is RequiredItem) {
+                getOrNull(item, errorWhenNotFound = true)
+            }
+        }
+        return this
+    }
+
     override fun <T> property(item: Item<T>): ReadWriteProperty<Any?, T> {
         if (!contains(item)) {
             throw NoSuchItemException(item)
@@ -411,10 +435,11 @@ open class BaseConfig(
                 itemByName[name] = item
                 valueByItem[item] = when (item) {
                     is OptionalItem -> {
-                        if (item.default == null) {
+                        val default = item.default
+                        if (default == null) {
                             ValueState.Null
                         } else {
-                            ValueState.Value(item.default)
+                            ValueState.Value(default)
                         }
                     }
                     is RequiredItem -> ValueState.Unset
@@ -444,10 +469,11 @@ open class BaseConfig(
                     itemByName[name] = item
                     valueByItem[item] = when (item) {
                         is OptionalItem -> {
-                            if (item.default == null) {
+                            val value = item.default
+                            if (value == null) {
                                 ValueState.Null
                             } else {
-                                ValueState.Value(item.default)
+                                ValueState.Value(value)
                             }
                         }
                         is RequiredItem -> ValueState.Unset

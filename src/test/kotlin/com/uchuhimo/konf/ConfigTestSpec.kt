@@ -572,6 +572,26 @@ fun SubjectProviderDsl<Config>.configTestSpec(prefix: String = "network.buffer",
                 assertTrue { name !in config && type !in config }
             }
         }
+        on("check whether all required items have values or not") {
+            it("should return false when some required items don't have values") {
+                assertFalse { subject.containsRequired() }
+            }
+            it("should return true when all required items have values") {
+                subject[size] = 1
+                assertTrue { subject.containsRequired() }
+            }
+        }
+        on("validate whether all required items have values or not") {
+            it("should throw UnsetValueException when some required items don't have values") {
+                assertThat({
+                    subject.validateRequired()
+                }, throws<UnsetValueException>())
+            }
+            it("should return itself when all required items have values") {
+                subject[size] = 1
+                assertThat(subject, sameInstance(subject.validateRequired()))
+            }
+        }
         group("item property") {
             on("declare a property by item") {
                 var nameProperty by subject.property(name)

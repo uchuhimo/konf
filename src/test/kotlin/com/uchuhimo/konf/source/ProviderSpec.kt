@@ -19,6 +19,7 @@ package com.uchuhimo.konf.source
 import com.natpryce.hamkrest.assertion.assertThat
 import com.natpryce.hamkrest.equalTo
 import com.natpryce.hamkrest.throws
+import com.uchuhimo.konf.source.base.EmptyMapSource
 import com.uchuhimo.konf.source.properties.PropertiesProvider
 import com.uchuhimo.konf.tempFileOf
 import org.eclipse.jgit.api.Git
@@ -28,7 +29,11 @@ import org.jetbrains.spek.api.dsl.it
 import org.jetbrains.spek.api.dsl.on
 import org.jetbrains.spek.subject.SubjectSpek
 import org.jetbrains.spek.subject.itBehavesLike
+import org.junit.jupiter.api.assertThrows
 import spark.Service
+import java.io.File
+import java.io.FileNotFoundException
+import java.io.IOException
 import java.net.URL
 import java.nio.file.Paths
 
@@ -59,6 +64,14 @@ object ProviderSpec : SubjectSpek<Provider>({
                 assertThat(source["type"].toText(), equalTo("file"))
             }
         }
+        on("create source from not-existed file") {
+            it("should throw exception") {
+                assertThrows<FileNotFoundException> { subject.fromFile(File("not_existed.json")) }
+            }
+            it("should return an empty source if optional") {
+                assertThat(subject.fromFile(File("not_existed.json"), optional = true), equalTo<Source>(EmptyMapSource))
+            }
+        }
         on("create source from file path") {
             val file = tempFileOf("type = file").toString()
             val source = subject.fromFile(file)
@@ -67,6 +80,14 @@ object ProviderSpec : SubjectSpek<Provider>({
             }
             it("should return a source which contains value in file") {
                 assertThat(source["type"].toText(), equalTo("file"))
+            }
+        }
+        on("create source from not-existed file path") {
+            it("should throw exception") {
+                assertThrows<FileNotFoundException> { subject.fromFile("not_existed.json") }
+            }
+            it("should return an empty source if optional") {
+                assertThat(subject.fromFile("not_existed.json", optional = true), equalTo<Source>(EmptyMapSource))
             }
         }
         on("create source from string") {
@@ -106,6 +127,14 @@ object ProviderSpec : SubjectSpek<Provider>({
             }
             service.stop()
         }
+        on("create source from not-existed HTTP URL") {
+            it("should throw exception") {
+                assertThrows<IOException> { subject.fromUrl(URL("http://localhost/not_existed.json")) }
+            }
+            it("should return an empty source if optional") {
+                assertThat(subject.fromUrl(URL("http://localhost/not_existed.json"), optional = true), equalTo<Source>(EmptyMapSource))
+            }
+        }
         on("create source from file URL") {
             val file = tempFileOf("type = fileUrl")
             val url = file.toURI().toURL()
@@ -117,6 +146,14 @@ object ProviderSpec : SubjectSpek<Provider>({
                 assertThat(source["type"].toText(), equalTo("fileUrl"))
             }
         }
+        on("create source from not-existed file URL") {
+            it("should throw exception") {
+                assertThrows<FileNotFoundException> { subject.fromUrl(URL("file://localhost/not_existed.json")) }
+            }
+            it("should return an empty source if optional") {
+                assertThat(subject.fromUrl(URL("file://localhost/not_existed.json"), optional = true), equalTo<Source>(EmptyMapSource))
+            }
+        }
         on("create source from file URL string") {
             val file = tempFileOf("type = fileUrl")
             val url = file.toURI().toURL().toString()
@@ -126,6 +163,14 @@ object ProviderSpec : SubjectSpek<Provider>({
             }
             it("should return a source which contains value in URL") {
                 assertThat(source["type"].toText(), equalTo("fileUrl"))
+            }
+        }
+        on("create source from not-existed file URL string") {
+            it("should throw exception") {
+                assertThrows<FileNotFoundException> { subject.fromUrl("file://localhost/not_existed.json") }
+            }
+            it("should return an empty source if optional") {
+                assertThat(subject.fromUrl("file://localhost/not_existed.json", optional = true), equalTo<Source>(EmptyMapSource))
             }
         }
         on("create source from resource") {
@@ -142,6 +187,9 @@ object ProviderSpec : SubjectSpek<Provider>({
             it("should throw SourceNotFoundException") {
                 assertThat({ subject.fromResource("source/no-provider.properties") },
                     throws<SourceNotFoundException>())
+            }
+            it("should return an empty source if optional") {
+                assertThat(subject.fromResource("source/no-provider.properties", optional = true), equalTo<Source>(EmptyMapSource))
             }
         }
         on("create source from git repository") {
@@ -185,6 +233,9 @@ object ProviderSpec : SubjectSpek<Provider>({
                 it("should throw InvalidRemoteRepoException") {
                     assertThat({ subject.fromGit(createTempDir().path, "test", dir = dir.path) },
                         throws<InvalidRemoteRepoException>())
+                }
+                it("should return an empty source if optional") {
+                    assertThat(subject.fromGit(createTempDir().path, "test", dir = dir.path, optional = true), equalTo<Source>(EmptyMapSource))
                 }
             }
         }

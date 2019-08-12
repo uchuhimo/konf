@@ -54,6 +54,7 @@ class DefaultLoaders(
      */
     private val transform: ((Source) -> Source)? = null
 ) {
+    private val optional = config.isEnabled(Feature.OPTIONAL_SOURCE_BY_DEFAULT)
     private fun Provider.orMapped(): Provider =
         if (transform != null) this.map(transform) else this
 
@@ -171,10 +172,11 @@ class DefaultLoaders(
      * Throws [UnsupportedExtensionException] if the file extension is unsupported.
      *
      * @param file specified file
+     * @param optional whether the source is optional
      * @return a child config containing values from specified file
      * @throws UnsupportedExtensionException
      */
-    fun file(file: File): Config = dispatchExtension(file.extension, file.name).file(file)
+    fun file(file: File, optional: Boolean = this.optional): Config = dispatchExtension(file.extension, file.name).file(file, optional)
 
     /**
      * Returns a child config containing values from specified file path.
@@ -191,10 +193,11 @@ class DefaultLoaders(
      * Throws [UnsupportedExtensionException] if the file extension is unsupported.
      *
      * @param file specified file path
+     * @param optional whether the source is optional
      * @return a child config containing values from specified file path
      * @throws UnsupportedExtensionException
      */
-    fun file(file: String): Config = file(File(file))
+    fun file(file: String, optional: Boolean = this.optional): Config = file(File(file), optional)
 
     /**
      * Returns a child config containing values from specified file,
@@ -214,7 +217,8 @@ class DefaultLoaders(
      * @param file specified file
      * @param delayTime delay to observe between every check. The default value is 5.
      * @param unit time unit of delay. The default value is [TimeUnit.SECONDS].
-     * @param context context of the coroutine. The default value is [DefaultDispatcher].
+     * @param context context of the coroutine. The default value is [Dispatchers.Default].
+     * @param optional whether the source is optional
      * @return a child config containing values from watched file
      * @throws UnsupportedExtensionException
      */
@@ -222,9 +226,10 @@ class DefaultLoaders(
         file: File,
         delayTime: Long = 5,
         unit: TimeUnit = TimeUnit.SECONDS,
-        context: CoroutineContext = Dispatchers.Default
+        context: CoroutineContext = Dispatchers.Default,
+        optional: Boolean = this.optional
     ): Config = dispatchExtension(file.extension, file.name)
-        .watchFile(file, delayTime, unit, context)
+        .watchFile(file, delayTime, unit, context, optional)
 
     /**
      * Returns a child config containing values from specified file path,
@@ -244,7 +249,8 @@ class DefaultLoaders(
      * @param file specified file path
      * @param delayTime delay to observe between every check. The default value is 5.
      * @param unit time unit of delay. The default value is [TimeUnit.SECONDS].
-     * @param context context of the coroutine. The default value is [DefaultDispatcher].
+     * @param context context of the coroutine. The default value is [Dispatchers.Default].
+     * @param optional whether the source is optional
      * @return a child config containing values from watched file
      * @throws UnsupportedExtensionException
      */
@@ -252,8 +258,9 @@ class DefaultLoaders(
         file: String,
         delayTime: Long = 5,
         unit: TimeUnit = TimeUnit.SECONDS,
-        context: CoroutineContext = Dispatchers.Default
-    ): Config = watchFile(File(file), delayTime, unit, context)
+        context: CoroutineContext = Dispatchers.Default,
+        optional: Boolean = this.optional
+    ): Config = watchFile(File(file), delayTime, unit, context, optional)
 
     /**
      * Returns a child config containing values from specified url.
@@ -270,10 +277,11 @@ class DefaultLoaders(
      * Throws [UnsupportedExtensionException] if the url extension is unsupported.
      *
      * @param url specified url
+     * @param optional whether the source is optional
      * @return a child config containing values from specified url
      * @throws UnsupportedExtensionException
      */
-    fun url(url: URL): Config = dispatchExtension(File(url.path).extension, url.toString()).url(url)
+    fun url(url: URL, optional: Boolean = this.optional): Config = dispatchExtension(File(url.path).extension, url.toString()).url(url, optional)
 
     /**
      * Returns a child config containing values from specified url string.
@@ -290,10 +298,11 @@ class DefaultLoaders(
      * Throws [UnsupportedExtensionException] if the url extension is unsupported.
      *
      * @param url specified url string
+     * @param optional whether the source is optional
      * @return a child config containing values from specified url string
      * @throws UnsupportedExtensionException
      */
-    fun url(url: String): Config = url(URL(url))
+    fun url(url: String, optional: Boolean = this.optional): Config = url(URL(url), optional)
 
     /**
      * Returns a child config containing values from specified url,
@@ -313,7 +322,8 @@ class DefaultLoaders(
      * @param url specified url
      * @param delayTime delay to observe between every check. The default value is 5.
      * @param unit time unit of delay. The default value is [TimeUnit.SECONDS].
-     * @param context context of the coroutine. The default value is [DefaultDispatcher].
+     * @param context context of the coroutine. The default value is [Dispatchers.Default].
+     * @param optional whether the source is optional
      * @return a child config containing values from specified url
      * @throws UnsupportedExtensionException
      */
@@ -321,9 +331,10 @@ class DefaultLoaders(
         url: URL,
         delayTime: Long = 5,
         unit: TimeUnit = TimeUnit.SECONDS,
-        context: CoroutineContext = Dispatchers.Default
+        context: CoroutineContext = Dispatchers.Default,
+        optional: Boolean = this.optional
     ): Config = dispatchExtension(File(url.path).extension, url.toString())
-        .watchUrl(url, delayTime, unit, context)
+        .watchUrl(url, delayTime, unit, context, optional)
 
     /**
      * Returns a child config containing values from specified url string,
@@ -343,7 +354,8 @@ class DefaultLoaders(
      * @param url specified url string
      * @param delayTime delay to observe between every check. The default value is 5.
      * @param unit time unit of delay. The default value is [TimeUnit.SECONDS].
-     * @param context context of the coroutine. The default value is [DefaultDispatcher].
+     * @param context context of the coroutine. The default value is [Dispatchers.Default].
+     * @param optional whether the source is optional
      * @return a child config containing values from specified url string
      * @throws UnsupportedExtensionException
      */
@@ -351,8 +363,9 @@ class DefaultLoaders(
         url: String,
         delayTime: Long = 5,
         unit: TimeUnit = TimeUnit.SECONDS,
-        context: CoroutineContext = Dispatchers.Default
-    ): Config = watchUrl(URL(url), delayTime, unit, context)
+        context: CoroutineContext = Dispatchers.Default,
+        optional: Boolean = this.optional
+    ): Config = watchUrl(URL(url), delayTime, unit, context, optional)
 
     /**
      * Returns a child config containing values from a specified git repository.
@@ -372,6 +385,7 @@ class DefaultLoaders(
      * @param file file in the git repository
      * @param dir local directory of the git repository
      * @param branch the initial branch
+     * @param optional whether the source is optional
      * @param action additional action when cloning/pulling
      * @return a child config containing values from a specified git repository
      * @throws UnsupportedExtensionException
@@ -381,9 +395,10 @@ class DefaultLoaders(
         file: String,
         dir: String? = null,
         branch: String = Constants.HEAD,
+        optional: Boolean = this.optional,
         action: TransportCommand<*, *>.() -> Unit = {}
     ): Config = dispatchExtension(File(file).extension, "{repo: $repo, file: $file}")
-        .git(repo, file, dir, branch, action)
+        .git(repo, file, dir, branch, optional, action)
 
     /**
      * Returns a child config containing values from a specified git repository,
@@ -406,7 +421,8 @@ class DefaultLoaders(
      * @param branch the initial branch
      * @param period reload period. The default value is 1.
      * @param unit time unit of reload period. The default value is [TimeUnit.MINUTES].
-     * @param context context of the coroutine. The default value is [DefaultDispatcher].
+     * @param context context of the coroutine. The default value is [Dispatchers.Default].
+     * @param optional whether the source is optional
      * @param action additional action when cloning/pulling
      * @return a child config containing values from a specified git repository
      * @throws UnsupportedExtensionException
@@ -419,9 +435,10 @@ class DefaultLoaders(
         period: Long = 1,
         unit: TimeUnit = TimeUnit.MINUTES,
         context: CoroutineContext = Dispatchers.Default,
+        optional: Boolean = this.optional,
         action: TransportCommand<*, *>.() -> Unit = {}
     ): Config = dispatchExtension(File(file).extension, "{repo: $repo, file: $file}")
-        .watchGit(repo, file, dir, branch, period, unit, context, action)
+        .watchGit(repo, file, dir, branch, period, unit, context, optional, action)
 }
 
 /**

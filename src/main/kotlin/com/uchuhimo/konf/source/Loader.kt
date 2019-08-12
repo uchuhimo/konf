@@ -17,6 +17,7 @@
 package com.uchuhimo.konf.source
 
 import com.uchuhimo.konf.Config
+import com.uchuhimo.konf.Feature
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.GlobalScope
 import kotlinx.coroutines.delay
@@ -49,6 +50,8 @@ class Loader(
      */
     val provider: Provider
 ) {
+    private val optional = config.isEnabled(Feature.OPTIONAL_SOURCE_BY_DEFAULT)
+
     /**
      * Returns a child config containing values from specified reader.
      *
@@ -71,19 +74,21 @@ class Loader(
      * Returns a child config containing values from specified file.
      *
      * @param file specified file
+     * @param optional whether the source is optional
      * @return a child config containing values from specified file
      */
-    fun file(file: File): Config =
-        config.withSource(provider.fromFile(file))
+    fun file(file: File, optional: Boolean = this.optional): Config =
+        config.withSource(provider.fromFile(file, optional))
 
     /**
      * Returns a child config containing values from specified file path.
      *
      * @param file specified file path
+     * @param optional whether the source is optional
      * @return a child config containing values from specified file path
      */
-    fun file(file: String): Config =
-        config.withSource(provider.fromFile(file))
+    fun file(file: String, optional: Boolean = this.optional): Config =
+        config.withSource(provider.fromFile(file, optional))
 
     /**
      * Returns a child config containing values from specified file,
@@ -92,16 +97,18 @@ class Loader(
      * @param file specified file
      * @param delayTime delay to observe between every check. The default value is 5.
      * @param unit time unit of delay. The default value is [TimeUnit.SECONDS].
-     * @param context context of the coroutine. The default value is [DefaultDispatcher].
+     * @param context context of the coroutine. The default value is [Dispatchers.Default].
+     * @param optional whether the source is optional
      * @return a child config containing values from watched file
      */
     fun watchFile(
         file: File,
         delayTime: Long = 5,
         unit: TimeUnit = TimeUnit.SECONDS,
-        context: CoroutineContext = Dispatchers.Default
+        context: CoroutineContext = Dispatchers.Default,
+        optional: Boolean = this.optional
     ): Config {
-        return provider.fromFile(file).let { source ->
+        return provider.fromFile(file, optional).let { source ->
             config.withLoadTrigger("watch ${source.description}") { newConfig, load ->
                 load(source)
                 val watcher = FileSystems.getDefault().newWatchService()
@@ -123,7 +130,7 @@ class Loader(
                                     filename.toString() == file.name) {
                                     newConfig.lock {
                                         newConfig.clear()
-                                        load(provider.fromFile(file))
+                                        load(provider.fromFile(file, optional))
                                     }
                                 }
                                 val valid = key.reset()
@@ -146,16 +153,18 @@ class Loader(
      * @param file specified file path
      * @param delayTime delay to observe between every check. The default value is 5.
      * @param unit time unit of delay. The default value is [TimeUnit.SECONDS].
-     * @param context context of the coroutine. The default value is [DefaultDispatcher].
+     * @param context context of the coroutine. The default value is [Dispatchers.Default].
+     * @param optional whether the source is optional
      * @return a child config containing values from watched file
      */
     fun watchFile(
         file: String,
         delayTime: Long = 5,
         unit: TimeUnit = TimeUnit.SECONDS,
-        context: CoroutineContext = Dispatchers.Default
+        context: CoroutineContext = Dispatchers.Default,
+        optional: Boolean = this.optional
     ): Config =
-        watchFile(File(file), delayTime, unit, context)
+        watchFile(File(file), delayTime, unit, context, optional)
 
     /**
      * Returns a child config containing values from specified string.
@@ -190,19 +199,21 @@ class Loader(
      * Returns a child config containing values from specified url.
      *
      * @param url specified url
+     * @param optional whether the source is optional
      * @return a child config containing values from specified url
      */
-    fun url(url: URL): Config =
-        config.withSource(provider.fromUrl(url))
+    fun url(url: URL, optional: Boolean = this.optional): Config =
+        config.withSource(provider.fromUrl(url, optional))
 
     /**
      * Returns a child config containing values from specified url string.
      *
      * @param url specified url string
+     * @param optional whether the source is optional
      * @return a child config containing values from specified url string
      */
-    fun url(url: String): Config =
-        config.withSource(provider.fromUrl(url))
+    fun url(url: String, optional: Boolean = this.optional): Config =
+        config.withSource(provider.fromUrl(url, optional))
 
     /**
      * Returns a child config containing values from specified url,
@@ -211,16 +222,18 @@ class Loader(
      * @param url specified url
      * @param period reload period. The default value is 5.
      * @param unit time unit of reload period. The default value is [TimeUnit.SECONDS].
-     * @param context context of the coroutine. The default value is [DefaultDispatcher].
+     * @param context context of the coroutine. The default value is [Dispatchers.Default].
+     * @param optional whether the source is optional
      * @return a child config containing values from specified url
      */
     fun watchUrl(
         url: URL,
         period: Long = 5,
         unit: TimeUnit = TimeUnit.SECONDS,
-        context: CoroutineContext = Dispatchers.Default
+        context: CoroutineContext = Dispatchers.Default,
+        optional: Boolean = this.optional
     ): Config {
-        return provider.fromUrl(url).let { source ->
+        return provider.fromUrl(url, optional).let { source ->
             config.withLoadTrigger("watch ${source.description}") { newConfig, load ->
                 load(source)
                 GlobalScope.launch(context) {
@@ -228,7 +241,7 @@ class Loader(
                         delay(unit.toMillis(period))
                         newConfig.lock {
                             newConfig.clear()
-                            load(provider.fromUrl(url))
+                            load(provider.fromUrl(url, optional))
                         }
                     }
                 }
@@ -243,25 +256,28 @@ class Loader(
      * @param url specified url string
      * @param period reload period. The default value is 5.
      * @param unit time unit of reload period. The default value is [TimeUnit.SECONDS].
-     * @param context context of the coroutine. The default value is [DefaultDispatcher].
+     * @param context context of the coroutine. The default value is [Dispatchers.Default].
+     * @param optional whether the source is optional
      * @return a child config containing values from specified url string
      */
     fun watchUrl(
         url: String,
         period: Long = 5,
         unit: TimeUnit = TimeUnit.SECONDS,
-        context: CoroutineContext = Dispatchers.Default
+        context: CoroutineContext = Dispatchers.Default,
+        optional: Boolean = this.optional
     ): Config =
-        watchUrl(URL(url), period, unit, context)
+        watchUrl(URL(url), period, unit, context, optional)
 
     /**
      * Returns a child config containing values from specified resource.
      *
      * @param resource path of specified resource
+     * @param optional whether the source is optional
      * @return a child config containing values from specified resource
      */
-    fun resource(resource: String): Config =
-        config.withSource(provider.fromResource(resource))
+    fun resource(resource: String, optional: Boolean = this.optional): Config =
+        config.withSource(provider.fromResource(resource, optional))
 
     /**
      * Returns a child config containing values from a specified git repository.
@@ -270,6 +286,7 @@ class Loader(
      * @param file file in the git repository
      * @param dir local directory of the git repository
      * @param branch the initial branch
+     * @param optional whether the source is optional
      * @param action additional action when cloning/pulling
      * @return a child config containing values from a specified git repository
      */
@@ -278,9 +295,10 @@ class Loader(
         file: String,
         dir: String? = null,
         branch: String = Constants.HEAD,
+        optional: Boolean = this.optional,
         action: TransportCommand<*, *>.() -> Unit = {}
     ): Config =
-        config.withSource(provider.fromGit(repo, file, dir, branch, action))
+        config.withSource(provider.fromGit(repo, file, dir, branch, optional, action))
 
     /**
      * Returns a child config containing values from a specified git repository,
@@ -292,7 +310,8 @@ class Loader(
      * @param branch the initial branch
      * @param period reload period. The default value is 1.
      * @param unit time unit of reload period. The default value is [TimeUnit.MINUTES].
-     * @param context context of the coroutine. The default value is [DefaultDispatcher].
+     * @param context context of the coroutine. The default value is [Dispatchers.Default].
+     * @param optional whether the source is optional
      * @param action additional action when cloning/pulling
      * @return a child config containing values from a specified git repository
      */
@@ -304,10 +323,11 @@ class Loader(
         period: Long = 1,
         unit: TimeUnit = TimeUnit.MINUTES,
         context: CoroutineContext = Dispatchers.Default,
+        optional: Boolean = this.optional,
         action: TransportCommand<*, *>.() -> Unit = {}
     ): Config {
         return (dir ?: createTempDir(prefix = "local_git_repo").path).let { directory ->
-            provider.fromGit(repo, file, directory, branch, action).let { source ->
+            provider.fromGit(repo, file, directory, branch, optional, action).let { source ->
                 config.withLoadTrigger("watch ${source.description}") { newConfig, load ->
                     load(source)
                     GlobalScope.launch(context) {
@@ -315,7 +335,7 @@ class Loader(
                             delay(unit.toMillis(period))
                             newConfig.lock {
                                 newConfig.clear()
-                                load(provider.fromGit(repo, file, directory, branch, action))
+                                load(provider.fromGit(repo, file, directory, branch, optional, action))
                             }
                         }
                     }

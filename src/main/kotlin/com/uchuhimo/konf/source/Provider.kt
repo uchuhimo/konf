@@ -16,6 +16,7 @@
 
 package com.uchuhimo.konf.source
 
+import com.uchuhimo.konf.source.base.EmptyMapSource
 import com.uchuhimo.konf.source.hocon.HoconProvider
 import com.uchuhimo.konf.source.json.JsonProvider
 import com.uchuhimo.konf.source.properties.PropertiesProvider
@@ -24,10 +25,12 @@ import com.uchuhimo.konf.source.xml.XmlProvider
 import com.uchuhimo.konf.source.yaml.YamlProvider
 import org.eclipse.jgit.api.Git
 import org.eclipse.jgit.api.TransportCommand
+import org.eclipse.jgit.api.errors.GitAPIException
 import org.eclipse.jgit.lib.Constants
 import org.eclipse.jgit.transport.URIish
 import java.io.File
 import java.io.FileInputStream
+import java.io.IOException
 import java.io.InputStream
 import java.io.Reader
 import java.net.URL
@@ -57,13 +60,18 @@ interface Provider {
      * Returns a new source from specified file.
      *
      * @param file specified file
+     * @param optional whether this source is optional
      * @return a new source from specified file
      */
-    fun fromFile(file: File): Source {
+    fun fromFile(file: File, optional: Boolean = false): Source {
+        val extendContext: Source.() -> Unit = {
+            addContext("file", file.toString())
+        }
+        if (!file.exists() && optional) {
+            return EmptyMapSource.apply(extendContext)
+        }
         return file.inputStream().buffered().use { inputStream ->
-            fromInputStream(inputStream).apply {
-                addContext("file", file.toString())
-            }
+            fromInputStream(inputStream).apply(extendContext)
         }
     }
 
@@ -71,9 +79,10 @@ interface Provider {
      * Returns a new source from specified file path.
      *
      * @param file specified file path
+     * @param optional whether this source is optional
      * @return a new source from specified file path
      */
-    fun fromFile(file: String): Source = fromFile(File(file))
+    fun fromFile(file: String, optional: Boolean = false): Source = fromFile(File(file), optional)
 
     /**
      * Returns a new source from specified string.
@@ -108,23 +117,36 @@ interface Provider {
      * Returns a new source from specified url.
      *
      * @param url specified url
+     * @param optional whether this source is optional
      * @return a new source from specified url
      */
-    fun fromUrl(url: URL): Source {
+    fun fromUrl(url: URL, optional: Boolean = false): Source {
         // from com.fasterxml.jackson.core.JsonFactory._optimizedStreamFromURL in version 2.8.9
+        val extendContext: Source.() -> Unit = {
+            addContext("url", url.toString())
+        }
         if (url.protocol == "file") {
             val host = url.host
             if (host == null || host.isEmpty()) {
                 val path = url.path
                 if (path.indexOf('%') < 0) {
-                    return fromInputStream(FileInputStream(url.path)).apply {
-                        addContext("url", url.toString())
+                    val file = File(path)
+                    if (!file.exists() && optional) {
+                        return EmptyMapSource.apply(extendContext)
                     }
+                    return fromInputStream(FileInputStream(file)).apply(extendContext)
                 }
             }
         }
-        return fromInputStream(url.openStream()).apply {
-            addContext("url", url.toString())
+        return try {
+            val stream = url.openStream()
+            fromInputStream(stream).apply(extendContext)
+        } catch (ex: IOException) {
+            if (optional) {
+                EmptyMapSource.apply(extendContext)
+            } else {
+                throw ex
+            }
         }
     }
 
@@ -132,31 +154,47 @@ interface Provider {
      * Returns a new source from specified url string.
      *
      * @param url specified url string
+     * @param optional whether this source is optional
      * @return a new source from specified url string
      */
-    fun fromUrl(url: String): Source = fromUrl(URL(url))
+    fun fromUrl(url: String, optional: Boolean = false): Source = fromUrl(URL(url), optional)
 
     /**
      * Returns a new source from specified resource.
      *
      * @param resource path of specified resource
+     * @param optional whether this source is optional
      * @return a new source from specified resource
      */
-    fun fromResource(resource: String): Source {
+    fun fromResource(resource: String, optional: Boolean = false): Source {
+        val extendContext: Source.() -> Unit = {
+            addContext("resource", resource)
+        }
         val loader = Thread.currentThread().contextClassLoader
-        val e = loader.getResources(resource)
+        val e = try {
+            loader.getResources(resource)
+        } catch (ex: IOException) {
+            if (optional) {
+                return EmptyMapSource.apply(extendContext)
+            } else {
+                throw ex
+            }
+        }
         if (!e.hasMoreElements()) {
-            throw SourceNotFoundException("resource not found on classpath: $resource")
+            if (optional) {
+                return EmptyMapSource.apply(extendContext)
+            } else {
+                throw SourceNotFoundException("resource not found on classpath: $resource")
+            }
         }
         val sources = mutableListOf<Source>()
         while (e.hasMoreElements()) {
             val url = e.nextElement()
-            val source = fromUrl(url)
+            val source = fromUrl(url, optional)
             sources.add(source)
         }
-        return sources.reduce(Source::withFallback).apply {
-            addContext("resource", resource)
-        }
+
+        return sources.reduce(Source::withFallback).apply(extendContext)
     }
 
     /**
@@ -166,6 +204,7 @@ interface Provider {
      * @param file file in the git repository
      * @param dir local directory of the git repository
      * @param branch the initial branch
+     * @param optional whether this source is optional
      * @param action additional action when cloning/pulling
      * @return a new source from a specified git repository
      */
@@ -174,34 +213,49 @@ interface Provider {
         file: String,
         dir: String? = null,
         branch: String = Constants.HEAD,
+        optional: Boolean = false,
         action: TransportCommand<*, *>.() -> Unit = {}
     ): Source {
         return (dir?.let(::File) ?: createTempDir(prefix = "local_git_repo")).let { directory ->
-            if (directory.list { _, name -> name == ".git" }.isEmpty()) {
-                Git.cloneRepository().apply {
-                    setURI(repo)
-                    setDirectory(directory)
-                    setBranch(branch)
-                    this.action()
-                }.call().close()
-            } else {
-                Git.open(directory).use { git ->
-                    val uri = URIish(repo)
-                    val remoteName = git.remoteList().call().firstOrNull { it.urIs.contains(uri) }?.name
-                        ?: throw InvalidRemoteRepoException(repo, directory.path)
-                    git.pull().apply {
-                        remote = remoteName
-                        remoteBranchName = branch
-                        this.action()
-                    }.call()
-                }
-            }
-            fromFile(Paths.get(directory.path, file).toFile()).apply {
+            val extendContext: Source.() -> Unit = {
                 addContext("repo", repo)
                 addContext("file", file)
                 addContext("dir", directory.path)
                 addContext("branch", branch)
             }
+            try {
+                if ((directory.list { _, name -> name == ".git" } ?: emptyArray()).isEmpty()) {
+                    Git.cloneRepository().apply {
+                        setURI(repo)
+                        setDirectory(directory)
+                        setBranch(branch)
+                        this.action()
+                    }.call().close()
+                } else {
+                    Git.open(directory).use { git ->
+                        val uri = URIish(repo)
+                        val remoteName = git.remoteList().call().firstOrNull { it.urIs.contains(uri) }?.name
+                            ?: throw InvalidRemoteRepoException(repo, directory.path)
+                        git.pull().apply {
+                            remote = remoteName
+                            remoteBranchName = branch
+                            this.action()
+                        }.call()
+                    }
+                }
+            } catch (ex: Exception) {
+                when (ex) {
+                    is GitAPIException, is IOException, is SourceException -> {
+                        if (optional) {
+                            return EmptyMapSource.apply(extendContext)
+                        } else {
+                            throw ex
+                        }
+                    }
+                    else -> throw ex
+                }
+            }
+            fromFile(Paths.get(directory.path, file).toFile(), optional).apply(extendContext)
         }
     }
 
@@ -219,11 +273,11 @@ interface Provider {
             override fun fromInputStream(inputStream: InputStream): Source =
                 this@Provider.fromInputStream(inputStream).let(transform)
 
-            override fun fromFile(file: File): Source =
-                this@Provider.fromFile(file).let(transform)
+            override fun fromFile(file: File, optional: Boolean): Source =
+                this@Provider.fromFile(file, optional).let(transform)
 
-            override fun fromFile(file: String): Source =
-                this@Provider.fromFile(file).let(transform)
+            override fun fromFile(file: String, optional: Boolean): Source =
+                this@Provider.fromFile(file, optional).let(transform)
 
             override fun fromString(content: String): Source =
                 this@Provider.fromString(content).let(transform)
@@ -234,14 +288,18 @@ interface Provider {
             override fun fromBytes(content: ByteArray, offset: Int, length: Int): Source =
                 this@Provider.fromBytes(content, offset, length).let(transform)
 
-            override fun fromUrl(url: URL): Source =
-                this@Provider.fromUrl(url).let(transform)
+            override fun fromUrl(url: URL, optional: Boolean): Source =
+                this@Provider.fromUrl(url, optional).let(transform)
 
-            override fun fromUrl(url: String): Source =
-                this@Provider.fromUrl(url).let(transform)
+            override fun fromUrl(url: String, optional: Boolean): Source =
+                this@Provider.fromUrl(url, optional).let(transform)
 
-            override fun fromResource(resource: String): Source =
-                this@Provider.fromResource(resource).let(transform)
+            override fun fromResource(resource: String, optional: Boolean): Source =
+                this@Provider.fromResource(resource, optional).let(transform)
+
+            override fun fromGit(repo: String, file: String, dir: String?, branch: String, optional: Boolean, action: TransportCommand<*, *>.() -> Unit): Source {
+                return this@Provider.fromGit(repo, file, dir, branch, optional, action).let(transform)
+            }
         }
     }
 

@@ -312,18 +312,30 @@ or:
 val host = config<String>("server.host")
 ```
 
-### Check whether value exists in config or not
+### Check whether an item exists in config or not
 
-Check whether value exists in config or not with item:
+Check whether an item exists in config or not:
 
 ```kotlin
 config.contains(Server.host)
 ```
 
-Check whether value exists in config or not with item name:
+Check whether an item name exists in config or not:
 
 ```kotlin
 config.contains("server.host")
+```
+
+Check whether all values of required items exist in config or not:
+
+```kotlin
+config.containsRequired()
+```
+
+Throw exception if some required items in config don't have values:
+
+```kotlin
+config.validateRequired()
 ```
 
 ### Modify value in config
@@ -586,6 +598,7 @@ These features include:
 
 - `FAIL_ON_UNKNOWN_PATH`: feature that determines what happens when unknown paths appear in the source. If enabled, an exception is thrown when loading from the source to indicate it contains unknown paths. This feature is disabled by default.
 - `LOAD_KEYS_CASE_INSENSITIVELY`: feature that determines whether loading keys from sources case-insensitively. This feature is disabled by default except for system environment.
+- `OPTIONAL_SOURCE_BY_DEFAULT`: feature that determines whether sources are optional by default. This feature is disabled by default.
 
 ## Build from source
 

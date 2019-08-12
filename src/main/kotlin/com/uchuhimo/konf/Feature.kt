@@ -33,5 +33,11 @@ enum class Feature(val enabledByDefault: Boolean) {
      *
      * Feature is disabled by default.
      */
-    LOAD_KEYS_CASE_INSENSITIVELY(false)
+    LOAD_KEYS_CASE_INSENSITIVELY(false),
+    /**
+     * Feature that determines whether sources are optional by default.
+     *
+     * Feature is disabled by default.
+     */
+    OPTIONAL_SOURCE_BY_DEFAULT(false)
 }

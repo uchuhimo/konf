@@ -26,7 +26,6 @@ import com.uchuhimo.konf.ConfigSpec
 import com.uchuhimo.konf.Feature
 import com.uchuhimo.konf.NetworkBuffer
 import com.uchuhimo.konf.Prefix
-import com.uchuhimo.konf.UnsetValueException
 import com.uchuhimo.konf.name
 import com.uchuhimo.konf.required
 import com.uchuhimo.konf.source.base.ValueSource
@@ -37,7 +36,6 @@ import org.jetbrains.spek.api.Spek
 import org.jetbrains.spek.api.dsl.given
 import org.jetbrains.spek.api.dsl.it
 import org.jetbrains.spek.api.dsl.on
-import org.junit.jupiter.api.assertThrows
 import java.math.BigDecimal
 import java.math.BigInteger
 import java.time.Duration
@@ -412,24 +410,6 @@ object SourceSpec : Spek({
                     assertThat(
                         source.isEnabled(Feature.FAIL_ON_UNKNOWN_PATH),
                         equalTo(Feature.FAIL_ON_UNKNOWN_PATH.enabledByDefault))
-                }
-            }
-            on("enable LOAD_KEYS_CASE_INSENSITIVELY feature") {
-                val source = mapOf("somekey" to "value").asSource().enabled(Feature.LOAD_KEYS_CASE_INSENSITIVELY)
-                val config = Config().withSource(source)
-                it("should load keys case-insensitively") {
-                    val someKey by config.required<String>()
-                    assertThat(someKey, equalTo("value"))
-                }
-            }
-            on("disable LOAD_KEYS_CASE_INSENSITIVELY feature") {
-                val source = mapOf("somekey" to "value").asSource().disabled(Feature.LOAD_KEYS_CASE_INSENSITIVELY)
-                val config = Config().withSource(source)
-                it("should load keys case-sensitively") {
-                    val someKey by config.required<String>()
-                    assertThrows<UnsetValueException> { someKey }
-                    val somekey by config.required<String>()
-                    assertThat(somekey, equalTo("value"))
                 }
             }
         }

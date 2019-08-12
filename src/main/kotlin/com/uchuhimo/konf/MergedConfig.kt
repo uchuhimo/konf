@@ -169,6 +169,18 @@ class MergedConfig(val fallback: Config, val facade: Config) :
         }
     }
 
+    override fun getOrNull(
+        item: Item<*>,
+        errorWhenNotFound: Boolean,
+        lazyContext: ItemContainer
+    ): Any? {
+        return if (item in facade) {
+            (facade as BaseConfig).getOrNull(item, errorWhenNotFound, lazyContext)
+        } else {
+            (fallback as BaseConfig).getOrNull(item, errorWhenNotFound, lazyContext)
+        }
+    }
+
     override fun iterator(): Iterator<Item<*>> =
         (facade.iterator().asSequence() + fallback.iterator().asSequence()).iterator()
 

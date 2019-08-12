@@ -727,7 +727,9 @@ internal fun Any?.toCompatibleValue(mapper: ObjectMapper): Any {
 
 internal fun Config.loadItem(item: Item<*>, path: Path, source: Source): Boolean {
     try {
-        val uniformPath = if (source.isEnabled(Feature.LOAD_KEYS_CASE_INSENSITIVELY)) {
+        val uniformPath = if (
+            source.isEnabled(Feature.LOAD_KEYS_CASE_INSENSITIVELY) ||
+            this.isEnabled(Feature.LOAD_KEYS_CASE_INSENSITIVELY)) {
             path.map { it.toLowerCase() }
         } else {
             path

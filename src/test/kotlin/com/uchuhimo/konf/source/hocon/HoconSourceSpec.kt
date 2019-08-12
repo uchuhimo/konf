@@ -18,6 +18,7 @@ package com.uchuhimo.konf.source.hocon
 
 import com.natpryce.hamkrest.assertion.assertThat
 import com.natpryce.hamkrest.equalTo
+import com.uchuhimo.konf.source.Source
 import com.uchuhimo.konf.toPath
 import org.jetbrains.spek.api.dsl.given
 import org.jetbrains.spek.api.dsl.it
@@ -50,6 +51,15 @@ object HoconSourceSpec : SubjectSpek<HoconSource>({
             }
             it("should not contain the corresponding value") {
                 assertNull(subject.getOrNull("invalid".toPath()))
+            }
+        }
+        on("use substitutions in source") {
+            val source = HoconProvider.fromString("""
+                key1 = 1
+                key2 = ${'$'}{key1}
+            """.trimIndent())
+            it("should resolve the key") {
+                assertThat((source["key2"] as Source).toInt(), equalTo(1))
             }
         }
     }

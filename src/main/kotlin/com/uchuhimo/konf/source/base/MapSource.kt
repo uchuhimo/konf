@@ -83,3 +83,14 @@ fun Config.toHierarchicalMap(): Map<String, Any> {
         }
     }
 }
+
+/**
+ * Source from an empty map.
+ */
+object EmptyMapSource : MapSource(emptyMap(), "empty map") {
+    override fun contains(path: Path): Boolean = false
+
+    override fun getOrNull(path: Path): Source? = null
+
+    override fun toMap(): Map<String, Source> = emptyMap()
+}

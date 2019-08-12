@@ -20,11 +20,16 @@ import com.natpryce.hamkrest.assertion.assertThat
 import com.natpryce.hamkrest.equalTo
 import com.natpryce.hamkrest.has
 import com.natpryce.hamkrest.throws
+import com.uchuhimo.konf.source.Source
 import com.uchuhimo.konf.source.UnknownPathsException
+import com.uchuhimo.konf.source.base.EmptyMapSource
+import com.uchuhimo.konf.source.base.asSource
 import org.jetbrains.spek.api.Spek
 import org.jetbrains.spek.api.dsl.given
 import org.jetbrains.spek.api.dsl.it
 import org.jetbrains.spek.api.dsl.on
+import org.junit.jupiter.api.assertThrows
+import java.io.FileNotFoundException
 
 object FailOnUnknownPathSpec : Spek({
     val source = """
@@ -41,7 +46,7 @@ object FailOnUnknownPathSpec : Spek({
                 addSpec(Valid)
             }
             it("should ignore unknown paths") {
-                val conf = config.from.hocon.string(source)
+                val conf = config.from.disabled(Feature.FAIL_ON_UNKNOWN_PATH).hocon.string(source)
                 assertThat(conf[Valid.valid], equalTo("value1"))
             }
         }
@@ -65,6 +70,61 @@ object FailOnUnknownPathSpec : Spek({
                 }, throws(has(
                     UnknownPathsException::paths,
                     equalTo(listOf("level1.level2.invalid")))))
+            }
+        }
+    }
+})
+
+object LoadKeysCaseInsensitivelySpec : Spek({
+    given("a config") {
+        on("the feature is disabled") {
+            val source = mapOf("somekey" to "value").asSource().disabled(Feature.LOAD_KEYS_CASE_INSENSITIVELY)
+            val config = Config().withSource(source)
+            it("should load keys case-sensitively") {
+                val someKey by config.required<String>()
+                assertThrows<UnsetValueException> { someKey }
+                val somekey by config.required<String>()
+                assertThat(somekey, equalTo("value"))
+            }
+        }
+        on("the feature is enabled on config") {
+            val source = mapOf("somekey" to "value").asSource()
+            val config = Config().enable(Feature.LOAD_KEYS_CASE_INSENSITIVELY).withSource(source)
+            it("should load keys case-insensitively") {
+                val someKey by config.required<String>()
+                assertThat(someKey, equalTo("value"))
+            }
+        }
+        on("the feature is enabled on source") {
+            val source = mapOf("somekey" to "value").asSource().enabled(Feature.LOAD_KEYS_CASE_INSENSITIVELY)
+            val config = Config().withSource(source)
+            it("should load keys case-insensitively") {
+                val someKey by config.required<String>()
+                assertThat(someKey, equalTo("value"))
+            }
+        }
+    }
+})
+
+object OptionalSourceByDefautSpec : Spek({
+    given("a config") {
+        on("the feature is disabled") {
+            val config = Config().disable(Feature.OPTIONAL_SOURCE_BY_DEFAULT)
+            it("should throw exception when file is not existed") {
+                assertThrows<FileNotFoundException> { config.from.file("not_existed.json") }
+            }
+        }
+        on("the feature is enabled on config") {
+            val config = Config().enable(Feature.OPTIONAL_SOURCE_BY_DEFAULT)
+            it("should load empty source") {
+                config.from.mapped {
+                    assertThat(it, equalTo<Source>(EmptyMapSource))
+                    it
+                }.file("not_existed.json")
+                config.from.mapped {
+                    assertThat(it, equalTo<Source>(EmptyMapSource))
+                    it
+                }.json.file("not_existed.json")
             }
         }
     }
