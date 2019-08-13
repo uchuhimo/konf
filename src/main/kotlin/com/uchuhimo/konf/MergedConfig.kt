@@ -19,14 +19,13 @@ package com.uchuhimo.konf
 import com.uchuhimo.konf.source.Source
 import java.util.ArrayDeque
 import java.util.Deque
-import kotlin.properties.ReadWriteProperty
 
 /**
  * Config that merge [fallback] and [facade].
  *
  * All operations will be applied to [facade] first, and then fall back to [facade] when necessary.
  */
-class MergedConfig(val fallback: Config, val facade: Config) :
+open class MergedConfig(val fallback: BaseConfig, val facade: BaseConfig) :
     BaseConfig("merged(facade=${facade.name}, fallback=${fallback.name})") {
 
     override fun rawSet(item: Item<*>, value: Any?) {
@@ -37,20 +36,24 @@ class MergedConfig(val fallback: Config, val facade: Config) :
         }
     }
 
-    override fun <T> set(item: Item<T>, value: T) {
-        if (item in facade) {
-            facade[item] = value
-        } else {
-            fallback[item] = value
-        }
-    }
+//    override fun <T> set(item: Item<T>, value: T) {
+//        if (item in facade) {
+//            facade[item] = value
+//        } else {
+//            fallback[item] = value
+//        }
+//    }
 
-    override fun <T> set(name: String, value: T) {
-        if (name in facade) {
-            facade[name] = value
-        } else {
-            fallback[name] = value
-        }
+//    override fun <T> set(name: String, value: T) {
+//        if (name in facade) {
+//            facade[name] = value
+//        } else {
+//            fallback[name] = value
+//        }
+//    }
+
+    override fun getItemOrNull(name: String): Item<*>? {
+        return facade.getItemOrNull(name) ?: fallback.getItemOrNull(name)
     }
 
     override fun <T> lazySet(item: Item<T>, thunk: (config: ItemContainer) -> T) {
@@ -61,13 +64,13 @@ class MergedConfig(val fallback: Config, val facade: Config) :
         }
     }
 
-    override fun <T> lazySet(name: String, thunk: (config: ItemContainer) -> T) {
-        if (name in facade) {
-            facade.lazySet(name, thunk)
-        } else {
-            fallback.lazySet(name, thunk)
-        }
-    }
+//    override fun <T> lazySet(name: String, thunk: (config: ItemContainer) -> T) {
+//        if (name in facade) {
+//            facade.lazySet(name, thunk)
+//        } else {
+//            fallback.lazySet(name, thunk)
+//        }
+//    }
 
     override fun unset(item: Item<*>) {
         if (item in facade) {
@@ -77,13 +80,13 @@ class MergedConfig(val fallback: Config, val facade: Config) :
         }
     }
 
-    override fun unset(name: String) {
-        if (name in facade) {
-            facade.unset(name)
-        } else {
-            fallback.unset(name)
-        }
-    }
+//    override fun unset(name: String) {
+//        if (name in facade) {
+//            facade.unset(name)
+//        } else {
+//            fallback.unset(name)
+//        }
+//    }
 
     override fun clear() {
         facade.clear()
@@ -135,49 +138,77 @@ class MergedConfig(val fallback: Config, val facade: Config) :
 
     override fun <T> lock(action: () -> T): T = facade.lock { fallback.lock(action) }
 
-    override fun toMap(): Map<String, Any> = fallback.toMap() + facade.toMap()
+//    override fun toMap(): Map<String, Any> = fallback.toMap() + facade.toMap()
 
-    override fun <T> get(item: Item<T>): T {
-        return if (item in facade) {
-            facade[item]
-        } else {
-            fallback[item]
-        }
-    }
+//    override fun <T> get(item: Item<T>): T {
+//        return if (item in facade) {
+//            facade[item]
+//        } else {
+//            fallback[item]
+//        }
+//    }
 
-    override fun <T> get(name: String): T {
-        return if (name in facade) {
-            facade[name]
-        } else {
-            fallback[name]
-        }
-    }
+//    override fun <T> get(name: String): T {
+//        return if (name in facade) {
+//            facade[name]
+//        } else {
+//            fallback[name]
+//        }
+//    }
 
-    override fun <T> getOrNull(item: Item<T>): T? {
-        return if (item in facade) {
-            facade.getOrNull(item)
-        } else {
-            fallback.getOrNull(item)
-        }
-    }
+//    override fun <T> getOrNull(item: Item<T>): T? {
+//        return if (item in facade) {
+//            facade.getOrNull(item)
+//        } else {
+//            fallback.getOrNull(item)
+//        }
+//    }
 
-    override fun <T> getOrNull(name: String): T? {
-        return if (name in facade) {
-            facade.getOrNull(name)
-        } else {
-            fallback.getOrNull(name)
-        }
-    }
+//    override fun <T> getOrNull(name: String): T? {
+//        return if (name in facade) {
+//            facade.getOrNull(name)
+//        } else {
+//            fallback.getOrNull(name)
+//        }
+//    }
 
     override fun getOrNull(
         item: Item<*>,
         errorWhenNotFound: Boolean,
+        errorWhenGetDefault: Boolean,
         lazyContext: ItemContainer
     ): Any? {
-        return if (item in facade) {
-            (facade as BaseConfig).getOrNull(item, errorWhenNotFound, lazyContext)
+        if (item in facade && item in fallback) {
+            try {
+                return facade.getOrNull(item, errorWhenNotFound, true, lazyContext)
+            } catch (ex: Exception) {
+                when (ex) {
+                    is UnsetValueException -> {
+                        return fallback.getOrNull(item, errorWhenNotFound, errorWhenGetDefault, lazyContext)
+                    }
+                    is GetDefaultValueException -> {
+                        try {
+                            return fallback.getOrNull(item, errorWhenNotFound, errorWhenGetDefault, lazyContext)
+                        } catch (ex: Exception) {
+                            when (ex) {
+                                is UnsetValueException -> {
+                                    if (errorWhenGetDefault) {
+                                        throw GetDefaultValueException(item)
+                                    } else {
+                                        return (item as OptionalItem).default
+                                    }
+                                }
+                                else -> throw ex
+                            }
+                        }
+                    }
+                    else -> throw ex
+                }
+            }
+        } else if (item in facade) {
+            return facade.getOrNull(item, errorWhenNotFound, errorWhenGetDefault, lazyContext)
         } else {
-            (fallback as BaseConfig).getOrNull(item, errorWhenNotFound, lazyContext)
+            return fallback.getOrNull(item, errorWhenNotFound, errorWhenGetDefault, lazyContext)
         }
     }
 
@@ -199,19 +230,19 @@ class MergedConfig(val fallback: Config, val facade: Config) :
     override val itemWithNames: List<Pair<Item<*>, String>>
         get() = facade.itemWithNames + fallback.itemWithNames
 
-    override fun <T> property(item: Item<T>): ReadWriteProperty<Any?, T> {
-        return if (item in facade) {
-            facade.property(item)
-        } else {
-            fallback.property(item)
-        }
-    }
-
-    override fun <T> property(name: String): ReadWriteProperty<Any?, T> {
-        return if (name in facade) {
-            facade.property(name)
-        } else {
-            fallback.property(name)
-        }
-    }
+//    override fun <T> property(item: Item<T>): ReadWriteProperty<Any?, T> {
+//        return if (item in facade) {
+//            facade.property(item)
+//        } else {
+//            fallback.property(item)
+//        }
+//    }
+//
+//    override fun <T> property(name: String): ReadWriteProperty<Any?, T> {
+//        return if (name in facade) {
+//            facade.property(name)
+//        } else {
+//            fallback.property(name)
+//        }
+//    }
 }

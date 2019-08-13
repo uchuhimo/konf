@@ -188,7 +188,18 @@ interface Config : ItemContainer {
      * @param config the facade config
      * @return a config overlapped by the specified facade config
      */
-    operator fun plus(config: Config): Config = MergedConfig(this, config)
+    operator fun plus(config: Config): Config = config.withFallback(this)
+
+    /**
+     * Returns a config backing by the specified fallback config.
+     *
+     * All operations will be applied to this config first,
+     * and then fall back to the fallback config when necessary.
+     *
+     * @param config the fallback config
+     * @return a config backing by the specified fallback config
+     */
+    fun withFallback(config: Config): Config = config + this
 
     /**
      * Returns sub-config in the specified path.

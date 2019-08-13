@@ -145,18 +145,20 @@ val Path.name: String get() = joinToString(".")
  * @return item path
  */
 fun String.toPath(): Path {
-    return if (isEmpty()) {
+    val name = this.trim()
+    return if (name.isEmpty()) {
         listOf()
     } else {
-        val path = this.split('.')
-        check("" !in path) { "$this is not a valid path" }
+        val path = name.split('.')
+        check("" !in path) { "\"$this\" is not a valid path" }
         path
     }
 }
 
 fun checkPath(path: String) {
-    if (path.isNotEmpty()) {
-        check("" !in path.split('.')) { "$path is not a valid path" }
+    val trimmedPath = path.trim()
+    if (trimmedPath.isNotEmpty()) {
+        check("" !in trimmedPath.split('.')) { "\"$path\" is not a valid path" }
     }
 }
 

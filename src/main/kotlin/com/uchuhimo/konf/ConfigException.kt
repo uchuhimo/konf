@@ -55,6 +55,13 @@ class UnsetValueException(val name: String) : ConfigException("$name is unset") 
 }
 
 /**
+ * Exception indicates that the specified item has default value.
+ */
+class GetDefaultValueException(val name: String) : ConfigException("$name has default value") {
+    constructor(item: Item<*>) : this(item.asName)
+}
+
+/**
  * Exception indicates that the specified item is not in this config.
  */
 class NoSuchItemException(val name: String) : ConfigException("cannot find $name in config") {

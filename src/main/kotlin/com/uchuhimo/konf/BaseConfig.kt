@@ -125,6 +125,7 @@ open class BaseConfig(
     open fun getOrNull(
         item: Item<*>,
         errorWhenNotFound: Boolean,
+        errorWhenGetDefault: Boolean = false,
         lazyContext: ItemContainer = this
     ): Any? {
         val valueState = lock.read { valueByItem[item] }
@@ -139,6 +140,13 @@ open class BaseConfig(
                     }
                 is ValueState.Null -> null
                 is ValueState.Value -> valueState.value
+                is ValueState.Default -> {
+                    if (errorWhenGetDefault) {
+                        throw GetDefaultValueException(item)
+                    } else {
+                        valueState.value
+                    }
+                }
                 is ValueState.Lazy<*> -> {
                     val value = try {
                         valueState.thunk(lazyContext)
@@ -175,7 +183,7 @@ open class BaseConfig(
             }
         } else {
             return if (parent != null) {
-                parent!!.getOrNull(item, errorWhenNotFound, lazyContext)
+                parent!!.getOrNull(item, errorWhenNotFound, errorWhenGetDefault, lazyContext)
             } else {
                 if (errorWhenNotFound) {
                     throw NoSuchItemException(item)
@@ -187,8 +195,9 @@ open class BaseConfig(
     }
 
     open fun getItemOrNull(name: String): Item<*>? {
-        val item = getItemInLayerOrNull(name)
-        return item ?: parent?.getItemOrNull(name)
+        val trimmedName = name.trim()
+        val item = getItemInLayerOrNull(trimmedName)
+        return item ?: parent?.getItemOrNull(trimmedName)
     }
 
     protected fun getItemInLayerOrNull(name: String) = lock.read { itemByName[name] }
@@ -219,7 +228,10 @@ open class BaseConfig(
         }
     }
 
-    protected fun containsInLayer(name: String) = lock.read { nameByItem.containsValue(name) }
+    protected fun containsInLayer(name: String): Boolean {
+        val trimmedName = name.trim()
+        return lock.read { nameByItem.containsValue(trimmedName) }
+    }
 
     override fun contains(name: String): Boolean {
         return if (containsInLayer(name)) {
@@ -360,6 +372,16 @@ open class BaseConfig(
         return this
     }
 
+    override fun plus(config: Config): Config {
+        return when (config) {
+            is BaseConfig -> MergedConfig(this, config)
+            is Layer -> {
+                throw NotImplementedError()
+            }
+            else -> config.withFallback(this)
+        }
+    }
+
     override fun <T> property(item: Item<T>): ReadWriteProperty<Any?, T> {
         if (!contains(item)) {
             throw NoSuchItemException(item)
@@ -434,14 +456,7 @@ open class BaseConfig(
                 nameByItem[item] = name
                 itemByName[name] = item
                 valueByItem[item] = when (item) {
-                    is OptionalItem -> {
-                        val default = item.default
-                        if (default == null) {
-                            ValueState.Null
-                        } else {
-                            ValueState.Value(default)
-                        }
-                    }
+                    is OptionalItem -> ValueState.Default(item.default)
                     is RequiredItem -> ValueState.Unset
                     is LazyItem -> ValueState.Lazy(item.thunk)
                 }
@@ -468,14 +483,7 @@ open class BaseConfig(
                     nameByItem[item] = name
                     itemByName[name] = item
                     valueByItem[item] = when (item) {
-                        is OptionalItem -> {
-                            val value = item.default
-                            if (value == null) {
-                                ValueState.Null
-                            } else {
-                                ValueState.Value(value)
-                            }
-                        }
+                        is OptionalItem -> ValueState.Default(item.default)
                         is RequiredItem -> ValueState.Unset
                         is LazyItem -> ValueState.Lazy(item.thunk)
                     }
@@ -522,6 +530,7 @@ open class BaseConfig(
         object Null : ValueState()
         data class Lazy<T>(var thunk: (config: ItemContainer) -> T) : ValueState()
         data class Value(var value: Any) : ValueState()
+        data class Default(val value: Any?) : ValueState()
     }
 
     private class Layer(val config: BaseConfig) : Config by config {

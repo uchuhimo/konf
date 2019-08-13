@@ -16,6 +16,12 @@
 
 package com.uchuhimo.konf
 
+import com.natpryce.hamkrest.assertion.assertThat
+import com.natpryce.hamkrest.equalTo
+import com.uchuhimo.konf.source.Source
+import org.jetbrains.spek.api.dsl.given
+import org.jetbrains.spek.api.dsl.it
+import org.jetbrains.spek.api.dsl.on
 import org.jetbrains.spek.subject.SubjectSpek
 
 object FacadeConfigSpec : SubjectSpek<Config>({
@@ -26,6 +32,54 @@ object FacadeConfigSpec : SubjectSpek<Config>({
 
 object FallbackConfigSpec : SubjectSpek<Config>({
     subject { Config { addSpec(NetworkBuffer) } + Config() }
+
+    configTestSpec(testLayer = false)
+})
+
+object BothConfigSpec : SubjectSpek<Config>({
+    subject { Config { addSpec(NetworkBuffer) } + Config { addSpec(NetworkBuffer) } }
+
+    configTestSpec(testLayer = false)
+
+    given("a merged config") {
+        on("set item in the fallback config") {
+            (subject as MergedConfig).fallback[NetworkBuffer.type] = NetworkBuffer.Type.ON_HEAP
+            it("should have higher priority than the default value") {
+                assertThat(subject[NetworkBuffer.type], equalTo(NetworkBuffer.Type.ON_HEAP))
+            }
+        }
+    }
+})
+
+class UpdateFallbackConfig(val config: MergedConfig) : MergedConfig(config.facade, config.fallback) {
+
+    override fun rawSet(item: Item<*>, value: Any?) {
+        if (item is LazyItem) {
+            facade.rawSet(item, value)
+        } else {
+            fallback.rawSet(item, value)
+        }
+    }
+
+    override fun unset(item: Item<*>) {
+        fallback.unset(item)
+    }
+
+    override fun addItem(item: Item<*>, prefix: String) {
+        fallback.addItem(item, prefix)
+    }
+
+    override fun addSpec(spec: Spec) {
+        fallback.addSpec(spec)
+    }
+
+    override fun addSource(source: Source) {
+        fallback.addSource(source)
+    }
+}
+
+object UpdateFallbackConfigSpec : SubjectSpek<Config>({
+    subject { UpdateFallbackConfig((Config { addSpec(NetworkBuffer) } + Config { addSpec(NetworkBuffer) }) as MergedConfig) }
 
     configTestSpec(testLayer = false)
 })

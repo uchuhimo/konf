@@ -379,6 +379,13 @@ fun SubjectProviderDsl<Config>.configTestSpec(prefix: String = "network.buffer",
                     assertTrue { qualify("name") in subject }
                 }
             }
+            on("get with valid name which contains trailing whitespaces") {
+                it("should return corresponding value") {
+                    assertThat(subject(qualify("name ")), equalTo("buffer"))
+                    assertThat(subject.getOrNull(qualify("name  ")), equalTo("buffer"))
+                    assertTrue { qualify("name   ") in subject }
+                }
+            }
             on("get with invalid name") {
                 it("should throw NoSuchItemException when using `get`") {
                     assertThat({ subject<String>(spec.qualify(invalidItem)) }, throws(has(
@@ -465,6 +472,12 @@ fun SubjectProviderDsl<Config>.configTestSpec(prefix: String = "network.buffer",
                     assertThat(subject[size], equalTo(1024))
                 }
             }
+            on("set with valid name which contains trailing whitespaces") {
+                subject[qualify("size  ")] = 1024
+                it("should contain the specified value") {
+                    assertThat(subject[size], equalTo(1024))
+                }
+            }
             on("set with invalid name") {
                 it("should throw NoSuchItemException") {
                     assertThat({ subject[invalidItemName] = 1024 },
@@ -518,6 +531,13 @@ fun SubjectProviderDsl<Config>.configTestSpec(prefix: String = "network.buffer",
             }
             on("lazy set with valid name") {
                 subject.lazySet(qualify(maxSize.name)) { it[size] * 4 }
+                subject[size] = 1024
+                it("should contain the specified value") {
+                    assertThat(subject[maxSize], equalTo(subject[size] * 4))
+                }
+            }
+            on("lazy set with valid name which contains trailing whitespaces") {
+                subject.lazySet(qualify(maxSize.name + "  ")) { it[size] * 4 }
                 subject[size] = 1024
                 it("should contain the specified value") {
                     assertThat(subject[maxSize], equalTo(subject[size] * 4))
