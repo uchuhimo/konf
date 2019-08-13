@@ -54,7 +54,7 @@ repositories {
 
 val wrapper by tasks.existing(Wrapper::class)
 wrapper {
-    gradleVersion = "5.1.1"
+    gradleVersion = "5.5.1"
     distributionType = Wrapper.DistributionType.ALL
 }
 
@@ -375,5 +375,5 @@ dependencyUpdates {
 
 buildScan {
     termsOfServiceUrl = "https://gradle.com/terms-of-service"
-    setTermsOfServiceAgree("yes")
+    termsOfServiceAgree = "yes"
 }

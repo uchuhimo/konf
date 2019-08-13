@@ -36,22 +36,6 @@ open class MergedConfig(val fallback: BaseConfig, val facade: BaseConfig) :
         }
     }
 
-//    override fun <T> set(item: Item<T>, value: T) {
-//        if (item in facade) {
-//            facade[item] = value
-//        } else {
-//            fallback[item] = value
-//        }
-//    }
-
-//    override fun <T> set(name: String, value: T) {
-//        if (name in facade) {
-//            facade[name] = value
-//        } else {
-//            fallback[name] = value
-//        }
-//    }
-
     override fun getItemOrNull(name: String): Item<*>? {
         return facade.getItemOrNull(name) ?: fallback.getItemOrNull(name)
     }
@@ -64,14 +48,6 @@ open class MergedConfig(val fallback: BaseConfig, val facade: BaseConfig) :
         }
     }
 
-//    override fun <T> lazySet(name: String, thunk: (config: ItemContainer) -> T) {
-//        if (name in facade) {
-//            facade.lazySet(name, thunk)
-//        } else {
-//            fallback.lazySet(name, thunk)
-//        }
-//    }
-
     override fun unset(item: Item<*>) {
         if (item in facade) {
             facade.unset(item)
@@ -79,14 +55,6 @@ open class MergedConfig(val fallback: BaseConfig, val facade: BaseConfig) :
             fallback.unset(item)
         }
     }
-
-//    override fun unset(name: String) {
-//        if (name in facade) {
-//            facade.unset(name)
-//        } else {
-//            fallback.unset(name)
-//        }
-//    }
 
     override fun clear() {
         facade.clear()
@@ -137,40 +105,6 @@ open class MergedConfig(val fallback: BaseConfig, val facade: BaseConfig) :
     }
 
     override fun <T> lock(action: () -> T): T = facade.lock { fallback.lock(action) }
-
-//    override fun toMap(): Map<String, Any> = fallback.toMap() + facade.toMap()
-
-//    override fun <T> get(item: Item<T>): T {
-//        return if (item in facade) {
-//            facade[item]
-//        } else {
-//            fallback[item]
-//        }
-//    }
-
-//    override fun <T> get(name: String): T {
-//        return if (name in facade) {
-//            facade[name]
-//        } else {
-//            fallback[name]
-//        }
-//    }
-
-//    override fun <T> getOrNull(item: Item<T>): T? {
-//        return if (item in facade) {
-//            facade.getOrNull(item)
-//        } else {
-//            fallback.getOrNull(item)
-//        }
-//    }
-
-//    override fun <T> getOrNull(name: String): T? {
-//        return if (name in facade) {
-//            facade.getOrNull(name)
-//        } else {
-//            fallback.getOrNull(name)
-//        }
-//    }
 
     override fun getOrNull(
         item: Item<*>,
@@ -229,20 +163,4 @@ open class MergedConfig(val fallback: BaseConfig, val facade: BaseConfig) :
 
     override val itemWithNames: List<Pair<Item<*>, String>>
         get() = facade.itemWithNames + fallback.itemWithNames
-
-//    override fun <T> property(item: Item<T>): ReadWriteProperty<Any?, T> {
-//        return if (item in facade) {
-//            facade.property(item)
-//        } else {
-//            fallback.property(item)
-//        }
-//    }
-//
-//    override fun <T> property(name: String): ReadWriteProperty<Any?, T> {
-//        return if (name in facade) {
-//            facade.property(name)
-//        } else {
-//            fallback.property(name)
-//        }
-//    }
 }

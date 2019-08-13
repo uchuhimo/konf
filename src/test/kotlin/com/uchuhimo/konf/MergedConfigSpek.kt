@@ -30,8 +30,20 @@ object FacadeConfigSpec : SubjectSpek<Config>({
     configTestSpec(testLayer = false)
 })
 
+object FacadeConfigUsingWithFallbackSpec : SubjectSpek<Config>({
+    subject { Config { addSpec(NetworkBuffer) }.withFallback(Config()) }
+
+    configTestSpec(testLayer = false)
+})
+
 object FallbackConfigSpec : SubjectSpek<Config>({
     subject { Config { addSpec(NetworkBuffer) } + Config() }
+
+    configTestSpec(testLayer = false)
+})
+
+object FallbackConfigUsingWithFallbackSpec : SubjectSpek<Config>({
+    subject { Config().withFallback(Config { addSpec(NetworkBuffer) }) }
 
     configTestSpec(testLayer = false)
 })

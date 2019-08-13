@@ -41,13 +41,8 @@ object EmptyStringToCollectionDeserializerModifier : BeanDeserializerModifier() 
         object : JsonDeserializer<Map<Any, Any>>(), ContextualDeserializer, ResolvableDeserializer {
             @Suppress("UNCHECKED_CAST")
             override fun deserialize(jp: JsonParser, ctx: DeserializationContext?): Map<Any, Any>? {
-                if (!jp.isExpectedStartArrayToken) {
-                    if (jp.hasToken(JsonToken.VALUE_STRING)) {
-                        val str = jp.text
-                        if (str.isEmpty()) {
-                            return deserializer.getEmptyValue(ctx) as Map<Any, Any>?
-                        }
-                    }
+                if (!jp.isExpectedStartArrayToken && jp.hasToken(JsonToken.VALUE_STRING) && jp.text.isEmpty()) {
+                    return deserializer.getEmptyValue(ctx) as Map<Any, Any>?
                 }
                 return deserializer.deserialize(jp, ctx) as Map<Any, Any>?
             }
@@ -73,13 +68,8 @@ object EmptyStringToCollectionDeserializerModifier : BeanDeserializerModifier() 
         object : JsonDeserializer<Collection<Any>>(), ContextualDeserializer {
             @Suppress("UNCHECKED_CAST")
             override fun deserialize(jp: JsonParser, ctx: DeserializationContext?): Collection<Any>? {
-                if (!jp.isExpectedStartArrayToken) {
-                    if (jp.hasToken(JsonToken.VALUE_STRING)) {
-                        val str = jp.text
-                        if (str.isEmpty()) {
-                            return deserializer.getEmptyValue(ctx) as Collection<Any>?
-                        }
-                    }
+                if (!jp.isExpectedStartArrayToken && jp.hasToken(JsonToken.VALUE_STRING) && jp.text.isEmpty()) {
+                    return deserializer.getEmptyValue(ctx) as Collection<Any>?
                 }
                 return deserializer.deserialize(jp, ctx) as Collection<Any>?
             }
@@ -101,17 +91,12 @@ object EmptyStringToCollectionDeserializerModifier : BeanDeserializerModifier() 
         object : JsonDeserializer<Any>(), ContextualDeserializer {
             @Suppress("UNCHECKED_CAST")
             override fun deserialize(jp: JsonParser, ctx: DeserializationContext?): Any? {
-                if (!jp.isExpectedStartArrayToken) {
-                    if (jp.hasToken(JsonToken.VALUE_STRING)) {
-                        val str = jp.text
-                        if (str.isEmpty()) {
-                            val emptyValue = deserializer.getEmptyValue(ctx)
-                            return if (emptyValue is Array<*>) {
-                                java.lang.reflect.Array.newInstance(valueType!!.contentType.rawClass, 0)
-                            } else {
-                                emptyValue
-                            }
-                        }
+                if (!jp.isExpectedStartArrayToken && jp.hasToken(JsonToken.VALUE_STRING) && jp.text.isEmpty()) {
+                    val emptyValue = deserializer.getEmptyValue(ctx)
+                    return if (emptyValue is Array<*>) {
+                        java.lang.reflect.Array.newInstance(valueType!!.contentType.rawClass, 0)
+                    } else {
+                        emptyValue
                     }
                 }
                 return deserializer.deserialize(jp, ctx)

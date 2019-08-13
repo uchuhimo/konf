@@ -376,9 +376,18 @@ open class BaseConfig(
         return when (config) {
             is BaseConfig -> MergedConfig(this, config)
             is Layer -> {
-                throw NotImplementedError()
+                throw MergeLayerException(this, config)
             }
             else -> config.withFallback(this)
+        }
+    }
+
+    override fun withFallback(config: Config): Config {
+        return when (config) {
+            is Layer -> {
+                throw MergeLayerException(this, config)
+            }
+            else -> config + this
         }
     }
 
@@ -579,6 +588,17 @@ open class BaseConfig(
         }
 
         override val items: List<Item<*>> get() = super.items
+
+        override fun plus(config: Config): Config {
+            return when (config) {
+                is Layer -> {
+                    throw MergeLayerException(config, this)
+                }
+                else -> config.withFallback(this)
+            }
+        }
+
+        override fun withFallback(config: Config): Config = config + this
 
         override fun equals(other: Any?): Boolean {
             if (this === other) return true

@@ -75,6 +75,12 @@ class LayerFrozenException(val config: Config) :
     ConfigException("config ${config.name} has child layer, cannot add new item")
 
 /**
+ * Exception indicates that the config is merged with a layer, which is not allowed.
+ */
+class MergeLayerException(val config: Config, val layer: Config) :
+    ConfigException("merge a config ${config.name} with a layer ${layer.name} is not allowed")
+
+/**
  * Exception indicates that expected value in specified path is not existed in the source.
  */
 class NoSuchPathException(val path: String) :

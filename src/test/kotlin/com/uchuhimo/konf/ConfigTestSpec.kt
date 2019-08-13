@@ -31,6 +31,7 @@ import org.jetbrains.spek.api.dsl.it
 import org.jetbrains.spek.api.dsl.on
 import org.jetbrains.spek.subject.SubjectSpek
 import org.jetbrains.spek.subject.dsl.SubjectProviderDsl
+import org.junit.jupiter.api.assertThrows
 import kotlin.test.assertFalse
 import kotlin.test.assertNull
 import kotlin.test.assertTrue
@@ -666,6 +667,13 @@ fun SubjectProviderDsl<Config>.configTestSpec(prefix: String = "network.buffer",
                 }
                 it("should return itself as its layer") {
                     assertThat(layer.layer, sameInstance(layer))
+                }
+                it("should not be merged with a config") {
+                    assertThrows<MergeLayerException> { layer + layer }
+                    assertThrows<MergeLayerException> { layer + subject }
+                    assertThrows<MergeLayerException> { layer.withFallback(subject) }
+                    assertThrows<MergeLayerException> { subject + layer }
+                    assertThrows<MergeLayerException> { subject.withFallback(layer) }
                 }
                 on("iterate items in layer") {
                     it("should cover all items in layer") {
