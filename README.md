@@ -38,7 +38,7 @@ A type-safe cascading configuration library for Kotlin/Java, supporting most con
     - [Create config](#create-config)
     - [Add config spec](#add-config-spec)
     - [Retrieve value from config](#retrieve-value-from-config)
-    - [Check whether value exists in config or not](#check-whether-value-exists-in-config-or-not)
+    - [Check whether an item exists in config or not](#check-whether-an-item-exists-in-config-or-not)
     - [Modify value in config](#modify-value-in-config)
     - [Export value in config as property](#export-value-in-config-as-property)
     - [Fork from another config](#fork-from-another-config)
@@ -48,6 +48,9 @@ A type-safe cascading configuration library for Kotlin/Java, supporting most con
   - [Supported item types](#supported-item-types)
   - [Optional features](#optional-features)
   - [Build from source](#build-from-source)
+  - [Breaking Changes](#breaking-changes)
+    - [v0.15](#v015)
+    - [v0.10](#v010)
 - [License](#license)
 
 ## Prerequisites
@@ -58,26 +61,36 @@ A type-safe cascading configuration library for Kotlin/Java, supporting most con
 
 This library has been published to [Maven Central](https://search.maven.org/artifact/com.uchuhimo/konf), [JCenter](https://bintray.com/uchuhimo/maven/konf) and [JitPack](https://jitpack.io/#uchuhimo/konf).
 
+Konf is modular, you can use different modules for different sources:
+
+- `konf-core`: for built-in sources (JSON, properties, map, command line and system environment)
+- `konf-hocon`: for built-in + [HOCON](https://github.com/typesafehub/config/blob/master/HOCON.md) sources
+- `konf-toml`: for built-in + [TOML](https://github.com/toml-lang/toml) sources
+- `konf-xml`: for built-in + XML sources
+- `konf-yaml`: for built-in + YAML sources
+- `konf-git`: for built-in + Git sources
+- `konf`: for all sources mentioned above
+
 ### Maven
 
 ```xml
 <dependency>
   <groupId>com.uchuhimo</groupId>
   <artifactId>konf</artifactId>
-  <version>0.14.1</version>
+  <version>0.15</version>
 </dependency>
 ```
 
 ### Gradle
 
 ```groovy
-compile 'com.uchuhimo:konf:0.14.1'
+compile 'com.uchuhimo:konf:0.15'
 ```
 
 ### Gradle Kotlin DSL
 
 ```kotlin
-compile(group = "com.uchuhimo", name = "konf", version = "0.14.1")
+compile(group = "com.uchuhimo", name = "konf", version = "0.15")
 ```
 
 ### Maven (master snapshot)
@@ -621,6 +634,21 @@ Install library in a local Maven repository for consumption in other projects vi
 ```
 gradlew clean install
 ```
+
+## Breaking Changes
+
+### v0.15
+
+After modularized Konf, `hocon`/`toml`/`xml`/`yaml`/`git`/`watchGit` in `DefaultLoaders` become extension properties/functions and should be imported explicitly.
+For example, you should import `com.uchuhimo.konf.source.hocon` before using `config.from.hocon`.
+
+### v0.10
+
+APIs in `ConfigSpec` have been updated to support item name's auto-detection, please migrate to new APIs. Here are some examples:
+
+- `val host = optional("host", "0.0.0.0")` to `val host by optional("0.0.0.0")`
+- `val port = required<Int>("port")` to `val port by required<Int>()`
+- `val nextPort = lazy("nextPort") { config -> config[port] + 1 }` to `val nextPort by lazy { config -> config[port] + 1 }`
 
 # License
 
