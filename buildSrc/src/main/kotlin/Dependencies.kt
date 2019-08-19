@@ -20,6 +20,7 @@ object Versions {
     // wait for 0.9.20 if using JDK11 (issue: https://github.com/Kotlin/dokka/issues/428)
     val dokka = "0.9.17"
     val apiguardian = "1.1.0"
+    val reflections = "0.9.11"
     val hocon = "1.3.4"
     val yaml = "1.24"
     val toml4j = "0.7.2"
