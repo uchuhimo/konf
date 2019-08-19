@@ -1,0 +1,3 @@
+dependencies {
+    jmhImplementation(kotlin("stdlib"))
+}
