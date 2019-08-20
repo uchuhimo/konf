@@ -640,7 +640,7 @@ gradlew clean install
 ### v0.15
 
 After modularized Konf, `hocon`/`toml`/`xml`/`yaml`/`git`/`watchGit` in `DefaultLoaders` become extension properties/functions and should be imported explicitly.
-For example, you should import `com.uchuhimo.konf.source.hocon` before using `config.from.hocon`.
+For example, you should import `com.uchuhimo.konf.source.hocon` before using `config.from.hocon`; in Java, `config.from().hocon` is unavailable, please use `config.from().source(HoconProvider.INSTANCE)` instead.
 
 ### v0.10
 
