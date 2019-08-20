@@ -195,17 +195,14 @@ subprojects {
             googleJavaFormat(Versions.googleJavaFormat)
             trimTrailingWhitespace()
             endWithNewline()
-            // licenseHeaderFile will fail with an empty line after license header,
-            // disable it by default
-            //licenseHeaderFile rootProject.file("config/spotless/apache-license-2.0.java")
+            licenseHeaderFile(rootProject.file("config/spotless/apache-license-2.0.java"))
         }
         kotlin {
             ktlint(Versions.ktlint)
             trimTrailingWhitespace()
             endWithNewline()
-            // licenseHeaderFile is unstable for Kotlin
-            // (i.e. will remove `@file:JvmName` when formatting), disable it by default
-            //licenseHeaderFile rootProject.file("config/spotless/apache-license-2.0.kt")
+            // licenseHeaderFile is unstable for Kotlin (i.e. will remove `@file:JvmName` when formatting)
+            licenseHeaderFile(rootProject.file("config/spotless/apache-license-2.0.kt"))
         }
     }
 
