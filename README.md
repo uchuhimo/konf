@@ -652,4 +652,4 @@ APIs in `ConfigSpec` have been updated to support item name's auto-detection, pl
 
 # License
 
-© uchuhimo, 2017-2018. Licensed under an [Apache 2.0](./LICENSE) license.
+© uchuhimo, 2017-2019. Licensed under an [Apache 2.0](./LICENSE) license.
