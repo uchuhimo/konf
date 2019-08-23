@@ -63,7 +63,7 @@ allprojects {
     apply(plugin = "com.jfrog.bintray")
 
     group = "com.uchuhimo"
-    version = "0.15"
+    version = "0.15.1"
 
     repositories {
         aliyunMaven()
@@ -292,7 +292,7 @@ subprojects {
         key = bintrayKeyProperty
         publish = true
         dryRun = false
-        override = false
+        override = true
         setPublications("maven")
 
         pkg.apply {
