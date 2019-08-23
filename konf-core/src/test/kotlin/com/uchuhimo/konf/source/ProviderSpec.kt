@@ -33,6 +33,7 @@ import java.io.File
 import java.io.FileNotFoundException
 import java.io.IOException
 import java.net.URL
+import kotlin.test.assertTrue
 
 object ProviderSpec : SubjectSpek<Provider>({
     subject { PropertiesProvider }
@@ -59,6 +60,9 @@ object ProviderSpec : SubjectSpek<Provider>({
             }
             it("should return a source which contains value in file") {
                 assertThat(source["type"].toText(), equalTo("file"))
+            }
+            it("should not lock the file") {
+                assertTrue { file.delete() }
             }
         }
         on("create source from not-existed file") {
@@ -141,6 +145,9 @@ object ProviderSpec : SubjectSpek<Provider>({
             }
             it("should return a source which contains value in URL") {
                 assertThat(source["type"].toText(), equalTo("fileUrl"))
+            }
+            it("should not lock the file") {
+                assertTrue { file.delete() }
             }
         }
         on("create source from not-existed file URL") {

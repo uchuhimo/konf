@@ -22,7 +22,6 @@ import com.uchuhimo.konf.source.properties.PropertiesProvider
 import org.reflections.ReflectionUtils
 import org.reflections.Reflections
 import java.io.File
-import java.io.FileInputStream
 import java.io.IOException
 import java.io.InputStream
 import java.io.Reader
@@ -92,7 +91,11 @@ interface Provider {
      * @param content specified byte array
      * @return a new source from specified byte array
      */
-    fun fromBytes(content: ByteArray): Source = fromInputStream(content.inputStream())
+    fun fromBytes(content: ByteArray): Source {
+        return content.inputStream().use {
+            fromInputStream(it)
+        }
+    }
 
     /**
      * Returns a new source from specified portion of byte array.
@@ -102,8 +105,11 @@ interface Provider {
      * @param length the length of the portion of the array to read
      * @return a new source from specified portion of byte array
      */
-    fun fromBytes(content: ByteArray, offset: Int, length: Int): Source =
-        fromInputStream(content.inputStream(offset, length))
+    fun fromBytes(content: ByteArray, offset: Int, length: Int): Source {
+        return content.inputStream(offset, length).use {
+            fromInputStream(it)
+        }
+    }
 
     /**
      * Returns a new source from specified url.
@@ -126,13 +132,17 @@ interface Provider {
                     if (!file.exists() && optional) {
                         return EmptyMapSource.apply(extendContext)
                     }
-                    return fromInputStream(FileInputStream(file)).apply(extendContext)
+                    return file.inputStream().use {
+                        fromInputStream(it).apply(extendContext)
+                    }
                 }
             }
         }
         return try {
             val stream = url.openStream()
-            fromInputStream(stream).apply(extendContext)
+            stream.use {
+                fromInputStream(it).apply(extendContext)
+            }
         } catch (ex: IOException) {
             if (optional) {
                 EmptyMapSource.apply(extendContext)

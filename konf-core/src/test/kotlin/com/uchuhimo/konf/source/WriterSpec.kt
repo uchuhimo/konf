@@ -28,6 +28,7 @@ import org.jetbrains.spek.subject.SubjectSpek
 import java.io.ByteArrayOutputStream
 import java.io.StringWriter
 import java.nio.charset.Charset
+import kotlin.test.assertTrue
 
 object WriterSpec : SubjectSpek<Writer>({
     subject {
@@ -72,6 +73,9 @@ object WriterSpec : SubjectSpek<Writer>({
             subject.toFile(file)
             it("should return a file which contains content from config") {
                 assertThat(file.readText(), equalTo(expectedString))
+            }
+            it("should not lock the file") {
+                assertTrue { file.delete() }
             }
         }
         on("save to file by path") {

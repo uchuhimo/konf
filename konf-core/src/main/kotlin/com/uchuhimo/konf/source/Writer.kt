@@ -44,7 +44,11 @@ interface Writer {
      * @param file specified file
      * @return a new source from specified file
      */
-    fun toFile(file: File) = toOutputStream(file.outputStream())
+    fun toFile(file: File) {
+        file.outputStream().use {
+            toOutputStream(it)
+        }
+    }
 
     /**
      * Save to specified file path.
