@@ -78,20 +78,20 @@ Konf is modular, you can use different modules for different sources:
 <dependency>
   <groupId>com.uchuhimo</groupId>
   <artifactId>konf</artifactId>
-  <version>0.15.1</version>
+  <version>0.16.0</version>
 </dependency>
 ```
 
 ### Gradle
 
 ```groovy
-compile 'com.uchuhimo:konf:0.15.1'
+compile 'com.uchuhimo:konf:0.16.0'
 ```
 
 ### Gradle Kotlin DSL
 
 ```kotlin
-compile(group = "com.uchuhimo", name = "konf", version = "0.15.1")
+compile(group = "com.uchuhimo", name = "konf", version = "0.16.0")
 ```
 
 ### Maven (master snapshot)
