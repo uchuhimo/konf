@@ -16,36 +16,22 @@
 
 package com.uchuhimo.konf.source.js
 
-import com.fasterxml.jackson.core.JsonGenerator
-import com.fasterxml.jackson.core.util.DefaultPrettyPrinter
-import com.fasterxml.jackson.databind.ObjectMapper
 import com.uchuhimo.konf.Config
 import com.uchuhimo.konf.source.Writer
 import com.uchuhimo.konf.source.base.toHierarchicalMap
 import java.io.OutputStream
-import java.util.UUID
 import java.util.regex.Pattern
-
-class MarkedPrettyPrinter(
-    mapper: ObjectMapper,
-    val mark: String
-) : DefaultPrettyPrinter(mapper.serializationConfig.defaultPrettyPrinter as DefaultPrettyPrinter) {
-    override fun writeObjectFieldValueSeparator(g: JsonGenerator) {
-        g.writeRaw(mark)
-    }
-}
 
 /**
  * Writer for JavaScript source.
  */
 class JsWriter(val config: Config) : Writer {
     override fun toWriter(writer: java.io.Writer) {
-        val mark = UUID.randomUUID().toString()
         val jsonOutput = config.mapper
             .writerWithDefaultPrettyPrinter()
             .writeValueAsString(config.toHierarchicalMap())
-        val p = Pattern.compile("(\")(.*)(\"\\s*):")
-        val jsOutput = p.matcher(jsonOutput).replaceAll("$2:")
+        val pattern = Pattern.compile("(\")(.*)(\"\\s*):")
+        val jsOutput = pattern.matcher(jsonOutput).replaceAll("$2:")
         writer.write("($jsOutput)")
     }
 
