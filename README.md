@@ -70,6 +70,7 @@ Konf is modular, you can use different modules for different sources:
 - `konf-yaml`: for built-in + YAML sources
 - `konf-git`: for built-in + Git sources
 - `konf`: for all sources mentioned above
+- `konf-js`: for built-in + JavaScript (use GraalVM JavaScript) sources
 
 ### Maven
 
@@ -436,19 +437,20 @@ val childConfig = config.from.env()
 check(childConfig.parent === config)
 ```
 
-All out-of-box supported sources are declared in [`DefaultLoaders`](https://github.com/uchuhimo/konf/blob/master/src/main/kotlin/com/uchuhimo/konf/source/DefaultLoaders.kt), shown below (the corresponding config spec for these samples is [`ConfigForLoad`](https://github.com/uchuhimo/konf/blob/master/src/test/kotlin/com/uchuhimo/konf/source/ConfigForLoad.kt)):
+All out-of-box supported sources are declared in [`DefaultLoaders`](https://github.com/uchuhimo/konf/blob/master/konf-core/src/main/kotlin/com/uchuhimo/konf/source/DefaultLoaders.kt), shown below (the corresponding config spec for these samples is [`ConfigForLoad`](https://github.com/uchuhimo/konf/blob/master/konf-core/src/test/kotlin/com/uchuhimo/konf/source/ConfigForLoad.kt)):
 
 | Type | Sample |
 | - | - |
-| [HOCON](https://github.com/typesafehub/config/blob/master/HOCON.md) | [`source.conf`](https://github.com/uchuhimo/konf/blob/master/src/test/resources/source/source.conf) |
-| JSON | [`source.json`](https://github.com/uchuhimo/konf/blob/master/src/test/resources/source/source.json) |
-| properties | [`source.properties`](https://github.com/uchuhimo/konf/blob/master/src/test/resources/source/source.properties) |
-| [TOML](https://github.com/toml-lang/toml) | [`source.toml`](https://github.com/uchuhimo/konf/blob/master/src/test/resources/source/source.toml) |
-| XML | [`source.xml`](https://github.com/uchuhimo/konf/blob/master/src/test/resources/source/source.xml) |
-| YAML | [`source.yaml`](https://github.com/uchuhimo/konf/blob/master/src/test/resources/source/source.yaml) |
-| hierarchical map | [`MapSourceLoadSpec`](https://github.com/uchuhimo/konf/blob/master/src/test/kotlin/com/uchuhimo/konf/source/base/MapSourceLoadSpec.kt) |
-| map in key-value format | [`KVSourceSpec`](https://github.com/uchuhimo/konf/blob/master/src/test/kotlin/com/uchuhimo/konf/source/base/KVSourceSpec.kt) |
-| map in flat format | [`FlatSourceLoadSpec`](https://github.com/uchuhimo/konf/blob/master/src/test/kotlin/com/uchuhimo/konf/source/base/FlatSourceLoadSpec.kt) |
+| [HOCON](https://github.com/typesafehub/config/blob/master/HOCON.md) | [`source.conf`](https://github.com/uchuhimo/konf/blob/master/konf-hocon/src/test/resources/source/source.conf) |
+| JSON | [`source.json`](https://github.com/uchuhimo/konf/blob/master/konf-core/src/test/resources/source/source.json) |
+| properties | [`source.properties`](https://github.com/uchuhimo/konf/blob/master/konf-core/src/test/resources/source/source.properties) |
+| [TOML](https://github.com/toml-lang/toml) | [`source.toml`](https://github.com/uchuhimo/konf/blob/master/konf-toml/src/test/resources/source/source.toml) |
+| XML | [`source.xml`](https://github.com/uchuhimo/konf/blob/master/konf-xml/src/test/resources/source/source.xml) |
+| YAML | [`source.yaml`](https://github.com/uchuhimo/konf/blob/master/konf-yaml/src/test/resources/source/source.yaml) |
+| JavaScript | [`source.js`](https://github.com/uchuhimo/konf/blob/master/konf-js/src/test/resources/source/source.js) |
+| hierarchical map | [`MapSourceLoadSpec`](https://github.com/uchuhimo/konf/blob/master/konf-core/src/test/kotlin/com/uchuhimo/konf/source/base/MapSourceLoadSpec.kt) |
+| map in key-value format | [`KVSourceSpec`](https://github.com/uchuhimo/konf/blob/master/konf-core/src/test/kotlin/com/uchuhimo/konf/source/base/KVSourceSpec.kt) |
+| map in flat format | [`FlatSourceLoadSpec`](https://github.com/uchuhimo/konf/blob/master/konf-core/src/test/kotlin/com/uchuhimo/konf/source/base/FlatSourceLoadSpec.kt) |
 | system properties | - |
 | system environment | - |
 
@@ -457,7 +459,7 @@ Format of system properties source is same with that of properties source. Syste
 - All letters in name are in uppercase
 - `.` in name is replaced with `_`
 
-HOCON/JSON/properties/TOML/XML/YAML source can be loaded from a variety of input format. Use properties source as example:
+HOCON/JSON/properties/TOML/XML/YAML/JavaScript source can be loaded from a variety of input format. Use properties source as example:
 
 - From file: `config.from.properties.file("/path/to/file")`
 - From watched file: `config.from.properties.watchFile("/path/to/file", 100, TimeUnit.MILLISECONDS)`
@@ -482,8 +484,9 @@ If source is from file, file extension can be auto detected. Thus, you can use `
 | TOML | toml |
 | XML | xml |
 | YAML | yml, yaml |
+| JavaScript | js |
 
-You can also implement [`Source`](https://github.com/uchuhimo/konf/blob/master/src/main/kotlin/com/uchuhimo/konf/source/Source.kt) to customize your new source, which can be loaded into config by `config.withSource(source)`.
+You can also implement [`Source`](https://github.com/uchuhimo/konf/blob/master/konf-core/src/main/kotlin/com/uchuhimo/konf/source/Source.kt) to customize your new source, which can be loaded into config by `config.withSource(source)`.
 
 ### Strict parsing when loading
 
@@ -544,7 +547,7 @@ val newConfig = Config {
 check(config == newConfig)
 ```
 
-Config can be saved to a variety of output format in HOCON/JSON/properties/TOML/XML/YAML. Use JSON as example:
+Config can be saved to a variety of output format in HOCON/JSON/properties/TOML/XML/YAML/JavaScript. Use JSON as example:
 
 - To file: `config.toJson.toFile("/path/to/file")`
 - To string: `config.toJson.toText()`
@@ -552,7 +555,7 @@ Config can be saved to a variety of output format in HOCON/JSON/properties/TOML/
 - To output stream: `config.toJson.toOutputStream(outputStream)`
 - To byte array: `config.toJson.toBytes()`
 
-You can also implement [`Writer`](https://github.com/uchuhimo/konf/blob/master/src/main/kotlin/com/uchuhimo/konf/source/Writer.kt) to customize your new writer (see [`JsonWriter`](https://github.com/uchuhimo/konf/blob/master/src/main/kotlin/com/uchuhimo/konf/source/json/JsonWriter.kt) for how to integrate your writer with config).
+You can also implement [`Writer`](https://github.com/uchuhimo/konf/blob/master/konf-core/src/main/kotlin/com/uchuhimo/konf/source/Writer.kt) to customize your new writer (see [`JsonWriter`](https://github.com/uchuhimo/konf/blob/master/konf-core/src/main/kotlin/com/uchuhimo/konf/source/json/JsonWriter.kt) for how to integrate your writer with config).
 
 ## Supported item types
 
