@@ -23,6 +23,7 @@ import com.fasterxml.jackson.databind.node.FloatNode
 import com.fasterxml.jackson.databind.node.IntNode
 import com.fasterxml.jackson.databind.node.LongNode
 import com.fasterxml.jackson.databind.node.ShortNode
+import com.fasterxml.jackson.databind.node.TextNode
 import com.natpryce.hamkrest.assertion.assertThat
 import com.natpryce.hamkrest.equalTo
 import com.natpryce.hamkrest.throws
@@ -89,7 +90,7 @@ object JsonSourceSpec : Spek({
             }
             on("get double from other source") {
                 it("should throw WrongTypeException") {
-                    assertThat({ JsonSource(IntNode.valueOf(1)).toDouble() }, throws<WrongTypeException>())
+                    assertThat({ JsonSource(TextNode.valueOf("1")).toDouble() }, throws<WrongTypeException>())
                 }
             }
             on("get integer from other source") {

@@ -39,7 +39,9 @@ class YamlWriter(val config: Config) : Writer {
     }
 
     override fun toOutputStream(outputStream: OutputStream) {
-        toWriter(outputStream.writer())
+        outputStream.writer().use {
+            toWriter(it)
+        }
     }
 }
 

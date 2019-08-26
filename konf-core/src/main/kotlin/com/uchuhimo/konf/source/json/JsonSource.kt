@@ -120,7 +120,7 @@ class JsonSource(
     }
 
     override fun toDouble(): Double {
-        if (node.isDouble) {
+        if (node.isNumber) {
             return node.doubleValue()
         } else {
             throw WrongTypeException(this, node.nodeType.name, "DOUBLE")
@@ -128,7 +128,7 @@ class JsonSource(
     }
 
     override fun toFloat(): Float {
-        return if (node.isFloat) {
+        return if (node.isNumber) {
             node.floatValue()
         } else {
             super.toFloat()

@@ -24,6 +24,7 @@ object Versions {
     val hocon = "1.3.4"
     val yaml = "1.24"
     val toml4j = "0.7.2"
+    val graal = "19.2.0"
     // don't upgrade to 2.1.1
     val dom4j = "2.1.0"
     val coroutines = "1.2.2"

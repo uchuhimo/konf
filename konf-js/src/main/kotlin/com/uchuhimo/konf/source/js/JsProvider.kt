@@ -14,22 +14,33 @@
  * limitations under the License.
  */
 
-package com.uchuhimo.konf.source.hocon
+package com.uchuhimo.konf.source.js
 
-import com.typesafe.config.ConfigFactory
 import com.uchuhimo.konf.source.Provider
 import com.uchuhimo.konf.source.RegisterExtension
 import com.uchuhimo.konf.source.Source
+import com.uchuhimo.konf.source.json.JsonProvider
+import org.graalvm.polyglot.Context
 import java.io.InputStream
 import java.io.Reader
+import java.util.stream.Collectors
 
 /**
- * Provider for HOCON source.
+ * Provider for JavaScript source.
  */
-@RegisterExtension(["conf"])
-object HoconProvider : Provider {
-    override fun fromReader(reader: Reader): Source =
-        HoconSource(ConfigFactory.parseReader(reader).resolve().root())
+@RegisterExtension(["js"])
+object JsProvider : Provider {
+    override fun fromReader(reader: Reader): Source {
+        val sourceString = reader.buffered().lines().collect(Collectors.joining("\n"))
+        Context.create().use { context ->
+            val value = context.eval("js", sourceString)
+            context.getBindings("js").putMember("source", value)
+            val jsonString = context.eval("js", "JSON.stringify(source)").asString()
+            return JsonProvider.fromString(jsonString).apply {
+                addInfo("type", "JavaScript")
+            }
+        }
+    }
 
     override fun fromInputStream(inputStream: InputStream): Source {
         inputStream.reader().use {
