@@ -131,20 +131,20 @@ open class BaseConfig(
         val valueState = lock.read { valueByItem[item] }
         if (valueState != null) {
             @Suppress("UNCHECKED_CAST")
-            return when (valueState) {
+            when (valueState) {
                 is ValueState.Unset ->
                     if (errorWhenNotFound) {
                         throw UnsetValueException(item)
                     } else {
-                        null
+                        return null
                     }
-                is ValueState.Null -> null
-                is ValueState.Value -> valueState.value
+                is ValueState.Null -> return null
+                is ValueState.Value -> return valueState.value
                 is ValueState.Default -> {
                     if (errorWhenGetDefault) {
                         throw GetDefaultValueException(item)
                     } else {
-                        valueState.value
+                        return valueState.value
                     }
                 }
                 is ValueState.Lazy<*> -> {
@@ -164,7 +164,7 @@ open class BaseConfig(
                     }
                     if (value == null) {
                         if (item.nullable) {
-                            null
+                            return null
                         } else {
                             throw InvalidLazySetException(
                                 "fail to cast null to ${item.type.rawClass}" +
@@ -172,7 +172,7 @@ open class BaseConfig(
                         }
                     } else {
                         if (item.type.rawClass.isInstance(value)) {
-                            value
+                            return value
                         } else {
                             throw InvalidLazySetException(
                                 "fail to cast $value with ${value::class} to ${item.type.rawClass}" +
@@ -182,13 +182,13 @@ open class BaseConfig(
                 }
             }
         } else {
-            return if (parent != null) {
-                parent!!.getOrNull(item, errorWhenNotFound, errorWhenGetDefault, lazyContext)
+            if (parent != null) {
+                return parent!!.getOrNull(item, errorWhenNotFound, errorWhenGetDefault, lazyContext)
             } else {
                 if (errorWhenNotFound) {
                     throw NoSuchItemException(item)
                 } else {
-                    null
+                    return null
                 }
             }
         }
