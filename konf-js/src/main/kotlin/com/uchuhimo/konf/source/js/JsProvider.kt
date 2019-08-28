@@ -37,7 +37,7 @@ object JsProvider : Provider {
             context.getBindings("js").putMember("source", value)
             val jsonString = context.eval("js", "JSON.stringify(source)").asString()
             return JsonProvider.fromString(jsonString).apply {
-                addInfo("type", "JavaScript")
+                this.info["type"] = "JavaScript"
             }
         }
     }

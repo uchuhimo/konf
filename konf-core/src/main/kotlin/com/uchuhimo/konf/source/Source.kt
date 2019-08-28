@@ -95,7 +95,19 @@ import kotlin.String
  * whether value(s) in specified path is in this source, and `get` operations can be used
  * to retrieve the corresponding sub-source.
  */
-interface Source : SourceInfo {
+interface Source {
+    /**
+     * Description of this source.
+     */
+    val description: String get() = this.info.description
+
+    /**
+     * Information about this source.
+     *
+     * Info is in form of key-value pairs.
+     */
+    val info: SourceInfo
+
     /**
      * Whether this source contains value(s) in specified path or not.
      *
@@ -164,11 +176,11 @@ interface Source : SourceInfo {
         return if (prefix.isEmpty()) {
             this
         } else {
-            object : Source, SourceInfo by SourceInfo.default() {
-                init {
-                    addInfo("type", "prefix")
-                    addInfo("source", this@Source.description)
-                }
+            object : Source {
+                override val info: SourceInfo = SourceInfo(mutableMapOf(
+                    "type" to "prefix",
+                    "source" to this@Source.description
+                ))
 
                 override fun contains(path: Path): Boolean {
                     return if (prefix.size >= path.size) {
@@ -218,11 +230,11 @@ interface Source : SourceInfo {
      * @param fallback fallback source
      * @return a source backing by specified fallback source
      */
-    fun withFallback(fallback: Source): Source = object : Source, SourceInfo by SourceInfo.default() {
-        init {
-            addInfo("facade", this@Source.description)
-            addInfo("fallback", fallback.description)
-        }
+    fun withFallback(fallback: Source): Source = object : Source {
+        override val info: SourceInfo = SourceInfo(mutableMapOf(
+            "facade" to this@Source.description,
+            "fallback" to fallback.description
+        ))
 
         override fun contains(path: Path): Boolean =
             this@Source.contains(path) || fallback.contains(path)

@@ -26,7 +26,7 @@ import com.uchuhimo.konf.source.SourceInfo
 /**
  * Source from something that can be viewed as string.
  */
-interface StringValueSource : Source, SourceInfo {
+interface StringValueSource : Source {
 
     fun getValue(): String
 
@@ -67,7 +67,7 @@ interface StringValueSource : Source, SourceInfo {
     fun toRegularList(): List<Source> {
         val value = getValue()
         if (value.isNotEmpty() && value.contains(',')) {
-            return value.split(',').map { SingleStringValueSource(it, context = context) }
+            return value.split(',').map { SingleStringValueSource(it, info = info) }
         } else {
             throw ParseException("$value cannot be parsed to a list")
         }
@@ -78,7 +78,7 @@ interface StringValueSource : Source, SourceInfo {
         return if (value.isEmpty()) {
             listOf()
         } else {
-            listOf(SingleStringValueSource(value, context = context))
+            listOf(SingleStringValueSource(value, info = info))
         }
     }
 
@@ -140,13 +140,11 @@ interface StringValueSource : Source, SourceInfo {
 open class SingleStringValueSource(
     private val value: String,
     type: String = "",
-    context: Map<String, String> = mapOf()
-) : StringValueSource, SourceInfo by SourceInfo.with(context) {
+    final override val info: SourceInfo = SourceInfo()
+) : StringValueSource {
     init {
-        @Suppress("LeakingThis")
-        addInfo("type", type.notEmptyOr("single string"))
+        info["type"] = type.notEmptyOr("single string")
     }
-
     override fun getValue(): String = value
 
     override fun isList(): Boolean = false

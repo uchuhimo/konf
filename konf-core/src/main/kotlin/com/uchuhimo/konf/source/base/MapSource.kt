@@ -20,7 +20,7 @@ import com.uchuhimo.konf.Config
 import com.uchuhimo.konf.Path
 import com.uchuhimo.konf.notEmptyOr
 import com.uchuhimo.konf.source.Source
-import com.uchuhimo.konf.source.toDescription
+import com.uchuhimo.konf.source.SourceInfo
 
 /**
  * Source from a hierarchical map.
@@ -28,15 +28,15 @@ import com.uchuhimo.konf.source.toDescription
 open class MapSource(
     val map: Map<String, Any>,
     type: String = "",
-    context: Map<String, String> = mapOf()
-) : ValueSource(map, type.notEmptyOr("map"), context) {
+    info: SourceInfo = SourceInfo()
+) : ValueSource(map, type.notEmptyOr("map"), info) {
     override fun contains(path: Path): Boolean {
         return if (path.isEmpty()) {
             true
         } else {
             val key = path.first()
             val rest = path.drop(1)
-            map[key]?.castToSource(context)?.contains(rest) ?: false
+            map[key]?.castToSource(info)?.contains(rest) ?: false
         }
     }
 
@@ -47,14 +47,14 @@ open class MapSource(
             val key = path.first()
             val rest = path.drop(1)
             val result = map[key]
-            result?.castToSource(context)?.getOrNull(rest)
+            result?.castToSource(info)?.getOrNull(rest)
         }
     }
 
     override fun isMap(): Boolean = true
 
     override fun toMap(): Map<String, Source> = map.mapValues { (_, value) ->
-        value.castToSource(context).apply { addInfo("inMap", this@MapSource.info.toDescription()) }
+        value.castToSource(info)
     }
 }
 

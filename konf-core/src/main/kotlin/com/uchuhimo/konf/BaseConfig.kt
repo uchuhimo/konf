@@ -503,7 +503,7 @@ open class BaseConfig(
         return BaseConfig(name, this, mapper)
     }
 
-    override fun withSource(source: Source): Config  =
+    override fun withSource(source: Source): Config =
         withLayer("source: ${source.description}").also { config ->
             config.lock.write {
                 load(config, source)

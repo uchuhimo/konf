@@ -23,7 +23,6 @@ import com.uchuhimo.konf.source.NoSuchPathException
 import com.uchuhimo.konf.source.Source
 import com.uchuhimo.konf.source.SourceInfo
 import com.uchuhimo.konf.source.WrongTypeException
-import com.uchuhimo.konf.source.toDescription
 import java.math.BigDecimal
 import java.math.BigInteger
 import java.time.Duration
@@ -45,11 +44,10 @@ import java.util.Date
 open class ValueSource(
     val value: Any,
     type: String = "",
-    context: Map<String, String> = mapOf()
-) : Source, SourceInfo by SourceInfo.with(context) {
+    final override val info: SourceInfo = SourceInfo()
+) : Source {
     init {
-        @Suppress("LeakingThis")
-        addInfo("type", type.notEmptyOr("value"))
+        info["type"] = type.notEmptyOr("value")
     }
 
     override fun contains(path: Path): Boolean = path.isEmpty()
@@ -70,7 +68,7 @@ open class ValueSource(
         }
     }
 
-    open fun Any.castToSource(context: Map<String, String>): Source = asSource(context = context)
+    open fun Any.castToSource(info: SourceInfo): Source = asSource(info = info)
 
     override fun isList(): Boolean = value is List<*>
 
@@ -82,9 +80,7 @@ open class ValueSource(
             throw WrongTypeException(
                 this, value::class.java.simpleName, List::class.java.simpleName)
     }.map {
-        it!!.castToSource(context).apply {
-            addInfo("inList", this@ValueSource.info.toDescription())
-        }
+        it!!.castToSource(info)
     }
 
     override fun isText(): Boolean = value is String
@@ -312,13 +308,13 @@ open class ValueSource(
     }
 }
 
-fun Any.asSource(type: String = "", context: Map<String, String> = mapOf()): Source =
+fun Any.asSource(type: String = "", info: SourceInfo = SourceInfo()): Source =
     when {
         this is Source -> this
         this is Map<*, *> ->
             // assume that only `Map<String, Any>` is provided,
             // key type mismatch will be detected when loaded into Config
             @Suppress("UNCHECKED_CAST")
-            MapSource(this as Map<String, Any>, type, context)
-        else -> ValueSource(this, type, context)
+            MapSource(this as Map<String, Any>, type, info)
+        else -> ValueSource(this, type, info)
     }

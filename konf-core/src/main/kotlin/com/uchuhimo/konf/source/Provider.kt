@@ -56,7 +56,7 @@ interface Provider {
      */
     fun fromFile(file: File, optional: Boolean = false): Source {
         val extendContext: Source.() -> Unit = {
-            addContext("file", file.toString())
+            info["file"] = file.toString()
         }
         if (!file.exists() && optional) {
             return EmptyMapSource.apply(extendContext)
@@ -82,7 +82,7 @@ interface Provider {
      * @return a new source from specified string
      */
     fun fromString(content: String): Source = fromReader(content.reader()).apply {
-        addContext("content", "\"\n$content\n\"")
+        info["content"] = "\"\n$content\n\""
     }
 
     /**
@@ -121,7 +121,7 @@ interface Provider {
     fun fromUrl(url: URL, optional: Boolean = false): Source {
         // from com.fasterxml.jackson.core.JsonFactory._optimizedStreamFromURL in version 2.8.9
         val extendContext: Source.() -> Unit = {
-            addContext("url", url.toString())
+            info["url"] = url.toString()
         }
         if (url.protocol == "file") {
             val host = url.host
@@ -170,7 +170,7 @@ interface Provider {
      */
     fun fromResource(resource: String, optional: Boolean = false): Source {
         val extendContext: Source.() -> Unit = {
-            addContext("resource", resource)
+            info["resource"] = resource
         }
         val loader = Thread.currentThread().contextClassLoader
         val e = try {

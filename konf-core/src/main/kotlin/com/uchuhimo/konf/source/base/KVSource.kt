@@ -20,6 +20,7 @@ import com.uchuhimo.konf.Path
 import com.uchuhimo.konf.name
 import com.uchuhimo.konf.notEmptyOr
 import com.uchuhimo.konf.source.Source
+import com.uchuhimo.konf.source.SourceInfo
 
 /**
  * Source from a map in key-value format.
@@ -27,11 +28,11 @@ import com.uchuhimo.konf.source.Source
 open class KVSource(
     val map: Map<String, Any>,
     type: String = "",
-    context: Map<String, String> = mapOf()
-) : ValueSource(map, type.notEmptyOr("KV"), context) {
+    info: SourceInfo = SourceInfo()
+) : ValueSource(map, type.notEmptyOr("KV"), info) {
     override fun contains(path: Path): Boolean = map.contains(path.name)
 
-    override fun getOrNull(path: Path): Source? = map[path.name]?.castToSource(context)
+    override fun getOrNull(path: Path): Source? = map[path.name]?.castToSource(info)
 }
 
 fun Map<String, Any>.asKVSource() = KVSource(this)

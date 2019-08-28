@@ -19,7 +19,9 @@ package com.uchuhimo.konf.source
 import com.uchuhimo.konf.Path
 import com.uchuhimo.konf.unsupported
 
-class DumbSource : Source, SourceInfo by SourceInfo.default() {
+class DumbSource : Source {
+    override val info: SourceInfo = SourceInfo()
+
     override fun contains(path: Path): Boolean = unsupported()
 
     override fun getOrNull(path: Path): Source? = unsupported()

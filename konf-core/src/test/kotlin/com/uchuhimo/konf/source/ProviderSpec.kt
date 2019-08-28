@@ -56,7 +56,7 @@ object ProviderSpec : SubjectSpek<Provider>({
             val file = tempFileOf("type = file")
             val source = subject.fromFile(file)
             it("should create from the specified file") {
-                assertThat(source.context["file"], equalTo(file.toString()))
+                assertThat(source.info["file"], equalTo(file.toString()))
             }
             it("should return a source which contains value in file") {
                 assertThat(source["type"].toText(), equalTo("file"))
@@ -77,7 +77,7 @@ object ProviderSpec : SubjectSpek<Provider>({
             val file = tempFileOf("type = file").toString()
             val source = subject.fromFile(file)
             it("should create from the specified file path") {
-                assertThat(source.context["file"], equalTo(file))
+                assertThat(source.info["file"], equalTo(file))
             }
             it("should return a source which contains value in file") {
                 assertThat(source["type"].toText(), equalTo("file"))
@@ -95,7 +95,7 @@ object ProviderSpec : SubjectSpek<Provider>({
             val content = "type = string"
             val source = subject.fromString(content)
             it("should create from the specified string") {
-                assertThat(source.context["content"], equalTo("\"\n$content\n\""))
+                assertThat(source.info["content"], equalTo("\"\n$content\n\""))
             }
             it("should return a source which contains value in string") {
                 assertThat(source["type"].toText(), equalTo("string"))
@@ -121,7 +121,7 @@ object ProviderSpec : SubjectSpek<Provider>({
             val urlPath = "http://localhost:${service.port()}/source"
             val source = subject.fromUrl(URL(urlPath))
             it("should create from the specified URL") {
-                assertThat(source.context["url"], equalTo(urlPath))
+                assertThat(source.info["url"], equalTo(urlPath))
             }
             it("should return a source which contains value in URL") {
                 assertThat(source["type"].toText(), equalTo("http"))
@@ -141,7 +141,7 @@ object ProviderSpec : SubjectSpek<Provider>({
             val url = file.toURI().toURL()
             val source = subject.fromUrl(url)
             it("should create from the specified URL") {
-                assertThat(source.context["url"], equalTo(url.toString()))
+                assertThat(source.info["url"], equalTo(url.toString()))
             }
             it("should return a source which contains value in URL") {
                 assertThat(source["type"].toText(), equalTo("fileUrl"))
@@ -163,7 +163,7 @@ object ProviderSpec : SubjectSpek<Provider>({
             val url = file.toURI().toURL().toString()
             val source = subject.fromUrl(url)
             it("should create from the specified URL string") {
-                assertThat(source.context["url"], equalTo(url))
+                assertThat(source.info["url"], equalTo(url))
             }
             it("should return a source which contains value in URL") {
                 assertThat(source["type"].toText(), equalTo("fileUrl"))
@@ -181,7 +181,7 @@ object ProviderSpec : SubjectSpek<Provider>({
             val resource = "source/provider.properties"
             val source = subject.fromResource(resource)
             it("should create from the specified resource") {
-                assertThat(source.context["resource"], equalTo(resource))
+                assertThat(source.info["resource"], equalTo(resource))
             }
             it("should return a source which contains value in resource") {
                 assertThat(source["type"].toText(), equalTo("resource"))

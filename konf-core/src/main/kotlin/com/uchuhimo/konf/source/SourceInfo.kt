@@ -19,67 +19,26 @@ package com.uchuhimo.konf.source
 /**
  * Information of source for debugging.
  */
-interface SourceInfo {
+class SourceInfo(
+    private val info: MutableMap<String, String> = mutableMapOf()
+) : MutableMap<String, String> by info {
     /**
-     * Description of this source.
+     * Description of this source's information.
      */
-    val description: String get() = (info + context).toDescription()
-
-    /**
-     * Information about context of this source.
-     *
-     * Context is in form of key-value pairs.
-     * Context can be inherited by other related source.
-     */
-    val context: Map<String, String>
-
-    /**
-     * Add information into context.
-     */
-    fun addContext(name: String, value: String)
-
-    /**
-     * Information about this source.
-     *
-     * Info is in form of key-value pairs.
-     */
-    val info: Map<String, String>
-
-    /**
-     * Add information into info.
-     */
-    fun addInfo(name: String, value: String)
+    val description
+        get() = map { (name, value) ->
+            "$name: $value"
+        }.joinToString(separator = ", ", prefix = "[", postfix = "]")
 
     companion object {
         /**
-         * Return a new empty source info with specified context.
+         * Return a new source info with specified info.
          *
-         * @param context context to be inherited
-         * @return a new empty source info
+         * @param info info to be inherited
+         * @return a new source info
          */
-        fun with(context: Map<String, String>): SourceInfo = object : SourceInfo {
-            private val _info = mutableMapOf<String, String>()
-
-            override val info: Map<String, String> get() = _info
-
-            override fun addInfo(name: String, value: String) {
-                _info[name] = value
-            }
-
-            private val _context: MutableMap<String, String> = context.toMutableMap()
-
-            override val context: Map<String, String> get() = _context
-
-            override fun addContext(name: String, value: String) {
-                _context[name] = value
-            }
+        fun with(info: Map<String, String>): SourceInfo {
+            return SourceInfo(info.toMutableMap())
         }
-
-        /**
-         * Returns a new empty source info.
-         *
-         * @return a new empty source info
-         */
-        fun default(): SourceInfo = with(mapOf())
     }
 }

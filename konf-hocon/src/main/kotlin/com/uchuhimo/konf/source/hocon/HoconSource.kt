@@ -28,17 +28,16 @@ import com.uchuhimo.konf.source.ParseException
 import com.uchuhimo.konf.source.Source
 import com.uchuhimo.konf.source.SourceInfo
 import com.uchuhimo.konf.source.WrongTypeException
-import com.uchuhimo.konf.source.toDescription
 
 /**
  * Source from a HOCON value.
  */
 class HoconSource(
     val value: ConfigValue,
-    context: Map<String, String> = mapOf()
-) : Source, SourceInfo by SourceInfo.with(context) {
+    override val info: SourceInfo = SourceInfo()
+) : Source {
     init {
-        addInfo("type", "HOCON")
+        info["type"] = "HOCON"
     }
 
     private val type = value.valueType()
@@ -84,9 +83,9 @@ class HoconSource(
             if (config.getIsNull(name)) {
                 HoconSource(
                     ConfigValueFactory.fromAnyRef(null, config.origin().description()),
-                    context)
+                    info)
             } else {
-                HoconSource(config.getValue(name), context)
+                HoconSource(config.getValue(name), info)
             }
         } else {
             null
@@ -101,9 +100,7 @@ class HoconSource(
         checkType(type, ConfigValueType.LIST)
         return mutableListOf<Source>().apply {
             for (value in (value as ConfigList)) {
-                add(HoconSource(value, context).apply {
-                    addInfo("inList", this@HoconSource.info.toDescription())
-                })
+                add(HoconSource(value, info))
             }
         }
     }
@@ -114,9 +111,7 @@ class HoconSource(
         checkType(type, ConfigValueType.OBJECT)
         return mutableMapOf<String, Source>().apply {
             for ((key, value) in (value as ConfigObject)) {
-                put(key, HoconSource(value, context).apply {
-                    addInfo("inMap", this@HoconSource.info.toDescription())
-                })
+                put(key, HoconSource(value, info))
             }
         }
     }

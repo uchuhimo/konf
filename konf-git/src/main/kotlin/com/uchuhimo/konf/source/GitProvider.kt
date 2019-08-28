@@ -47,10 +47,10 @@ fun Provider.fromGit(
 ): Source {
     return (dir?.let(::File) ?: createTempDir(prefix = "local_git_repo")).let { directory ->
         val extendContext: Source.() -> Unit = {
-            addContext("repo", repo)
-            addContext("file", file)
-            addContext("dir", directory.path)
-            addContext("branch", branch)
+            info["repo"] = repo
+            info["file"] = file
+            info["dir"] = directory.path
+            info["branch"] = branch
         }
         try {
             if ((directory.list { _, name -> name == ".git" } ?: emptyArray()).isEmpty()) {

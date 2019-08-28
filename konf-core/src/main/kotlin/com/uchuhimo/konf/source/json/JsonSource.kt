@@ -22,7 +22,6 @@ import com.uchuhimo.konf.Path
 import com.uchuhimo.konf.source.Source
 import com.uchuhimo.konf.source.SourceInfo
 import com.uchuhimo.konf.source.WrongTypeException
-import com.uchuhimo.konf.source.toDescription
 import java.math.BigDecimal
 import java.math.BigInteger
 
@@ -31,10 +30,10 @@ import java.math.BigInteger
  */
 class JsonSource(
     val node: JsonNode,
-    context: Map<String, String> = mapOf()
-) : Source, SourceInfo by SourceInfo.with(context) {
+    override val info: SourceInfo = SourceInfo()
+) : Source {
     init {
-        addInfo("type", "JSON")
+        info["type"] = "JSON"
     }
 
     override fun contains(path: Path): Boolean {
@@ -45,7 +44,7 @@ class JsonSource(
             val rest = path.drop(1)
             val childNode = node[key]
             if (childNode != null) {
-                JsonSource(childNode, context).contains(rest)
+                JsonSource(childNode, info).contains(rest)
             } else {
                 false
             }
@@ -60,7 +59,7 @@ class JsonSource(
             val rest = path.drop(1)
             val childNode = node[key]
             if (childNode != null) {
-                JsonSource(childNode, context).getOrNull(rest)
+                JsonSource(childNode, info).getOrNull(rest)
             } else {
                 null
             }
@@ -76,9 +75,7 @@ class JsonSource(
             return mutableListOf<JsonNode>().apply {
                 addAll(node.elements().asSequence())
             }.map {
-                JsonSource(it, context).apply {
-                    addInfo("inList", this@JsonSource.info.toDescription())
-                }
+                JsonSource(it, info)
             }
         } else {
             throw WrongTypeException(this, node.nodeType.name, JsonNodeType.ARRAY.name)
@@ -94,9 +91,7 @@ class JsonSource(
                     put(key, value)
                 }
             }.mapValues { (_, value) ->
-                JsonSource(value, context).apply {
-                    addInfo("inMap", this@JsonSource.info.toDescription())
-                }
+                JsonSource(value, info)
             }
         } else {
             throw WrongTypeException(this, node.nodeType.name, JsonNodeType.OBJECT.name)

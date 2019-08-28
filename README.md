@@ -513,12 +513,6 @@ Export all values in config to map in key-value format:
 val map = config.toMap()
 ```
 
-Export all values in facade layer of config to map:
-
-```kotlin
-val map = config.layer.toMap()
-```
-
 Export all values in config to hierarchical map:
 
 ```kotlin

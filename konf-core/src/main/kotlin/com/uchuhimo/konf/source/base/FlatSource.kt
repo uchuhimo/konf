@@ -24,7 +24,6 @@ import com.uchuhimo.konf.source.NoSuchPathException
 import com.uchuhimo.konf.source.ParseException
 import com.uchuhimo.konf.source.Source
 import com.uchuhimo.konf.source.SourceInfo
-import com.uchuhimo.konf.source.toDescription
 import com.uchuhimo.konf.toPath
 
 /**
@@ -34,11 +33,10 @@ open class FlatSource(
     val map: Map<String, String>,
     val prefix: String = "",
     type: String = "",
-    context: Map<String, String> = mapOf()
-) : StringValueSource, SourceInfo by SourceInfo.with(context) {
+    final override val info: SourceInfo = SourceInfo()
+) : StringValueSource {
     init {
-        @Suppress("LeakingThis")
-        addInfo("type", type.notEmptyOr("flat"))
+        info["type"] = type.notEmptyOr("flat")
     }
 
     override fun contains(path: Path): Boolean {
@@ -67,9 +65,9 @@ open class FlatSource(
         } else {
             if (contains(path)) {
                 if (prefix.isEmpty()) {
-                    FlatSource(map, path.name, context = context)
+                    FlatSource(map, path.name, info = info)
                 } else {
-                    FlatSource(map, "$prefix.${path.name}", context = context)
+                    FlatSource(map, "$prefix.${path.name}", info = info)
                 }
             } else {
                 null
@@ -88,9 +86,7 @@ open class FlatSource(
                 getOrNull(it.toString().toPath())
             }.takeWhile {
                 it != null
-            }.filterNotNull().toList().map {
-                it.apply { addInfo("inList", this@FlatSource.info.toDescription()) }
-            }
+            }.filterNotNull().toList()
             if (list.isNotEmpty()) {
                 return list
             } else {
@@ -117,9 +113,7 @@ open class FlatSource(
             it.takeWhile { it != '.' }
         }.toSet().associate {
             val newPrefix = if (prefix.isEmpty()) it else "$prefix.$it"
-            it to FlatSource(map, newPrefix, context = context).apply {
-                addInfo("inMap", this@FlatSource.info.toDescription())
-            }
+            it to FlatSource(map, newPrefix, info = info)
         }
     }
 

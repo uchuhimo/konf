@@ -26,13 +26,10 @@ import com.natpryce.hamkrest.equalTo
 import com.natpryce.hamkrest.sameInstance
 import com.natpryce.hamkrest.throws
 import com.uchuhimo.konf.source.LoadException
-import com.uchuhimo.konf.source.Source
-import com.uchuhimo.konf.source.base.asKVSource
 import org.jetbrains.spek.api.dsl.it
 import org.jetbrains.spek.api.dsl.on
 import org.jetbrains.spek.subject.SubjectSpek
 import org.jetbrains.spek.subject.itBehavesLike
-import java.util.ArrayDeque
 
 object MultiLayerConfigSpec : SubjectSpek<Config>({
 

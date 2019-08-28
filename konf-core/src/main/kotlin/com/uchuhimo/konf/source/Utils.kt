@@ -22,16 +22,6 @@ import java.time.format.DateTimeParseException
 import java.util.concurrent.TimeUnit
 
 /**
- * Converts key-value pairs to description in string representation.
- *
- * @receiver key-value pairs
- * @return description in string representation
- */
-fun Map<String, String>.toDescription() = map { (name, value) ->
-    "$name: $value"
-}.joinToString(separator = ", ", prefix = "[", postfix = "]")
-
-/**
  * Parses specified string to duration.
  *
  * @receiver specified string

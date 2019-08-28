@@ -17,6 +17,7 @@
 package com.uchuhimo.konf.source.toml
 
 import com.uchuhimo.konf.source.Source
+import com.uchuhimo.konf.source.SourceInfo
 import com.uchuhimo.konf.source.base.MapSource
 
 /**
@@ -24,7 +25,7 @@ import com.uchuhimo.konf.source.base.MapSource
  */
 class TomlMapSource(
     map: Map<String, Any>,
-    context: Map<String, String> = mapOf()
-) : MapSource(map, "TOML", context) {
-    override fun Any.castToSource(context: Map<String, String>): Source = asTomlSource(context)
+    info: SourceInfo = SourceInfo()
+) : MapSource(map, "TOML", info) {
+    override fun Any.castToSource(info: SourceInfo): Source = asTomlSource(info)
 }

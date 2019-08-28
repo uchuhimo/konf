@@ -18,6 +18,7 @@ package com.uchuhimo.konf.source.toml
 
 import com.uchuhimo.konf.source.ParseException
 import com.uchuhimo.konf.source.Source
+import com.uchuhimo.konf.source.SourceInfo
 import com.uchuhimo.konf.source.base.ValueSource
 
 /**
@@ -25,9 +26,9 @@ import com.uchuhimo.konf.source.base.ValueSource
  */
 class TomlValueSource(
     value: Any,
-    context: Map<String, String> = mapOf()
-) : ValueSource(value, "TOML-value", context) {
-    override fun Any.castToSource(context: Map<String, String>): Source = asTomlSource(context)
+    info: SourceInfo = SourceInfo()
+) : ValueSource(value, "TOML-value", info) {
+    override fun Any.castToSource(info: SourceInfo): Source = asTomlSource(info)
 
     override fun toLong(): Long = cast()
 
@@ -38,13 +39,13 @@ class TomlValueSource(
     }.toInt()
 }
 
-fun Any.asTomlSource(context: Map<String, String> = mapOf()): Source =
+fun Any.asTomlSource(info: SourceInfo = SourceInfo()): Source =
     when {
         this is Source -> this
         this is Map<*, *> ->
             // assume that only `Map<String, Any>` is provided,
             // key type mismatch will be detected when loaded into Config
             @Suppress("UNCHECKED_CAST")
-            TomlMapSource(this as Map<String, Any>, context)
-        else -> TomlValueSource(this, context)
+            TomlMapSource(this as Map<String, Any>, info)
+        else -> TomlValueSource(this, info)
     }
