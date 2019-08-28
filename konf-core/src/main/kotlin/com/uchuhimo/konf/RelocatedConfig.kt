@@ -66,10 +66,10 @@ abstract class RelocatedConfig(parent: BaseConfig, name: String = "") : BaseConf
 
     fun Source.relocated(): Source {
         return object : Source {
-            override val info: SourceInfo = SourceInfo(mutableMapOf(
+            override val info: SourceInfo = SourceInfo(
                 "type" to "relocated",
                 "source" to this@relocated.description
-            ))
+            )
 
             override fun contains(path: Path): Boolean =
                 relocateInOrNull(path)?.let { this@relocated.contains(it) } ?: false

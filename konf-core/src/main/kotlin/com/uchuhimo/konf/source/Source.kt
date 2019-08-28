@@ -99,7 +99,10 @@ interface Source {
     /**
      * Description of this source.
      */
-    val description: String get() = this.info.description
+    val description: String
+        get() = this.info.map { (name, value) ->
+            "$name: $value"
+        }.joinToString(separator = ", ", prefix = "[", postfix = "]")
 
     /**
      * Information about this source.
@@ -177,10 +180,10 @@ interface Source {
             this
         } else {
             object : Source {
-                override val info: SourceInfo = SourceInfo(mutableMapOf(
+                override val info: SourceInfo = SourceInfo(
                     "type" to "prefix",
                     "source" to this@Source.description
-                ))
+                )
 
                 override fun contains(path: Path): Boolean {
                     return if (prefix.size >= path.size) {
@@ -231,10 +234,10 @@ interface Source {
      * @return a source backing by specified fallback source
      */
     fun withFallback(fallback: Source): Source = object : Source {
-        override val info: SourceInfo = SourceInfo(mutableMapOf(
+        override val info: SourceInfo = SourceInfo(
             "facade" to this@Source.description,
             "fallback" to fallback.description
-        ))
+        )
 
         override fun contains(path: Path): Boolean =
             this@Source.contains(path) || fallback.contains(path)
@@ -671,6 +674,15 @@ interface Source {
      * @return a [SizeInBytes] value
      */
     fun toSizeInBytes(): SizeInBytes = SizeInBytes.parse(toText())
+}
+
+/**
+ * Information of source for debugging.
+ */
+class SourceInfo(
+    private val info: MutableMap<String, String> = mutableMapOf()
+) : MutableMap<String, String> by info {
+    constructor(vararg pairs: Pair<String, String>) : this(mutableMapOf(*pairs))
 }
 
 /**
