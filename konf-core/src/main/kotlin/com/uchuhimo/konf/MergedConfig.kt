@@ -26,7 +26,7 @@ import java.util.Deque
  * All operations will be applied to [facade] first, and then fall back to [facade] when necessary.
  */
 open class MergedConfig(val fallback: BaseConfig, val facade: BaseConfig) :
-    BaseConfig("merged(facade=${facade.name}, fallback=${fallback.name})") {
+    BaseConfig("merged(facade=${facade.name.notEmptyOr("\"\"")}, fallback=${fallback.name.notEmptyOr("\"\"")})") {
 
     override fun rawSet(item: Item<*>, value: Any?) {
         if (item in facade) {
@@ -97,11 +97,6 @@ open class MergedConfig(val fallback: BaseConfig, val facade: BaseConfig) :
             }
         }
         facade.addSpec(spec)
-    }
-
-    override fun addSource(source: Source) {
-        facade.addSource(source)
-        fallback.addSource(source)
     }
 
     override fun <T> lock(action: () -> T): T = facade.lock { fallback.lock(action) }

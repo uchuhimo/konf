@@ -81,7 +81,7 @@ abstract class RelocatedConfig(parent: BaseConfig, name: String = "") : BaseConf
 
     override val sources: Deque<Source>
         get() {
-            return lock.read { sourcesInLayer.clone() }.apply {
+            return lock.read { ArrayDeque(listOf(source)) }.apply {
                 for (source in parent?.sources?.mapTo(ArrayDeque()) {
                     it.relocated()
                 } ?: ArrayDeque<Source>()) {

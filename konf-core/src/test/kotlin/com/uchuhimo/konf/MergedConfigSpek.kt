@@ -27,31 +27,31 @@ import org.jetbrains.spek.subject.SubjectSpek
 object FacadeConfigSpec : SubjectSpek<Config>({
     subject { Config() + Config { addSpec(NetworkBuffer) } }
 
-    configTestSpec(testLayer = false)
+    configTestSpec()
 })
 
 object FacadeConfigUsingWithFallbackSpec : SubjectSpek<Config>({
     subject { Config { addSpec(NetworkBuffer) }.withFallback(Config()) }
 
-    configTestSpec(testLayer = false)
+    configTestSpec()
 })
 
 object FallbackConfigSpec : SubjectSpek<Config>({
     subject { Config { addSpec(NetworkBuffer) } + Config() }
 
-    configTestSpec(testLayer = false)
+    configTestSpec()
 })
 
 object FallbackConfigUsingWithFallbackSpec : SubjectSpek<Config>({
     subject { Config().withFallback(Config { addSpec(NetworkBuffer) }) }
 
-    configTestSpec(testLayer = false)
+    configTestSpec()
 })
 
 object BothConfigSpec : SubjectSpek<Config>({
     subject { Config { addSpec(NetworkBuffer) } + Config { addSpec(NetworkBuffer) } }
 
-    configTestSpec(testLayer = false)
+    configTestSpec()
 
     given("a merged config") {
         on("set item in the fallback config") {
@@ -84,14 +84,10 @@ class UpdateFallbackConfig(val config: MergedConfig) : MergedConfig(config.facad
     override fun addSpec(spec: Spec) {
         fallback.addSpec(spec)
     }
-
-    override fun addSource(source: Source) {
-        fallback.addSource(source)
-    }
 }
 
 object UpdateFallbackConfigSpec : SubjectSpek<Config>({
     subject { UpdateFallbackConfig((Config { addSpec(NetworkBuffer) } + Config { addSpec(NetworkBuffer) }) as MergedConfig) }
 
-    configTestSpec(testLayer = false)
+    configTestSpec()
 })

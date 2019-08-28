@@ -175,11 +175,6 @@ interface Config : ItemContainer {
     val sources: Deque<Source>
 
     /**
-     * Facade layer of config.
-     */
-    val layer: Config
-
-    /**
      * Returns a config overlapped by the specified facade config.
      *
      * All operations will be applied to the facade config first,
@@ -239,13 +234,6 @@ interface Config : ItemContainer {
     fun addSpec(spec: Spec)
 
     /**
-     * Load values from specified source into facade layer.
-     *
-     * @param source config source
-     */
-    fun addSource(source: Source)
-
-    /**
      * Executes the given [action] after locking the facade layer of this config.
      *
      * @param action the given action
@@ -270,8 +258,7 @@ interface Config : ItemContainer {
      * @param source config source
      * @return a child config containing value from specified source
      */
-    fun withSource(source: Source): Config =
-        withLayer("source: ${source.description}").apply { addSource(source) }
+    fun withSource(source: Source): Config
 
     /**
      * Returns a child config containing values loaded by specified trigger.

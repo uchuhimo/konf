@@ -23,6 +23,7 @@ import com.fasterxml.jackson.databind.module.SimpleModule
 import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule
 import com.fasterxml.jackson.module.kotlin.jacksonObjectMapper
 import com.uchuhimo.konf.source.Source
+import com.uchuhimo.konf.source.base.EmptyMapSource
 import com.uchuhimo.konf.source.deserializer.DurationDeserializer
 import com.uchuhimo.konf.source.deserializer.EmptyStringToCollectionDeserializerModifier
 import com.uchuhimo.konf.source.deserializer.OffsetDateTimeDeserializer
@@ -51,7 +52,7 @@ open class BaseConfig(
     override val mapper: ObjectMapper = createDefaultMapper()
 ) : Config {
     protected val specsInLayer = mutableListOf<Spec>()
-    protected val sourcesInLayer = ArrayDeque<Source>()
+    protected var source: Source = EmptyMapSource
     protected val valueByItem = mutableMapOf<Item<*>, ValueState>()
     protected val nameByItem = mutableMapOf<Item<*>, String>()
     protected val itemByName = mutableMapOf<String, Item<*>>()
@@ -375,20 +376,12 @@ open class BaseConfig(
     override fun plus(config: Config): Config {
         return when (config) {
             is BaseConfig -> MergedConfig(this, config)
-            is Layer -> {
-                throw MergeLayerException(this, config)
-            }
             else -> config.withFallback(this)
         }
     }
 
     override fun withFallback(config: Config): Config {
-        return when (config) {
-            is Layer -> {
-                throw MergeLayerException(this, config)
-            }
-            else -> config + this
-        }
+        return config + this
     }
 
     override fun <T> property(item: Item<T>): ReadWriteProperty<Any?, T> {
@@ -419,7 +412,7 @@ open class BaseConfig(
 
     override val sources: Deque<Source>
         get() {
-            return lock.read { sourcesInLayer.clone() }.apply {
+            return lock.read { ArrayDeque(listOf(source)) }.apply {
                 for (source in parent?.sources ?: ArrayDeque()) {
                     addLast(source)
                 }
@@ -447,9 +440,6 @@ open class BaseConfig(
             featuresInLayer[feature] ?: parent?.isEnabled(feature) ?: feature.enabledByDefault
         }
     }
-
-    @Suppress("LeakingThis")
-    override val layer: Config = Layer(this)
 
     override fun addItem(item: Item<*>, prefix: String) {
         lock.write {
@@ -508,17 +498,18 @@ open class BaseConfig(
         }
     }
 
-    override fun addSource(source: Source) {
-        lock.write {
-            load(this, source)
-            sourcesInLayer.push(source)
-        }
-    }
-
-    override fun withLayer(name: String): Config {
+    override fun withLayer(name: String): BaseConfig {
         lock.write { hasChildren = true }
         return BaseConfig(name, this, mapper)
     }
+
+    override fun withSource(source: Source): Config  =
+        withLayer("source: ${source.description}").also { config ->
+            config.lock.write {
+                load(config, source)
+                config.source = source
+            }
+        }
 
     override fun equals(other: Any?): Boolean {
         if (this === other) return true
@@ -540,79 +531,6 @@ open class BaseConfig(
         data class Lazy<T>(var thunk: (config: ItemContainer) -> T) : ValueState()
         data class Value(var value: Any) : ValueState()
         data class Default(val value: Any?) : ValueState()
-    }
-
-    private class Layer(val config: BaseConfig) : Config by config {
-        override val parent: Config? = null
-        override val specs: List<Spec> = config.specsInLayer
-        override val layer: Config = this
-
-        override fun toMap(): Map<String, Any> {
-            return mutableMapOf<String, Any>().apply {
-                for (item in config.lock.read { config.valueByItem.keys }) {
-                    try {
-                        put(nameOf(item), config.getOrNull(item, errorWhenNotFound = true).toCompatibleValue(mapper))
-                    } catch (_: UnsetValueException) {
-                    }
-                }
-            }
-        }
-
-        override fun <T> get(item: Item<T>): T =
-            if (contains(item)) config[item] else throw NoSuchItemException(item)
-
-        override fun <T> get(name: String): T =
-            if (contains(name)) config[name] else throw NoSuchItemException(name)
-
-        override fun <T> getOrNull(item: Item<T>): T? =
-            if (contains(item)) config.getOrNull(item) else null
-
-        override fun <T> getOrNull(name: String): T? =
-            if (contains(name)) config.getOrNull(name) else null
-
-        override fun <T> invoke(name: String): T = super.invoke(name)
-
-        override fun iterator(): Iterator<Item<*>> = config.valueByItem.keys.iterator()
-
-        override fun contains(item: Item<*>): Boolean {
-            return config.run { lock.read { valueByItem.containsKey(item) } }
-        }
-
-        override fun contains(name: String): Boolean {
-            return config.run {
-                lock.read {
-                    val item = getItemOrNull(name)
-                    if (item == null) false else valueByItem.containsKey(item)
-                }
-            }
-        }
-
-        override val items: List<Item<*>> get() = super.items
-
-        override fun plus(config: Config): Config {
-            return when (config) {
-                is Layer -> {
-                    throw MergeLayerException(config, this)
-                }
-                else -> config.withFallback(this)
-            }
-        }
-
-        override fun withFallback(config: Config): Config = config + this
-
-        override fun equals(other: Any?): Boolean {
-            if (this === other) return true
-            if (other !is Config) return false
-            return toMap() == other.toMap()
-        }
-
-        override fun hashCode(): Int {
-            return toMap().hashCode()
-        }
-
-        override fun toString(): String {
-            return "Layer(items=${toMap()})"
-        }
     }
 }
 

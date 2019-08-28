@@ -8,7 +8,7 @@ import java.util.Properties
 fun Project.getPrivateProperty(key: String): String {
     return if (file("private.properties").exists()) {
         val properties = Properties()
-        properties.load(File("private.properties").inputStream())
+        properties.load(file("private.properties").inputStream())
         properties.getProperty(key)
     } else {
         ""

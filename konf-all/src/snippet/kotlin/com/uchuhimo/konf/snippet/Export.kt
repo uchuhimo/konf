@@ -28,9 +28,6 @@ fun main(args: Array<String>) {
         val map = config.toMap()
     }
     run {
-        val map = config.layer.toMap()
-    }
-    run {
         val map = config.toHierarchicalMap()
     }
     run {

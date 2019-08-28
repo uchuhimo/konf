@@ -1,8 +1,5 @@
 import com.github.benmanes.gradle.versions.updates.DependencyUpdatesTask
 import com.jfrog.bintray.gradle.BintrayExtension
-import io.spring.gradle.dependencymanagement.dsl.DependenciesHandler
-import io.spring.gradle.dependencymanagement.dsl.DependencyManagementExtension
-import io.spring.gradle.dependencymanagement.dsl.DependencySetHandler
 import org.jetbrains.dokka.DokkaConfiguration
 import org.jetbrains.dokka.gradle.DokkaTask
 import org.jetbrains.dokka.gradle.LinkMapping
@@ -146,7 +143,7 @@ subprojects {
         useJUnitPlatform()
         testLogging.showStandardStreams = true
         val properties = Properties()
-        properties.load(File("konf-core/src/test/kotlin/com/uchuhimo/konf/source/env/env.properties").inputStream())
+        properties.load(rootProject.file("konf-core/src/test/kotlin/com/uchuhimo/konf/source/env/env.properties").inputStream())
         properties.forEach { key, value ->
             environment(key as String, value)
         }

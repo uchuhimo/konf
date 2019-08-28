@@ -84,7 +84,7 @@ object LoadKeysCaseInsensitivelySpec : Spek({
             val config = Config().withSource(source)
             it("should load keys case-sensitively") {
                 val someKey by config.required<String>()
-                assertThrows<UnsetValueException> { someKey }
+                assertThrows<UnsetValueException> { someKey.isNotEmpty() }
                 val somekey by config.required<String>()
                 assertThat(somekey, equalTo("value"))
             }
