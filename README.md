@@ -128,7 +128,7 @@ repositories {
 Add dependencies:
 
 ```groovy
-compile 'com.github.uchuhimo:konf:master-SNAPSHOT'
+compile 'com.github.uchuhimo.konf:konf:master-SNAPSHOT'
 ```
 
 ## Quick start
@@ -638,6 +638,8 @@ gradlew clean install
 
 After modularized Konf, `hocon`/`toml`/`xml`/`yaml`/`git`/`watchGit` in `DefaultLoaders` become extension properties/functions and should be imported explicitly.
 For example, you should import `com.uchuhimo.konf.source.hocon` before using `config.from.hocon`; in Java, `config.from().hocon` is unavailable, please use `config.from().source(HoconProvider.INSTANCE)` instead.
+
+If you use JitPack, you should use `com.github.uchuhimo.konf:konf:<version>` instead of `com.github.uchuhimo:konf:<version>` now.
 
 ### v0.10
 
