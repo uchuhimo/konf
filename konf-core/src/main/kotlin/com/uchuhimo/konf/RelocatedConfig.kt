@@ -31,6 +31,8 @@ abstract class RelocatedConfig(parent: BaseConfig, name: String = "") : BaseConf
 
     fun relocateOutOrNull(name: String): String? = relocateOutOrNull(name.toPath())?.name
 
+    abstract val sourceInfo: SourceInfo
+
     override fun contains(name: String): Boolean {
         return if (containsInLayer(name)) {
             true
@@ -66,10 +68,7 @@ abstract class RelocatedConfig(parent: BaseConfig, name: String = "") : BaseConf
 
     fun Source.relocated(): Source {
         return object : Source {
-            override val info: SourceInfo = SourceInfo(
-                "type" to "relocated",
-                "source" to this@relocated.description
-            )
+            override val info: SourceInfo = this@relocated.info.with(sourceInfo)
 
             override fun contains(path: Path): Boolean =
                 relocateInOrNull(path)?.let { this@relocated.contains(it) } ?: false
@@ -100,6 +99,11 @@ open class DrillDownConfig(val prefix: String, parent: BaseConfig, name: String 
         checkPath(prefix)
     }
 
+    override val sourceInfo: SourceInfo = SourceInfo(
+        "relocated_type" to "drill_down",
+        "relocated_prefix" to prefix
+    )
+
     override fun relocateInOrNull(path: Path): Path? = relocateInOrNull(prefix.toPath(), path)
 
     private fun relocateInOrNull(prefix: Path, path: Path): Path? = prefix + path
@@ -120,6 +124,11 @@ open class RollUpConfig(val prefix: String, parent: BaseConfig, name: String = "
     init {
         checkPath(prefix)
     }
+
+    override val sourceInfo: SourceInfo = SourceInfo(
+        "relocated_type" to "roll_up",
+        "relocated_prefix" to prefix
+    )
 
     override fun relocateOutOrNull(name: Path): Path? = relocateOutOrNull(prefix.toPath(), name)
 

@@ -44,10 +44,12 @@ import com.uchuhimo.konf.ContainerNode
 import com.uchuhimo.konf.EmptyNode
 import com.uchuhimo.konf.Feature
 import com.uchuhimo.konf.Item
+import com.uchuhimo.konf.MergedMap
 import com.uchuhimo.konf.Path
 import com.uchuhimo.konf.SizeInBytes
 import com.uchuhimo.konf.TreeNode
 import com.uchuhimo.konf.ValueNode
+import com.uchuhimo.konf.name
 import com.uchuhimo.konf.source.base.StringValueSource
 import com.uchuhimo.konf.source.base.ValueSource
 import com.uchuhimo.konf.source.json.JsonSource
@@ -180,10 +182,7 @@ interface Source {
             this
         } else {
             object : Source {
-                override val info: SourceInfo = SourceInfo(
-                    "type" to "prefix",
-                    "source" to this@Source.description
-                )
+                override val info: SourceInfo = this@Source.info.with("prefix" to prefix.name)
 
                 override fun contains(path: Path): Boolean {
                     return if (prefix.size >= path.size) {
@@ -683,6 +682,14 @@ class SourceInfo(
     private val info: MutableMap<String, String> = mutableMapOf()
 ) : MutableMap<String, String> by info {
     constructor(vararg pairs: Pair<String, String>) : this(mutableMapOf(*pairs))
+
+    fun with(vararg pairs: Pair<String, String>): SourceInfo {
+        return SourceInfo(MergedMap(fallback = this, facade = mutableMapOf(*pairs)))
+    }
+
+    fun with(sourceInfo: SourceInfo): SourceInfo {
+        return SourceInfo(MergedMap(fallback = this, facade = sourceInfo.toMutableMap()))
+    }
 }
 
 /**
@@ -693,6 +700,9 @@ class FeaturedSource(
     private val feature: Feature,
     private val isEnabled: Boolean
 ) : Source by source {
+    override val info: SourceInfo = source.info.with(
+        "feature:${feature.name}" to if (isEnabled) "enabled" else "disabled")
+
     override fun isEnabled(feature: Feature): Boolean {
         return if (feature == this.feature) isEnabled else super.isEnabled(feature)
     }
