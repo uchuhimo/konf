@@ -19,7 +19,7 @@ package com.uchuhimo.konf.source.yaml
 import com.uchuhimo.konf.source.Provider
 import com.uchuhimo.konf.source.RegisterExtension
 import com.uchuhimo.konf.source.Source
-import com.uchuhimo.konf.source.base.asSource
+import com.uchuhimo.konf.source.asSource
 import org.yaml.snakeyaml.Yaml
 import org.yaml.snakeyaml.constructor.AbstractConstruct
 import org.yaml.snakeyaml.constructor.SafeConstructor

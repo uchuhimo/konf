@@ -20,6 +20,7 @@ import com.natpryce.hamkrest.assertion.assertThat
 import com.natpryce.hamkrest.sameInstance
 import com.natpryce.hamkrest.throws
 import com.uchuhimo.konf.source.NoSuchPathException
+import com.uchuhimo.konf.source.asSource
 import org.jetbrains.spek.api.Spek
 import org.jetbrains.spek.api.dsl.given
 import org.jetbrains.spek.api.dsl.it
@@ -29,7 +30,7 @@ object ValueSourceSpec : Spek({
     given("a value source") {
         on("get with non-empty path") {
             it("should throw NoSuchPathException") {
-                assertThat({ 1.asSource().getOrNull("a") }, throws<NoSuchPathException>())
+                assertThat({ 1.asSource()["a"] }, throws<NoSuchPathException>())
             }
         }
         on("invoke `asSource`") {

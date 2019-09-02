@@ -19,7 +19,6 @@ package com.uchuhimo.konf.source
 import com.natpryce.hamkrest.assertion.assertThat
 import com.natpryce.hamkrest.equalTo
 import com.natpryce.hamkrest.throws
-import com.uchuhimo.konf.source.base.EmptyMapSource
 import com.uchuhimo.konf.source.properties.PropertiesProvider
 import org.eclipse.jgit.api.Git
 import org.eclipse.jgit.lib.Constants
@@ -28,6 +27,7 @@ import org.jetbrains.spek.api.dsl.it
 import org.jetbrains.spek.api.dsl.on
 import org.jetbrains.spek.subject.SubjectSpek
 import java.nio.file.Paths
+import kotlin.test.assertTrue
 
 object GitProviderSpec : SubjectSpek<Provider>({
     subject { PropertiesProvider }
@@ -54,7 +54,7 @@ object GitProviderSpec : SubjectSpek<Provider>({
                     assertThat(source.info["branch"], equalTo(Constants.HEAD))
                 }
                 it("should return a source which contains value in git repository") {
-                    assertThat(source["type"].toText(), equalTo("git"))
+                    assertThat(source["type"].asValue<String>(), equalTo("git"))
                 }
             }
         }
@@ -76,7 +76,9 @@ object GitProviderSpec : SubjectSpek<Provider>({
                         throws<InvalidRemoteRepoException>())
                 }
                 it("should return an empty source if optional") {
-                    assertThat(subject.fromGit(createTempDir().path, "test", dir = dir.path, optional = true), equalTo<Source>(EmptyMapSource))
+                    assertTrue {
+                        subject.fromGit(createTempDir().path, "test", dir = dir.path, optional = true).tree.children.isEmpty()
+                    }
                 }
             }
         }

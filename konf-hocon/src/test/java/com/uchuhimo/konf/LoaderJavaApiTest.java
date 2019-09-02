@@ -24,8 +24,8 @@ import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 
-@DisplayName("test Java API of Config")
-class ConfigJavaApiTest {
+@DisplayName("test Java API of loader")
+class LoaderJavaApiTest {
   private Config config;
 
   @BeforeEach

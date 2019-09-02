@@ -17,107 +17,76 @@
 package com.uchuhimo.konf.source.base
 
 import com.uchuhimo.konf.Config
-import com.uchuhimo.konf.Path
-import com.uchuhimo.konf.name
+import com.uchuhimo.konf.ContainerNode
+import com.uchuhimo.konf.ListNode
+import com.uchuhimo.konf.TreeNode
+import com.uchuhimo.konf.ValueNode
 import com.uchuhimo.konf.notEmptyOr
-import com.uchuhimo.konf.source.NoSuchPathException
-import com.uchuhimo.konf.source.ParseException
+import com.uchuhimo.konf.source.ListSourceNode
 import com.uchuhimo.konf.source.Source
 import com.uchuhimo.konf.source.SourceInfo
-import com.uchuhimo.konf.toPath
+import com.uchuhimo.konf.source.asTree
+import java.util.Collections
 
 /**
  * Source from a map in flat format.
  */
 open class FlatSource(
     val map: Map<String, String>,
-    val prefix: String = "",
     type: String = "",
     final override val info: SourceInfo = SourceInfo()
-) : StringValueSource {
+) : Source {
     init {
         info["type"] = type.notEmptyOr("flat")
     }
 
-    override fun contains(path: Path): Boolean {
-        if (path.isEmpty()) {
-            return true
-        } else {
-            val fullPath = if (prefix.isEmpty()) path.name else "$prefix.${path.name}"
-            return map.any { (key, _) ->
-                if (key.startsWith(fullPath)) {
-                    if (key == fullPath) {
-                        true
-                    } else {
-                        val suffix = key.removePrefix(fullPath)
-                        suffix.startsWith(".") && suffix.length > 1
-                    }
+    override val tree: TreeNode = ContainerNode(mutableMapOf()).apply {
+        map.forEach { (path, value) ->
+            set(path, value.asTree())
+        }
+    }.promoteToList()
+}
+
+object EmptyStringNode : ValueNode, ListNode {
+    override val children: MutableMap<String, TreeNode> = Collections.unmodifiableMap(mutableMapOf())
+    override val value: Any = ""
+    override val list: List<TreeNode> = listOf()
+}
+
+class SingleStringListNode(override val value: String) : ValueNode, ListNode {
+    override val children: MutableMap<String, TreeNode> = Collections.unmodifiableMap(
+        mutableMapOf("0" to value.asTree()))
+    override val list: List<TreeNode> = listOf(value.asTree())
+}
+
+fun ContainerNode.promoteToList(): TreeNode {
+    for ((key, child) in children) {
+        if (child is ContainerNode) {
+            children[key] = child.promoteToList()
+        } else if (child is ValueNode) {
+            val value = child.value
+            if (value is String) {
+                if (',' in value) {
+                    children[key] = ListSourceNode(value.split(',').map { it.asTree() })
+                } else if (value == "") {
+                    children[key] = EmptyStringNode
                 } else {
-                    false
+                    children[key] = SingleStringListNode(value)
                 }
             }
         }
     }
-
-    override fun getOrNull(path: Path): Source? {
-        return if (path.isEmpty()) {
-            this
-        } else {
-            if (contains(path)) {
-                if (prefix.isEmpty()) {
-                    FlatSource(map, path.name, info = info)
-                } else {
-                    FlatSource(map, "$prefix.${path.name}", info = info)
-                }
-            } else {
-                null
-            }
-        }
+    val list = generateSequence(0) { it + 1 }.map {
+        val key = it.toString()
+        if (key in children) key else null
+    }.takeWhile {
+        it != null
+    }.filterNotNull().toList()
+    if (list.isNotEmpty() && list.toSet() == children.keys) {
+        return ListSourceNode(list.map { children[it]!! })
+    } else {
+        return this
     }
-
-    override fun getValue(): String =
-        map[prefix] ?: throw NoSuchPathException(this, prefix.toPath())
-
-    override fun toRegularList(): List<Source> {
-        try {
-            return super.toRegularList()
-        } catch (e: Exception) {
-            val list = generateSequence(0) { it + 1 }.map {
-                getOrNull(it.toString().toPath())
-            }.takeWhile {
-                it != null
-            }.filterNotNull().toList()
-            if (list.isNotEmpty()) {
-                return list
-            } else {
-                throw ParseException("$prefix in $map cannot be parsed to a list")
-            }
-        }
-    }
-
-    override fun isMap(): Boolean = toMap().isNotEmpty()
-
-    override fun toMap(): Map<String, Source> {
-        val keys = if (prefix.isEmpty()) {
-            map.keys
-        } else {
-            map.keys.asSequence().filter {
-                it.startsWith("$prefix.")
-            }.map {
-                it.removePrefix("$prefix.")
-            }.filter {
-                it.isNotEmpty()
-            }.toList()
-        }
-        return keys.map {
-            it.takeWhile { it != '.' }
-        }.toSet().associate {
-            val newPrefix = if (prefix.isEmpty()) it else "$prefix.$it"
-            it to FlatSource(map, newPrefix, info = info)
-        }
-    }
-
-    override fun isText(): Boolean = map.contains(prefix)
 }
 
 /**

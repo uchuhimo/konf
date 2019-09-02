@@ -79,3 +79,9 @@ class LayerFrozenException(val config: Config) :
  */
 class NoSuchPathException(val path: String) :
     ConfigException("cannot find path \"$path\" in config spec")
+
+/**
+ * Exception indicates that the specified path is invalid.
+ */
+class InvalidPathException(val path: String) :
+    ConfigException("\"$path\" is not a valid path")

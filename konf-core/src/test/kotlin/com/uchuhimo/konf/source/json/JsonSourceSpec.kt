@@ -17,17 +17,18 @@
 package com.uchuhimo.konf.source.json
 
 import com.fasterxml.jackson.databind.node.BigIntegerNode
+import com.fasterxml.jackson.databind.node.BooleanNode
 import com.fasterxml.jackson.databind.node.DecimalNode
 import com.fasterxml.jackson.databind.node.DoubleNode
 import com.fasterxml.jackson.databind.node.FloatNode
 import com.fasterxml.jackson.databind.node.IntNode
 import com.fasterxml.jackson.databind.node.LongNode
 import com.fasterxml.jackson.databind.node.ShortNode
-import com.fasterxml.jackson.databind.node.TextNode
 import com.natpryce.hamkrest.assertion.assertThat
 import com.natpryce.hamkrest.equalTo
 import com.natpryce.hamkrest.throws
 import com.uchuhimo.konf.source.WrongTypeException
+import com.uchuhimo.konf.source.asValue
 import com.uchuhimo.konf.toPath
 import org.jetbrains.spek.api.Spek
 import org.jetbrains.spek.api.dsl.given
@@ -55,7 +56,7 @@ object JsonSourceSpec : Spek({
                     assertTrue("key".toPath() in source)
                 }
                 it("should contain the corresponding value") {
-                    assertThat((source["key".toPath()] as JsonSource).toInt(), equalTo(1))
+                    assertThat(source["key".toPath()].asValue<Int>(), equalTo(1))
                 }
             }
             on("get an non-existed key") {
@@ -68,87 +69,77 @@ object JsonSourceSpec : Spek({
             }
         }
         group("cast operation") {
-            on("get list from other source") {
-                it("should throw WrongTypeException") {
-                    assertThat({ JsonSource(IntNode.valueOf(1)).toList() }, throws<WrongTypeException>())
-                }
-            }
-            on("get map from other source") {
-                it("should throw WrongTypeException") {
-                    assertThat({ JsonSource(IntNode.valueOf(1)).toMap() }, throws<WrongTypeException>())
-                }
-            }
             on("get string from other source") {
                 it("should throw WrongTypeException") {
-                    assertThat({ JsonSource(IntNode.valueOf(1)).toText() }, throws<WrongTypeException>())
+                    assertThat({ JsonSource(IntNode.valueOf(1)).asValue<String>() }, throws<WrongTypeException>())
                 }
             }
             on("get boolean from other source") {
                 it("should throw WrongTypeException") {
-                    assertThat({ JsonSource(IntNode.valueOf(1)).toBoolean() }, throws<WrongTypeException>())
+                    assertThat({ JsonSource(IntNode.valueOf(1)).asValue<Boolean>() }, throws<WrongTypeException>())
                 }
             }
             on("get double from other source") {
                 it("should throw WrongTypeException") {
-                    assertThat({ JsonSource(TextNode.valueOf("1")).toDouble() }, throws<WrongTypeException>())
+                    assertThat({ JsonSource(BooleanNode.valueOf(true)).asValue<Double>() }, throws<WrongTypeException>())
                 }
             }
             on("get integer from other source") {
                 it("should throw WrongTypeException") {
-                    assertThat({ JsonSource(DoubleNode.valueOf(1.0)).toInt() }, throws<WrongTypeException>())
+                    assertThat({ JsonSource(DoubleNode.valueOf(1.0)).asValue<Int>() }, throws<WrongTypeException>())
                 }
             }
             on("get long from long source") {
                 it("should succeed") {
-                    assertThat(JsonSource(LongNode.valueOf(1L)).toLong(), equalTo(1L))
+                    assertThat(JsonSource(LongNode.valueOf(1L)).asValue<Long>(), equalTo(1L))
                 }
             }
             on("get long from integer source") {
                 it("should succeed") {
-                    assertThat(JsonSource(IntNode.valueOf(1)).toLong(), equalTo(1L))
+                    assertThat(JsonSource(IntNode.valueOf(1)).asValue<Long>(), equalTo(1L))
                 }
             }
             on("get short from short source") {
                 it("should succeed") {
-                    assertThat(JsonSource(ShortNode.valueOf(1)).toShort(), equalTo(1.toShort()))
+                    assertThat(JsonSource(ShortNode.valueOf(1)).asValue<Short>(), equalTo(1.toShort()))
                 }
             }
             on("get short from integer source") {
                 it("should succeed") {
-                    assertThat(JsonSource(IntNode.valueOf(1)).toShort(), equalTo(1.toShort()))
+                    assertThat(JsonSource(IntNode.valueOf(1)).asValue<Short>(), equalTo(1.toShort()))
                 }
             }
             on("get float from float source") {
                 it("should succeed") {
-                    assertThat(JsonSource(FloatNode.valueOf(1.0F)).toFloat(), equalTo(1.0F))
+                    assertThat(JsonSource(FloatNode.valueOf(1.0F)).asValue<Float>(), equalTo(1.0F))
                 }
             }
             on("get float from double source") {
                 it("should succeed") {
-                    assertThat(JsonSource(DoubleNode.valueOf(1.0)).toFloat(), equalTo(1.0F))
+                    assertThat(JsonSource(DoubleNode.valueOf(1.0)).asValue<Float>(), equalTo(1.0F))
                 }
             }
             on("get BigInteger from BigInteger source") {
                 it("should succeed") {
-                    assertThat(JsonSource(BigIntegerNode.valueOf(BigInteger.valueOf(1L))).toBigInteger(),
+                    assertThat(JsonSource(BigIntegerNode.valueOf(BigInteger.valueOf(1L))).asValue<BigInteger>(),
                         equalTo(BigInteger.valueOf(1L)))
                 }
             }
             on("get BigInteger from long source") {
                 it("should succeed") {
-                    assertThat(JsonSource(LongNode.valueOf(1L)).toBigInteger(),
+                    assertThat(JsonSource(LongNode.valueOf(1L)).asValue<BigInteger>(),
                         equalTo(BigInteger.valueOf(1L)))
                 }
             }
             on("get BigDecimal from BigDecimal source") {
                 it("should succeed") {
-                    assertThat(JsonSource(DecimalNode.valueOf(BigDecimal.valueOf(1.0))).toBigDecimal(),
+                    assertThat(JsonSource(DecimalNode.valueOf(BigDecimal.valueOf(1.0))).asValue<BigDecimal>(),
                         equalTo(BigDecimal.valueOf(1.0)))
                 }
             }
             on("get BigDecimal from double source") {
                 it("should succeed") {
-                    assertThat(JsonSource(DoubleNode.valueOf(1.0)).toBigDecimal(),
+                    assertThat(JsonSource(DoubleNode.valueOf(1.0)).asValue<BigDecimal>(),
                         equalTo(BigDecimal.valueOf(1.0)))
                 }
             }

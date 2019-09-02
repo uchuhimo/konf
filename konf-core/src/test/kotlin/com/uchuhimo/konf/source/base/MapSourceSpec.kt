@@ -18,6 +18,8 @@ package com.uchuhimo.konf.source.base
 
 import com.natpryce.hamkrest.assertion.assertThat
 import com.natpryce.hamkrest.equalTo
+import com.uchuhimo.konf.ValueNode
+import com.uchuhimo.konf.source.asValue
 import com.uchuhimo.konf.toPath
 import org.jetbrains.spek.api.dsl.given
 import org.jetbrains.spek.api.dsl.it
@@ -38,9 +40,8 @@ object MapSourceSpec : SubjectSpek<MapSource>({
         }
         on("cast to map") {
             it("should succeed") {
-                assertTrue(subject.isMap())
-                val map = subject.toMap()
-                assertThat((map["1"] as ValueSource).value, equalTo(1 as Any))
+                val map = subject.tree.children
+                assertThat((map["1"] as ValueNode).value, equalTo(1 as Any))
             }
         }
         on("get an existed key") {
@@ -48,7 +49,7 @@ object MapSourceSpec : SubjectSpek<MapSource>({
                 assertTrue("1".toPath() in subject)
             }
             it("should contain the corresponding value") {
-                assertThat((subject.getOrNull("1".toPath()) as ValueSource).value, equalTo(1 as Any))
+                assertThat(subject.getOrNull("1".toPath())?.asValue<Int>(), equalTo(1))
             }
         }
         on("get an non-existed key") {

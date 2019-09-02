@@ -22,10 +22,8 @@ import com.fasterxml.jackson.databind.type.TypeFactory
 import com.uchuhimo.konf.annotation.JavaApi
 import com.uchuhimo.konf.source.DefaultLoaders
 import com.uchuhimo.konf.source.Source
-import com.uchuhimo.konf.source.base.MapSource
-import com.uchuhimo.konf.source.base.toHierarchicalMap
+import com.uchuhimo.konf.source.base.asKVSource
 import com.uchuhimo.konf.source.loadBy
-import com.uchuhimo.konf.source.toTree
 import java.util.Deque
 import kotlin.properties.ReadWriteProperty
 import kotlin.reflect.KProperty
@@ -510,5 +508,5 @@ open class LazyConfigProperty<T>(
  * @return a tree node
  */
 fun Config.toTree(): TreeNode {
-    return MapSource(toHierarchicalMap()).toTree()
+    return toMap().asKVSource().tree
 }

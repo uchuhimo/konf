@@ -21,31 +21,29 @@ import com.natpryce.hamkrest.equalTo
 import com.natpryce.hamkrest.throws
 import com.uchuhimo.konf.Config
 import com.uchuhimo.konf.ConfigSpec
-import com.uchuhimo.konf.source.NoSuchPathException
+import com.uchuhimo.konf.InvalidPathException
+import com.uchuhimo.konf.ListNode
+import com.uchuhimo.konf.ValueNode
 import com.uchuhimo.konf.source.ParseException
 import com.uchuhimo.konf.source.Source
+import com.uchuhimo.konf.source.asValue
 import com.uchuhimo.konf.toPath
 import org.jetbrains.spek.api.dsl.given
 import org.jetbrains.spek.api.dsl.it
 import org.jetbrains.spek.api.dsl.on
 import org.jetbrains.spek.subject.SubjectSpek
-import kotlin.test.assertFalse
+import org.junit.jupiter.api.assertThrows
 import kotlin.test.assertTrue
 
 object FlatSourceSpec : SubjectSpek<FlatSource>({
     given("a flat map source") {
         group("get operation") {
             val source by memoized {
-                FlatSource(map = mapOf("level1.level2.key" to "value"), prefix = "level1.level2")
+                FlatSource(map = mapOf("level1.level2.key" to "value"))
             }
             on("get the underlying map") {
                 it("should return the specified map") {
                     assertThat(source.map, equalTo(mapOf("level1.level2.key" to "value")))
-                }
-            }
-            on("get prefix") {
-                it("should return the specified prefix") {
-                    assertThat(source.prefix, equalTo("level1.level2"))
                 }
             }
             on("access with empty path") {
@@ -67,77 +65,58 @@ object FlatSourceSpec : SubjectSpek<FlatSource>({
             }
             on("empty string value") {
                 it("should return an empty list") {
-                    assertTrue { source["empty"].isList() }
-                    assertThat(source["empty"].toList(), equalTo(listOf()))
+                    assertThat((source["empty"].tree as ListNode).list, equalTo(listOf()))
                 }
             }
             on("string value without commas") {
                 it("should return a list containing a single element") {
-                    assertTrue { source["single"].isList() }
                     assertThat(
-                        source["single"].toList().map { (it as SingleStringValueSource).getValue() },
+                        (source["single"].tree as ListNode).list.map { (it as ValueNode).value as String },
                         equalTo(listOf("a")))
                 }
             }
             on("string value with commas") {
                 it("should return a list containing multiple elements") {
-                    assertTrue { source["multiple"].isList() }
                     assertThat(
-                        source["multiple"].toList().map { (it as SingleStringValueSource).getValue() },
+                        (source["multiple"].tree as ListNode).list.map { (it as ValueNode).value as String },
                         equalTo(listOf("a", "b")))
                 }
             }
         }
         on("contain invalid key") {
-            val source = FlatSource(
-                map = mapOf("level1.level2.key." to "value"),
-                prefix = "level1.level2")
-            it("should not contain any path") {
-                assertFalse("key" in source)
-            }
-        }
-        on("underlying map's key prefix mismatches with prefix") {
-            val source = FlatSource(map = mapOf("level1.key" to "value"), prefix = "level2")
-            it("should fail to cast to map") {
-                assertFalse(source.isMap())
-                assertTrue(source.toMap().isEmpty())
-            }
-        }
-        on("underlying map's key mismatches with prefix") {
-            val source = FlatSource(map = mapOf("level1" to "value"), prefix = "level2")
-            it("should fail to cast to string") {
-                assertFalse(source.isText())
-                assertThat({ source.toText() }, throws<NoSuchPathException>())
+            it("should throw InvalidPathException") {
+                assertThrows<InvalidPathException> {
+                    FlatSource(map = mapOf("level1.level2.key." to "value"))
+                }
             }
         }
         group("cast operation") {
             val source by memoized {
-                FlatSource(map = mapOf("level1.key" to "value"), prefix = "level1.key")
+                FlatSource(map = mapOf("level1.key" to "value"))["level1.key"]
             }
             on("value is a string") {
                 it("should succeed to cast to string") {
-                    assertTrue(source.isText())
-                    assertThat(source.toText(), equalTo("value"))
+                    assertThat(source.asValue<String>(), equalTo("value"))
                 }
             }
             on("value is not a boolean") {
                 it("should throw ParseException when casting to boolean") {
-                    assertThat({ source.toBoolean() }, throws<ParseException>())
+                    assertThat({ source.asValue<Boolean>() }, throws<ParseException>())
                 }
             }
             on("value is not a double") {
                 it("should throw ParseException when casting to double") {
-                    assertThat({ source.toDouble() }, throws<ParseException>())
+                    assertThat({ source.asValue<Double>() }, throws<ParseException>())
                 }
             }
             on("value is not an integer") {
                 it("should throw ParseException when casting to integer") {
-                    assertThat({ source.toInt() }, throws<ParseException>())
+                    assertThat({ source.asValue<Int>() }, throws<ParseException>())
                 }
             }
             on("value is not a long") {
                 it("should throw ParseException when casting to long") {
-                    assertThat({ source.toLong() }, throws<ParseException>())
+                    assertThat({ source.asValue<Long>() }, throws<ParseException>())
                 }
             }
         }

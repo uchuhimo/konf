@@ -171,7 +171,7 @@ object ConfigSpecTestSpec : Spek({
             on("get an invalid path") {
                 it("should throw NoSuchPathException") {
                     assertThat({ spec["b"] }, throws(has(NoSuchPathException::path, equalTo("b"))))
-                    assertThat({ spec["a."] }, throws<IllegalStateException>())
+                    assertThat({ spec["a."] }, throws<InvalidPathException>())
                     assertThat({ spec["a.b"] }, throws(has(NoSuchPathException::path, equalTo("a.b"))))
                     assertThat({
                         spec["a.bb.inner4"]

@@ -18,6 +18,7 @@ package com.uchuhimo.konf.source.base
 
 import com.natpryce.hamkrest.assertion.assertThat
 import com.natpryce.hamkrest.equalTo
+import com.uchuhimo.konf.source.asValue
 import com.uchuhimo.konf.toPath
 import org.jetbrains.spek.api.dsl.given
 import org.jetbrains.spek.api.dsl.it
@@ -41,7 +42,7 @@ object KVSourceSpec : SubjectSpek<KVSource>({
                 assertTrue("1".toPath() in subject)
             }
             it("should contain the corresponding value") {
-                assertThat((subject.getOrNull("1".toPath()) as ValueSource).value, equalTo(1 as Any))
+                assertThat(subject.getOrNull("1".toPath())?.asValue<Int>(), equalTo(1))
             }
         }
         on("get an non-existed key") {

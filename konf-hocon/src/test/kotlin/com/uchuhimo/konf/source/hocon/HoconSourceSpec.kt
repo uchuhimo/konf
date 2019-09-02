@@ -18,6 +18,8 @@ package com.uchuhimo.konf.source.hocon
 
 import com.natpryce.hamkrest.assertion.assertThat
 import com.natpryce.hamkrest.equalTo
+import com.typesafe.config.ConfigObject
+import com.uchuhimo.konf.source.asValue
 import com.uchuhimo.konf.toPath
 import org.jetbrains.spek.api.dsl.given
 import org.jetbrains.spek.api.dsl.it
@@ -32,7 +34,7 @@ object HoconSourceSpec : SubjectSpek<HoconSource>({
     given("a HOCON source") {
         on("get underlying config") {
             it("should return corresponding config") {
-                val config = subject.config
+                val config = (subject.value as ConfigObject).toConfig()
                 assertThat(config.getInt("key"), equalTo(1))
             }
         }
@@ -41,7 +43,7 @@ object HoconSourceSpec : SubjectSpek<HoconSource>({
                 assertTrue("key".toPath() in subject)
             }
             it("should contain the corresponding value") {
-                assertThat((subject["key".toPath()] as HoconSource).toInt(), equalTo(1))
+                assertThat(subject["key".toPath()].asValue<Int>(), equalTo(1))
             }
         }
         on("get an non-existed key") {
@@ -58,7 +60,7 @@ object HoconSourceSpec : SubjectSpek<HoconSource>({
                 key2 = ${'$'}{key1}
             """.trimIndent())
             it("should resolve the key") {
-                assertThat(source["key2"].toInt(), equalTo(1))
+                assertThat(source["key2"].asValue<Int>(), equalTo(1))
             }
         }
     }

@@ -19,77 +19,68 @@ package com.uchuhimo.konf.source.hocon
 import com.natpryce.hamkrest.assertion.assertThat
 import com.natpryce.hamkrest.equalTo
 import com.natpryce.hamkrest.throws
-import com.uchuhimo.konf.source.WrongTypeException
+import com.uchuhimo.konf.source.NoSuchPathException
+import com.uchuhimo.konf.source.Source
+import com.uchuhimo.konf.source.asValue
 import org.jetbrains.spek.api.Spek
 import org.jetbrains.spek.api.dsl.given
 import org.jetbrains.spek.api.dsl.it
 import org.jetbrains.spek.api.dsl.on
-import kotlin.test.assertFalse
 import kotlin.test.assertTrue
 
 object HoconValueSourceSpec : Spek({
     given("a HOCON value source") {
-        on("access the underlying config value") {
-            it("should return the corresponding config value") {
-                assertThat("1".toHoconValueSource().value.unwrapped(), equalTo(1 as Any))
-            }
-        }
         on("treat object value source as HOCON source") {
             val source = "{key = 1}".toHoconValueSource()
             it("should contain specified value") {
                 assertTrue("key" in source)
-                assertThat(source["key"].toInt(), equalTo(1))
+                assertThat(source["key"].asValue<Int>(), equalTo(1))
             }
         }
         on("treat number value source as HOCON source") {
             val source = "1".toHoconValueSource()
-            it("should throw WrongTypeException") {
-                assertThat({ source["key"] }, throws<WrongTypeException>())
+            it("should throw NoSuchPathException") {
+                assertThat({ source["key"] }, throws<NoSuchPathException>())
             }
         }
         on("get integer from integer value source") {
             it("should succeed") {
-                assertThat("1".toHoconValueSource().toInt(), equalTo(1))
+                assertThat("1".toHoconValueSource().asValue<Int>(), equalTo(1))
             }
         }
         on("get long from long value source") {
             val source = "123456789000".toHoconValueSource()
             it("should succeed") {
-                assertTrue(source.isLong())
-                assertThat(source.toLong(), equalTo(123_456_789_000L))
+                assertThat(source.asValue<Long>(), equalTo(123_456_789_000L))
             }
         }
         on("get long from integer value source") {
             val source = "1".toHoconValueSource()
             it("should succeed") {
-                assertFalse(source.isLong())
-                assertThat(source.toLong(), equalTo(1L))
+                assertThat(source.asValue<Long>(), equalTo(1L))
             }
         }
         on("get double from double value source") {
             val source = "1.5".toHoconValueSource()
             it("should succeed") {
-                assertTrue(source.isDouble())
-                assertThat(source.toDouble(), equalTo(1.5))
+                assertThat(source.asValue<Double>(), equalTo(1.5))
             }
         }
         on("get double from int value source") {
             val source = "1".toHoconValueSource()
             it("should succeed") {
-                assertFalse(source.isDouble())
-                assertThat(source.toDouble(), equalTo(1.0))
+                assertThat(source.asValue<Double>(), equalTo(1.0))
             }
         }
         on("get double from long value source") {
             val source = "123456789000".toHoconValueSource()
             it("should succeed") {
-                assertFalse(source.isDouble())
-                assertThat(source.toDouble(), equalTo(123456789000.0))
+                assertThat(source.asValue<Double>(), equalTo(123456789000.0))
             }
         }
     }
 })
 
-private fun String.toHoconValueSource(): HoconSource {
-    return HoconProvider.fromString("key = $this")["key"] as HoconSource
+private fun String.toHoconValueSource(): Source {
+    return HoconProvider.fromString("key = $this")["key"]
 }

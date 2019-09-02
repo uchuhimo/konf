@@ -150,7 +150,9 @@ fun String.toPath(): Path {
         listOf()
     } else {
         val path = name.split('.')
-        check("" !in path) { "\"$this\" is not a valid path" }
+        if ("" in path) {
+            throw InvalidPathException(this)
+        }
         path
     }
 }
@@ -158,7 +160,9 @@ fun String.toPath(): Path {
 fun checkPath(path: String) {
     val trimmedPath = path.trim()
     if (trimmedPath.isNotEmpty()) {
-        check("" !in trimmedPath.split('.')) { "\"$path\" is not a valid path" }
+        if ("" in trimmedPath.split('.')) {
+            throw InvalidPathException(path)
+        }
     }
 }
 

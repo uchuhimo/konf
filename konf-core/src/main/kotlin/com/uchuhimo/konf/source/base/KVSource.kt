@@ -16,11 +16,11 @@
 
 package com.uchuhimo.konf.source.base
 
-import com.uchuhimo.konf.Path
-import com.uchuhimo.konf.name
+import com.uchuhimo.konf.ContainerNode
+import com.uchuhimo.konf.TreeNode
 import com.uchuhimo.konf.notEmptyOr
-import com.uchuhimo.konf.source.Source
 import com.uchuhimo.konf.source.SourceInfo
+import com.uchuhimo.konf.source.asTree
 
 /**
  * Source from a map in key-value format.
@@ -30,9 +30,11 @@ open class KVSource(
     type: String = "",
     info: SourceInfo = SourceInfo()
 ) : ValueSource(map, type.notEmptyOr("KV"), info) {
-    override fun contains(path: Path): Boolean = map.contains(path.name)
-
-    override fun getOrNull(path: Path): Source? = map[path.name]?.castToSource(info)
+    override val tree: TreeNode = ContainerNode(mutableMapOf()).apply {
+        map.forEach { (path, value) ->
+            set(path, value.asTree())
+        }
+    }
 }
 
 fun Map<String, Any>.asKVSource() = KVSource(this)

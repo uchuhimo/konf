@@ -17,156 +17,41 @@
 package com.uchuhimo.konf.source.json
 
 import com.fasterxml.jackson.databind.JsonNode
-import com.fasterxml.jackson.databind.node.JsonNodeType
-import com.uchuhimo.konf.Path
+import com.uchuhimo.konf.ContainerNode
+import com.uchuhimo.konf.TreeNode
+import com.uchuhimo.konf.source.ListSourceNode
+import com.uchuhimo.konf.source.NullSourceNode
 import com.uchuhimo.konf.source.Source
 import com.uchuhimo.konf.source.SourceInfo
-import com.uchuhimo.konf.source.WrongTypeException
-import java.math.BigDecimal
-import java.math.BigInteger
+import com.uchuhimo.konf.source.ValueSourceNode
 
 /**
  * Source from a JSON node.
  */
 class JsonSource(
-    val node: JsonNode,
-    override val info: SourceInfo = SourceInfo()
+    val node: JsonNode
 ) : Source {
-    init {
-        info["type"] = "JSON"
-    }
+    override val info: SourceInfo = SourceInfo("type" to "JSON")
 
-    override fun contains(path: Path): Boolean {
-        return if (path.isEmpty()) {
-            true
-        } else {
-            val key = path.first()
-            val rest = path.drop(1)
-            val childNode = node[key]
-            if (childNode != null) {
-                JsonSource(childNode, info).contains(rest)
-            } else {
-                false
+    override val tree: TreeNode = node.toTree()
+}
+
+fun JsonNode.toTree(): TreeNode {
+    return when {
+        isNull -> NullSourceNode
+        isBoolean -> ValueSourceNode(booleanValue())
+        isNumber -> ValueSourceNode(numberValue())
+        isTextual -> ValueSourceNode(textValue())
+        isArray -> ListSourceNode(mutableListOf<TreeNode>().apply {
+            elements().forEach {
+                add(it.toTree())
             }
-        }
-    }
-
-    override fun getOrNull(path: Path): Source? {
-        return if (path.isEmpty()) {
-            this
-        } else {
-            val key = path.first()
-            val rest = path.drop(1)
-            val childNode = node[key]
-            if (childNode != null) {
-                JsonSource(childNode, info).getOrNull(rest)
-            } else {
-                null
+        })
+        isObject -> ContainerNode(mutableMapOf<String, TreeNode>().apply {
+            for ((key, value) in fields()) {
+                put(key, value.toTree())
             }
-        }
-    }
-
-    override fun isNull(): Boolean = node.isNull
-
-    override fun isText(): Boolean = node.isTextual
-
-    override fun toList(): List<Source> {
-        if (node.isArray) {
-            return mutableListOf<JsonNode>().apply {
-                addAll(node.elements().asSequence())
-            }.map {
-                JsonSource(it, info)
-            }
-        } else {
-            throw WrongTypeException(this, node.nodeType.name, JsonNodeType.ARRAY.name)
-        }
-    }
-
-    override fun isMap(): Boolean = node.isObject
-
-    override fun toMap(): Map<String, Source> {
-        if (node.isObject) {
-            return mutableMapOf<String, JsonNode>().apply {
-                for ((key, value) in node.fields()) {
-                    put(key, value)
-                }
-            }.mapValues { (_, value) ->
-                JsonSource(value, info)
-            }
-        } else {
-            throw WrongTypeException(this, node.nodeType.name, JsonNodeType.OBJECT.name)
-        }
-    }
-
-    override fun toText(): String {
-        if (node.isTextual) {
-            return node.textValue()
-        } else {
-            throw WrongTypeException(this, node.nodeType.name, JsonNodeType.STRING.name)
-        }
-    }
-
-    override fun toBoolean(): Boolean {
-        if (node.isBoolean) {
-            return node.booleanValue()
-        } else {
-            throw WrongTypeException(this, node.nodeType.name, JsonNodeType.BOOLEAN.name)
-        }
-    }
-
-    override fun toDouble(): Double {
-        if (node.isNumber) {
-            return node.doubleValue()
-        } else {
-            throw WrongTypeException(this, node.nodeType.name, "DOUBLE")
-        }
-    }
-
-    override fun toFloat(): Float {
-        return if (node.isNumber) {
-            node.floatValue()
-        } else {
-            super.toFloat()
-        }
-    }
-
-    override fun toInt(): Int {
-        if (node.isInt) {
-            return node.intValue()
-        } else {
-            throw WrongTypeException(this, node.nodeType.name, "INT")
-        }
-    }
-
-    override fun toLong(): Long {
-        return if (node.isLong) {
-            node.longValue()
-        } else {
-            super.toLong()
-        }
-    }
-
-    override fun toShort(): Short {
-        return if (node.isShort) {
-            node.shortValue()
-        } else {
-            super.toShort()
-        }
-    }
-
-    override fun toBigInteger(): BigInteger {
-        return if (node.isBigInteger) {
-            node.bigIntegerValue()
-        } else {
-            super.toBigInteger()
-        }
-    }
-
-    override fun toBigDecimal(): BigDecimal {
-        return if (node.isBigDecimal) {
-            node.decimalValue()
-        } else {
-            super.toBigDecimal()
-        }
+        })
+        else -> throw NotImplementedError()
     }
 }

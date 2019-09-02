@@ -18,6 +18,7 @@ package com.uchuhimo.konf.source.yaml
 
 import com.natpryce.hamkrest.assertion.assertThat
 import com.natpryce.hamkrest.equalTo
+import com.uchuhimo.konf.source.asValue
 import com.uchuhimo.konf.tempFileOf
 import org.jetbrains.spek.api.dsl.given
 import org.jetbrains.spek.api.dsl.it
@@ -34,7 +35,7 @@ object YamlProviderSpec : SubjectSpek<YamlProvider>({
                 assertThat(source.info["type"], equalTo("YAML"))
             }
             it("should return a source which contains value from reader") {
-                assertThat(source["type"].toText(), equalTo("reader"))
+                assertThat(source["type"].asValue<String>(), equalTo("reader"))
             }
         }
         on("create source from input stream") {
@@ -44,7 +45,7 @@ object YamlProviderSpec : SubjectSpek<YamlProvider>({
                 assertThat(source.info["type"], equalTo("YAML"))
             }
             it("should return a source which contains value from input stream") {
-                assertThat(source["type"].toText(), equalTo("inputStream"))
+                assertThat(source["type"].asValue<String>(), equalTo("inputStream"))
             }
         }
     }

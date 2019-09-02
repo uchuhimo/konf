@@ -20,6 +20,7 @@ import com.moandjiezana.toml.Toml
 import com.uchuhimo.konf.source.Provider
 import com.uchuhimo.konf.source.RegisterExtension
 import com.uchuhimo.konf.source.Source
+import com.uchuhimo.konf.source.asSource
 import java.io.InputStream
 import java.io.Reader
 
@@ -29,8 +30,8 @@ import java.io.Reader
 @RegisterExtension(["toml"])
 object TomlProvider : Provider {
     override fun fromReader(reader: Reader): Source =
-        Toml().read(reader).toMap().asTomlSource()
+        Toml().read(reader).toMap().asSource(type = "TOML")
 
     override fun fromInputStream(inputStream: InputStream): Source =
-        Toml().read(inputStream).toMap().asTomlSource()
+        Toml().read(inputStream).toMap().asSource(type = "TOML")
 }

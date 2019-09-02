@@ -26,11 +26,11 @@ import com.uchuhimo.konf.ConfigSpec
 import com.uchuhimo.konf.Feature
 import com.uchuhimo.konf.NetworkBuffer
 import com.uchuhimo.konf.Prefix
+import com.uchuhimo.konf.SizeInBytes
+import com.uchuhimo.konf.ValueNode
 import com.uchuhimo.konf.name
-import com.uchuhimo.konf.required
 import com.uchuhimo.konf.source.base.ValueSource
 import com.uchuhimo.konf.source.base.asKVSource
-import com.uchuhimo.konf.source.base.asSource
 import com.uchuhimo.konf.toPath
 import org.jetbrains.spek.api.Spek
 import org.jetbrains.spek.api.dsl.given
@@ -58,6 +58,7 @@ object SourceSpec : Spek({
     given("a source") {
         group("get operation") {
             val value: Source = ValueSource(Unit)
+            val tree = value.tree
             val validPath = "a.b".toPath()
             val invalidPath = "a.c".toPath()
             val validKey = "a"
@@ -74,10 +75,9 @@ object SourceSpec : Spek({
                     assertTrue(invalidPath !in sourceForPath)
                 }
             }
-
             on("get by a valid path using `getOrNull`") {
                 it("should return the corresponding value") {
-                    assertThat(sourceForPath.getOrNull(validPath), equalTo(value))
+                    assertThat(sourceForPath.getOrNull(validPath)?.tree, equalTo(tree))
                 }
             }
             on("get by an invalid path using `getOrNull`") {
@@ -88,7 +88,7 @@ object SourceSpec : Spek({
 
             on("get by a valid path using `get`") {
                 it("should return the corresponding value") {
-                    assertThat(sourceForPath[validPath], equalTo(value))
+                    assertThat(sourceForPath[validPath].tree, equalTo(tree))
                 }
             }
             on("get by an invalid path using `get`") {
@@ -111,7 +111,7 @@ object SourceSpec : Spek({
 
             on("get by a valid key using `getOrNull`") {
                 it("should return the corresponding value") {
-                    assertThat(sourceForKey.getOrNull(validKey), equalTo(value))
+                    assertThat(sourceForKey.getOrNull(validKey)?.tree, equalTo(tree))
                 }
             }
             on("get by an invalid key using `getOrNull`") {
@@ -122,7 +122,7 @@ object SourceSpec : Spek({
 
             on("get by a valid key using `get`") {
                 it("should return the corresponding value") {
-                    assertThat(sourceForKey[validKey], equalTo(value))
+                    assertThat(sourceForKey[validKey].tree, equalTo(tree))
                 }
             }
             on("get by an invalid key using `get`") {
@@ -136,66 +136,66 @@ object SourceSpec : Spek({
             on("cast int to long") {
                 val source = 1.asSource()
                 it("should succeed") {
-                    assertThat(source.toLong(), equalTo(1L))
+                    assertThat(source.asValue<Long>(), equalTo(1L))
                 }
             }
             on("cast int in range of short to short") {
                 val source = 1.asSource()
                 it("should succeed") {
-                    assertThat(source.toShort(), equalTo(1.toShort()))
+                    assertThat(source.asValue<Short>(), equalTo(1.toShort()))
                 }
             }
             on("cast int out of range of short to short") {
                 it("should throw ParseException") {
-                    assertThat({ Int.MAX_VALUE.asSource().toShort() }, throws<ParseException>())
-                    assertThat({ Int.MIN_VALUE.asSource().toShort() }, throws<ParseException>())
+                    assertThat({ Int.MAX_VALUE.asSource().asValue<Short>() }, throws<ParseException>())
+                    assertThat({ Int.MIN_VALUE.asSource().asValue<Short>() }, throws<ParseException>())
                 }
             }
 
             on("cast int in range of byte to byte") {
                 val source = 1.asSource()
                 it("should succeed") {
-                    assertThat(source.toByte(), equalTo(1.toByte()))
+                    assertThat(source.asValue<Byte>(), equalTo(1.toByte()))
                 }
             }
             on("cast int out of range of byte to byte") {
                 it("should throw ParseException") {
-                    assertThat({ Int.MAX_VALUE.asSource().toByte() }, throws<ParseException>())
-                    assertThat({ Int.MIN_VALUE.asSource().toByte() }, throws<ParseException>())
+                    assertThat({ Int.MAX_VALUE.asSource().asValue<Byte>() }, throws<ParseException>())
+                    assertThat({ Int.MIN_VALUE.asSource().asValue<Byte>() }, throws<ParseException>())
                 }
             }
 
             on("cast double to float") {
                 val source = 1.5.asSource()
                 it("should succeed") {
-                    assertThat(source.toFloat(), equalTo(1.5f))
+                    assertThat(source.asValue<Float>(), equalTo(1.5f))
                 }
             }
 
             on("cast string containing single char to char") {
                 val source = "a".asSource()
                 it("should succeed") {
-                    assertThat(source.toChar(), equalTo('a'))
+                    assertThat(source.asValue<Char>(), equalTo('a'))
                 }
             }
             on("cast string containing multiple chars to char") {
                 val source = "ab".asSource()
-                it("should throw WrongTypeException") {
-                    assertThat({ source.toChar() }, throws<WrongTypeException>())
+                it("should throw ParseException") {
+                    assertThat({ source.asValue<Char>() }, throws<ParseException>())
                 }
             }
 
             on("cast long to BigInteger") {
                 val source = 1L.asSource()
                 it("should succeed") {
-                    assertThat(source.toBigInteger(), equalTo(BigInteger.valueOf(1)))
+                    assertThat(source.asValue<BigInteger>(), equalTo(BigInteger.valueOf(1)))
                 }
             }
 
             on("cast double to BigDecimal") {
                 val source = 1.5.asSource()
                 it("should succeed") {
-                    assertThat(source.toBigDecimal(), equalTo(BigDecimal.valueOf(1.5)))
+                    assertThat(source.asValue<BigDecimal>(), equalTo(BigDecimal.valueOf(1.5)))
                 }
             }
 
@@ -203,14 +203,14 @@ object SourceSpec : Spek({
                 val text = "10:15:30+01:00"
                 val source = text.asSource()
                 it("should succeed") {
-                    assertThat(source.toOffsetTime(), equalTo(OffsetTime.parse(text)))
+                    assertThat(source.asValue<OffsetTime>(), equalTo(OffsetTime.parse(text)))
                 }
             }
             on("cast string with invalid format to OffsetTime") {
                 val text = "10:15:30"
                 val source = text.asSource()
                 it("should throw ParseException") {
-                    assertThat({ source.toOffsetTime() }, throws<ParseException>())
+                    assertThat({ source.asValue<OffsetTime>() }, throws<ParseException>())
                 }
             }
 
@@ -218,7 +218,7 @@ object SourceSpec : Spek({
                 val text = "2007-12-03T10:15:30+01:00"
                 val source = text.asSource()
                 it("should succeed") {
-                    assertThat(source.toOffsetDateTime(), equalTo(OffsetDateTime.parse(text)))
+                    assertThat(source.asValue<OffsetDateTime>(), equalTo(OffsetDateTime.parse(text)))
                 }
             }
 
@@ -226,7 +226,7 @@ object SourceSpec : Spek({
                 val text = "2007-12-03T10:15:30+01:00[Europe/Paris]"
                 val source = text.asSource()
                 it("should succeed") {
-                    assertThat(source.toZonedDateTime(), equalTo(ZonedDateTime.parse(text)))
+                    assertThat(source.asValue<ZonedDateTime>(), equalTo(ZonedDateTime.parse(text)))
                 }
             }
 
@@ -234,7 +234,7 @@ object SourceSpec : Spek({
                 val text = "2007-12-03"
                 val source = text.asSource()
                 it("should succeed") {
-                    assertThat(source.toLocalDate(), equalTo(LocalDate.parse(text)))
+                    assertThat(source.asValue<LocalDate>(), equalTo(LocalDate.parse(text)))
                 }
             }
 
@@ -242,7 +242,7 @@ object SourceSpec : Spek({
                 val text = "10:15:30"
                 val source = text.asSource()
                 it("should succeed") {
-                    assertThat(source.toLocalTime(), equalTo(LocalTime.parse(text)))
+                    assertThat(source.asValue<LocalTime>(), equalTo(LocalTime.parse(text)))
                 }
             }
 
@@ -250,7 +250,7 @@ object SourceSpec : Spek({
                 val text = "2007-12-03T10:15:30"
                 val source = text.asSource()
                 it("should succeed") {
-                    assertThat(source.toLocalDateTime(), equalTo(LocalDateTime.parse(text)))
+                    assertThat(source.asValue<LocalDateTime>(), equalTo(LocalDateTime.parse(text)))
                 }
             }
 
@@ -258,7 +258,7 @@ object SourceSpec : Spek({
                 val text = "2007"
                 val source = text.asSource()
                 it("should succeed") {
-                    assertThat(source.toYear(), equalTo(Year.parse(text)))
+                    assertThat(source.asValue<Year>(), equalTo(Year.parse(text)))
                 }
             }
 
@@ -266,7 +266,7 @@ object SourceSpec : Spek({
                 val text = "2007-12"
                 val source = text.asSource()
                 it("should succeed") {
-                    assertThat(source.toYearMonth(), equalTo(YearMonth.parse(text)))
+                    assertThat(source.asValue<YearMonth>(), equalTo(YearMonth.parse(text)))
                 }
             }
 
@@ -274,7 +274,7 @@ object SourceSpec : Spek({
                 val text = "2007-12-03T10:15:30.00Z"
                 val source = text.asSource()
                 it("should succeed") {
-                    assertThat(source.toInstant(), equalTo(Instant.parse(text)))
+                    assertThat(source.asValue<Instant>(), equalTo(Instant.parse(text)))
                 }
             }
 
@@ -282,7 +282,7 @@ object SourceSpec : Spek({
                 val text = "2007-12-03T10:15:30.00Z"
                 val source = text.asSource()
                 it("should succeed") {
-                    assertThat(source.toDate(), equalTo(Date.from(Instant.parse(text))))
+                    assertThat(source.asValue<Date>(), equalTo(Date.from(Instant.parse(text))))
                 }
             }
 
@@ -290,7 +290,7 @@ object SourceSpec : Spek({
                 val text = "2007-12-03T10:15:30"
                 val source = text.asSource()
                 it("should succeed") {
-                    assertThat(source.toDate(),
+                    assertThat(source.asValue<Date>(),
                         equalTo(Date.from(LocalDateTime.parse(text).toInstant(ZoneOffset.UTC))))
                 }
             }
@@ -299,7 +299,7 @@ object SourceSpec : Spek({
                 val text = "2007-12-03"
                 val source = text.asSource()
                 it("should succeed") {
-                    assertThat(source.toDate(),
+                    assertThat(source.asValue<Date>(),
                         equalTo(Date.from(LocalDate.parse(text).atStartOfDay().toInstant(ZoneOffset.UTC))))
                 }
             }
@@ -308,7 +308,7 @@ object SourceSpec : Spek({
                 val text = "P2DT3H4M"
                 val source = text.asSource()
                 it("should succeed") {
-                    assertThat(source.toDuration(), equalTo(Duration.parse(text)))
+                    assertThat(source.asValue<Duration>(), equalTo(Duration.parse(text)))
                 }
             }
 
@@ -316,14 +316,14 @@ object SourceSpec : Spek({
                 val text = "200ms"
                 val source = text.asSource()
                 it("should succeed") {
-                    assertThat(source.toDuration(), equalTo(Duration.ofMillis(200)))
+                    assertThat(source.asValue<Duration>(), equalTo(Duration.ofMillis(200)))
                 }
             }
             on("cast string with invalid format to Duration") {
                 val text = "2 year"
                 val source = text.asSource()
                 it("should throw ParseException") {
-                    assertThat({ source.toDuration() }, throws<ParseException>())
+                    assertThat({ source.asValue<Duration>() }, throws<ParseException>())
                 }
             }
 
@@ -331,14 +331,14 @@ object SourceSpec : Spek({
                 val text = "10k"
                 val source = text.asSource()
                 it("should succeed") {
-                    assertThat(source.toSizeInBytes().bytes, equalTo(10240L))
+                    assertThat(source.asValue<SizeInBytes>().bytes, equalTo(10240L))
                 }
             }
             on("cast string with invalid format to SizeInBytes") {
                 val text = "10u"
                 val source = text.asSource()
                 it("should throw ParseException") {
-                    assertThat({ source.toSizeInBytes() }, throws<ParseException>())
+                    assertThat({ source.asValue<SizeInBytes>() }, throws<ParseException>())
                 }
             }
         }
@@ -384,72 +384,33 @@ object SourceSpec : Spek({
                 }
             }
             on("load invalid POJO value") {
-                it("should throw LoadException caused by ParseException") {
-                    assertCausedBy<ParseException> {
-                        load<Person>(mapOf("name" to DumbSource()))
+                it("should throw LoadException caused by ObjectMappingException") {
+                    assertCausedBy<ObjectMappingException> {
+                        load<Person>(mapOf("name" to Source()))
                     }
                 }
             }
         }
         group("feature operation") {
             on("enable feature") {
-                val source = DumbSource().enabled(Feature.FAIL_ON_UNKNOWN_PATH)
+                val source = Source().enabled(Feature.FAIL_ON_UNKNOWN_PATH)
                 it("should let the feature be enabled") {
                     assertTrue { source.isEnabled(Feature.FAIL_ON_UNKNOWN_PATH) }
                 }
             }
             on("disable feature") {
-                val source = DumbSource().disabled(Feature.FAIL_ON_UNKNOWN_PATH)
+                val source = Source().disabled(Feature.FAIL_ON_UNKNOWN_PATH)
                 it("should let the feature be disabled") {
                     assertFalse { source.isEnabled(Feature.FAIL_ON_UNKNOWN_PATH) }
                 }
             }
             on("by default") {
-                val source = DumbSource()
+                val source = Source()
                 it("should use the feature's default setting") {
                     assertThat(
                         source.isEnabled(Feature.FAIL_ON_UNKNOWN_PATH),
                         equalTo(Feature.FAIL_ON_UNKNOWN_PATH.enabledByDefault))
                 }
-            }
-        }
-        group("default implementations") {
-            val source = DumbSource()
-            it("returns `false` for all `is` operations") {
-                assertFalse(source.isBigDecimal())
-                assertFalse(source.isBigInteger())
-                assertFalse(source.isBoolean())
-                assertFalse(source.isByte())
-                assertFalse(source.isChar())
-                assertFalse(source.isDate())
-                assertFalse(source.isDouble())
-                assertFalse(source.isDuration())
-                assertFalse(source.isFloat())
-                assertFalse(source.isInstant())
-                assertFalse(source.isInt())
-                assertFalse(source.isList())
-                assertFalse(source.isLocalDate())
-                assertFalse(source.isLocalDateTime())
-                assertFalse(source.isLocalTime())
-                assertFalse(source.isLong())
-                assertFalse(source.isMap())
-                assertFalse(source.isOffsetDateTime())
-                assertFalse(source.isOffsetTime())
-                assertFalse(source.isShort())
-                assertFalse(source.isSizeInBytes())
-                assertFalse(source.isText())
-                assertFalse(source.isYear())
-                assertFalse(source.isYearMonth())
-                assertFalse(source.isZonedDateTime())
-            }
-            it("throws UnsupportedOperationException for all cast operations") {
-                assertThat({ source.toList() }, throws<UnsupportedOperationException>())
-                assertThat({ source.toMap() }, throws<UnsupportedOperationException>())
-                assertThat({ source.toText() }, throws<UnsupportedOperationException>())
-                assertThat({ source.toBoolean() }, throws<UnsupportedOperationException>())
-                assertThat({ source.toLong() }, throws<UnsupportedOperationException>())
-                assertThat({ source.toDouble() }, throws<UnsupportedOperationException>())
-                assertThat({ source.toInt() }, throws<UnsupportedOperationException>())
             }
         }
         group("source with prefix") {
@@ -475,13 +436,13 @@ object SourceSpec : Spek({
             on("get by a valid path using `getOrNull`") {
                 it("should return the corresponding value") {
                     assertThat(
-                        (source.getOrNull("level1")?.get("level2.key") as ValueSource).value as String,
+                        (source.getOrNull("level1")?.get("level2.key")?.tree as ValueNode).value as String,
                         equalTo("value"))
                     assertThat(
-                        (source.getOrNull("level1.level2")?.get("key") as ValueSource).value as String,
+                        (source.getOrNull("level1.level2")?.get("key")?.tree as ValueNode).value as String,
                         equalTo("value"))
                     assertThat(
-                        (source.getOrNull("level1.level2.key") as ValueSource).value as String,
+                        (source.getOrNull("level1.level2.key")?.tree as ValueNode).value as String,
                         equalTo("value"))
                 }
             }

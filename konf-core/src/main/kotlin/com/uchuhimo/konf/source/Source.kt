@@ -29,7 +29,6 @@ import com.fasterxml.jackson.databind.node.FloatNode
 import com.fasterxml.jackson.databind.node.IntNode
 import com.fasterxml.jackson.databind.node.JsonNodeFactory
 import com.fasterxml.jackson.databind.node.LongNode
-import com.fasterxml.jackson.databind.node.NullNode
 import com.fasterxml.jackson.databind.node.ObjectNode
 import com.fasterxml.jackson.databind.node.ShortNode
 import com.fasterxml.jackson.databind.node.TextNode
@@ -44,18 +43,16 @@ import com.uchuhimo.konf.ContainerNode
 import com.uchuhimo.konf.EmptyNode
 import com.uchuhimo.konf.Feature
 import com.uchuhimo.konf.Item
+import com.uchuhimo.konf.ListNode
+import com.uchuhimo.konf.MapNode
 import com.uchuhimo.konf.MergedMap
+import com.uchuhimo.konf.NullNode
 import com.uchuhimo.konf.Path
 import com.uchuhimo.konf.SizeInBytes
 import com.uchuhimo.konf.TreeNode
 import com.uchuhimo.konf.ValueNode
-import com.uchuhimo.konf.name
-import com.uchuhimo.konf.source.base.StringValueSource
-import com.uchuhimo.konf.source.base.ValueSource
-import com.uchuhimo.konf.source.json.JsonSource
 import com.uchuhimo.konf.toPath
 import com.uchuhimo.konf.toTree
-import com.uchuhimo.konf.unsupported
 import java.lang.reflect.InvocationTargetException
 import java.math.BigDecimal
 import java.math.BigInteger
@@ -71,7 +68,9 @@ import java.time.YearMonth
 import java.time.ZoneOffset
 import java.time.ZonedDateTime
 import java.time.format.DateTimeParseException
+import java.util.ArrayDeque
 import java.util.Date
+import java.util.Queue
 import java.util.SortedMap
 import java.util.SortedSet
 import java.util.TreeMap
@@ -84,6 +83,8 @@ import kotlin.Int
 import kotlin.Long
 import kotlin.Short
 import kotlin.String
+import kotlin.reflect.KClass
+import com.fasterxml.jackson.databind.node.NullNode as JacksonNullNode
 
 /**
  * Source to provide values for config.
@@ -114,12 +115,17 @@ interface Source {
     val info: SourceInfo
 
     /**
+     * a tree node that represents internal structure of this source.
+     */
+    val tree: TreeNode
+
+    /**
      * Whether this source contains value(s) in specified path or not.
      *
      * @param path item path
      * @return `true` if this source contains value(s) in specified path, `false` otherwise
      */
-    operator fun contains(path: Path): Boolean
+    operator fun contains(path: Path): Boolean = path in tree
 
     /**
      * Returns sub-source in specified path if this source contains value(s) in specified path,
@@ -129,7 +135,15 @@ interface Source {
      * @return sub-source in specified path if this source contains value(s) in specified path,
      * `null` otherwise
      */
-    fun getOrNull(path: Path): Source?
+    fun getOrNull(path: Path): Source? {
+        if (path.isEmpty()) {
+            return this
+        } else {
+            return tree.getOrNull(path)?.let {
+                Source(info = info, tree = it)
+            }
+        }
+    }
 
     /**
      * Returns sub-source in specified path.
@@ -181,37 +195,14 @@ interface Source {
         return if (prefix.isEmpty()) {
             this
         } else {
-            object : Source {
-                override val info: SourceInfo = this@Source.info.with("prefix" to prefix.name)
-
-                override fun contains(path: Path): Boolean {
-                    return if (prefix.size >= path.size) {
-                        prefix.subList(0, path.size) == path
-                    } else {
-                        if (path.subList(0, prefix.size) == prefix) {
-                            this@Source.contains(path.subList(prefix.size, path.size))
-                        } else {
-                            false
-                        }
-                    }
-                }
-
-                override fun getOrNull(path: Path): Source? {
-                    return if (prefix.size >= path.size) {
-                        if (prefix.subList(0, path.size) == path) {
-                            this@Source.withPrefix(prefix.subList(path.size, prefix.size))
-                        } else {
-                            null
-                        }
-                    } else {
-                        if (path.subList(0, prefix.size) == prefix) {
-                            this@Source.getOrNull(path.subList(prefix.size, path.size))
-                        } else {
-                            null
-                        }
-                    }
-                }
+            var prefixedTree = tree
+            for (key in prefix.asReversed()) {
+                prefixedTree = ContainerNode(mutableMapOf(key to prefixedTree))
             }
+            Source(
+                info = this@Source.info,
+                tree = prefixedTree
+            )
         }
     }
 
@@ -237,6 +228,9 @@ interface Source {
             "facade" to this@Source.description,
             "fallback" to fallback.description
         )
+
+        override val tree: TreeNode
+            get() = TODO("not implemented") // To change initializer of created properties use File | Settings | File Templates.
 
         override fun contains(path: Path): Boolean =
             this@Source.contains(path) || fallback.contains(path)
@@ -280,400 +274,17 @@ interface Source {
      */
     fun isEnabled(feature: Feature): Boolean = feature.enabledByDefault
 
-    /**
-     * Whether this source contains a null value or not.
-     *
-     * @return `true` if this source contains a null value, `false` otherwise
-     */
-    fun isNull(): Boolean = false
-
-    /**
-     * Whether this source contains a list of values or not.
-     *
-     * @return `true` if this source contains a list of values, `false` otherwise
-     */
-    fun isList(): Boolean = false
-
-    /**
-     * Get a list of sub-sources from this source.
-     *
-     * @return a list of sub-sources
-     */
-    fun toList(): List<Source> = unsupported()
-
-    /**
-     * Whether this source contains multiple values mapping from corresponding paths or not.
-     *
-     * @return `true` if this source contains multiple values mapping from corresponding paths,
-     * `false` otherwise
-     */
-    fun isMap(): Boolean = false
-
-    /**
-     * Get a map from paths to corresponding values from this source.
-     *
-     * @return a map from paths to corresponding values
-     */
-    fun toMap(): Map<String, Source> = unsupported()
-
-    /**
-     * Whether this source contains a single value with type [String] or not.
-     *
-     * @return `true` if this source contains a single value with type [String], `false` otherwise
-     */
-    fun isText(): Boolean = false
-
-    /**
-     * Get a [String] value from this source.
-     *
-     * @return a [String] value
-     */
-    fun toText(): String = unsupported()
-
-    /**
-     * Whether this source contains a single value with type [Boolean] or not.
-     *
-     * @return `true` if this source contains a single value with type [Boolean], `false` otherwise
-     */
-    fun isBoolean(): Boolean = false
-
-    /**
-     * Get a [Boolean] value from this source.
-     *
-     * @return a [Boolean] value
-     */
-    fun toBoolean(): Boolean = unsupported()
-
-    /**
-     * Whether this source contains a single value with type [Long] or not.
-     *
-     * @return `true` if this source contains a single value with type [Long], `false` otherwise
-     */
-    fun isLong(): Boolean = false
-
-    /**
-     * Get a [Long] value from this source.
-     *
-     * @return a [Long] value
-     */
-    fun toLong(): Long = toInt().toLong()
-
-    /**
-     * Whether this source contains a single value with type [Double] or not.
-     *
-     * @return `true` if this source contains a single value with type [Double], `false` otherwise
-     */
-    fun isDouble(): Boolean = false
-
-    /**
-     * Get a [Double] value from this source.
-     *
-     * @return a [Double] value
-     */
-    fun toDouble(): Double = unsupported()
-
-    /**
-     * Whether this source contains a single value with type [Int] or not.
-     *
-     * @return `true` if this source contains a single value with type [Int], `false` otherwise
-     */
-    fun isInt(): Boolean = false
-
-    /**
-     * Get a [Int] value from this source.
-     *
-     * @return a [Int] value
-     */
-    fun toInt(): Int = unsupported()
-
-    /**
-     * Whether this source contains a single value with type [Short] or not.
-     *
-     * @return `true` if this source contains a single value with type [Short], `false` otherwise
-     */
-    fun isShort(): Boolean = false
-
-    /**
-     * Get a [Short] value from this source.
-     *
-     * @return a [Short] value
-     */
-    fun toShort(): Short = toInt().also { value ->
-        if (value < Short.MIN_VALUE || value > Short.MAX_VALUE) {
-            throw ParseException("$value is out of range of Short")
-        }
-    }.toShort()
-
-    /**
-     * Whether this source contains a single value with type [Byte] or not.
-     *
-     * @return `true` if this source contains a single value with type [Byte], `false` otherwise
-     */
-    fun isByte(): Boolean = false
-
-    /**
-     * Get a [Byte] value from this source.
-     *
-     * @return a [Byte] value
-     */
-    fun toByte(): Byte = toInt().also { value ->
-        if (value < Byte.MIN_VALUE || value > Byte.MAX_VALUE) {
-            throw ParseException("$value is out of range of Byte")
-        }
-    }.toByte()
-
-    /**
-     * Whether this source contains a single value with type [Float] or not.
-     *
-     * @return `true` if this source contains a single value with type [Float], `false` otherwise
-     */
-    fun isFloat(): Boolean = false
-
-    /**
-     * Get a [Float] value from this source.
-     *
-     * @return a [Float] value
-     */
-    fun toFloat(): Float = toDouble().toFloat()
-
-    /**
-     * Whether this source contains a single value with type [Char] or not.
-     *
-     * @return `true` if this source contains a single value with type [Char], `false` otherwise
-     */
-    fun isChar(): Boolean = false
-
-    /**
-     * Get a [Char] value from this source.
-     *
-     * @return a [Char] value
-     */
-    fun toChar(): Char {
-        val value = toText()
-        if (value.length != 1) {
-            throw WrongTypeException(this, "String", "Char")
-        }
-        return value[0]
-    }
-
-    /**
-     * Whether this source contains a single value with type [BigInteger] or not.
-     *
-     * @return `true` if this source contains a single value with type [BigInteger], `false` otherwise
-     */
-    fun isBigInteger(): Boolean = false
-
-    /**
-     * Get a [BigInteger] value from this source.
-     *
-     * @return a [BigInteger] value
-     */
-    fun toBigInteger(): BigInteger = BigInteger.valueOf(toLong())
-
-    /**
-     * Whether this source contains a single value with type [BigDecimal] or not.
-     *
-     * @return `true` if this source contains a single value with type [BigDecimal], `false` otherwise
-     */
-    fun isBigDecimal(): Boolean = false
-
-    /**
-     * Get a [BigDecimal] value from this source.
-     *
-     * @return a [BigDecimal] value
-     */
-    fun toBigDecimal(): BigDecimal = BigDecimal.valueOf(toDouble())
-
-    private inline fun <T> tryParse(block: () -> T): T {
-        try {
-            return block()
-        } catch (cause: DateTimeParseException) {
-            throw ParseException("fail to parse \"${toText()}\" as data time", cause)
+    companion object {
+        operator fun invoke(info: SourceInfo = SourceInfo(), tree: TreeNode = ContainerNode.empty()): Source {
+            return BaseSource(info, tree)
         }
     }
-
-    /**
-     * Whether this source contains a single value with type [OffsetTime] or not.
-     *
-     * @return `true` if this source contains a single value with type [OffsetTime], `false` otherwise
-     */
-    fun isOffsetTime(): Boolean = false
-
-    /**
-     * Get a [OffsetTime] value from this source.
-     *
-     * @return a [OffsetTime] value
-     */
-    fun toOffsetTime(): OffsetTime = tryParse { OffsetTime.parse(toText()) }
-
-    /**
-     * Whether this source contains a single value with type [OffsetDateTime] or not.
-     *
-     * @return `true` if this source contains a single value with type [OffsetDateTime], `false` otherwise
-     */
-    fun isOffsetDateTime(): Boolean = false
-
-    /**
-     * Get a [OffsetDateTime] value from this source.
-     *
-     * @return a [OffsetDateTime] value
-     */
-    fun toOffsetDateTime(): OffsetDateTime = tryParse { OffsetDateTime.parse(toText()) }
-
-    /**
-     * Whether this source contains a single value with type [ZonedDateTime] or not.
-     *
-     * @return `true` if this source contains a single value with type [ZonedDateTime], `false` otherwise
-     */
-    fun isZonedDateTime(): Boolean = false
-
-    /**
-     * Get a [ZonedDateTime] value from this source.
-     *
-     * @return a [ZonedDateTime] value
-     */
-    fun toZonedDateTime(): ZonedDateTime = tryParse { ZonedDateTime.parse(toText()) }
-
-    /**
-     * Whether this source contains a single value with type [LocalDate] or not.
-     *
-     * @return `true` if this source contains a single value with type [LocalDate], `false` otherwise
-     */
-    fun isLocalDate(): Boolean = false
-
-    /**
-     * Get a [LocalDate] value from this source.
-     *
-     * @return a [LocalDate] value
-     */
-    fun toLocalDate(): LocalDate = tryParse { LocalDate.parse(toText()) }
-
-    /**
-     * Whether this source contains a single value with type [LocalTime] or not.
-     *
-     * @return `true` if this source contains a single value with type [LocalTime], `false` otherwise
-     */
-    fun isLocalTime(): Boolean = false
-
-    /**
-     * Get a [LocalTime] value from this source.
-     *
-     * @return a [LocalTime] value
-     */
-    fun toLocalTime(): LocalTime = tryParse { LocalTime.parse(toText()) }
-
-    /**
-     * Whether this source contains a single value with type [LocalDateTime] or not.
-     *
-     * @return `true` if this source contains a single value with type [LocalDateTime], `false` otherwise
-     */
-    fun isLocalDateTime(): Boolean = false
-
-    /**
-     * Get a [LocalDateTime] value from this source.
-     *
-     * @return a [LocalDateTime] value
-     */
-    fun toLocalDateTime(): LocalDateTime = tryParse { LocalDateTime.parse(toText()) }
-
-    /**
-     * Whether this source contains a single value with type [Date] or not.
-     *
-     * @return `true` if this source contains a single value with type [Date], `false` otherwise
-     */
-    fun isDate(): Boolean = false
-
-    /**
-     * Get a [Date] value from this source.
-     *
-     * @return a [Date] value
-     */
-    fun toDate(): Date {
-        return try {
-            Date.from(tryParse { Instant.parse(toText()) })
-        } catch (e: ParseException) {
-            try {
-                Date.from(tryParse {
-                    LocalDateTime.parse(toText())
-                }.toInstant(ZoneOffset.UTC))
-            } catch (e: ParseException) {
-                Date.from(tryParse {
-                    LocalDate.parse(toText())
-                }.atStartOfDay().toInstant(ZoneOffset.UTC))
-            }
-        }
-    }
-
-    /**
-     * Whether this source contains a single value with type [Year] or not.
-     *
-     * @return `true` if this source contains a single value with type [Year], `false` otherwise
-     */
-    fun isYear(): Boolean = false
-
-    /**
-     * Get a [Year] value from this source.
-     *
-     * @return a [Year] value
-     */
-    fun toYear(): Year = tryParse { Year.parse(toText()) }
-
-    /**
-     * Whether this source contains a single value with type [YearMonth] or not.
-     *
-     * @return `true` if this source contains a single value with type [YearMonth], `false` otherwise
-     */
-    fun isYearMonth(): Boolean = false
-
-    /**
-     * Get a [YearMonth] value from this source.
-     *
-     * @return a [YearMonth] value
-     */
-    fun toYearMonth(): YearMonth = tryParse { YearMonth.parse(toText()) }
-
-    /**
-     * Whether this source contains a single value with type [Instant] or not.
-     *
-     * @return `true` if this source contains a single value with type [Instant], `false` otherwise
-     */
-    fun isInstant(): Boolean = false
-
-    /**
-     * Get a [Instant] value from this source.
-     *
-     * @return a [Instant] value
-     */
-    fun toInstant(): Instant = tryParse { Instant.parse(toText()) }
-
-    /**
-     * Whether this source contains a single value with type [Duration] or not.
-     *
-     * @return `true` if this source contains a single value with type [Duration], `false` otherwise
-     */
-    fun isDuration(): Boolean = false
-
-    /**
-     * Get a [Duration] value from this source.
-     *
-     * @return a [Duration] value
-     */
-    fun toDuration(): Duration = toText().toDuration()
-
-    /**
-     * Whether this source contains a single value with type [SizeInBytes] or not.
-     *
-     * @return `true` if this source contains a single value with type [SizeInBytes], `false` otherwise
-     */
-    fun isSizeInBytes(): Boolean = false
-
-    /**
-     * Get a [SizeInBytes] value from this source.
-     *
-     * @return a [SizeInBytes] value
-     */
-    fun toSizeInBytes(): SizeInBytes = SizeInBytes.parse(toText())
 }
+
+open class BaseSource(
+    override val info: SourceInfo = SourceInfo(),
+    override val tree: TreeNode = ContainerNode.empty()
+) : Source
 
 /**
  * Information of source for debugging.
@@ -706,6 +317,19 @@ class FeaturedSource(
     override fun isEnabled(feature: Feature): Boolean {
         return if (feature == this.feature) isEnabled else super.isEnabled(feature)
     }
+}
+
+inline fun <reified T> Source.asValue(): T {
+    return asValueOf(T::class.java) as T
+}
+
+fun Source.asValueOf(type: Class<*>): Any {
+    return tree.castOrNull(this, type)
+        ?: throw WrongTypeException(
+            this,
+            if (tree is ValueNode) (tree as ValueNode).value::class.java.simpleName else "Unknown",
+            type.simpleName
+        )
 }
 
 internal fun Any?.toCompatibleValue(mapper: ObjectMapper): Any {
@@ -768,18 +392,18 @@ internal fun Config.loadItem(item: Item<*>, path: Path, source: Source): Boolean
         } else {
             path
         }
-        val itemSource = source.getOrNull(uniformPath)
-        return if (itemSource != null) {
+        val itemNode = source.tree.getOrNull(uniformPath)
+        if (itemNode != null) {
             if (item.nullable &&
-                (itemSource.isNull() ||
-                    (itemSource.isText() && itemSource.toText() == "null"))) {
+                ((itemNode is NullNode) ||
+                    (itemNode is ValueNode && itemNode.value == "null"))) {
                 rawSet(item, null)
             } else {
-                rawSet(item, itemSource.toValue(item.type, mapper))
+                rawSet(item, itemNode.toValue(source, item.type, mapper))
             }
-            true
+            return true
         } else {
-            false
+            return false
         }
     } catch (cause: SourceException) {
         throw LoadException(path, cause)
@@ -794,7 +418,7 @@ internal fun load(config: Config, source: Source): Config {
             }
             if (source.isEnabled(Feature.FAIL_ON_UNKNOWN_PATH) ||
                 config.isEnabled(Feature.FAIL_ON_UNKNOWN_PATH)) {
-                val treeFromSource = source.toTree()
+                val treeFromSource = source.tree
                 check(!treeFromSource.isLeaf())
                 val treeFromConfig = config.toTree()
                 val diffTree = treeFromSource - treeFromConfig
@@ -821,21 +445,251 @@ internal fun Config.loadBy(
     }
 }
 
-/**
- * Convert the source to a tree node.
- *
- * @return a tree node
- */
-fun Source.toTree(): TreeNode {
-    return if (isMap()) {
-        ContainerNode(toMap().mapValues { it.value.toTree() })
+private inline fun <reified T> TreeNode.cast(source: Source): T {
+    if (this !is ValueNode) {
+        throw WrongTypeException(source, "Unknown", T::class.java.simpleName)
+    }
+    if (T::class.java.isInstance(value)) {
+        return value as T
     } else {
-        ValueNode()
+        throw WrongTypeException(source, value::class.java.simpleName, T::class.java.simpleName)
     }
 }
 
-private fun Source.toValue(type: JavaType, mapper: ObjectMapper): Any {
-    if (this is ValueSource &&
+internal fun stringToBoolean(value: String): Boolean {
+    return when {
+        value.toLowerCase() == "true" -> true
+        value.toLowerCase() == "false" -> false
+        else -> throw ParseException("$value cannot be parsed to a boolean")
+    }
+}
+
+internal fun shortToByte(value: Short): Byte {
+    if (value < Byte.MIN_VALUE || value > Byte.MAX_VALUE) {
+        throw ParseException("$value cannot be parsed to a byte")
+    }
+    return value.toByte()
+}
+
+internal fun intToShort(value: Int): Short {
+    if (value < Short.MIN_VALUE || value > Short.MAX_VALUE) {
+        throw ParseException("$value cannot be parsed to a short")
+    }
+    return value.toShort()
+}
+
+internal fun longToInt(value: Long): Int {
+    if (value < Int.MIN_VALUE || value > Int.MAX_VALUE) {
+        throw ParseException("$value cannot be parsed to an int")
+    }
+    return value.toInt()
+}
+
+internal fun stringToChar(value: String): Char {
+    if (value.length != 1) {
+        throw ParseException("$value cannot be parsed to a char")
+    }
+    return value[0]
+}
+
+private inline fun <T> String.tryParse(block: (String) -> T): T {
+    try {
+        return block(this)
+    } catch (cause: DateTimeParseException) {
+        throw ParseException("fail to parse \"$this\" as data time", cause)
+    }
+}
+
+internal fun stringToDate(value: String): Date {
+    return try {
+        Date.from(value.tryParse { Instant.parse(it) })
+    } catch (e: ParseException) {
+        try {
+            Date.from(value.tryParse {
+                LocalDateTime.parse(it)
+            }.toInstant(ZoneOffset.UTC))
+        } catch (e: ParseException) {
+            Date.from(value.tryParse {
+                LocalDate.parse(it)
+            }.atStartOfDay().toInstant(ZoneOffset.UTC))
+        }
+    }
+}
+
+private fun <In, Out> ((In) -> Out).asPromote(): PromoteFunc<*> {
+    return { value, _ ->
+        @Suppress("UNCHECKED_CAST")
+        this(value as In)
+    }
+}
+
+private fun <T> tryParseAsPromote(block: (String) -> T): PromoteFunc<*> {
+    return { value, _ ->
+        try {
+            block(value as String)
+        } catch (cause: Exception) {
+            if (cause is DateTimeParseException || cause is NumberFormatException) {
+                throw ParseException("fail to parse \"$value\" as data time", cause)
+            } else {
+                throw cause
+            }
+        }
+    }
+}
+
+typealias PromoteFunc<Out> = (Any, Source) -> Out
+
+private val promoteMap: MutableMap<KClass<*>, List<Pair<KClass<*>, PromoteFunc<*>>>> = mutableMapOf(
+    String::class to listOf(
+        Boolean::class to ::stringToBoolean.asPromote(),
+        Char::class to ::stringToChar.asPromote(),
+
+        Byte::class to tryParseAsPromote { value: String -> value.toByte() },
+        Short::class to tryParseAsPromote { value: String -> value.toShort() },
+        Int::class to tryParseAsPromote { value: String -> value.toInt() },
+        Long::class to tryParseAsPromote { value: String -> value.toLong() },
+        Float::class to tryParseAsPromote { value: String -> value.toFloat() },
+        Double::class to tryParseAsPromote { value: String -> value.toDouble() },
+        BigInteger::class to tryParseAsPromote { value: String -> value.toBigInteger() },
+        BigDecimal::class to tryParseAsPromote { value: String -> value.toBigDecimal() },
+
+        OffsetTime::class to tryParseAsPromote { OffsetTime.parse(it) },
+        OffsetDateTime::class to tryParseAsPromote { OffsetDateTime.parse(it) },
+        ZonedDateTime::class to tryParseAsPromote { ZonedDateTime.parse(it) },
+        LocalDate::class to tryParseAsPromote { LocalDate.parse(it) },
+        LocalTime::class to tryParseAsPromote { LocalTime.parse(it) },
+        LocalDateTime::class to tryParseAsPromote { LocalDateTime.parse(it) },
+        Year::class to tryParseAsPromote { Year.parse(it) },
+        YearMonth::class to tryParseAsPromote { YearMonth.parse(it) },
+        Instant::class to tryParseAsPromote { Instant.parse(it) },
+
+        Date::class to ::stringToDate.asPromote(),
+        Duration::class to String::toDuration.asPromote(),
+
+        SizeInBytes::class to { value: String -> SizeInBytes.parse(value) }.asPromote()
+    ),
+    Char::class to listOf(
+        String::class to { value: Char -> "$value" }.asPromote()
+    ),
+    Byte::class to listOf(
+        Short::class to Byte::toShort.asPromote(),
+        Int::class to Byte::toInt.asPromote(),
+        Long::class to Byte::toLong.asPromote(),
+        Float::class to Byte::toFloat.asPromote(),
+        Double::class to Byte::toDouble.asPromote()
+    ),
+    Short::class to listOf(
+        Byte::class to ::shortToByte.asPromote(),
+        Int::class to Short::toInt.asPromote(),
+        Long::class to Short::toLong.asPromote(),
+        Float::class to Short::toFloat.asPromote(),
+        Double::class to Short::toDouble.asPromote()
+    ),
+    Int::class to listOf(
+        Short::class to ::intToShort.asPromote(),
+        Long::class to Int::toLong.asPromote(),
+        Float::class to Int::toFloat.asPromote(),
+        Double::class to Int::toDouble.asPromote()
+    ),
+    Long::class to listOf(
+        Int::class to ::longToInt.asPromote(),
+        Float::class to Long::toFloat.asPromote(),
+        Double::class to Long::toDouble.asPromote(),
+        BigInteger::class to { value: Long -> BigInteger.valueOf(value) }.asPromote()
+    ),
+    Float::class to listOf(
+        Double::class to Float::toDouble.asPromote()
+    ),
+    Double::class to listOf(
+        Float::class to Double::toFloat.asPromote(),
+        BigDecimal::class to { value: Double -> BigDecimal.valueOf(value) }.asPromote()
+    ),
+    Set::class to listOf(
+        List::class to { value: Set<*> -> value.toList() }.asPromote()
+    )
+)
+
+private val promoteMatchers: MutableList<Pair<(KClass<*>) -> Boolean, List<Pair<KClass<*>, PromoteFunc<*>>>>> = mutableListOf(
+    { type: KClass<*> -> type is Array<*> } to listOf(
+        List::class to { value: Array<*> -> value.asList() }.asPromote()
+    )
+)
+
+private fun walkPromoteMap(
+    valueType: KClass<*>,
+    targetType: KClass<*>,
+    tasks: Queue<() -> PromoteFunc<*>?>,
+    visitedTypes: MutableSet<KClass<*>>,
+    previousPromoteFunc: PromoteFunc<*>? = null
+): PromoteFunc<*>? {
+    if (valueType in visitedTypes) {
+        return null
+    }
+    visitedTypes.add(valueType)
+    var promotedTypes = promoteMap[valueType]
+    if (promotedTypes == null) {
+        for ((matcher, types) in promoteMatchers) {
+            if (matcher(valueType)) {
+                promotedTypes = types
+                break
+            }
+        }
+    }
+    if (promotedTypes == null || promotedTypes.isEmpty()) {
+        return null
+    }
+    for ((promotedType, promoteFunc) in promotedTypes) {
+        val currentPromoteFunc: PromoteFunc<*> = if (previousPromoteFunc != null) {
+            { value, source -> promoteFunc(previousPromoteFunc(value, source)!!, source) }
+        } else {
+            promoteFunc
+        }
+        if (promotedType == targetType) {
+            return currentPromoteFunc
+        } else {
+            tasks.offer {
+                walkPromoteMap(promotedType, targetType, tasks, visitedTypes, currentPromoteFunc)
+            }
+        }
+    }
+    return null
+}
+
+private fun getPromoteFunc(valueType: KClass<*>, targetType: KClass<*>): PromoteFunc<*>? {
+    val tasks = ArrayDeque<() -> PromoteFunc<*>?>()
+    tasks.offer {
+        walkPromoteMap(valueType, targetType, tasks, mutableSetOf())
+    }
+    while (tasks.isNotEmpty()) {
+        val func = tasks.poll()()
+        if (func != null) {
+            return func
+        }
+    }
+    return null
+}
+
+private fun <T : Any> TreeNode.castOrNull(source: Source, clazz: Class<T>): T? {
+    if (this is ValueNode) {
+        if (clazz.kotlin.javaObjectType.isInstance(value)) {
+            @Suppress("UNCHECKED_CAST")
+            return value as T
+        } else {
+            val promoteFunc = getPromoteFunc(value::class, clazz.kotlin)
+            if (promoteFunc != null) {
+                @Suppress("UNCHECKED_CAST")
+                return promoteFunc(value, source) as T
+            } else {
+                return null
+            }
+        }
+    } else {
+        return null
+    }
+}
+
+private fun TreeNode.toValue(source: Source, type: JavaType, mapper: ObjectMapper): Any {
+    if (this is ValueNode &&
         type == TypeFactory.defaultInstance().constructType(value::class.java)) {
         return value
     }
@@ -844,7 +698,7 @@ private fun Source.toValue(type: JavaType, mapper: ObjectMapper): Any {
             val clazz = type.rawClass
             if (type.isEnumType) {
                 val valueOfMethod = clazz.getMethod("valueOf", String::class.java)
-                val name = toText()
+                val name: String = cast(source)
                 try {
                     return valueOfMethod.invoke(null, name)
                 } catch (cause: InvocationTargetException) {
@@ -852,49 +706,24 @@ private fun Source.toValue(type: JavaType, mapper: ObjectMapper): Any {
                         "enum type $clazz has no constant with name $name", cause)
                 }
             } else {
-                return when (clazz) {
-                    Boolean::class.javaObjectType, Boolean::class.java -> toBoolean()
-                    Int::class.javaObjectType, Int::class.java -> toInt()
-                    Short::class.javaObjectType, Short::class.java -> toShort()
-                    Byte::class.javaObjectType, Byte::class.java -> toByte()
-                    Long::class.javaObjectType, Long::class.java -> toLong()
-                    BigInteger::class.java -> toBigInteger()
-                    Double::class.javaObjectType, Double::class.java -> toDouble()
-                    Float::class.javaObjectType, Float::class.java -> toFloat()
-                    BigDecimal::class.java -> toBigDecimal()
-                    Char::class.javaObjectType, Char::class.java -> toChar()
-                    String::class.java -> toText()
-                    OffsetTime::class.java -> toOffsetTime()
-                    OffsetDateTime::class.java -> toOffsetDateTime()
-                    ZonedDateTime::class.java -> toZonedDateTime()
-                    LocalDate::class.java -> toLocalDate()
-                    LocalTime::class.java -> toLocalTime()
-                    LocalDateTime::class.java -> toLocalDateTime()
-                    Date::class.java -> toDate()
-                    Year::class.java -> toYear()
-                    YearMonth::class.java -> toYearMonth()
-                    Instant::class.java -> toInstant()
-                    Duration::class.java -> toDuration()
-                    SizeInBytes::class.java -> toSizeInBytes()
-                    else -> {
-                        if (this is ValueSource && clazz == value.javaClass) {
-                            value
-                        } else {
-                            try {
-                                mapper.readValue<Any>(
-                                    TreeTraversingParser(toJsonNode(), mapper),
-                                    type)
-                            } catch (cause: JsonProcessingException) {
-                                throw ObjectMappingException(this, clazz, cause)
-                            }
-                        }
+                val value = castOrNull(source, clazz)
+                if (value != null) {
+                    return value
+                } else {
+                    try {
+                        return mapper.readValue<Any>(
+                            TreeTraversingParser(toJsonNode(source), mapper),
+                            type
+                        )
+                    } catch (cause: JsonProcessingException) {
+                        throw ObjectMappingException(source, clazz, cause)
                     }
                 }
             }
         }
         is ArrayType -> {
             val clazz = type.contentType.rawClass
-            val list = toListValue(type.contentType, mapper)
+            val list = toListValue(source, type.contentType, mapper)
             if (!clazz.isPrimitive) {
                 val array = java.lang.reflect.Array.newInstance(clazz, list.size) as Array<*>
                 @Suppress("PLATFORM_CLASS_MAPPED_TO_KOTLIN")
@@ -910,7 +739,7 @@ private fun Source.toValue(type: JavaType, mapper: ObjectMapper): Any {
                     Double::class.java -> (list as List<Double>).toDoubleArray()
                     Float::class.java -> (list as List<Float>).toFloatArray()
                     Char::class.java -> (list as List<Char>).toCharArray()
-                    else -> throw UnsupportedTypeException(this, clazz)
+                    else -> throw UnsupportedTypeException(source, clazz)
                 }
             }
         }
@@ -918,10 +747,10 @@ private fun Source.toValue(type: JavaType, mapper: ObjectMapper): Any {
             if (type.isTrueCollectionType) {
                 @Suppress("UNCHECKED_CAST")
                 return (implOf(type.rawClass).getDeclaredConstructor().newInstance() as MutableCollection<Any>).apply {
-                    addAll(toListValue(type.contentType, mapper))
+                    addAll(toListValue(source, type.contentType, mapper) as List<Any>)
                 }
             } else {
-                throw UnsupportedTypeException(this, type.rawClass)
+                throw UnsupportedTypeException(source, type.rawClass)
             }
         }
         is MapLikeType -> {
@@ -929,71 +758,82 @@ private fun Source.toValue(type: JavaType, mapper: ObjectMapper): Any {
                 if (type.keyType.rawClass == String::class.java) {
                     @Suppress("UNCHECKED_CAST")
                     return (implOf(type.rawClass).getDeclaredConstructor().newInstance() as MutableMap<String, Any>).apply {
-                        putAll(this@toValue.toMap().mapValues { (_, value) ->
-                            value.toValue(type.contentType, mapper)
+                        putAll(this@toValue.toMap(source).mapValues { (_, value) ->
+                            value.toValue(source, type.contentType, mapper)
                         })
                     }
                 } else {
                     throw UnsupportedMapKeyException(type.keyType.rawClass)
                 }
             } else {
-                throw UnsupportedTypeException(this, type.rawClass)
+                throw UnsupportedTypeException(source, type.rawClass)
             }
         }
-        else -> throw UnsupportedTypeException(this, type.rawClass)
+        else -> throw UnsupportedTypeException(source, type.rawClass)
     }
 }
 
-private fun Source.toListValue(type: JavaType, mapper: ObjectMapper) =
-    toList().map { it.toValue(type, mapper) }
-
-private fun Source.toJsonNode(canBeList: Boolean = true): JsonNode {
-    if (this is JsonSource) {
-        return this.node
-    } else {
-        return when {
-            isNull() -> NullNode.instance
-            isList() && canBeList ->
-                if (this is StringValueSource && !isRegularList()) {
-                    toJsonNode(canBeList = false)
-                } else {
-                    ArrayNode(
-                        JsonNodeFactory.instance,
-                        toList().map {
-                            it.toJsonNode(canBeList = canBeList)
-                        })
-                }
-            isMap() -> ObjectNode(
-                JsonNodeFactory.instance,
-                toMap().mapValues { (_, value) ->
-                    value.toJsonNode(canBeList = canBeList)
-                }
-            )
-            isBoolean() -> BooleanNode.valueOf(toBoolean())
-            isLong() -> LongNode.valueOf(toLong())
-            isInt() -> IntNode.valueOf(toInt())
-            isShort() -> ShortNode.valueOf(toShort())
-            isByte() -> ShortNode.valueOf(toByte().toShort())
-            isBigInteger() -> BigIntegerNode.valueOf(toBigInteger())
-            isDouble() -> DoubleNode.valueOf(toDouble())
-            isFloat() -> FloatNode.valueOf(toFloat())
-            isChar() -> TextNode.valueOf(toChar().toString())
-            isBigDecimal() -> DecimalNode.valueOf(toBigDecimal())
-            isText() -> TextNode.valueOf(toText())
-            isOffsetTime() -> TextNode.valueOf(toOffsetTime().toString())
-            isOffsetDateTime() -> TextNode.valueOf(toOffsetDateTime().toString())
-            isZonedDateTime() -> TextNode.valueOf(toZonedDateTime().toString())
-            isLocalDate() -> TextNode.valueOf(toLocalDate().toString())
-            isLocalTime() -> TextNode.valueOf(toLocalTime().toString())
-            isLocalDateTime() -> TextNode.valueOf(toLocalDateTime().toString())
-            isDate() -> TextNode.valueOf(toDate().toInstant().toString())
-            isYear() -> TextNode.valueOf(toYear().toString())
-            isYearMonth() -> TextNode.valueOf(toYearMonth().toString())
-            isInstant() -> TextNode.valueOf(toInstant().toString())
-            isDuration() -> TextNode.valueOf(toDuration().toString())
-            isSizeInBytes() -> LongNode.valueOf(toSizeInBytes().bytes)
-            else -> throw ParseException("fail to cast source $description to JSON node")
+private fun TreeNode.toListValue(source: Source, type: JavaType, mapper: ObjectMapper): List<*> {
+    return when (this) {
+        is ListNode -> list.map { it.toValue(source, type, mapper) }
+        is ValueNode -> {
+            castOrNull(source, List::class.java)
+                ?: throw WrongTypeException(source, value::class.java.simpleName, List::class.java.simpleName)
         }
+        else -> throw WrongTypeException(source, "Unknown", List::class.java.simpleName)
+    }
+}
+
+private fun TreeNode.toMap(source: Source): Map<String, TreeNode> {
+    return when (this) {
+        is MapNode -> children
+        else -> throw WrongTypeException(source, "Unknown", Map::class.java.simpleName)
+    }
+}
+
+private fun TreeNode.toJsonNode(source: Source): JsonNode {
+    return when (this) {
+        is NullNode -> JacksonNullNode.instance
+        is ValueNode -> {
+            when (value) {
+                is Boolean -> BooleanNode.valueOf(value as Boolean)
+                is Long -> LongNode.valueOf(value as Long)
+                is Int -> IntNode.valueOf(value as Int)
+                is Short -> ShortNode.valueOf(value as Short)
+                is Byte -> ShortNode.valueOf((value as Byte).toShort())
+                is BigInteger -> BigIntegerNode.valueOf(value as BigInteger)
+                is Double -> DoubleNode.valueOf(value as Double)
+                is Float -> FloatNode.valueOf(value as Float)
+                is Char -> TextNode.valueOf(value.toString())
+                is BigDecimal -> DecimalNode.valueOf(value as BigDecimal)
+                is String -> TextNode.valueOf(value as String)
+                is OffsetTime -> TextNode.valueOf(value.toString())
+                is OffsetDateTime -> TextNode.valueOf(value.toString())
+                is ZonedDateTime -> TextNode.valueOf(value.toString())
+                is LocalDate -> TextNode.valueOf(value.toString())
+                is LocalTime -> TextNode.valueOf(value.toString())
+                is LocalDateTime -> TextNode.valueOf(value.toString())
+                is Date -> TextNode.valueOf((value as Date).toInstant().toString())
+                is Year -> TextNode.valueOf(value.toString())
+                is YearMonth -> TextNode.valueOf(value.toString())
+                is Instant -> TextNode.valueOf(value.toString())
+                is Duration -> TextNode.valueOf(value.toString())
+                is SizeInBytes -> LongNode.valueOf((value as SizeInBytes).bytes)
+                else -> throw ParseException("fail to cast source ${source.description} to JSON node")
+            }
+        }
+        is ListNode -> ArrayNode(
+            JsonNodeFactory.instance,
+            list.map {
+                it.toJsonNode(source)
+            })
+        is MapNode -> ObjectNode(
+            JsonNodeFactory.instance,
+            children.mapValues { (_, value) ->
+                value.toJsonNode(source)
+            }
+        )
+        else -> throw ParseException("fail to cast source ${source.description} to JSON node")
     }
 }
 
@@ -1005,4 +845,24 @@ private fun implOf(clazz: Class<*>): Class<*> =
         Map::class.java -> HashMap::class.java
         SortedMap::class.java -> TreeMap::class.java
         else -> clazz
+    }
+
+fun Any.asTree(): TreeNode =
+    when (this) {
+        is TreeNode -> this
+        is Source -> this.tree
+        is List<*> -> @Suppress("UNCHECKED_CAST")
+        (ListSourceNode((this as List<Any>).map { it.asTree() }))
+        is Map<*, *> -> @Suppress("UNCHECKED_CAST")
+        (ContainerNode((this as Map<String, Any>).mapValues { (_, value) ->
+            value.asTree()
+        }.toMutableMap()))
+        else -> ValueSourceNode(this)
+    }
+
+fun Any.asSource(type: String = "", info: SourceInfo = SourceInfo()): Source =
+    when (this) {
+        is Source -> this
+        is TreeNode -> Source(info.with("type" to type), this)
+        else -> Source(info.with("type" to type), asTree())
     }

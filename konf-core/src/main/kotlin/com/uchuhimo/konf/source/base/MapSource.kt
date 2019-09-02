@@ -17,9 +17,7 @@
 package com.uchuhimo.konf.source.base
 
 import com.uchuhimo.konf.Config
-import com.uchuhimo.konf.Path
 import com.uchuhimo.konf.notEmptyOr
-import com.uchuhimo.konf.source.Source
 import com.uchuhimo.konf.source.SourceInfo
 
 /**
@@ -29,34 +27,7 @@ open class MapSource(
     val map: Map<String, Any>,
     type: String = "",
     info: SourceInfo = SourceInfo()
-) : ValueSource(map, type.notEmptyOr("map"), info) {
-    override fun contains(path: Path): Boolean {
-        return if (path.isEmpty()) {
-            true
-        } else {
-            val key = path.first()
-            val rest = path.drop(1)
-            map[key]?.castToSource(info)?.contains(rest) ?: false
-        }
-    }
-
-    override fun getOrNull(path: Path): Source? {
-        return if (path.isEmpty()) {
-            this
-        } else {
-            val key = path.first()
-            val rest = path.drop(1)
-            val result = map[key]
-            result?.castToSource(info)?.getOrNull(rest)
-        }
-    }
-
-    override fun isMap(): Boolean = true
-
-    override fun toMap(): Map<String, Source> = map.mapValues { (_, value) ->
-        value.castToSource(info)
-    }
-}
+) : ValueSource(map, type.notEmptyOr("map"), info)
 
 /**
  * Returns a hierarchical map for this config.
@@ -87,10 +58,4 @@ fun Config.toHierarchicalMap(): Map<String, Any> {
 /**
  * Source from an empty map.
  */
-object EmptyMapSource : MapSource(emptyMap(), "empty map") {
-    override fun contains(path: Path): Boolean = false
-
-    override fun getOrNull(path: Path): Source? = null
-
-    override fun toMap(): Map<String, Source> = emptyMap()
-}
+object EmptyMapSource : MapSource(emptyMap(), "empty map")

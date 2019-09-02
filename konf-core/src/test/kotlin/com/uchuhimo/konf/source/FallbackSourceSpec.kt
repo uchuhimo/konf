@@ -20,7 +20,6 @@ import com.natpryce.hamkrest.assertion.assertThat
 import com.natpryce.hamkrest.equalTo
 import com.uchuhimo.konf.name
 import com.uchuhimo.konf.source.base.asKVSource
-import com.uchuhimo.konf.source.base.asSource
 import com.uchuhimo.konf.toPath
 import org.jetbrains.spek.api.Spek
 import org.jetbrains.spek.api.dsl.given
@@ -47,12 +46,12 @@ object FallbackSourceSpec : Spek({
             it("gets value from facade source") {
                 assertTrue(path in source)
                 assertTrue(key in source)
-                assertThat(source[path].toText(), equalTo(facadeSource[path].toText()))
-                assertThat(source[key].toText(), equalTo(facadeSource[key].toText()))
-                assertThat(source.getOrNull(path)?.toText(),
-                    equalTo(facadeSource.getOrNull(path)?.toText()))
-                assertThat(source.getOrNull(key)?.toText(),
-                    equalTo(facadeSource.getOrNull(key)?.toText()))
+                assertThat(source[path].asValue<String>(), equalTo(facadeSource[path].asValue<String>()))
+                assertThat(source[key].asValue<String>(), equalTo(facadeSource[key].asValue<String>()))
+                assertThat(source.getOrNull(path)?.asValue<String>(),
+                    equalTo(facadeSource.getOrNull(path)?.asValue<String>()))
+                assertThat(source.getOrNull(key)?.asValue<String>(),
+                    equalTo(facadeSource.getOrNull(key)?.asValue<String>()))
             }
         }
         on("path/key is in fallback source") {
@@ -66,12 +65,12 @@ object FallbackSourceSpec : Spek({
             it("gets value from fallback source") {
                 assertTrue(path in source)
                 assertTrue(key in source)
-                assertThat(source[path].toText(), equalTo(fallbackSource[path].toText()))
-                assertThat(source[key].toText(), equalTo(fallbackSource[key].toText()))
-                assertThat(source.getOrNull(path)?.toText(),
-                    equalTo(fallbackSource.getOrNull(path)?.toText()))
-                assertThat(source.getOrNull(key)?.toText(),
-                    equalTo(fallbackSource.getOrNull(key)?.toText()))
+                assertThat(source[path].asValue<String>(), equalTo(fallbackSource[path].asValue<String>()))
+                assertThat(source[key].asValue<String>(), equalTo(fallbackSource[key].asValue<String>()))
+                assertThat(source.getOrNull(path)?.asValue<String>(),
+                    equalTo(fallbackSource.getOrNull(path)?.asValue<String>()))
+                assertThat(source.getOrNull(key)?.asValue<String>(),
+                    equalTo(fallbackSource.getOrNull(key)?.asValue<String>()))
             }
             it("contains value in facade source") {
                 assertTrue(facadePath in source)

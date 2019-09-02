@@ -18,6 +18,7 @@ package com.uchuhimo.konf.source.properties
 
 import com.natpryce.hamkrest.assertion.assertThat
 import com.natpryce.hamkrest.equalTo
+import com.uchuhimo.konf.source.asValue
 import com.uchuhimo.konf.tempFileOf
 import org.jetbrains.spek.api.dsl.given
 import org.jetbrains.spek.api.dsl.it
@@ -34,7 +35,7 @@ object PropertiesProviderSpec : SubjectSpek<PropertiesProvider>({
                 assertThat(source.info["type"], equalTo("properties"))
             }
             it("should return a source which contains value from reader") {
-                assertThat(source["type"].toText(), equalTo("reader"))
+                assertThat(source["type"].asValue<String>(), equalTo("reader"))
             }
         }
         on("create source from input stream") {
@@ -44,7 +45,7 @@ object PropertiesProviderSpec : SubjectSpek<PropertiesProvider>({
                 assertThat(source.info["type"], equalTo("properties"))
             }
             it("should return a source which contains value from input stream") {
-                assertThat(source["type"].toText(), equalTo("inputStream"))
+                assertThat(source["type"].asValue<String>(), equalTo("inputStream"))
             }
         }
         on("create source from system properties") {
@@ -54,7 +55,7 @@ object PropertiesProviderSpec : SubjectSpek<PropertiesProvider>({
                 assertThat(source.info["type"], equalTo("system-properties"))
             }
             it("should return a source which contains value from system properties") {
-                assertThat(source["type"].toText(), equalTo("system"))
+                assertThat(source["type"].asValue<String>(), equalTo("system"))
             }
         }
     }

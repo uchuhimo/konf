@@ -31,8 +31,6 @@ abstract class RelocatedConfig(parent: BaseConfig, name: String = "") : BaseConf
 
     fun relocateOutOrNull(name: String): String? = relocateOutOrNull(name.toPath())?.name
 
-    abstract val sourceInfo: SourceInfo
-
     override fun contains(name: String): Boolean {
         return if (containsInLayer(name)) {
             true
@@ -66,21 +64,11 @@ abstract class RelocatedConfig(parent: BaseConfig, name: String = "") : BaseConf
         ?: throw NoSuchItemException(item)
     }
 
-    fun Source.relocated(): Source {
-        return object : Source {
-            override val info: SourceInfo = this@relocated.info.with(sourceInfo)
-
-            override fun contains(path: Path): Boolean =
-                relocateInOrNull(path)?.let { this@relocated.contains(it) } ?: false
-
-            override fun getOrNull(path: Path): Source? =
-                relocateInOrNull(path)?.let { this@relocated.getOrNull(it) }
-        }
-    }
+    abstract fun Source.relocated(): Source
 
     override val sources: Deque<Source>
         get() {
-            return lock.read { ArrayDeque(listOf(source)) }.apply {
+            return lock.read { ArrayDeque(listOf(source.relocated())) }.apply {
                 for (source in parent?.sources?.mapTo(ArrayDeque()) {
                     it.relocated()
                 } ?: ArrayDeque<Source>()) {
@@ -99,10 +87,13 @@ open class DrillDownConfig(val prefix: String, parent: BaseConfig, name: String 
         checkPath(prefix)
     }
 
-    override val sourceInfo: SourceInfo = SourceInfo(
-        "relocated_type" to "drill_down",
-        "relocated_prefix" to prefix
-    )
+    override fun Source.relocated(): Source {
+        return object : Source {
+            override val info: SourceInfo = this@relocated.info
+
+            override val tree: TreeNode = this@relocated.tree.getOrNull(prefix) ?: ContainerNode.empty()
+        }
+    }
 
     override fun relocateInOrNull(path: Path): Path? = relocateInOrNull(prefix.toPath(), path)
 
@@ -125,10 +116,13 @@ open class RollUpConfig(val prefix: String, parent: BaseConfig, name: String = "
         checkPath(prefix)
     }
 
-    override val sourceInfo: SourceInfo = SourceInfo(
-        "relocated_type" to "roll_up",
-        "relocated_prefix" to prefix
-    )
+    override fun Source.relocated(): Source {
+        return object : Source {
+            override val info: SourceInfo = this@relocated.info
+
+            override val tree: TreeNode = this@relocated.withPrefix(prefix).tree
+        }
+    }
 
     override fun relocateOutOrNull(name: Path): Path? = relocateOutOrNull(prefix.toPath(), name)
 

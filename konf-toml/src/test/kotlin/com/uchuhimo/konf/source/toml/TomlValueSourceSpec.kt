@@ -21,6 +21,8 @@ import com.natpryce.hamkrest.equalTo
 import com.natpryce.hamkrest.sameInstance
 import com.natpryce.hamkrest.throws
 import com.uchuhimo.konf.source.ParseException
+import com.uchuhimo.konf.source.asValue
+import com.uchuhimo.konf.source.asSource
 import org.jetbrains.spek.api.Spek
 import org.jetbrains.spek.api.dsl.given
 import org.jetbrains.spek.api.dsl.it
@@ -30,19 +32,19 @@ object TomlValueSourceSpec : Spek({
     given("a TOML source") {
         on("get integer from long source") {
             it("should succeed") {
-                assertThat(1L.asTomlSource().toInt(), equalTo(1))
+                assertThat(1L.asSource().asValue<Int>(), equalTo(1))
             }
         }
         on("get integer from long source whose value is out of range of integer") {
             it("should throw ParseException") {
-                assertThat({ Long.MAX_VALUE.asTomlSource().toInt() }, throws<ParseException>())
-                assertThat({ Long.MIN_VALUE.asTomlSource().toInt() }, throws<ParseException>())
+                assertThat({ Long.MAX_VALUE.asSource().asValue<Int>() }, throws<ParseException>())
+                assertThat({ Long.MIN_VALUE.asSource().asValue<Int>() }, throws<ParseException>())
             }
         }
         on("invoke `asTomlSource`") {
-            val source = 1.asTomlSource()
+            val source = 1.asSource()
             it("should return itself") {
-                assertThat(source.asTomlSource(), sameInstance(source))
+                assertThat(source.asSource(), sameInstance(source))
             }
         }
     }

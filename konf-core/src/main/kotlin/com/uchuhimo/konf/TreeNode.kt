@@ -16,6 +16,8 @@
 
 package com.uchuhimo.konf
 
+import java.util.Collections
+
 /**
  * Tree node that represents internal structure of config/source.
  */
@@ -25,12 +27,94 @@ interface TreeNode {
      *
      * @return whether this tree node is a leaf node
      */
-    fun isLeaf(): Boolean
+    fun isLeaf(): Boolean = children.isEmpty()
 
     /**
      * Children nodes in this tree node with their names as keys.
      */
-    val children: Map<String, TreeNode>
+    val children: MutableMap<String, TreeNode>
+
+    /**
+     * Associate path with specified node.
+     *
+     * @param path path
+     * @param node associated node
+     */
+    operator fun set(path: Path, node: TreeNode) {
+        check(path.isNotEmpty())
+        val key = path.first()
+        return if (path.size == 1) {
+            children[key] = node
+        } else {
+            val rest = path.drop(1)
+            var child = children[key]
+            if (child == null) {
+                child = ContainerNode(mutableMapOf())
+                children[key] = child
+            }
+            child[rest] = node
+        }
+    }
+
+    /**
+     * Associate path with specified node.
+     *
+     * @param path path
+     * @param node associated node
+     */
+    operator fun set(path: String, node: TreeNode) {
+        set(path.toPath(), node)
+    }
+
+    /**
+     * Whether this tree node contains node(s) in specified path or not.
+     *
+     * @param path item path
+     * @return `true` if this tree node contains node(s) in specified path, `false` otherwise
+     */
+    operator fun contains(path: Path): Boolean {
+        return if (path.isEmpty()) {
+            true
+        } else {
+            val key = path.first()
+            val rest = path.drop(1)
+            val result = children[key]
+            if (result != null) {
+                return rest in result
+            } else {
+                return false
+            }
+        }
+    }
+
+    /**
+     * Returns tree node in specified path if this tree node contains value(s) in specified path,
+     * `null` otherwise.
+     *
+     * @param path item path
+     * @return tree node in specified path if this tree node contains value(s) in specified path,
+     * `null` otherwise
+     */
+    fun getOrNull(path: Path): TreeNode? {
+        return if (path.isEmpty()) {
+            this
+        } else {
+            val key = path.first()
+            val rest = path.drop(1)
+            val result = children[key]
+            result?.getOrNull(rest)
+        }
+    }
+
+    /**
+     * Returns tree node in specified path if this tree node contains value(s) in specified path,
+     * `null` otherwise.
+     *
+     * @param path item path
+     * @return tree node in specified path if this tree node contains value(s) in specified path,
+     * `null` otherwise
+     */
+    fun getOrNull(path: String): TreeNode? = getOrNull(path.toPath())
 
     /**
      * Returns a tree node containing all nodes of the original tree node
@@ -91,23 +175,38 @@ interface TreeNode {
         }
 }
 
-/**
- * Tree node that contains children nodes.
- */
-open class ContainerNode(override val children: Map<String, TreeNode>) : TreeNode {
-    override fun isLeaf(): Boolean = false
+interface MapNode : TreeNode
+
+interface ValueNode : TreeNode {
+    val value: Any
+}
+
+interface NullNode : TreeNode
+
+interface ListNode : TreeNode {
+    override fun isLeaf(): Boolean = true
+
+    val list: List<TreeNode>
 }
 
 /**
- * Tree node without any child node.
+ * Tree node that contains children nodes.
  */
-open class ValueNode : TreeNode {
+open class ContainerNode(override val children: MutableMap<String, TreeNode>) : MapNode {
+    companion object {
+        fun empty(): ContainerNode = ContainerNode(mutableMapOf())
+    }
+}
+
+/**
+ * Tree node that contains an unknown value and no child node.
+ */
+open class UnknownValueNode : TreeNode {
     override fun isLeaf(): Boolean = true
-    override val children: Map<String, TreeNode>
-        get() = emptyMap()
+    override val children: MutableMap<String, TreeNode> = Collections.unmodifiableMap(mutableMapOf())
 }
 
 /**
  * Tree node that represents a empty tree.
  */
-object EmptyNode : ValueNode()
+object EmptyNode : UnknownValueNode()
