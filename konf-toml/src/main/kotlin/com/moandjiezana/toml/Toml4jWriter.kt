@@ -17,18 +17,12 @@
 package com.moandjiezana.toml
 
 import com.moandjiezana.toml.BooleanValueReaderWriter.BOOLEAN_VALUE_READER_WRITER
-import com.moandjiezana.toml.DateValueReaderWriter.DATE_PARSER_JDK_6
 import com.moandjiezana.toml.DateValueReaderWriter.DATE_VALUE_READER_WRITER
 import com.moandjiezana.toml.NumberValueReaderWriter.NUMBER_VALUE_READER_WRITER
 import com.moandjiezana.toml.StringValueReaderWriter.STRING_VALUE_READER_WRITER
 import java.io.IOException
 import java.io.StringWriter
 import java.io.Writer
-import java.lang.reflect.Field
-import java.lang.reflect.Modifier
-import java.util.Arrays
-import java.util.LinkedHashMap
-import java.util.LinkedHashSet
 import java.util.TimeZone
 import java.util.regex.Pattern
 
@@ -77,7 +71,7 @@ class Toml4jWriter {
     @Throws(IOException::class)
     fun write(from: Any, target: Writer) {
         val valueWriter = Toml4jValueWriters.findWriterFor(from)
-        if (valueWriter === NewMapValueWriter || valueWriter === NewObjectValueWriter) {
+        if (valueWriter === NewMapValueWriter) {
             val context = WriterContext(
                 IndentationPolicy(0, 0, 0),
                 DatePolicy(TimeZone.getTimeZone("UTC"), false),
@@ -98,22 +92,14 @@ internal object Toml4jValueWriters {
                 return valueWriter
             }
         }
-        return NewObjectValueWriter
+        return NewMapValueWriter
     }
-
-    private val platformSpecificDateConverter: DateValueReaderWriter
-        get() {
-            val specificationVersion = Runtime::class.java.getPackage().specificationVersion
-            return if (specificationVersion != null && specificationVersion.startsWith("1.6"))
-                DATE_PARSER_JDK_6
-            else DATE_VALUE_READER_WRITER
-        }
 
     private val VALUE_WRITERS = arrayOf<ValueWriter>(
         STRING_VALUE_READER_WRITER,
         NUMBER_VALUE_READER_WRITER,
         BOOLEAN_VALUE_READER_WRITER,
-        platformSpecificDateConverter,
+        DATE_VALUE_READER_WRITER,
         NewMapValueWriter,
         NewArrayValueWriter
     )
@@ -149,11 +135,11 @@ internal object NewArrayValueWriter : ArrayValueWriter() {
 
             val writer = Toml4jValueWriters.findWriterFor(value)
             val isNestedOldValue = NewMapValueWriter.isNested
-            if (writer == NewMapValueWriter || writer == NewObjectValueWriter) {
+            if (writer == NewMapValueWriter) {
                 NewMapValueWriter.isNested = true
             }
             writer.write(value, context)
-            if (writer == NewMapValueWriter || writer == NewObjectValueWriter) {
+            if (writer == NewMapValueWriter) {
                 NewMapValueWriter.isNested = isNestedOldValue
             }
         }
@@ -213,7 +199,7 @@ internal object NewMapValueWriter : ValueWriter {
             val fromValue = from[key] ?: continue
 
             val valueWriter = Toml4jValueWriters.findWriterFor(fromValue)
-            if (valueWriter === this || valueWriter === NewObjectValueWriter) {
+            if (valueWriter === this) {
                 valueWriter.write(fromValue, context.pushTable(quoteKey(key!!)))
             }
         }
@@ -250,62 +236,5 @@ internal object NewMapValueWriter : ValueWriter {
         }
 
         return false
-    }
-}
-
-internal object NewObjectValueWriter : ValueWriter {
-
-    override fun canWrite(value: Any): Boolean {
-        return true
-    }
-
-    override fun write(value: Any, context: WriterContext) {
-        val to = LinkedHashMap<String, Any>()
-        val fields = getFields(value.javaClass)
-        for (field in fields) {
-            to[field.name] = getFieldValue(field, value)!!
-        }
-
-        NewMapValueWriter.write(to, context)
-    }
-
-    override fun isPrimitiveType(): Boolean {
-        return false
-    }
-
-    private fun getFields(cls: Class<*>): Set<Field> {
-        var clazz = cls
-        val fields = LinkedHashSet(Arrays.asList(*clazz.declaredFields))
-        while (clazz != Any::class.java) {
-            fields.addAll(Arrays.asList(*clazz.declaredFields))
-            clazz = clazz.superclass
-        }
-        removeConstantsAndSyntheticFields(fields)
-
-        return fields
-    }
-
-    private fun removeConstantsAndSyntheticFields(fields: MutableSet<Field>) {
-        val iterator = fields.iterator()
-        while (iterator.hasNext()) {
-            val field = iterator.next()
-            if (Modifier.isFinal(field.modifiers) && Modifier.isStatic(field.modifiers) || field.isSynthetic || Modifier.isTransient(field.modifiers)) {
-                iterator.remove()
-            }
-        }
-    }
-
-    private fun getFieldValue(field: Field, o: Any): Any? {
-        val isAccessible = field.isAccessible
-        field.isAccessible = true
-        var value: Any? = null
-        try {
-            value = field.get(o)
-        } catch (ignored: IllegalAccessException) {
-        }
-
-        field.isAccessible = isAccessible
-
-        return value
     }
 }

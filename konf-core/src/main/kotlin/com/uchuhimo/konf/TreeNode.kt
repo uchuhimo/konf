@@ -199,14 +199,6 @@ open class ContainerNode(override val children: MutableMap<String, TreeNode>) : 
 }
 
 /**
- * Tree node that contains an unknown value and no child node.
- */
-open class UnknownValueNode : TreeNode {
-    override fun isLeaf(): Boolean = true
-    override val children: MutableMap<String, TreeNode> = Collections.unmodifiableMap(mutableMapOf())
-}
-
-/**
  * Tree node that represents a empty tree.
  */
-object EmptyNode : UnknownValueNode()
+object EmptyNode : ContainerNode(Collections.unmodifiableMap(mutableMapOf()))
