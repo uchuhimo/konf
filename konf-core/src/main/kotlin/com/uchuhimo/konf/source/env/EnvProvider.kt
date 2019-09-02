@@ -33,6 +33,8 @@ object EnvProvider {
         return FlatSource(
             System.getenv().mapKeys { (key, _) ->
                 key.toLowerCase().replace('_', '.')
+            }.filter { (key, _) ->
+                !(key.startsWith('.') || key.endsWith('.'))
             },
             type = "system-environment").enabled(Feature.LOAD_KEYS_CASE_INSENSITIVELY)
     }
