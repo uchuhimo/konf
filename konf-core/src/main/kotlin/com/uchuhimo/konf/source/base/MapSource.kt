@@ -17,8 +17,12 @@
 package com.uchuhimo.konf.source.base
 
 import com.uchuhimo.konf.Config
+import com.uchuhimo.konf.ListNode
+import com.uchuhimo.konf.TreeNode
+import com.uchuhimo.konf.ValueNode
 import com.uchuhimo.konf.notEmptyOr
 import com.uchuhimo.konf.source.SourceInfo
+import com.uchuhimo.konf.toTree
 
 /**
  * Source from a hierarchical map.
@@ -37,21 +41,24 @@ open class MapSource(
  * `config.from.map.hierarchical(map)`.
  */
 fun Config.toHierarchicalMap(): Map<String, Any> {
-    fun MutableMap<String, Any>.putHierarchically(key: String, value: Any) {
-        if ('.' in key) {
-            val prefix = key.substringBefore('.')
-            val suffix = key.substringAfter('.')
-            @Suppress("UNCHECKED_CAST")
-            val child = getOrPut(prefix) { mutableMapOf<String, Any>() } as MutableMap<String, Any>
-            child.putHierarchically(suffix, value)
-        } else {
-            put(key, value)
-        }
-    }
-    return mutableMapOf<String, Any>().apply {
-        for ((key, value) in this@toHierarchicalMap.toMap()) {
-            putHierarchically(key, value)
-        }
+    return toTree().toHierarchicalMap()
+}
+
+/**
+ * Returns a hierarchical map for this tree node.
+ *
+ * The returned map contains all items in this tree node.
+ * This map can be loaded into config as [com.uchuhimo.konf.source.base.MapSource] using
+ * `config.from.map.hierarchical(map)`.
+ */
+@Suppress("UNCHECKED_CAST")
+fun TreeNode.toHierarchicalMap(): Map<String, Any> = toHierarchicalMapInternal() as Map<String, Any>
+
+private fun TreeNode.toHierarchicalMapInternal(): Any {
+    when (this) {
+        is ValueNode -> return value
+        is ListNode -> return list.map { it.toHierarchicalMapInternal() }
+        else -> return children.mapValues { (_, child) -> child.toHierarchicalMapInternal() }
     }
 }
 

@@ -22,7 +22,7 @@ import com.fasterxml.jackson.databind.type.TypeFactory
 import com.uchuhimo.konf.annotation.JavaApi
 import com.uchuhimo.konf.source.DefaultLoaders
 import com.uchuhimo.konf.source.Source
-import com.uchuhimo.konf.source.base.asKVSource
+import com.uchuhimo.konf.source.base.kvToTree
 import com.uchuhimo.konf.source.loadBy
 import java.util.Deque
 import kotlin.properties.ReadWriteProperty
@@ -291,40 +291,8 @@ interface Config : ItemContainer {
      * Returns default loaders for this config.
      *
      * It is a fluent API for loading source from default loaders.
-     *
-     * @return default loaders for this config
-     */
-    @JavaApi
-    @Deprecated("use the shorter API `from` instead", ReplaceWith("from"))
-    fun withSourceFrom(): DefaultLoaders = from
-
-    /**
-     * Returns default loaders for this config.
-     *
-     * It is a fluent API for loading source from default loaders.
      */
     val from: DefaultLoaders get() = DefaultLoaders(this)
-
-    /**
-     * Returns default loaders for this config.
-     *
-     * Source will be applied the given [transform] function when loaded.
-     *
-     * It is a fluent API for loading source from default loaders.
-     *
-     * @param transform the given transformation function
-     */
-    @Deprecated("use the clearer API `from.mapped` instead", ReplaceWith("from.mapped(transform)"))
-    fun from(transform: (Source) -> Source): DefaultLoaders = DefaultLoaders(this).mapped(transform)
-
-    /**
-     * Returns default loaders for this config.
-     *
-     * It is a fluent API for loading source from default loaders.
-     */
-    @Deprecated("use the shorter API `from` instead", ReplaceWith("from"))
-    val withSourceFrom: DefaultLoaders
-        get() = from
 
     /**
      * Returns [ObjectMapper] using to map from source to value in config.
@@ -508,5 +476,5 @@ open class LazyConfigProperty<T>(
  * @return a tree node
  */
 fun Config.toTree(): TreeNode {
-    return toMap().asKVSource().tree
+    return toMap().kvToTree()
 }

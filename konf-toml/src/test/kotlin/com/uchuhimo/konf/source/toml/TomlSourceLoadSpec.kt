@@ -48,5 +48,5 @@ object TomlSourceReloadSpec : SubjectSpek<Config>({
         }.from.toml.string(toml)
     }
 
-//    itBehavesLike(SourceLoadSpec)
+    itBehavesLike(SourceLoadSpec)
 })

@@ -16,20 +16,17 @@
 
 package com.uchuhimo.konf.source.toml
 
+import com.moandjiezana.toml.Toml4jWriter
 import com.uchuhimo.konf.Config
 import com.uchuhimo.konf.source.Writer
 import com.uchuhimo.konf.source.base.toHierarchicalMap
 import java.io.OutputStream
-import com.moandjiezana.toml.TomlWriter as Toml4jWriter
 
 /**
  * Writer for TOML source.
  */
 class TomlWriter(val config: Config) : Writer {
-    private val toml4jWriter = Toml4jWriter.Builder()
-        .indentValuesBy(0)
-        .indentTablesBy(0)
-        .build()
+    private val toml4jWriter = Toml4jWriter()
 
     override fun toWriter(writer: java.io.Writer) {
         writer.write(toText())
@@ -42,7 +39,6 @@ class TomlWriter(val config: Config) : Writer {
     }
 
     override fun toText(): String {
-        // TODO: fix bug that map in nested list is formatted incorrectly (open issue in toml4j)
         return toml4jWriter.write(config.toHierarchicalMap()).replace("\n", System.lineSeparator())
     }
 }

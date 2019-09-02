@@ -30,8 +30,12 @@ open class KVSource(
     type: String = "",
     info: SourceInfo = SourceInfo()
 ) : ValueSource(map, type.notEmptyOr("KV"), info) {
-    override val tree: TreeNode = ContainerNode(mutableMapOf()).apply {
-        map.forEach { (path, value) ->
+    override val tree: TreeNode = map.kvToTree()
+}
+
+fun Map<String, Any>.kvToTree(): TreeNode {
+    return ContainerNode(mutableMapOf()).apply {
+        this@kvToTree.forEach { (path, value) ->
             set(path, value.asTree())
         }
     }
