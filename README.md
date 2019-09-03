@@ -442,7 +442,7 @@ check(childConfig.parent === config)
 All out-of-box supported sources are declared in [`DefaultLoaders`](https://github.com/uchuhimo/konf/blob/master/konf-core/src/main/kotlin/com/uchuhimo/konf/source/DefaultLoaders.kt), shown below (the corresponding config spec for these samples is [`ConfigForLoad`](https://github.com/uchuhimo/konf/blob/master/konf-core/src/test/kotlin/com/uchuhimo/konf/source/ConfigForLoad.kt)):
 
 | Type | Usage | Provider | Sample |
-| - | - |
+| - | - | - | - |
 | [HOCON](https://github.com/typesafehub/config/blob/master/HOCON.md) | `config.from.hocon` | [`HoconProvider`](https://github.com/uchuhimo/konf/blob/master/konf-hocon/src/main/kotlin/com/uchuhimo/konf/source/hocon/HoconProvider.kt) | [`source.conf`](https://github.com/uchuhimo/konf/blob/master/konf-hocon/src/test/resources/source/source.conf) |
 | JSON | `config.from.json` | [`JsonProvider`](https://github.com/uchuhimo/konf/blob/master/konf-core/src/main/kotlin/com/uchuhimo/konf/source/json/JsonProvider.kt) | [`source.json`](https://github.com/uchuhimo/konf/blob/master/konf-core/src/test/resources/source/source.json) |
 | properties | `config.from.properties` | [`PropertiesProvider`](https://github.com/uchuhimo/konf/blob/master/konf-core/src/main/kotlin/com/uchuhimo/konf/source/properties/PropertiesProvider.kt) | [`source.properties`](https://github.com/uchuhimo/konf/blob/master/konf-core/src/test/resources/source/source.properties) |
@@ -656,7 +656,7 @@ gradlew clean install
 
 ### v0.17.0
 
-After migrate to tree-based source APIs, many deprecated APIs are removed, including:
+After migrated to tree-based source APIs, many deprecated APIs are removed, including:
 
 - `Source`: all `isXXX` and `toXXX` APIs
 - `Config`: `layer`, `addSource` and `withSourceFrom`
