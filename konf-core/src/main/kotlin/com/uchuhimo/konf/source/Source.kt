@@ -84,6 +84,8 @@ import kotlin.Long
 import kotlin.Short
 import kotlin.String
 import kotlin.reflect.KClass
+import kotlin.reflect.full.isSubclassOf
+import kotlin.reflect.full.starProjectedType
 import com.fasterxml.jackson.databind.node.NullNode as JacksonNullNode
 
 /**
@@ -419,7 +421,6 @@ internal fun load(config: Config, source: Source): Config {
             if (source.isEnabled(Feature.FAIL_ON_UNKNOWN_PATH) ||
                 config.isEnabled(Feature.FAIL_ON_UNKNOWN_PATH)) {
                 val treeFromSource = source.tree
-                check(!treeFromSource.isLeaf())
                 val treeFromConfig = config.toTree()
                 val diffTree = treeFromSource - treeFromConfig
                 if (diffTree != EmptyNode) {
@@ -603,15 +604,16 @@ private val promoteMap: MutableMap<KClass<*>, List<Pair<KClass<*>, PromoteFunc<*
     Double::class to listOf(
         Float::class to Double::toFloat.asPromote(),
         BigDecimal::class to { value: Double -> BigDecimal.valueOf(value) }.asPromote()
-    ),
-    Set::class to listOf(
-        List::class to { value: Set<*> -> value.toList() }.asPromote()
     )
 )
 
 private val promoteMatchers: MutableList<Pair<(KClass<*>) -> Boolean, List<Pair<KClass<*>, PromoteFunc<*>>>>> = mutableListOf(
-    { type: KClass<*> -> type is Array<*> } to listOf(
-        List::class to { value: Array<*> -> value.asList() }.asPromote()
+    { type: KClass<*> -> type.starProjectedType == Array<Int>::class.starProjectedType } to listOf(
+        List::class to { value: Array<*> -> value.asList() }.asPromote(),
+        Set::class to { value: Array<*> -> value.asList().toSet() }.asPromote()
+    ),
+    { type: KClass<*> -> type.isSubclassOf(Set::class) } to listOf(
+        List::class to { value: Set<*> -> value.toList() }.asPromote()
     )
 )
 
@@ -635,7 +637,7 @@ private fun walkPromoteMap(
             }
         }
     }
-    if (promotedTypes == null || promotedTypes.isEmpty()) {
+    if (promotedTypes == null) {
         return null
     }
     for ((promotedType, promoteFunc) in promotedTypes) {
@@ -776,10 +778,6 @@ private fun TreeNode.toValue(source: Source, type: JavaType, mapper: ObjectMappe
 private fun TreeNode.toListValue(source: Source, type: JavaType, mapper: ObjectMapper): List<*> {
     return when (this) {
         is ListNode -> list.map { it.toValue(source, type, mapper) }
-        is ValueNode -> {
-            castOrNull(source, List::class.java)
-                ?: throw WrongTypeException(source, value::class.java.simpleName, List::class.java.simpleName)
-        }
         else -> throw WrongTypeException(source, "Unknown", List::class.java.simpleName)
     }
 }

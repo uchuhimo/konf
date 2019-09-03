@@ -139,6 +139,45 @@ object SourceSpec : Spek({
                     assertThat(source.asValue<Long>(), equalTo(1L))
                 }
             }
+            on("cast short to int") {
+                val source = 1.toShort().asSource()
+                it("should succeed") {
+                    assertThat(source.asValue<Int>(), equalTo(1))
+                }
+            }
+            on("cast byte to short") {
+                val source = 1.toByte().asSource()
+                it("should succeed") {
+                    assertThat(source.asValue<Short>(), equalTo(1.toShort()))
+                }
+            }
+            on("cast long to BigInteger") {
+                val source = 1L.asSource()
+                it("should succeed") {
+                    assertThat(source.asValue<BigInteger>(), equalTo(BigInteger.valueOf(1)))
+                }
+            }
+
+            on("cast double to BigDecimal") {
+                val source = 1.5.asSource()
+                it("should succeed") {
+                    assertThat(source.asValue<BigDecimal>(), equalTo(BigDecimal.valueOf(1.5)))
+                }
+            }
+
+            on("cast long in range of int to int") {
+                val source = 1L.asSource()
+                it("should succeed") {
+                    assertThat(source.asValue<Int>(), equalTo(1))
+                }
+            }
+            on("cast long out of range of int to int") {
+                it("should throw ParseException") {
+                    assertThat({ Long.MAX_VALUE.asSource().asValue<Int>() }, throws<ParseException>())
+                    assertThat({ Long.MIN_VALUE.asSource().asValue<Int>() }, throws<ParseException>())
+                }
+            }
+
             on("cast int in range of short to short") {
                 val source = 1.asSource()
                 it("should succeed") {
@@ -152,16 +191,29 @@ object SourceSpec : Spek({
                 }
             }
 
-            on("cast int in range of byte to byte") {
-                val source = 1.asSource()
+            on("cast short in range of byte to byte") {
+                val source = 1.toShort().asSource()
                 it("should succeed") {
                     assertThat(source.asValue<Byte>(), equalTo(1.toByte()))
                 }
             }
-            on("cast int out of range of byte to byte") {
+            on("cast short out of range of byte to byte") {
                 it("should throw ParseException") {
-                    assertThat({ Int.MAX_VALUE.asSource().asValue<Byte>() }, throws<ParseException>())
-                    assertThat({ Int.MIN_VALUE.asSource().asValue<Byte>() }, throws<ParseException>())
+                    assertThat({ Short.MAX_VALUE.asSource().asValue<Byte>() }, throws<ParseException>())
+                    assertThat({ Short.MIN_VALUE.asSource().asValue<Byte>() }, throws<ParseException>())
+                }
+            }
+
+            on("cast long in range of byte to byte") {
+                val source = 1L.asSource()
+                it("should succeed") {
+                    assertThat(source.asValue<Byte>(), equalTo(1L.toByte()))
+                }
+            }
+            on("cast long out of range of byte to byte") {
+                it("should throw ParseException") {
+                    assertThat({ Long.MAX_VALUE.asSource().asValue<Byte>() }, throws<ParseException>())
+                    assertThat({ Long.MIN_VALUE.asSource().asValue<Byte>() }, throws<ParseException>())
                 }
             }
 
@@ -172,6 +224,12 @@ object SourceSpec : Spek({
                 }
             }
 
+            on("cast char to string") {
+                val source = 'a'.asSource()
+                it("should succeed") {
+                    assertThat(source.asValue<String>(), equalTo("a"))
+                }
+            }
             on("cast string containing single char to char") {
                 val source = "a".asSource()
                 it("should succeed") {
@@ -185,17 +243,71 @@ object SourceSpec : Spek({
                 }
             }
 
-            on("cast long to BigInteger") {
-                val source = 1L.asSource()
+            on("cast \"true\" to Boolean") {
+                val source = "true".asSource()
                 it("should succeed") {
-                    assertThat(source.asValue<BigInteger>(), equalTo(BigInteger.valueOf(1)))
+                    assertTrue { source.asValue() }
+                }
+            }
+            on("cast \"false\" to Boolean") {
+                val source = "false".asSource()
+                it("should succeed") {
+                    assertFalse { source.asValue() }
+                }
+            }
+            on("cast string with invalid format to Boolean") {
+                val source = "yes".asSource()
+                it("should throw ParseException") {
+                    assertThat({ source.asValue<Boolean>() }, throws<ParseException>())
                 }
             }
 
-            on("cast double to BigDecimal") {
-                val source = 1.5.asSource()
+            on("cast string to Byte") {
+                val source = "1".asSource()
                 it("should succeed") {
-                    assertThat(source.asValue<BigDecimal>(), equalTo(BigDecimal.valueOf(1.5)))
+                    assertThat(source.asValue<Byte>(), equalTo(1.toByte()))
+                }
+            }
+            on("cast string to Short") {
+                val source = "1".asSource()
+                it("should succeed") {
+                    assertThat(source.asValue<Short>(), equalTo(1.toShort()))
+                }
+            }
+            on("cast string to Int") {
+                val source = "1".asSource()
+                it("should succeed") {
+                    assertThat(source.asValue<Int>(), equalTo(1))
+                }
+            }
+            on("cast string to Long") {
+                val source = "1".asSource()
+                it("should succeed") {
+                    assertThat(source.asValue<Long>(), equalTo(1L))
+                }
+            }
+            on("cast string to Float") {
+                val source = "1.5".asSource()
+                it("should succeed") {
+                    assertThat(source.asValue<Float>(), equalTo(1.5F))
+                }
+            }
+            on("cast string to Double") {
+                val source = "1.5F".asSource()
+                it("should succeed") {
+                    assertThat(source.asValue<Double>(), equalTo(1.5))
+                }
+            }
+            on("cast string to BigInteger") {
+                val source = "1".asSource()
+                it("should succeed") {
+                    assertThat(source.asValue<BigInteger>(), equalTo(1.toBigInteger()))
+                }
+            }
+            on("cast string to BigDecimal") {
+                val source = "1.5".asSource()
+                it("should succeed") {
+                    assertThat(source.asValue<BigDecimal>(), equalTo(1.5.toBigDecimal()))
                 }
             }
 
@@ -339,6 +451,25 @@ object SourceSpec : Spek({
                 val source = text.asSource()
                 it("should throw ParseException") {
                     assertThat({ source.asValue<SizeInBytes>() }, throws<ParseException>())
+                }
+            }
+
+            on("cast set to list") {
+                val source = setOf(1).asSource()
+                it("should succeed") {
+                    assertThat(source.asValue<List<Int>>(), equalTo(listOf(1)))
+                }
+            }
+            on("cast array to list") {
+                val source = arrayOf(1).asSource()
+                it("should succeed") {
+                    assertThat(source.asValue<List<Int>>(), equalTo(listOf(1)))
+                }
+            }
+            on("cast array to set") {
+                val source = arrayOf(1).asSource()
+                it("should succeed") {
+                    assertThat(source.asValue<Set<Int>>(), equalTo(setOf(1)))
                 }
             }
         }

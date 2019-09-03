@@ -41,7 +41,9 @@ interface TreeNode {
      * @param node associated node
      */
     operator fun set(path: Path, node: TreeNode) {
-        check(path.isNotEmpty())
+        if (path.isEmpty()) {
+            throw InvalidPathException(path.name)
+        }
         val key = path.first()
         return if (path.size == 1) {
             children[key] = node
