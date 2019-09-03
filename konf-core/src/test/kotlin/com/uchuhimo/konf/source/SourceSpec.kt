@@ -20,6 +20,7 @@ import com.natpryce.hamkrest.absent
 import com.natpryce.hamkrest.assertion.assertThat
 import com.natpryce.hamkrest.equalTo
 import com.natpryce.hamkrest.has
+import com.natpryce.hamkrest.sameInstance
 import com.natpryce.hamkrest.throws
 import com.uchuhimo.konf.Config
 import com.uchuhimo.konf.ConfigSpec
@@ -547,6 +548,11 @@ object SourceSpec : Spek({
         group("source with prefix") {
             val source by memoized {
                 Prefix("level1.level2") + mapOf("key" to "value").asSource()
+            }
+            on("prefix is empty") {
+                it("should return itself") {
+                    assertThat(source.withPrefix(""), sameInstance(source))
+                }
             }
             on("find a valid path") {
                 it("should contain the value") {

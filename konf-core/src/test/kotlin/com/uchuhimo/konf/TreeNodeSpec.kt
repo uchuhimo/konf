@@ -23,6 +23,7 @@ import com.natpryce.hamkrest.sameInstance
 import com.natpryce.hamkrest.throws
 import com.uchuhimo.konf.source.asSource
 import com.uchuhimo.konf.source.asTree
+import com.uchuhimo.konf.source.base.toHierarchicalMap
 import org.jetbrains.spek.api.dsl.given
 import org.jetbrains.spek.api.dsl.it
 import org.jetbrains.spek.api.dsl.on
@@ -49,7 +50,10 @@ object TreeNodeSpec : SubjectSpek<TreeNode>({
             it("should throw InvalidPathException") {
                 assertThat(
                     { subject[""] = EmptyNode },
-                    throws(has(InvalidPathException::path, equalTo(""))))
+                    throws(has(PathConflictException::path, equalTo(""))))
+                assertThat(
+                    { subject["level1.level2.level3"] = EmptyNode },
+                    throws(has(PathConflictException::path, equalTo("level1.level2.level3"))))
             }
         }
         on("minus itself") {
@@ -60,6 +64,46 @@ object TreeNodeSpec : SubjectSpek<TreeNode>({
         on("minus a leaf node") {
             it("should return an empty node") {
                 assertThat(subject - EmptyNode, equalTo<TreeNode>(EmptyNode))
+            }
+        }
+        on("merge two trees") {
+            val facadeNode = 1.asTree()
+            val facade = mapOf(
+                "key1" to facadeNode,
+                "key2" to EmptyNode,
+                "key4" to mapOf("level2" to facadeNode)
+            ).asTree()
+            val fallbackNode = 2.asTree()
+            val fallback = mapOf(
+                "key1" to EmptyNode,
+                "key2" to fallbackNode,
+                "key3" to fallbackNode,
+                "key4" to mapOf("level2" to fallbackNode)
+            ).asTree()
+            it("should return the merged tree when valid") {
+                assertThat((fallback + facade).toHierarchicalMap(), equalTo(mapOf(
+                    "key1" to facadeNode,
+                    "key2" to EmptyNode,
+                    "key3" to fallbackNode,
+                    "key4" to mapOf("level2" to facadeNode)
+                ).asTree().toHierarchicalMap()))
+                assertThat(facade.withFallback(fallback).toHierarchicalMap(), equalTo(mapOf(
+                    "key1" to facadeNode,
+                    "key2" to EmptyNode,
+                    "key3" to fallbackNode,
+                    "key4" to mapOf("level2" to facadeNode)
+                ).asTree().toHierarchicalMap()))
+            }
+            it("should throw PathConflictException when invalid") {
+                assertThat(
+                    { EmptyNode + facade },
+                    throws(has(PathConflictException::path, equalTo(""))))
+                assertThat(
+                    { fallback + EmptyNode },
+                    throws(has(PathConflictException::path, equalTo(""))))
+                assertThat(
+                    { fallback + mapOf("key1" to mapOf("key2" to EmptyNode)).asTree() },
+                    throws(has(PathConflictException::path, equalTo("key1"))))
             }
         }
     }

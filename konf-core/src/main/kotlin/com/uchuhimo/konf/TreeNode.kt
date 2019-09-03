@@ -23,13 +23,6 @@ import java.util.Collections
  */
 interface TreeNode {
     /**
-     * Check whether this tree node is a leaf node.
-     *
-     * @return whether this tree node is a leaf node
-     */
-    fun isLeaf(): Boolean = children.isEmpty()
-
-    /**
      * Children nodes in this tree node with their names as keys.
      */
     val children: MutableMap<String, TreeNode>
@@ -42,19 +35,25 @@ interface TreeNode {
      */
     operator fun set(path: Path, node: TreeNode) {
         if (path.isEmpty()) {
-            throw InvalidPathException(path.name)
+            throw PathConflictException(path.name)
         }
         val key = path.first()
-        return if (path.size == 1) {
-            children[key] = node
-        } else {
-            val rest = path.drop(1)
-            var child = children[key]
-            if (child == null) {
-                child = ContainerNode(mutableMapOf())
-                children[key] = child
+        try {
+            return if (this is LeafNode) {
+                throw PathConflictException(path.name)
+            } else if (path.size == 1) {
+                children[key] = node
+            } else {
+                val rest = path.drop(1)
+                var child = children[key]
+                if (child == null) {
+                    child = ContainerNode(mutableMapOf())
+                    children[key] = child
+                }
+                child[rest] = node
             }
-            child[rest] = node
+        } catch (_: PathConflictException) {
+            throw PathConflictException(path.name)
         }
     }
 
@@ -119,6 +118,42 @@ interface TreeNode {
     fun getOrNull(path: String): TreeNode? = getOrNull(path.toPath())
 
     /**
+     * Returns a node backing by specified fallback node.
+     *
+     * @param fallback fallback node
+     * @return a node backing by specified fallback node
+     */
+    fun withFallback(fallback: TreeNode): TreeNode {
+        fun traverseTree(facade: TreeNode, fallback: TreeNode, path: Path): TreeNode {
+            if (facade is LeafNode && fallback is LeafNode) {
+                return facade
+            } else if ((facade is LeafNode && fallback !is LeafNode) ||
+                (facade !is LeafNode && fallback is LeafNode)) {
+                throw PathConflictException(path.name)
+            } else {
+                return ContainerNode(facade.children.toMutableMap().also { map ->
+                    for ((key, child) in fallback.children) {
+                        if (key in facade.children) {
+                            map[key] = traverseTree(facade.children.getValue(key), child, path + key)
+                        } else {
+                            map[key] = child
+                        }
+                    }
+                })
+            }
+        }
+        return traverseTree(this, fallback, "".toPath())
+    }
+
+    /**
+     * Returns a node overlapped by the specified facade node.
+     *
+     * @param facade the facade node
+     * @return a node overlapped by the specified facade node
+     */
+    operator fun plus(facade: TreeNode): TreeNode = facade.withFallback(this)
+
+    /**
      * Returns a tree node containing all nodes of the original tree node
      * except the nodes contained in the given [other] tree node.
      *
@@ -126,10 +161,10 @@ interface TreeNode {
      */
     operator fun minus(other: TreeNode): TreeNode {
         fun traverseTree(left: TreeNode, right: TreeNode): TreeNode {
-            if (left.isLeaf()) {
+            if (left is LeafNode) {
                 return EmptyNode
             } else {
-                if (right.isLeaf()) {
+                if (right is LeafNode) {
                     return EmptyNode
                 } else {
                     val leftKeys = left.children.keys
@@ -162,32 +197,32 @@ interface TreeNode {
      */
     val paths: List<String>
         get() {
-            return mutableListOf<String>().apply {
+            return mutableListOf<String>().also { list ->
                 fun traverseTree(node: TreeNode, path: Path) {
-                    if (node.isLeaf()) {
-                        add(path.name)
+                    if (node is LeafNode) {
+                        list.add(path.name)
                     } else {
-                        node.children.forEach { key, child ->
+                        node.children.forEach { (key, child) ->
                             traverseTree(child, path + key)
                         }
                     }
                 }
-                traverseTree(this@TreeNode, emptyList())
+                traverseTree(this, "".toPath())
             }
         }
 }
 
+interface LeafNode : TreeNode
+
 interface MapNode : TreeNode
 
-interface ValueNode : TreeNode {
+interface ValueNode : LeafNode {
     val value: Any
 }
 
-interface NullNode : TreeNode
+interface NullNode : LeafNode
 
-interface ListNode : TreeNode {
-    override fun isLeaf(): Boolean = true
-
+interface ListNode : LeafNode {
     val list: List<TreeNode>
 }
 
@@ -203,4 +238,6 @@ open class ContainerNode(override val children: MutableMap<String, TreeNode>) : 
 /**
  * Tree node that represents a empty tree.
  */
-object EmptyNode : ContainerNode(Collections.unmodifiableMap(mutableMapOf()))
+object EmptyNode : LeafNode {
+    override val children: MutableMap<String, TreeNode> = Collections.unmodifiableMap(mutableMapOf())
+}

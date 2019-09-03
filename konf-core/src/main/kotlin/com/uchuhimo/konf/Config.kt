@@ -23,7 +23,6 @@ import com.uchuhimo.konf.annotation.JavaApi
 import com.uchuhimo.konf.source.DefaultLoaders
 import com.uchuhimo.konf.source.Source
 import com.uchuhimo.konf.source.base.kvToTree
-import com.uchuhimo.konf.source.loadBy
 import java.util.Deque
 import kotlin.properties.ReadWriteProperty
 import kotlin.reflect.KProperty
@@ -274,8 +273,7 @@ interface Config : ItemContainer {
             config: Config,
             load: (source: Source) -> Unit
         ) -> Unit
-    ): Config =
-        loadBy(description, trigger)
+    ): Config
 
     /**
      * Returns default loaders for this config.

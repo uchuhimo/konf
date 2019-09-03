@@ -41,5 +41,9 @@ object PropertiesProvider : Provider {
      *
      * @return a new source from system properties
      */
-    fun fromSystem(): Source = FlatSource(System.getProperties().toMap(), type = "system-properties")
+    fun fromSystem(): Source = FlatSource(
+        System.getProperties().toMap(),
+        type = "system-properties",
+        allowConflict = true
+    )
 }

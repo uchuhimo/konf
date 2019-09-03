@@ -231,14 +231,7 @@ interface Source {
             "fallback" to fallback.description
         )
 
-        override val tree: TreeNode
-            get() = TODO("not implemented") // To change initializer of created properties use File | Settings | File Templates.
-
-        override fun contains(path: Path): Boolean =
-            this@Source.contains(path) || fallback.contains(path)
-
-        override fun getOrNull(path: Path): Source? =
-            this@Source.getOrNull(path) ?: fallback.getOrNull(path)
+        override val tree: TreeNode = this@Source.tree.withFallback(fallback.tree)
     }
 
     /**
@@ -428,20 +421,6 @@ internal fun load(config: Config, source: Source): Config {
                     throw UnknownPathsException(source, unknownPaths)
                 }
             }
-        }
-    }
-}
-
-internal fun Config.loadBy(
-    description: String,
-    trigger: (
-        config: Config,
-        load: (source: Source) -> Unit
-    ) -> Unit
-): Config {
-    return withLayer("trigger: $description").apply {
-        trigger(this) { source ->
-            load(this, source)
         }
     }
 }

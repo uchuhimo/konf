@@ -19,6 +19,7 @@ package com.uchuhimo.konf.source.base
 import com.uchuhimo.konf.Config
 import com.uchuhimo.konf.ContainerNode
 import com.uchuhimo.konf.ListNode
+import com.uchuhimo.konf.PathConflictException
 import com.uchuhimo.konf.TreeNode
 import com.uchuhimo.konf.ValueNode
 import com.uchuhimo.konf.notEmptyOr
@@ -34,7 +35,8 @@ import java.util.Collections
 open class FlatSource(
     val map: Map<String, String>,
     type: String = "",
-    final override val info: SourceInfo = SourceInfo()
+    final override val info: SourceInfo = SourceInfo(),
+    private val allowConflict: Boolean = false
 ) : Source {
     init {
         info["type"] = type.notEmptyOr("flat")
@@ -42,7 +44,13 @@ open class FlatSource(
 
     override val tree: TreeNode = ContainerNode(mutableMapOf()).apply {
         map.forEach { (path, value) ->
-            set(path, value.asTree())
+            try {
+                set(path, value.asTree())
+            } catch (ex: PathConflictException) {
+                if (!allowConflict) {
+                    throw ex
+                }
+            }
         }
     }.promoteToList()
 }

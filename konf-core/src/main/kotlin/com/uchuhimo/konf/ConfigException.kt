@@ -85,3 +85,9 @@ class NoSuchPathException(val path: String) :
  */
 class InvalidPathException(val path: String) :
     ConfigException("\"$path\" is not a valid path")
+
+/**
+ * Exception indicates that the specified path conflicts with existed paths in the tree node.
+ */
+class PathConflictException(val path: String) :
+    ConfigException("\"$path\" conflicts with existed paths in the tree node")

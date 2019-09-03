@@ -35,7 +35,9 @@ object EnvProvider {
                 key.toLowerCase().replace('_', '.')
             }.filter { (key, _) ->
                 !(key.startsWith('.') || key.endsWith('.'))
-            },
-            type = "system-environment").enabled(Feature.LOAD_KEYS_CASE_INSENSITIVELY)
+            }.toSortedMap(),
+            type = "system-environment",
+            allowConflict = true
+        ).enabled(Feature.LOAD_KEYS_CASE_INSENSITIVELY)
     }
 }

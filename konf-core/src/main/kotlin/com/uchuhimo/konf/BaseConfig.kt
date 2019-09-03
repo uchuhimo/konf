@@ -511,6 +511,21 @@ open class BaseConfig(
             }
         }
 
+    override fun withLoadTrigger(
+        description: String,
+        trigger: (
+            config: Config,
+            load: (source: Source) -> Unit
+        ) -> Unit
+    ): Config {
+        return withLayer("trigger: $description").apply {
+            trigger(this) { source ->
+                load(this, source)
+                this.source = source
+            }
+        }
+    }
+
     override fun equals(other: Any?): Boolean {
         if (this === other) return true
         if (other !is Config) return false
