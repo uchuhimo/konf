@@ -44,6 +44,7 @@ A type-safe cascading configuration library for Kotlin/Java, supporting most con
     - [Fork from another config](#fork-from-another-config)
   - [Load values from source](#load-values-from-source)
     - [Strict parsing when loading](#strict-parsing-when-loading)
+  - [Prefix/Merge operations for source/config/config spec](#prefixmerge-operations-for-sourceconfigconfig-spec)
   - [Export/Reload values in config](#exportreload-values-in-config)
   - [Supported item types](#supported-item-types)
   - [Optional features](#optional-features)
@@ -439,20 +440,22 @@ check(childConfig.parent === config)
 
 All out-of-box supported sources are declared in [`DefaultLoaders`](https://github.com/uchuhimo/konf/blob/master/konf-core/src/main/kotlin/com/uchuhimo/konf/source/DefaultLoaders.kt), shown below (the corresponding config spec for these samples is [`ConfigForLoad`](https://github.com/uchuhimo/konf/blob/master/konf-core/src/test/kotlin/com/uchuhimo/konf/source/ConfigForLoad.kt)):
 
-| Type | Sample |
+| Type | Usage | Provider | Sample |
 | - | - |
-| [HOCON](https://github.com/typesafehub/config/blob/master/HOCON.md) | [`source.conf`](https://github.com/uchuhimo/konf/blob/master/konf-hocon/src/test/resources/source/source.conf) |
-| JSON | [`source.json`](https://github.com/uchuhimo/konf/blob/master/konf-core/src/test/resources/source/source.json) |
-| properties | [`source.properties`](https://github.com/uchuhimo/konf/blob/master/konf-core/src/test/resources/source/source.properties) |
-| [TOML](https://github.com/toml-lang/toml) | [`source.toml`](https://github.com/uchuhimo/konf/blob/master/konf-toml/src/test/resources/source/source.toml) |
-| XML | [`source.xml`](https://github.com/uchuhimo/konf/blob/master/konf-xml/src/test/resources/source/source.xml) |
-| YAML | [`source.yaml`](https://github.com/uchuhimo/konf/blob/master/konf-yaml/src/test/resources/source/source.yaml) |
-| JavaScript | [`source.js`](https://github.com/uchuhimo/konf/blob/master/konf-js/src/test/resources/source/source.js) |
-| hierarchical map | [`MapSourceLoadSpec`](https://github.com/uchuhimo/konf/blob/master/konf-core/src/test/kotlin/com/uchuhimo/konf/source/base/MapSourceLoadSpec.kt) |
-| map in key-value format | [`KVSourceSpec`](https://github.com/uchuhimo/konf/blob/master/konf-core/src/test/kotlin/com/uchuhimo/konf/source/base/KVSourceSpec.kt) |
-| map in flat format | [`FlatSourceLoadSpec`](https://github.com/uchuhimo/konf/blob/master/konf-core/src/test/kotlin/com/uchuhimo/konf/source/base/FlatSourceLoadSpec.kt) |
-| system properties | - |
-| system environment | - |
+| [HOCON](https://github.com/typesafehub/config/blob/master/HOCON.md) | `config.from.hocon` | [`HoconProvider`](https://github.com/uchuhimo/konf/blob/master/konf-hocon/src/main/kotlin/com/uchuhimo/konf/source/hocon/HoconProvider.kt) | [`source.conf`](https://github.com/uchuhimo/konf/blob/master/konf-hocon/src/test/resources/source/source.conf) |
+| JSON | `config.from.json` | [`JsonProvider`](https://github.com/uchuhimo/konf/blob/master/konf-core/src/main/kotlin/com/uchuhimo/konf/source/json/JsonProvider.kt) | [`source.json`](https://github.com/uchuhimo/konf/blob/master/konf-core/src/test/resources/source/source.json) |
+| properties | `config.from.properties` | [`PropertiesProvider`](https://github.com/uchuhimo/konf/blob/master/konf-core/src/main/kotlin/com/uchuhimo/konf/source/properties/PropertiesProvider.kt) | [`source.properties`](https://github.com/uchuhimo/konf/blob/master/konf-core/src/test/resources/source/source.properties) |
+| [TOML](https://github.com/toml-lang/toml) | `config.from.toml` | [`TomlProvider`](https://github.com/uchuhimo/konf/blob/master/konf-toml/src/main/kotlin/com/uchuhimo/konf/source/toml/TomlProvider.kt) | [`source.toml`](https://github.com/uchuhimo/konf/blob/master/konf-toml/src/test/resources/source/source.toml) |
+| XML | `config.from.xml` | [`XmlProvider`](https://github.com/uchuhimo/konf/blob/master/konf-xml/src/main/kotlin/com/uchuhimo/konf/source/xml/XmlProvider.kt) | [`source.xml`](https://github.com/uchuhimo/konf/blob/master/konf-xml/src/test/resources/source/source.xml) |
+| YAML | `config.from.yaml` | [`YamlProvider`](https://github.com/uchuhimo/konf/blob/master/konf-yaml/src/main/kotlin/com/uchuhimo/konf/source/yaml/YamlProvider.kt) | [`source.yaml`](https://github.com/uchuhimo/konf/blob/master/konf-yaml/src/test/resources/source/source.yaml) |
+| JavaScript | `config.from.js` | [`JsProvider`](https://github.com/uchuhimo/konf/blob/master/konf-js/src/main/kotlin/com/uchuhimo/konf/source/js/JsProvider.kt) | [`source.js`](https://github.com/uchuhimo/konf/blob/master/konf-js/src/test/resources/source/source.js) |
+| hierarchical map | `config.from.map.hierarchical` | - | [`MapSourceLoadSpec`](https://github.com/uchuhimo/konf/blob/master/konf-core/src/test/kotlin/com/uchuhimo/konf/source/base/MapSourceLoadSpec.kt) |
+| map in key-value format | `config.from.map.kv` | - | [`KVSourceSpec`](https://github.com/uchuhimo/konf/blob/master/konf-core/src/test/kotlin/com/uchuhimo/konf/source/base/KVSourceSpec.kt) |
+| map in flat format | `config.from.map.flat` | - | [`FlatSourceLoadSpec`](https://github.com/uchuhimo/konf/blob/master/konf-core/src/test/kotlin/com/uchuhimo/konf/source/base/FlatSourceLoadSpec.kt) |
+| system properties | `config.from.env()` | [`EnvProvider`](https://github.com/uchuhimo/konf/blob/master/konf-core/src/main/kotlin/com/uchuhimo/konf/source/env/EnvProvider.kt) | - |
+| system environment | `config.from.systemProperties()` | [`PropertiesProvider`](https://github.com/uchuhimo/konf/blob/master/konf-core/src/main/kotlin/com/uchuhimo/konf/source/properties/PropertiesProvider.kt) | - |
+
+These sources can also be manually created using their provider, and then loaded into config by `config.withSource(source)`.
 
 Format of system properties source is same with that of properties source. System environment source follows the same mapping convention with properties source, but with the following name convention:
 
@@ -505,7 +508,23 @@ config.from.enable(Feature.FAIL_ON_UNKNOWN_PATH).properties.file("/path/to/file"
     .from.json.resource("server.json")
 ```
 
+## Prefix/Merge operations for source/config/config spec
+
+All of source/config/config spec support add prefix operation, remove prefix operation and merge operation as shown below:
+
+| Type | Add Prefix | Remove Prefix | Merge
+| - | - | - | - |
+| `Source` | `source.withPrefix(prefix)` or `Prefix(prefix) + source` | `source[prefix]` | `fallback + facade` or `facade.withFallback(fallback)` |
+| `Config` | `config.withPrefix(prefix)` or `Prefix(prefix) + config` | `config.at(prefix)` | `fallback + facade` or `facade.withFallback(fallback)` |
+| `Spec` | `spec.withPrefix(prefix)` or `Prefix(prefix) + spec` | `spec[prefix]` | `fallback + facade` or `facade.withFallback(fallback)` |
+
 ## Export/Reload values in config
+
+Export all values in config as a tree:
+
+```kotlin
+val tree = config.toTree()
+```
 
 Export all values in config to map in key-value format:
 

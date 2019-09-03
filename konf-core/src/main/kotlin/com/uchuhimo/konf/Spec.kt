@@ -105,6 +105,16 @@ interface Spec {
     }
 
     /**
+     * Returns a config spec backing by the specified fallback config spec.
+     *
+     * New items will be added to the current config spec.
+     *
+     * @param spec the fallback config spec
+     * @return a config spec backing by the specified fallback config spec
+     */
+    fun withFallback(spec: Spec): Spec = spec + this
+
+    /**
      * Returns sub-spec in the specified path.
      *
      * @param path the specified path

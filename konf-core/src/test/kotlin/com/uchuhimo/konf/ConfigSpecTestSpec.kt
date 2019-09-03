@@ -231,6 +231,41 @@ object ConfigSpecTestSpec : Spek({
                 }
             }
         }
+        group("withFallback operation") {
+            val spec1 = object : ConfigSpec("a") {
+                val item1 by required<Int>()
+            }
+            val spec2 = object : ConfigSpec("b") {
+                val item2 by required<Int>()
+            }
+            @Suppress("NAME_SHADOWING")
+            val spec by memoized { spec2.withFallback(spec1) }
+            on("add a valid item") {
+                it("should contains the item in the facade spec") {
+                    val item by Spec.dummy.required<Int>()
+                    spec.addItem(item)
+                    assertThat(item, isIn(spec.items))
+                    assertThat(item, isIn(spec2.items))
+                }
+            }
+            on("add a repeated item") {
+                it("should throw RepeatedItemException") {
+                    assertThat({ spec.addItem(spec1.item1) },
+                        throws(has(RepeatedItemException::name, equalTo("item1"))))
+                }
+            }
+            on("get the list of items") {
+                it("should contains all items in both the facade spec and the fallback spec") {
+                    assertThat(spec.items, equalTo(spec1.items + spec2.items))
+                }
+            }
+            on("qualify item name") {
+                it("should add proper prefix") {
+                    assertThat(spec.qualify(spec1.item1), equalTo("a.item1"))
+                    assertThat(spec.qualify(spec2.item2), equalTo("b.item2"))
+                }
+            }
+        }
         group("prefix inference") {
             val configSpecInstance = ConfigSpec()
             on("instance of `ConfigSpec` class") {
