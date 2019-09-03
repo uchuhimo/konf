@@ -50,6 +50,7 @@ A type-safe cascading configuration library for Kotlin/Java, supporting most con
   - [Optional features](#optional-features)
   - [Build from source](#build-from-source)
   - [Breaking Changes](#breaking-changes)
+    - [v0.17.0](#v0170)
     - [v0.15](#v015)
     - [v0.10](#v010)
 - [License](#license)
@@ -79,20 +80,20 @@ Konf is modular, you can use different modules for different sources:
 <dependency>
   <groupId>com.uchuhimo</groupId>
   <artifactId>konf</artifactId>
-  <version>0.16.0</version>
+  <version>0.17.0</version>
 </dependency>
 ```
 
 ### Gradle
 
 ```groovy
-compile 'com.uchuhimo:konf:0.16.0'
+compile 'com.uchuhimo:konf:0.17.0'
 ```
 
 ### Gradle Kotlin DSL
 
 ```kotlin
-compile(group = "com.uchuhimo", name = "konf", version = "0.16.0")
+compile(group = "com.uchuhimo", name = "konf", version = "0.17.0")
 ```
 
 ### Maven (master snapshot)
@@ -652,6 +653,13 @@ gradlew clean install
 ```
 
 ## Breaking Changes
+
+### v0.17.0
+
+After migrate to tree-based source APIs, many deprecated APIs are removed, including:
+
+- `Source`: all `isXXX` and `toXXX` APIs
+- `Config`: `layer`, `addSource` and `withSourceFrom`
 
 ### v0.15
 
