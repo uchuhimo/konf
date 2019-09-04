@@ -2,7 +2,6 @@ import org.gradle.api.Project
 import org.gradle.api.artifacts.dsl.RepositoryHandler
 import org.gradle.kotlin.dsl.maven
 import org.w3c.dom.Element
-import java.io.File
 import java.util.Properties
 
 fun Project.getPrivateProperty(key: String): String {
