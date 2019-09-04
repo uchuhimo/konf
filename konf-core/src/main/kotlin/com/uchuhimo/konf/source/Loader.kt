@@ -19,6 +19,7 @@ package com.uchuhimo.konf.source
 import com.uchuhimo.konf.Config
 import com.uchuhimo.konf.Feature
 import io.methvin.watchservice.MacOSXListeningWatchService
+import io.methvin.watchservice.WatchablePath
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.GlobalScope
 import kotlinx.coroutines.delay
@@ -114,7 +115,8 @@ class Loader(
                 val watcher = if (isMac) MacOSXListeningWatchService()
                 else FileSystems.getDefault().newWatchService()
                 val path = file.toPath().parent
-                path.register(watcher, StandardWatchEventKinds.ENTRY_MODIFY)
+                val watchablePath = if (isMac) WatchablePath(path) else path
+                watchablePath.register(watcher, StandardWatchEventKinds.ENTRY_MODIFY)
                 GlobalScope.launch(context) {
                     while (true) {
                         delay(unit.toMillis(delayTime))
