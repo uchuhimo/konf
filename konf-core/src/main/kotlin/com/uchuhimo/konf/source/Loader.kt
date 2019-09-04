@@ -18,6 +18,7 @@ package com.uchuhimo.konf.source
 
 import com.uchuhimo.konf.Config
 import com.uchuhimo.konf.Feature
+import io.methvin.watchservice.MacOSXListeningWatchService
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.GlobalScope
 import kotlinx.coroutines.delay
@@ -109,7 +110,9 @@ class Loader(
         return provider.fromFile(file, optional).let { source ->
             config.withLoadTrigger("watch ${source.description}") { newConfig, load ->
                 load(source)
-                val watcher = FileSystems.getDefault().newWatchService()
+                val isMac = "mac" in System.getProperty("os.name").toLowerCase()
+                val watcher = if (isMac) MacOSXListeningWatchService()
+                else FileSystems.getDefault().newWatchService()
                 val path = file.toPath().parent
                 path.register(watcher, StandardWatchEventKinds.ENTRY_MODIFY)
                 GlobalScope.launch(context) {
