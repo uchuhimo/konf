@@ -18,8 +18,6 @@ package com.uchuhimo.konf.source
 
 import com.uchuhimo.konf.Config
 import com.uchuhimo.konf.Feature
-import io.methvin.watchservice.MacOSXListeningWatchService
-import io.methvin.watchservice.WatchablePath
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.GlobalScope
 import kotlinx.coroutines.delay
@@ -34,6 +32,7 @@ import java.nio.file.StandardWatchEventKinds
 import java.nio.file.WatchEvent
 import java.util.concurrent.TimeUnit
 import kotlin.coroutines.CoroutineContext
+import com.sun.nio.file.SensitivityWatchEventModifier
 
 /**
  * Loader to load source from various input formats.
@@ -112,11 +111,29 @@ class Loader(
             config.withLoadTrigger("watch ${source.description}") { newConfig, load ->
                 load(source)
                 val path = file.toPath().parent
-                val isMac = false
-                val watcher = if (isMac) MacOSXListeningWatchService()
-                else FileSystems.getDefault().newWatchService()
-                val watchablePath = if (isMac) WatchablePath(path) else path
-                watchablePath.register(watcher, StandardWatchEventKinds.ENTRY_MODIFY)
+                val isMac = "mac" in System.getProperty("os.name").toLowerCase()
+                val watcher = FileSystems.getDefault().newWatchService()
+                val watchablePath = path
+                if (isMac) {
+                    watchablePath.register(
+                        watcher,
+                        arrayOf(
+                            StandardWatchEventKinds.ENTRY_MODIFY,
+                            StandardWatchEventKinds.ENTRY_CREATE
+                        ),
+                        SensitivityWatchEventModifier.HIGH
+                    )
+                } else {
+                    watchablePath.register(
+                        watcher,
+                        StandardWatchEventKinds.ENTRY_MODIFY,
+                        StandardWatchEventKinds.ENTRY_CREATE
+                    )
+                }
+//                val watcher = if (isMac) MacOSXListeningWatchService()
+//                else FileSystems.getDefault().newWatchService()
+//                val watchablePath = if (isMac) WatchablePath(path) else path
+//                watchablePath.register(watcher, StandardWatchEventKinds.ENTRY_MODIFY)
                 GlobalScope.launch(context) {
                     while (true) {
                         delay(unit.toMillis(delayTime))
@@ -129,7 +146,8 @@ class Loader(
                                 val filename = event.context()
                                 if (kind == StandardWatchEventKinds.OVERFLOW) {
                                     continue
-                                } else if (kind == StandardWatchEventKinds.ENTRY_MODIFY &&
+                                } else if ((kind == StandardWatchEventKinds.ENTRY_MODIFY ||
+                                        kind == StandardWatchEventKinds.ENTRY_CREATE) &&
                                     filename.toString() == file.name) {
                                     newConfig.lock {
                                         newConfig.clear()
