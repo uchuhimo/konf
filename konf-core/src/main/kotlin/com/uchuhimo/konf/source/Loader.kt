@@ -16,7 +16,6 @@
 
 package com.uchuhimo.konf.source
 
-import com.sun.nio.file.SensitivityWatchEventModifier
 import com.uchuhimo.konf.Config
 import com.uchuhimo.konf.Feature
 import kotlinx.coroutines.Dispatchers
@@ -113,49 +112,43 @@ class Loader(
                 val path = file.toPath().parent
                 val isMac = "mac" in System.getProperty("os.name").toLowerCase()
                 val watcher = FileSystems.getDefault().newWatchService()
-                val watchablePath = path
-                if (isMac) {
-                    watchablePath.register(
-                        watcher,
-                        arrayOf(
-                            StandardWatchEventKinds.ENTRY_MODIFY,
-                            StandardWatchEventKinds.ENTRY_CREATE
-                        ),
-                        SensitivityWatchEventModifier.HIGH
-                    )
-                } else {
-                    watchablePath.register(
-                        watcher,
-                        StandardWatchEventKinds.ENTRY_MODIFY,
-                        StandardWatchEventKinds.ENTRY_CREATE
-                    )
-                }
+                path.register(
+                    watcher,
+                    StandardWatchEventKinds.ENTRY_MODIFY,
+                    StandardWatchEventKinds.ENTRY_CREATE
+                )
                 GlobalScope.launch(context) {
                     while (true) {
                         delay(unit.toMillis(delayTime))
-                        val key = watcher.poll()
-                        if (key != null) {
-                            for (event in key.pollEvents()) {
-                                val kind = event.kind()
-                                @Suppress("UNCHECKED_CAST")
-                                event as WatchEvent<Path>
-                                val filename = event.context()
-                                if (filename.toString() == file.name) {
-                                    if (kind == StandardWatchEventKinds.OVERFLOW) {
-//                                    continue
-                                        throw RuntimeException()
-                                    } else if (kind == StandardWatchEventKinds.ENTRY_MODIFY ||
-                                        kind == StandardWatchEventKinds.ENTRY_CREATE) {
-                                        newConfig.lock {
-                                            newConfig.clear()
-                                            load(provider.fromFile(file, optional))
+                        if (isMac) {
+                            newConfig.lock {
+                                newConfig.clear()
+                                load(provider.fromFile(file, optional))
+                            }
+                        } else {
+                            val key = watcher.poll()
+                            if (key != null) {
+                                for (event in key.pollEvents()) {
+                                    val kind = event.kind()
+                                    @Suppress("UNCHECKED_CAST")
+                                    event as WatchEvent<Path>
+                                    val filename = event.context()
+                                    if (filename.toString() == file.name) {
+                                        if (kind == StandardWatchEventKinds.OVERFLOW) {
+                                            continue
+                                        } else if (kind == StandardWatchEventKinds.ENTRY_MODIFY ||
+                                            kind == StandardWatchEventKinds.ENTRY_CREATE) {
+                                            newConfig.lock {
+                                                newConfig.clear()
+                                                load(provider.fromFile(file, optional))
+                                            }
                                         }
                                     }
-                                }
-                                val valid = key.reset()
-                                if (!valid) {
-                                    watcher.close()
-                                    throw InvalidWatchKeyException(source)
+                                    val valid = key.reset()
+                                    if (!valid) {
+                                        watcher.close()
+                                        throw InvalidWatchKeyException(source)
+                                    }
                                 }
                             }
                         }
