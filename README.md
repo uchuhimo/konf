@@ -80,20 +80,20 @@ Konf is modular, you can use different modules for different sources:
 <dependency>
   <groupId>com.uchuhimo</groupId>
   <artifactId>konf</artifactId>
-  <version>0.17.0</version>
+  <version>0.17.1</version>
 </dependency>
 ```
 
 ### Gradle
 
 ```groovy
-compile 'com.uchuhimo:konf:0.17.0'
+compile 'com.uchuhimo:konf:0.17.1'
 ```
 
 ### Gradle Kotlin DSL
 
 ```kotlin
-compile(group = "com.uchuhimo", name = "konf", version = "0.17.0")
+compile(group = "com.uchuhimo", name = "konf", version = "0.17.1")
 ```
 
 ### Maven (master snapshot)
@@ -131,6 +131,22 @@ Add dependencies:
 
 ```groovy
 compile 'com.github.uchuhimo.konf:konf:master-SNAPSHOT'
+```
+
+### Gradle Kotlin DSL (master snapshot)
+
+Add JitPack repository:
+
+```kotlin
+repositories {
+    maven(url = "https://jitpack.io")
+}
+```
+
+Add dependencies:
+
+```kotlin
+compile(group = "com.github.uchuhimo.konf", name = "konf", version = "master-SNAPSHOT")
 ```
 
 ## Quick start
