@@ -12,7 +12,6 @@ val bintrayKeyProperty by extra { getPrivateProperty("bintrayKey") }
 val ossUserToken by extra { getPrivateProperty("ossUserToken") }
 val ossUserPassword by extra { getPrivateProperty("ossUserPassword") }
 val gpgPassphrase by extra { getPrivateProperty("gpgPassphrase") }
-val useAliyun by extra { getPrivateProperty("useAliyun") }
 
 val wrapper by tasks.existing(Wrapper::class)
 wrapper {
@@ -22,7 +21,7 @@ wrapper {
 
 buildscript {
     repositories {
-        if (useAliyun == "true") {
+        if (useAliyun) {
             aliyunMaven()
         }
         jcenter()
@@ -66,7 +65,7 @@ allprojects {
     version = "0.17.0"
 
     repositories {
-        if (useAliyun == "true") {
+        if (useAliyun) {
             aliyunMaven()
         }
         jcenter()

@@ -14,6 +14,14 @@ fun Project.getPrivateProperty(key: String): String {
     }
 }
 
+val Project.useAliyun: Boolean get() = if (file("private.properties").exists()) {
+    val properties = Properties()
+    properties.load(file("private.properties").inputStream())
+    properties.getProperty("useAliyun")?.toBoolean() ?: false
+} else {
+    false
+}
+
 fun RepositoryHandler.aliyunMaven() = maven(url = "https://maven.aliyun.com/repository/central")
 
 fun RepositoryHandler.aliyunGradlePluginPortal() = maven(url = "https://maven.aliyun.com/repository/gradle-plugin")
