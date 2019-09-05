@@ -75,7 +75,7 @@ object LoaderSpec : SubjectSpek<Loader>({
             val originalValue = config[SourceType.type]
             file.writeText("type = newValue")
             runBlocking(Dispatchers.Sequential) {
-                delay(TimeUnit.SECONDS.toMillis(5))
+                delay(TimeUnit.SECONDS.toMillis(10))
             }
             val newValue = config[SourceType.type]
             it("should return a config which contains value in file") {
@@ -91,7 +91,7 @@ object LoaderSpec : SubjectSpek<Loader>({
             val originalValue = config[SourceType.type]
             file.writeText("type = newValue")
             runBlocking(Dispatchers.Sequential) {
-                delay(TimeUnit.SECONDS.toMillis(5))
+                delay(TimeUnit.SECONDS.toMillis(10))
             }
             val newValue = config[SourceType.type]
             it("should return a config which contains value in file") {

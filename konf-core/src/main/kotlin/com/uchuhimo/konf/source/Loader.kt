@@ -16,6 +16,7 @@
 
 package com.uchuhimo.konf.source
 
+import com.sun.nio.file.SensitivityWatchEventModifier
 import com.uchuhimo.konf.Config
 import com.uchuhimo.konf.Feature
 import kotlinx.coroutines.Dispatchers
@@ -32,7 +33,6 @@ import java.nio.file.StandardWatchEventKinds
 import java.nio.file.WatchEvent
 import java.util.concurrent.TimeUnit
 import kotlin.coroutines.CoroutineContext
-import com.sun.nio.file.SensitivityWatchEventModifier
 
 /**
  * Loader to load source from various input formats.
@@ -130,10 +130,6 @@ class Loader(
                         StandardWatchEventKinds.ENTRY_CREATE
                     )
                 }
-//                val watcher = if (isMac) MacOSXListeningWatchService()
-//                else FileSystems.getDefault().newWatchService()
-//                val watchablePath = if (isMac) WatchablePath(path) else path
-//                watchablePath.register(watcher, StandardWatchEventKinds.ENTRY_MODIFY)
                 GlobalScope.launch(context) {
                     while (true) {
                         delay(unit.toMillis(delayTime))
