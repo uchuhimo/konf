@@ -12,6 +12,7 @@ val bintrayKeyProperty by extra { getPrivateProperty("bintrayKey") }
 val ossUserToken by extra { getPrivateProperty("ossUserToken") }
 val ossUserPassword by extra { getPrivateProperty("ossUserPassword") }
 val gpgPassphrase by extra { getPrivateProperty("gpgPassphrase") }
+val useAliyun by extra { getPrivateProperty("useAliyun") }
 
 val wrapper by tasks.existing(Wrapper::class)
 wrapper {
@@ -21,7 +22,9 @@ wrapper {
 
 buildscript {
     repositories {
-        aliyunMaven()
+        if (useAliyun == "true") {
+            aliyunMaven()
+        }
         jcenter()
         maven(url = "https://dl.bintray.com/kotlin/kotlin-eap")
     }
@@ -63,7 +66,9 @@ allprojects {
     version = "0.17.0"
 
     repositories {
-        aliyunMaven()
+        if (useAliyun == "true") {
+            aliyunMaven()
+        }
         jcenter()
     }
 }

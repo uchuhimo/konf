@@ -18,8 +18,6 @@ package com.uchuhimo.konf.source
 
 import com.uchuhimo.konf.Config
 import com.uchuhimo.konf.Feature
-import io.methvin.watcher.DirectoryChangeEvent
-import io.methvin.watcher.DirectoryWatcher
 import io.methvin.watchservice.MacOSXListeningWatchService
 import io.methvin.watchservice.WatchablePath
 import kotlinx.coroutines.Dispatchers
@@ -114,52 +112,34 @@ class Loader(
             config.withLoadTrigger("watch ${source.description}") { newConfig, load ->
                 load(source)
                 val path = file.toPath().parent
-                val isMac = "mac" in System.getProperty("os.name").toLowerCase()
-                if (isMac) {
-                    DirectoryWatcher.builder()
-                        .path(path) // or use paths(directoriesToWatch)
-                        .listener { event ->
-                            val filename = event.path()
-                            if (event.eventType() == DirectoryChangeEvent.EventType.MODIFY &&
-                                filename.toString() == file.name) {
-                                newConfig.lock {
-                                    newConfig.clear()
-                                    load(provider.fromFile(file, optional))
+                val isMac = false
+                val watcher = if (isMac) MacOSXListeningWatchService()
+                else FileSystems.getDefault().newWatchService()
+                val watchablePath = if (isMac) WatchablePath(path) else path
+                watchablePath.register(watcher, StandardWatchEventKinds.ENTRY_MODIFY)
+                GlobalScope.launch(context) {
+                    while (true) {
+                        delay(unit.toMillis(delayTime))
+                        val key = watcher.poll()
+                        if (key != null) {
+                            for (event in key.pollEvents()) {
+                                val kind = event.kind()
+                                @Suppress("UNCHECKED_CAST")
+                                event as WatchEvent<Path>
+                                val filename = event.context()
+                                if (kind == StandardWatchEventKinds.OVERFLOW) {
+                                    continue
+                                } else if (kind == StandardWatchEventKinds.ENTRY_MODIFY &&
+                                    filename.toString() == file.name) {
+                                    newConfig.lock {
+                                        newConfig.clear()
+                                        load(provider.fromFile(file, optional))
+                                    }
                                 }
-                            }
-                        }
-                        .fileHashing(false)
-                        .build()
-                        .watchAsync()
-                } else {
-                    val watcher = if (isMac) MacOSXListeningWatchService()
-                    else FileSystems.getDefault().newWatchService()
-                    val watchablePath = if (isMac) WatchablePath(path) else path
-                    watchablePath.register(watcher, StandardWatchEventKinds.ENTRY_MODIFY)
-                    GlobalScope.launch(context) {
-                        while (true) {
-                            delay(unit.toMillis(delayTime))
-                            val key = watcher.poll()
-                            if (key != null) {
-                                for (event in key.pollEvents()) {
-                                    val kind = event.kind()
-                                    @Suppress("UNCHECKED_CAST")
-                                    event as WatchEvent<Path>
-                                    val filename = event.context()
-                                    if (kind == StandardWatchEventKinds.OVERFLOW) {
-                                        continue
-                                    } else if (kind == StandardWatchEventKinds.ENTRY_MODIFY &&
-                                        filename.toString() == file.name) {
-                                        newConfig.lock {
-                                            newConfig.clear()
-                                            load(provider.fromFile(file, optional))
-                                        }
-                                    }
-                                    val valid = key.reset()
-                                    if (!valid) {
-                                        watcher.close()
-                                        throw InvalidWatchKeyException(source)
-                                    }
+                                val valid = key.reset()
+                                if (!valid) {
+                                    watcher.close()
+                                    throw InvalidWatchKeyException(source)
                                 }
                             }
                         }

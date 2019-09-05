@@ -69,13 +69,14 @@ object LoaderSpec : SubjectSpek<Loader>({
                 assertThat(config[SourceType.type], equalTo("file"))
             }
         }
+        val isMac = "mac" in System.getProperty("os.name").toLowerCase()
         on("load from watched file") {
             val file = tempFileOf("type = originalValue")
             val config = subject.watchFile(file, context = Dispatchers.Sequential)
             val originalValue = config[SourceType.type]
             file.writeText("type = newValue")
             runBlocking(Dispatchers.Sequential) {
-                delay(TimeUnit.SECONDS.toMillis(5))
+                delay(TimeUnit.SECONDS.toMillis(if (isMac) 10 else 5))
             }
             val newValue = config[SourceType.type]
             it("should return a config which contains value in file") {
@@ -91,7 +92,7 @@ object LoaderSpec : SubjectSpek<Loader>({
             val originalValue = config[SourceType.type]
             file.writeText("type = newValue")
             runBlocking(Dispatchers.Sequential) {
-                delay(TimeUnit.SECONDS.toMillis(5))
+                delay(TimeUnit.SECONDS.toMillis(if (isMac) 10 else 5))
             }
             val newValue = config[SourceType.type]
             it("should return a config which contains value in file") {
