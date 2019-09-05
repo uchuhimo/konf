@@ -70,35 +70,39 @@ object LoaderSpec : SubjectSpek<Loader>({
             }
         }
         on("load from watched file") {
-            val file = tempFileOf("type = originalValue")
-            val config = subject.watchFile(file, context = Dispatchers.Sequential)
-            val originalValue = config[SourceType.type]
-            file.writeText("type = newValue")
-            runBlocking(Dispatchers.Sequential) {
-                delay(TimeUnit.SECONDS.toMillis(10))
-            }
-            val newValue = config[SourceType.type]
-            it("should return a config which contains value in file") {
-                assertThat(originalValue, equalTo("originalValue"))
-            }
-            it("should load new value when file has been changed") {
-                assertThat(newValue, equalTo("newValue"))
+            newSequentialDispatcher().use { dispatcher ->
+                val file = tempFileOf("type = originalValue")
+                val config = subject.watchFile(file, context = dispatcher)
+                val originalValue = config[SourceType.type]
+                file.writeText("type = newValue")
+                runBlocking(dispatcher) {
+                    delay(TimeUnit.SECONDS.toMillis(5))
+                }
+                val newValue = config[SourceType.type]
+                it("should return a config which contains value in file") {
+                    assertThat(originalValue, equalTo("originalValue"))
+                }
+                it("should load new value when file has been changed") {
+                    assertThat(newValue, equalTo("newValue"))
+                }
             }
         }
         on("load from watched file path") {
-            val file = tempFileOf("type = originalValue")
-            val config = subject.watchFile(file.toString(), context = Dispatchers.Sequential)
-            val originalValue = config[SourceType.type]
-            file.writeText("type = newValue")
-            runBlocking(Dispatchers.Sequential) {
-                delay(TimeUnit.SECONDS.toMillis(10))
-            }
-            val newValue = config[SourceType.type]
-            it("should return a config which contains value in file") {
-                assertThat(originalValue, equalTo("originalValue"))
-            }
-            it("should load new value when file has been changed") {
-                assertThat(newValue, equalTo("newValue"))
+            newSequentialDispatcher().use { dispatcher ->
+                val file = tempFileOf("type = originalValue")
+                val config = subject.watchFile(file.toString(), context = dispatcher)
+                val originalValue = config[SourceType.type]
+                file.writeText("type = newValue")
+                runBlocking(dispatcher) {
+                    delay(TimeUnit.SECONDS.toMillis(5))
+                }
+                val newValue = config[SourceType.type]
+                it("should return a config which contains value in file") {
+                    assertThat(originalValue, equalTo("originalValue"))
+                }
+                it("should load new value when file has been changed") {
+                    assertThat(newValue, equalTo("newValue"))
+                }
             }
         }
         on("load from string") {

@@ -21,6 +21,8 @@ import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.asCoroutineDispatcher
 import java.util.concurrent.Executors
 
-private val dispatcher = Executors.newSingleThreadExecutor().asCoroutineDispatcher()
+fun newSequentialDispatcher() = Executors.newSingleThreadExecutor().asCoroutineDispatcher()
+
+private val dispatcher = newSequentialDispatcher()
 
 val Dispatchers.Sequential: CoroutineDispatcher get() = dispatcher
