@@ -140,14 +140,16 @@ class Loader(
                                 @Suppress("UNCHECKED_CAST")
                                 event as WatchEvent<Path>
                                 val filename = event.context()
-                                if (kind == StandardWatchEventKinds.OVERFLOW) {
-                                    continue
-                                } else if ((kind == StandardWatchEventKinds.ENTRY_MODIFY ||
-                                        kind == StandardWatchEventKinds.ENTRY_CREATE) &&
-                                    filename.toString() == file.name) {
-                                    newConfig.lock {
-                                        newConfig.clear()
-                                        load(provider.fromFile(file, optional))
+                                if (filename.toString() == file.name) {
+                                    if (kind == StandardWatchEventKinds.OVERFLOW) {
+//                                    continue
+                                        throw RuntimeException()
+                                    } else if (kind == StandardWatchEventKinds.ENTRY_MODIFY ||
+                                        kind == StandardWatchEventKinds.ENTRY_CREATE) {
+                                        newConfig.lock {
+                                            newConfig.clear()
+                                            load(provider.fromFile(file, optional))
+                                        }
                                     }
                                 }
                                 val valid = key.reset()
