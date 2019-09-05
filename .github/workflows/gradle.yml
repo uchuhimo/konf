@@ -1,10 +1,10 @@
-name: Java CI
+name: Konf CI
 
 on: [push]
 
 jobs:
   build:
-    name: Test on JDK ${{ matrix.java_version }} and ${{ matrix.os }}
+    name: Build on JDK ${{ matrix.java_version }} and ${{ matrix.os }}
     runs-on: ${{ matrix.os }}
     strategy:
       matrix:
@@ -18,4 +18,4 @@ jobs:
       with:
         java-version: ${{ matrix.java_version }}
     - name: Build with Gradle
-      run: ./gradlew build --info
+      run: ./gradlew build
