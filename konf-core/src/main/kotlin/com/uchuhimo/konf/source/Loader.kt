@@ -30,8 +30,11 @@ import java.nio.file.FileSystems
 import java.nio.file.Path
 import java.nio.file.StandardWatchEventKinds
 import java.nio.file.WatchEvent
+import java.security.DigestInputStream
+import java.security.MessageDigest
 import java.util.concurrent.TimeUnit
 import kotlin.coroutines.CoroutineContext
+
 
 /**
  * Loader to load source from various input formats.
@@ -88,6 +91,14 @@ class Loader(
     fun file(file: String, optional: Boolean = this.optional): Config =
         config.withSource(provider.fromFile(file, optional))
 
+
+    private val File.digest: ByteArray
+        get() {
+            val messageDigest = MessageDigest.getInstance("MD5")
+            DigestInputStream(inputStream().buffered(), messageDigest).use { it.readBytes() }
+            return messageDigest.digest()
+        }
+
     /**
      * Returns a child config containing values from specified file,
      * and reloads values when file content has been changed.
@@ -117,13 +128,18 @@ class Loader(
                     StandardWatchEventKinds.ENTRY_MODIFY,
                     StandardWatchEventKinds.ENTRY_CREATE
                 )
+                var digest = file.digest
                 GlobalScope.launch(context) {
                     while (true) {
                         delay(unit.toMillis(delayTime))
                         if (isMac) {
-                            newConfig.lock {
-                                newConfig.clear()
-                                load(provider.fromFile(file, optional))
+                            val newDigest = file.digest
+                            if (!newDigest.contentEquals(digest)) {
+                                digest = newDigest
+                                newConfig.lock {
+                                    newConfig.clear()
+                                    load(provider.fromFile(file, optional))
+                                }
                             }
                         } else {
                             val key = watcher.poll()
