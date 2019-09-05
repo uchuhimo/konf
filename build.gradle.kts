@@ -78,7 +78,6 @@ subprojects {
             dependency("org.apiguardian:apiguardian-api:${Versions.apiguardian}")
             dependency("org.jetbrains.kotlinx:kotlinx-coroutines-core:${Versions.coroutines}")
             dependency("org.reflections:reflections:${Versions.reflections}")
-            dependency("io.methvin:directory-watcher:${Versions.directoryWatcher}")
 
             arrayOf("stdlib", "reflect", "stdlib-jdk8").forEach { name ->
                 dependency(kotlin(name, Versions.kotlin))
@@ -117,7 +116,6 @@ subprojects {
         implementation("org.jetbrains.kotlinx:kotlinx-coroutines-core")
         implementation("org.apiguardian:apiguardian-api")
         implementation("org.reflections:reflections")
-        implementation("io.methvin:directory-watcher")
         arrayOf("core", "annotations", "databind").forEach { name ->
             implementation(jacksonCore(name))
         }

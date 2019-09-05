@@ -35,7 +35,6 @@ import java.security.MessageDigest
 import java.util.concurrent.TimeUnit
 import kotlin.coroutines.CoroutineContext
 
-
 /**
  * Loader to load source from various input formats.
  *
@@ -90,7 +89,6 @@ class Loader(
      */
     fun file(file: String, optional: Boolean = this.optional): Config =
         config.withSource(provider.fromFile(file, optional))
-
 
     private val File.digest: ByteArray
         get() {
