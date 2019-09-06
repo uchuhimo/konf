@@ -32,9 +32,15 @@ fun main(args: Array<String>) {
         val host = config<String>("server.host")
     }
     config.contains(Server.host)
+    // or
+    Server.host in config
     config.contains("server.host")
+    // or
+    "server.host" in config
     config[Server.port] = 80
     config["server.port"] = 80
+    config.containsRequired()
+    config.validateRequired()
     config.unset(Server.port)
     config.unset("server.port")
     val basePort by ConfigSpec("server").required<Int>()

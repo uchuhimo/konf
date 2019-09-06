@@ -32,6 +32,7 @@ A type-safe cascading configuration library for Kotlin/Java, supporting most con
     - [Gradle Kotlin DSL](#gradle-kotlin-dsl)
     - [Maven (master snapshot)](#maven-master-snapshot)
     - [Gradle (master snapshot)](#gradle-master-snapshot)
+    - [Gradle Kotlin DSL (master snapshot)](#gradle-kotlin-dsl-master-snapshot)
   - [Quick start](#quick-start)
   - [Define items](#define-items)
   - [Use config](#use-config)
@@ -210,7 +211,7 @@ compile(group = "com.github.uchuhimo.konf", name = "konf", version = "master-SNA
 
 4. Retrieve values from config with type-safe APIs:
     ```kotlin
-    val server = Server(config[server.host], config[server.port])
+    val server = Server(config[ServerSpec.host], config[ServerSpec.port])
     server.start()
     ```
 
@@ -350,12 +351,16 @@ Check whether an item exists in config or not:
 
 ```kotlin
 config.contains(Server.host)
+// or
+Server.host in config
 ```
 
 Check whether an item name exists in config or not:
 
 ```kotlin
 config.contains("server.host")
+// or
+"server.host" in config
 ```
 
 Check whether all values of required items exist in config or not:
@@ -651,13 +656,13 @@ These features include:
 Build library with Gradle using the following command:
 
 ```
-gradlew clean assemble
+./gradlew clean assemble
 ```
 
 Test library with Gradle using the following command:
 
 ```
-gradlew clean test
+./gradlew clean test
 ```
 
 Since Gradle has excellent incremental build support, you can usually omit executing the `clean` task.
@@ -665,7 +670,7 @@ Since Gradle has excellent incremental build support, you can usually omit execu
 Install library in a local Maven repository for consumption in other projects via the following command:
 
 ```
-gradlew clean install
+./gradlew clean install
 ```
 
 ## Breaking Changes
