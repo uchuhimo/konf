@@ -71,6 +71,41 @@ object LoaderSpec : SubjectSpek<Loader>({
         }
         on("load from watched file") {
             val file = tempFileOf("type = originalValue")
+            val config = subject.watchFile(file, delayTime = 1, unit = TimeUnit.SECONDS, context = Dispatchers.Sequential)
+            val originalValue = config[SourceType.type]
+            file.writeText("type = newValue")
+            runBlocking(Dispatchers.Sequential) {
+                delay(TimeUnit.SECONDS.toMillis(1))
+            }
+            val newValue = config[SourceType.type]
+            it("should return a config which contains value in file") {
+                assertThat(originalValue, equalTo("originalValue"))
+            }
+            it("should load new value when file has been changed") {
+                assertThat(newValue, equalTo("newValue"))
+            }
+        }
+        on("load from watched file on macOS") {
+            val os = System.getProperty("os.name")
+            System.setProperty("os.name", "mac")
+            val file = tempFileOf("type = originalValue")
+            val config = subject.watchFile(file, delayTime = 1, unit = TimeUnit.SECONDS, context = Dispatchers.Sequential)
+            val originalValue = config[SourceType.type]
+            file.writeText("type = newValue")
+            runBlocking(Dispatchers.Sequential) {
+                delay(TimeUnit.SECONDS.toMillis(1))
+            }
+            val newValue = config[SourceType.type]
+            it("should return a config which contains value in file") {
+                assertThat(originalValue, equalTo("originalValue"))
+            }
+            it("should load new value when file has been changed") {
+                assertThat(newValue, equalTo("newValue"))
+            }
+            System.setProperty("os.name", os)
+        }
+        on("load from watched file with default delay time") {
+            val file = tempFileOf("type = originalValue")
             val config = subject.watchFile(file, context = Dispatchers.Sequential)
             val originalValue = config[SourceType.type]
             file.writeText("type = newValue")
@@ -86,6 +121,22 @@ object LoaderSpec : SubjectSpek<Loader>({
             }
         }
         on("load from watched file path") {
+            val file = tempFileOf("type = originalValue")
+            val config = subject.watchFile(file.toString(), delayTime = 1, unit = TimeUnit.SECONDS, context = Dispatchers.Sequential)
+            val originalValue = config[SourceType.type]
+            file.writeText("type = newValue")
+            runBlocking(Dispatchers.Sequential) {
+                delay(TimeUnit.SECONDS.toMillis(1))
+            }
+            val newValue = config[SourceType.type]
+            it("should return a config which contains value in file") {
+                assertThat(originalValue, equalTo("originalValue"))
+            }
+            it("should load new value when file has been changed") {
+                assertThat(newValue, equalTo("newValue"))
+            }
+        }
+        on("load from watched file path with default delay time") {
             val file = tempFileOf("type = originalValue")
             val config = subject.watchFile(file.toString(), context = Dispatchers.Sequential)
             val originalValue = config[SourceType.type]
@@ -167,6 +218,22 @@ object LoaderSpec : SubjectSpek<Loader>({
         }
         on("load from watched file URL") {
             val file = tempFileOf("type = originalValue")
+            val config = subject.watchUrl(file.toURI().toURL(), period = 1, unit = TimeUnit.SECONDS, context = Dispatchers.Sequential)
+            val originalValue = config[SourceType.type]
+            file.writeText("type = newValue")
+            runBlocking(Dispatchers.Sequential) {
+                delay(TimeUnit.SECONDS.toMillis(1))
+            }
+            val newValue = config[SourceType.type]
+            it("should return a config which contains value in URL") {
+                assertThat(originalValue, equalTo("originalValue"))
+            }
+            it("should load new value after URL content has been changed") {
+                assertThat(newValue, equalTo("newValue"))
+            }
+        }
+        on("load from watched file URL with default delay time") {
+            val file = tempFileOf("type = originalValue")
             val config = subject.watchUrl(file.toURI().toURL(), context = Dispatchers.Sequential)
             val originalValue = config[SourceType.type]
             file.writeText("type = newValue")
@@ -182,6 +249,23 @@ object LoaderSpec : SubjectSpek<Loader>({
             }
         }
         on("load from watched file URL string") {
+            val file = tempFileOf("type = originalValue")
+            val url = file.toURI().toURL()
+            val config = subject.watchUrl(url.toString(), period = 1, unit = TimeUnit.SECONDS, context = Dispatchers.Sequential)
+            val originalValue = config[SourceType.type]
+            file.writeText("type = newValue")
+            runBlocking(Dispatchers.Sequential) {
+                delay(TimeUnit.SECONDS.toMillis(1))
+            }
+            val newValue = config[SourceType.type]
+            it("should return a config which contains value in URL") {
+                assertThat(originalValue, equalTo("originalValue"))
+            }
+            it("should load new value after URL content has been changed") {
+                assertThat(newValue, equalTo("newValue"))
+            }
+        }
+        on("load from watched file URL string with default delay time") {
             val file = tempFileOf("type = originalValue")
             val url = file.toURI().toURL()
             val config = subject.watchUrl(url.toString(), context = Dispatchers.Sequential)

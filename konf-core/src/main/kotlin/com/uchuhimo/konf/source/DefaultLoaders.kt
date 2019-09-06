@@ -298,7 +298,7 @@ class DefaultLoaders(
      * Throws [UnsupportedExtensionException] if the url extension is unsupported.
      *
      * @param url specified url
-     * @param delayTime delay to observe between every check. The default value is 5.
+     * @param period reload period. The default value is 5.
      * @param unit time unit of delay. The default value is [TimeUnit.SECONDS].
      * @param context context of the coroutine. The default value is [Dispatchers.Default].
      * @param optional whether the source is optional
@@ -307,12 +307,12 @@ class DefaultLoaders(
      */
     fun watchUrl(
         url: URL,
-        delayTime: Long = 5,
+        period: Long = 5,
         unit: TimeUnit = TimeUnit.SECONDS,
         context: CoroutineContext = Dispatchers.Default,
         optional: Boolean = this.optional
     ): Config = dispatchExtension(File(url.path).extension, url.toString())
-        .watchUrl(url, delayTime, unit, context, optional)
+        .watchUrl(url, period, unit, context, optional)
 
     /**
      * Returns a child config containing values from specified url string,
@@ -330,7 +330,7 @@ class DefaultLoaders(
      * Throws [UnsupportedExtensionException] if the url extension is unsupported.
      *
      * @param url specified url string
-     * @param delayTime delay to observe between every check. The default value is 5.
+     * @param period reload period. The default value is 5.
      * @param unit time unit of delay. The default value is [TimeUnit.SECONDS].
      * @param context context of the coroutine. The default value is [Dispatchers.Default].
      * @param optional whether the source is optional
@@ -339,11 +339,11 @@ class DefaultLoaders(
      */
     fun watchUrl(
         url: String,
-        delayTime: Long = 5,
+        period: Long = 5,
         unit: TimeUnit = TimeUnit.SECONDS,
         context: CoroutineContext = Dispatchers.Default,
         optional: Boolean = this.optional
-    ): Config = watchUrl(URL(url), delayTime, unit, context, optional)
+    ): Config = watchUrl(URL(url), period, unit, context, optional)
 }
 
 /**
@@ -363,7 +363,7 @@ class MapLoader(
      */
     private val transform: ((Source) -> Source)? = null
 ) {
-    private fun Source.orMapped(): Source = transform?.invoke(this) ?: this
+    fun Source.orMapped(): Source = transform?.invoke(this) ?: this
 
     /**
      * Returns a child config containing values from specified hierarchical map.

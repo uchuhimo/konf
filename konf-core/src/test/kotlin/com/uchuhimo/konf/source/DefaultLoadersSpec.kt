@@ -18,6 +18,7 @@ package com.uchuhimo.konf.source
 
 import com.natpryce.hamkrest.assertion.assertThat
 import com.natpryce.hamkrest.equalTo
+import com.natpryce.hamkrest.sameInstance
 import com.natpryce.hamkrest.throws
 import com.uchuhimo.konf.Config
 import com.uchuhimo.konf.ConfigSpec
@@ -68,6 +69,15 @@ object DefaultLoadersSpec : SubjectSpek<DefaultLoaders>({
                 Provider.unregisterExtension("txt")
             }
         }
+        on("load from provider") {
+            val config = subject.source(PropertiesProvider).file(tempFileOf(propertiesContent, suffix = ".properties"))
+            it("should load with the provider") {
+                assertThat(config[item], equalTo("properties"))
+            }
+            it("should build a new layer on the parent config") {
+                assertThat(config.parent!!, sameInstance(subject.config))
+            }
+        }
         on("load from URL") {
             val service = Service.ignite()
             service.port(0)
@@ -105,7 +115,7 @@ object DefaultLoadersSpec : SubjectSpek<DefaultLoaders>({
         }
         on("load from watched file") {
             val file = tempFileOf(propertiesContent, suffix = ".properties")
-            val config = subject.watchFile(file, 1, context = Dispatchers.Sequential)
+            val config = subject.watchFile(file, 1, unit = TimeUnit.SECONDS, context = Dispatchers.Sequential)
             val originalValue = config[item]
             file.writeText(propertiesContent.replace("properties", "newValue"))
             runBlocking(Dispatchers.Sequential) {
@@ -119,13 +129,45 @@ object DefaultLoadersSpec : SubjectSpek<DefaultLoaders>({
                 assertThat(newValue, equalTo("newValue"))
             }
         }
+        on("load from watched file with default delay time") {
+            val file = tempFileOf(propertiesContent, suffix = ".properties")
+            val config = subject.watchFile(file, context = Dispatchers.Sequential)
+            val originalValue = config[item]
+            file.writeText(propertiesContent.replace("properties", "newValue"))
+            runBlocking(Dispatchers.Sequential) {
+                delay(TimeUnit.SECONDS.toMillis(5))
+            }
+            val newValue = config[item]
+            it("should load as auto-detected file format") {
+                assertThat(originalValue, equalTo("properties"))
+            }
+            it("should load new value when file has been changed") {
+                assertThat(newValue, equalTo("newValue"))
+            }
+        }
         on("load from watched file path") {
             val file = tempFileOf(propertiesContent, suffix = ".properties")
-            val config = subject.watchFile(file.path, 1, context = Dispatchers.Sequential)
+            val config = subject.watchFile(file.path, 1, unit = TimeUnit.SECONDS, context = Dispatchers.Sequential)
             val originalValue = config[item]
             file.writeText(propertiesContent.replace("properties", "newValue"))
             runBlocking(Dispatchers.Sequential) {
                 delay(TimeUnit.SECONDS.toMillis(1))
+            }
+            val newValue = config[item]
+            it("should load as auto-detected file format") {
+                assertThat(originalValue, equalTo("properties"))
+            }
+            it("should load new value when file has been changed") {
+                assertThat(newValue, equalTo("newValue"))
+            }
+        }
+        on("load from watched file path with default delay time") {
+            val file = tempFileOf(propertiesContent, suffix = ".properties")
+            val config = subject.watchFile(file.path, context = Dispatchers.Sequential)
+            val originalValue = config[item]
+            file.writeText(propertiesContent.replace("properties", "newValue"))
+            runBlocking(Dispatchers.Sequential) {
+                delay(TimeUnit.SECONDS.toMillis(5))
             }
             val newValue = config[item]
             it("should load as auto-detected file format") {
@@ -142,11 +184,32 @@ object DefaultLoadersSpec : SubjectSpek<DefaultLoaders>({
             service.get("/source.properties") { _, _ -> content }
             service.awaitInitialization()
             val url = "http://localhost:${service.port()}/source.properties"
-            val config = subject.watchUrl(URL(url), delayTime = 1, context = Dispatchers.Sequential)
+            val config = subject.watchUrl(URL(url), period = 1, unit = TimeUnit.SECONDS, context = Dispatchers.Sequential)
             val originalValue = config[item]
             content = propertiesContent.replace("properties", "newValue")
             runBlocking(Dispatchers.Sequential) {
                 delay(TimeUnit.SECONDS.toMillis(1))
+            }
+            val newValue = config[item]
+            it("should load as auto-detected URL format") {
+                assertThat(originalValue, equalTo("properties"))
+            }
+            it("should load new value after URL content has been changed") {
+                assertThat(newValue, equalTo("newValue"))
+            }
+        }
+        on("load from watched URL with default delay time") {
+            var content = propertiesContent
+            val service = Service.ignite()
+            service.port(0)
+            service.get("/source.properties") { _, _ -> content }
+            service.awaitInitialization()
+            val url = "http://localhost:${service.port()}/source.properties"
+            val config = subject.watchUrl(URL(url), context = Dispatchers.Sequential)
+            val originalValue = config[item]
+            content = propertiesContent.replace("properties", "newValue")
+            runBlocking(Dispatchers.Sequential) {
+                delay(TimeUnit.SECONDS.toMillis(5))
             }
             val newValue = config[item]
             it("should load as auto-detected URL format") {
@@ -163,7 +226,7 @@ object DefaultLoadersSpec : SubjectSpek<DefaultLoaders>({
             service.get("/source.properties") { _, _ -> content }
             service.awaitInitialization()
             val url = "http://localhost:${service.port()}/source.properties"
-            val config = subject.watchUrl(url, delayTime = 1, context = Dispatchers.Sequential)
+            val config = subject.watchUrl(url, period = 1, unit = TimeUnit.SECONDS, context = Dispatchers.Sequential)
             val originalValue = config[item]
             content = propertiesContent.replace("properties", "newValue")
             runBlocking(Dispatchers.Sequential) {
@@ -175,6 +238,32 @@ object DefaultLoadersSpec : SubjectSpek<DefaultLoaders>({
             }
             it("should load new value after URL content has been changed") {
                 assertThat(newValue, equalTo("newValue"))
+            }
+        }
+        on("load from watched URL string with default delay time") {
+            var content = propertiesContent
+            val service = Service.ignite()
+            service.port(0)
+            service.get("/source.properties") { _, _ -> content }
+            service.awaitInitialization()
+            val url = "http://localhost:${service.port()}/source.properties"
+            val config = subject.watchUrl(url, context = Dispatchers.Sequential)
+            val originalValue = config[item]
+            content = propertiesContent.replace("properties", "newValue")
+            runBlocking(Dispatchers.Sequential) {
+                delay(TimeUnit.SECONDS.toMillis(5))
+            }
+            val newValue = config[item]
+            it("should load as auto-detected URL format") {
+                assertThat(originalValue, equalTo("properties"))
+            }
+            it("should load new value after URL content has been changed") {
+                assertThat(newValue, equalTo("newValue"))
+            }
+        }
+        on("load from map") {
+            it("should use the same config") {
+                assertThat(subject.config, sameInstance(subject.map.config))
             }
         }
     }
