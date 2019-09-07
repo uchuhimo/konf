@@ -37,6 +37,7 @@ import java.time.OffsetDateTime
 import java.time.ZonedDateTime
 import java.util.ArrayDeque
 import java.util.Deque
+import java.util.WeakHashMap
 import java.util.concurrent.locks.ReentrantReadWriteLock
 import kotlin.concurrent.read
 import kotlin.concurrent.write
@@ -49,28 +50,72 @@ import kotlin.reflect.KProperty
 open class BaseConfig(
     override val name: String = "",
     override val parent: BaseConfig? = null,
-    override val mapper: ObjectMapper = createDefaultMapper()
+    override val mapper: ObjectMapper = createDefaultMapper(),
+    val specsInLayer: MutableList<Spec> = mutableListOf(),
+    val featuresInLayer: MutableMap<Feature, Boolean> = mutableMapOf(),
+    val nodeByItem: MutableMap<Item<*>, ItemNode> = mutableMapOf(),
+    val tree: TreeNode = ContainerNode.empty(),
+    val hasChildren: Value<Boolean> = Value(false),
+    val lock: ReentrantReadWriteLock = ReentrantReadWriteLock()
 ) : Config {
-    protected val specsInLayer = mutableListOf<Spec>()
-    protected var source: Source = EmptyMapSource
-    protected val valueByItem = mutableMapOf<Item<*>, ValueState>()
-    protected val nameByItem = mutableMapOf<Item<*>, String>()
-    protected val itemByName = mutableMapOf<String, Item<*>>()
-    protected val featuresInLayer = mutableMapOf<Feature, Boolean>()
-
-    private var hasChildren = false
-
-    protected val lock = ReentrantReadWriteLock()
+    private val _source: Value<Source> = Value(EmptyMapSource())
+    open val source: Source get() = _source.value
+    private val nameByItem: WeakHashMap<Item<*>, String> = WeakHashMap()
 
     override fun <T> lock(action: () -> T): T = lock.write(action)
 
-    override fun at(path: String): Config = DrillDownConfig(path, this)
+    override fun at(path: String): Config {
+        if (path.isEmpty()) {
+            return this
+        } else {
+            return object : BaseConfig(
+                name = name,
+                parent = parent?.at(path) as BaseConfig?,
+                mapper = mapper,
+                specsInLayer = specsInLayer,
+                featuresInLayer = featuresInLayer,
+                nodeByItem = nodeByItem,
+                tree = tree.getOrNull(path) ?: ContainerNode.empty().also {
+                    lock.write { tree[path] = it }
+                },
+                hasChildren = hasChildren,
+                lock = lock
+            ) {
+                override val source: Source
+                    get() {
+                        if (path !in this@BaseConfig.source) {
+                            this@BaseConfig.source.tree[path] = ContainerNode.empty()
+                        }
+                        return this@BaseConfig.source[path]
+                    }
+            }
+        }
+    }
 
-    override fun withPrefix(prefix: String): Config = RollUpConfig(prefix, this)
+    override fun withPrefix(prefix: String): Config {
+        if (prefix.isEmpty()) {
+            return this
+        } else {
+            return object : BaseConfig(
+                name = name,
+                parent = parent?.withPrefix(prefix) as BaseConfig?,
+                mapper = mapper,
+                specsInLayer = specsInLayer,
+                featuresInLayer = featuresInLayer,
+                nodeByItem = nodeByItem,
+                tree = if (prefix.isEmpty()) tree
+                else ContainerNode.empty().apply { set(prefix, tree) },
+                hasChildren = hasChildren,
+                lock = lock
+            ) {
+                override val source: Source get() = this@BaseConfig.source.withPrefix(prefix)
+            }
+        }
+    }
 
     override fun iterator(): Iterator<Item<*>> = object : Iterator<Item<*>> {
         private var currentConfig = this@BaseConfig
-        private var current = currentConfig.nameByItem.keys.iterator()
+        private var current = currentConfig.nodeByItem.keys.iterator()
         private var lock = currentConfig.lock
 
         init {
@@ -85,7 +130,7 @@ open class BaseConfig(
                 val parent = currentConfig.parent
                 if (parent != null) {
                     currentConfig = parent
-                    current = currentConfig.nameByItem.keys.iterator()
+                    current = currentConfig.nodeByItem.keys.iterator()
                     lock = currentConfig.lock
                     lock.readLock().lock()
                     hasNext()
@@ -99,18 +144,19 @@ open class BaseConfig(
     }
 
     override val itemWithNames: List<Pair<Item<*>, String>>
-        get() = lock.read { nameByItem.entries }.map { it.toPair() } +
-            (parent?.itemWithNames ?: listOf())
+        get() = lock.read { tree.leafByPath }.map { (name, node) ->
+            (node as ItemNode).item to name
+        } + (parent?.itemWithNames ?: listOf())
 
     override fun toMap(): Map<String, Any> {
-        return mutableMapOf<String, Any>().apply {
-            val config = this@BaseConfig
-            for ((item, name) in config.itemWithNames) {
-                try {
-                    put(name, config.getOrNull(item, errorWhenNotFound = true).toCompatibleValue(mapper))
+        return lock.read {
+            itemWithNames.map { (item, name) ->
+                name to try {
+                    getOrNull(item, errorWhenNotFound = true).toCompatibleValue(mapper)
                 } catch (_: UnsetValueException) {
+                    ValueState.Unset
                 }
-            }
+            }.filter { (_, value) -> value != ValueState.Unset }.toMap()
         }
     }
 
@@ -123,13 +169,21 @@ open class BaseConfig(
     @Suppress("UNCHECKED_CAST")
     override fun <T> getOrNull(item: Item<T>): T? = getOrNull(item, errorWhenNotFound = false) as T?
 
+    private fun setState(item: Item<*>, state: ValueState) {
+        if (item in nodeByItem) {
+            nodeByItem[item]!!.value = state
+        } else {
+            nodeByItem[item] = ItemNode(state, item)
+        }
+    }
+
     open fun getOrNull(
         item: Item<*>,
         errorWhenNotFound: Boolean,
         errorWhenGetDefault: Boolean = false,
         lazyContext: ItemContainer = this
     ): Any? {
-        val valueState = lock.read { valueByItem[item] }
+        val valueState = lock.read { nodeByItem[item]?.value }
         if (valueState != null) {
             @Suppress("UNCHECKED_CAST")
             when (valueState) {
@@ -201,7 +255,11 @@ open class BaseConfig(
         return item ?: parent?.getItemOrNull(trimmedName)
     }
 
-    protected fun getItemInLayerOrNull(name: String) = lock.read { itemByName[name] }
+    private fun getItemInLayerOrNull(name: String): Item<*>? {
+        return lock.read {
+            (tree.getOrNull(name) as? ItemNode)?.item
+        }
+    }
 
     @Suppress("UNCHECKED_CAST")
     override fun <T> getOrNull(name: String): T? = getOrNull(name, errorWhenNotFound = false) as T?
@@ -219,7 +277,7 @@ open class BaseConfig(
         }
     }
 
-    protected fun containsInLayer(item: Item<*>) = lock.read { valueByItem.containsKey(item) }
+    private fun containsInLayer(item: Item<*>) = lock.read { nodeByItem.containsKey(item) }
 
     override fun contains(item: Item<*>): Boolean {
         return if (containsInLayer(item)) {
@@ -229,9 +287,8 @@ open class BaseConfig(
         }
     }
 
-    protected fun containsInLayer(name: String): Boolean {
-        val trimmedName = name.trim()
-        return lock.read { nameByItem.containsValue(trimmedName) }
+    private fun containsInLayer(name: String): Boolean {
+        return containsInLayer(name.toPath())
     }
 
     override fun contains(name: String): Boolean {
@@ -242,23 +299,42 @@ open class BaseConfig(
         }
     }
 
-    protected fun containsInLayer(path: Path): Boolean {
-        nameByItem.values.forEach {
-            val itemName = it.toPath()
-            if ((path.size >= itemName.size && path.subList(0, itemName.size) == itemName) ||
-                (path.size < itemName.size && itemName.subList(0, path.size) == path)) {
-                return true
+    private fun TreeNode.partialMatch(path: Path): Boolean {
+        return if (this is LeafNode) {
+            true
+        } else if (path.isEmpty()) {
+            children.isNotEmpty()
+        } else {
+            val key = path.first()
+            val rest = path.drop(1)
+            val result = children[key]
+            if (result != null) {
+                return result.partialMatch(rest)
+            } else {
+                return false
             }
         }
-        return false
+    }
+
+    private fun containsInLayer(path: Path): Boolean {
+        return lock.read {
+            tree.partialMatch(path)
+        }
     }
 
     override fun contains(path: Path): Boolean =
         containsInLayer(path) || (parent?.contains(path) ?: false)
 
     override fun nameOf(item: Item<*>): String {
-        val name = lock.read { nameByItem[item] }
-        return name ?: parent?.nameOf(item) ?: throw NoSuchItemException(item)
+        return nameByItem[item] ?: {
+            val name = lock.read { tree.firstPath { it is ItemNode && it.item == item } }?.name
+            if (name != null) {
+                nameByItem[item] = name
+                name
+            } else {
+                parent?.nameOf(item) ?: throw NoSuchItemException(item)
+            }
+        }()
     }
 
     override fun rawSet(item: Item<*>, value: Any?) {
@@ -267,7 +343,7 @@ open class BaseConfig(
                 if (item.nullable) {
                     item.notifySet(null)
                     lock.write {
-                        valueByItem[item] = ValueState.Null
+                        setState(item, ValueState.Null)
                     }
                 } else {
                     throw ClassCastException(
@@ -278,12 +354,7 @@ open class BaseConfig(
                 if (item.type.rawClass.isInstance(value)) {
                     item.notifySet(value)
                     lock.write {
-                        val valueState = valueByItem[item]
-                        if (valueState is ValueState.Value) {
-                            valueState.value = value
-                        } else {
-                            valueByItem[item] = ValueState.Value(value)
-                        }
+                        setState(item, ValueState.Value(value))
                     }
                 } else {
                     throw ClassCastException(
@@ -313,13 +384,7 @@ open class BaseConfig(
     override fun <T> lazySet(item: Item<T>, thunk: (config: ItemContainer) -> T) {
         if (item in this) {
             lock.write {
-                val valueState = valueByItem[item]
-                if (valueState is ValueState.Lazy<*>) {
-                    @Suppress("UNCHECKED_CAST")
-                    (valueState as ValueState.Lazy<T>).thunk = thunk
-                } else {
-                    valueByItem[item] = ValueState.Lazy(thunk)
-                }
+                setState(item, ValueState.Lazy(thunk))
             }
         } else {
             throw NoSuchItemException(item)
@@ -338,7 +403,9 @@ open class BaseConfig(
 
     override fun unset(item: Item<*>) {
         if (item in this) {
-            lock.write { valueByItem[item] = ValueState.Unset }
+            lock.write {
+                setState(item, ValueState.Unset)
+            }
         } else {
             throw NoSuchItemException(item)
         }
@@ -354,7 +421,10 @@ open class BaseConfig(
     }
 
     override fun clear() {
-        lock.write { valueByItem.clear() }
+        lock.write {
+            nodeByItem.clear()
+            tree.children.clear()
+        }
     }
 
     override fun containsRequired(): Boolean = try {
@@ -443,7 +513,7 @@ open class BaseConfig(
 
     override fun addItem(item: Item<*>, prefix: String) {
         lock.write {
-            if (hasChildren) {
+            if (hasChildren.value) {
                 throw LayerFrozenException(this)
             }
             val path = prefix.toPath() + item.name.toPath()
@@ -452,13 +522,16 @@ open class BaseConfig(
                 if (path in this) {
                     throw NameConflictException("item $name cannot be added")
                 }
-                nameByItem[item] = name
-                itemByName[name] = item
-                valueByItem[item] = when (item) {
-                    is OptionalItem -> ValueState.Default(item.default)
-                    is RequiredItem -> ValueState.Unset
-                    is LazyItem -> ValueState.Lazy(item.thunk)
-                }
+                val node = ItemNode(
+                    when (item) {
+                        is OptionalItem -> ValueState.Default(item.default)
+                        is RequiredItem -> ValueState.Unset
+                        is LazyItem -> ValueState.Lazy(item.thunk)
+                    },
+                    item
+                )
+                tree[name] = node
+                nodeByItem[item] = node
                 sources.firstOrNull { loadItem(item, path, it) }
             } else {
                 throw RepeatedItemException(name)
@@ -468,7 +541,7 @@ open class BaseConfig(
 
     override fun addSpec(spec: Spec) {
         lock.write {
-            if (hasChildren) {
+            if (hasChildren.value) {
                 throw LayerFrozenException(this)
             }
             val sources = this.sources
@@ -479,13 +552,16 @@ open class BaseConfig(
                     if (path in this) {
                         throw NameConflictException("item $name cannot be added")
                     }
-                    nameByItem[item] = name
-                    itemByName[name] = item
-                    valueByItem[item] = when (item) {
-                        is OptionalItem -> ValueState.Default(item.default)
-                        is RequiredItem -> ValueState.Unset
-                        is LazyItem -> ValueState.Lazy(item.thunk)
-                    }
+                    val node = ItemNode(
+                        when (item) {
+                            is OptionalItem -> ValueState.Default(item.default)
+                            is RequiredItem -> ValueState.Unset
+                            is LazyItem -> ValueState.Lazy(item.thunk)
+                        },
+                        item
+                    )
+                    tree[name] = node
+                    nodeByItem[item] = node
                     sources.firstOrNull { loadItem(item, path, it) }
                 } else {
                     throw RepeatedItemException(name)
@@ -499,7 +575,7 @@ open class BaseConfig(
     }
 
     override fun withLayer(name: String): BaseConfig {
-        lock.write { hasChildren = true }
+        lock.write { hasChildren.value = true }
         return BaseConfig(name, this, mapper)
     }
 
@@ -507,7 +583,7 @@ open class BaseConfig(
         withLayer("source: ${source.description}").also { config ->
             config.lock.write {
                 load(config, source)
-                config.source = source
+                config._source.value = source
             }
         }
 
@@ -521,30 +597,24 @@ open class BaseConfig(
         return withLayer("trigger: $description").apply {
             trigger(this) { source ->
                 load(this, source)
-                this.source = source
+                this._source.value = source
             }
         }
-    }
-
-    override fun equals(other: Any?): Boolean {
-        if (this === other) return true
-        if (other !is Config) return false
-        return toMap() == other.toMap()
-    }
-
-    override fun hashCode(): Int {
-        return toMap().hashCode()
     }
 
     override fun toString(): String {
         return "Config(items=${toMap()})"
     }
 
-    protected sealed class ValueState {
+    class ItemNode(override var value: ValueState, val item: Item<*>) : ValueNode
+
+    data class Value<T>(var value: T)
+
+    sealed class ValueState {
         object Unset : ValueState()
         object Null : ValueState()
-        data class Lazy<T>(var thunk: (config: ItemContainer) -> T) : ValueState()
-        data class Value(var value: Any) : ValueState()
+        data class Lazy<T>(val thunk: (config: ItemContainer) -> T) : ValueState()
+        data class Value(val value: Any) : ValueState()
         data class Default(val value: Any?) : ValueState()
     }
 }

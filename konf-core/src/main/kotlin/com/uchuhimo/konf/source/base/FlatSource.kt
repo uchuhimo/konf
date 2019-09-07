@@ -56,7 +56,6 @@ open class FlatSource(
 }
 
 object EmptyStringNode : ValueNode, ListNode {
-    override val children: MutableMap<String, TreeNode> = Collections.unmodifiableMap(mutableMapOf())
     override val value: Any = ""
     override val list: List<TreeNode> = listOf()
 }

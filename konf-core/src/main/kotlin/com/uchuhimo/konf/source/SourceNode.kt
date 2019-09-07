@@ -21,14 +21,13 @@ import com.uchuhimo.konf.MapNode
 import com.uchuhimo.konf.NullNode
 import com.uchuhimo.konf.TreeNode
 import com.uchuhimo.konf.ValueNode
+import com.uchuhimo.konf.emptyMutableMap
 import java.util.Collections
 
-class ValueSourceNode(override val value: Any) : ValueNode {
-    override val children: MutableMap<String, TreeNode> = mutableMapOf()
-}
+class ValueSourceNode(override val value: Any) : ValueNode
 
 object NullSourceNode : NullNode {
-    override val children: MutableMap<String, TreeNode> = mutableMapOf()
+    override val children: MutableMap<String, TreeNode> = emptyMutableMap
 }
 
 class ListSourceNode(override val list: List<TreeNode>) : ListNode, MapNode {

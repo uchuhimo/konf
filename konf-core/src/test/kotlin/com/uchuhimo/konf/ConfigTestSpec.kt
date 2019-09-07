@@ -266,7 +266,7 @@ fun SubjectProviderDsl<Config>.configTestSpec(prefix: String = "network.buffer")
                 assertThat(newConfig[name], equalTo("buffer"))
                 assertThat(newConfig[type], equalTo(NetworkBuffer.Type.ON_HEAP))
                 assertThat(newConfig[offset], equalTo(0))
-                assertThat(newConfig, equalTo(subject))
+                assertThat(newConfig.toMap(), equalTo(subject.toMap()))
             }
         }
         on("export values to hierarchical map") {
@@ -313,7 +313,7 @@ fun SubjectProviderDsl<Config>.configTestSpec(prefix: String = "network.buffer")
                 assertThat(newConfig[name], equalTo("buffer"))
                 assertThat(newConfig[type], equalTo(NetworkBuffer.Type.ON_HEAP))
                 assertThat(newConfig[offset], equalTo(0))
-                assertThat(newConfig, equalTo(subject))
+                assertThat(newConfig.toMap(), equalTo(subject.toMap()))
             }
         }
         on("object methods") {
@@ -327,9 +327,6 @@ fun SubjectProviderDsl<Config>.configTestSpec(prefix: String = "network.buffer")
             }
             it("should equal to itself") {
                 assertThat(subject, equalTo(subject))
-            }
-            it("should have same hash code with map with same content") {
-                assertThat(subject.hashCode(), equalTo(map.hashCode()))
             }
             it("should convert to string in map-like format") {
                 assertThat(subject.toString(), equalTo("Config(items=$map)"))

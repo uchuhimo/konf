@@ -59,7 +59,7 @@ interface Provider {
             info["file"] = file.toString()
         }
         if (!file.exists() && optional) {
-            return EmptyMapSource.apply(extendContext)
+            return EmptyMapSource().apply(extendContext)
         }
         return file.inputStream().buffered().use { inputStream ->
             fromInputStream(inputStream).apply(extendContext)
@@ -130,7 +130,7 @@ interface Provider {
                 if (path.indexOf('%') < 0) {
                     val file = File(path)
                     if (!file.exists() && optional) {
-                        return EmptyMapSource.apply(extendContext)
+                        return EmptyMapSource().apply(extendContext)
                     }
                     return file.inputStream().use {
                         fromInputStream(it).apply(extendContext)
@@ -145,7 +145,7 @@ interface Provider {
             }
         } catch (ex: IOException) {
             if (optional) {
-                EmptyMapSource.apply(extendContext)
+                EmptyMapSource().apply(extendContext)
             } else {
                 throw ex
             }
@@ -177,14 +177,14 @@ interface Provider {
             loader.getResources(resource)
         } catch (ex: IOException) {
             if (optional) {
-                return EmptyMapSource.apply(extendContext)
+                return EmptyMapSource().apply(extendContext)
             } else {
                 throw ex
             }
         }
         if (!e.hasMoreElements()) {
             if (optional) {
-                return EmptyMapSource.apply(extendContext)
+                return EmptyMapSource().apply(extendContext)
             } else {
                 throw SourceNotFoundException("resource not found on classpath: $resource")
             }

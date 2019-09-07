@@ -355,7 +355,7 @@ interface Config : ItemContainer {
  * @return a property that can read/set associated value casted from config
  */
 inline fun <reified T> Config.cast() =
-    object : RequiredConfigProperty<T>(this, name = "") {}
+    object : RequiredConfigProperty<T>(this.withPrefix("root"), name = "root") {}
 
 /**
  * Returns a property that can read/set associated value for specified required item.

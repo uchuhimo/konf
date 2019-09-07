@@ -76,7 +76,7 @@ fun Provider.fromGit(
             when (ex) {
                 is GitAPIException, is IOException, is SourceException -> {
                     if (optional) {
-                        return EmptyMapSource.apply(extendContext)
+                        return EmptyMapSource().apply(extendContext)
                     } else {
                         throw ex
                     }

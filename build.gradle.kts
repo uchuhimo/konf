@@ -15,7 +15,7 @@ val gpgPassphrase by extra { getPrivateProperty("gpgPassphrase") }
 
 val wrapper by tasks.existing(Wrapper::class)
 wrapper {
-    gradleVersion = "5.6.1"
+    gradleVersion = "5.6.2"
     distributionType = Wrapper.DistributionType.ALL
 }
 

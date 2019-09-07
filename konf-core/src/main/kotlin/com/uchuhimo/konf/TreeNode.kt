@@ -210,14 +210,54 @@ interface TreeNode {
                 traverseTree(this, "".toPath())
             }
         }
+
+    fun firstPath(predicate: (TreeNode) -> Boolean): Path? {
+        fun traverseTree(node: TreeNode, path: Path): Path? {
+            if (predicate(node)) {
+                return path
+            } else {
+                node.children.forEach { (key, child) ->
+                    val matchPath = traverseTree(child, path + key)
+                    if (matchPath != null) {
+                        return matchPath
+                    }
+                }
+                return null
+            }
+        }
+        return traverseTree(this, "".toPath())
+    }
+
+    /**
+     * Map of all leaves indexed by paths in this tree node.
+     */
+    val leafByPath: Map<String, TreeNode>
+        get() {
+            return mutableMapOf<String, TreeNode>().also { map ->
+                fun traverseTree(node: TreeNode, path: Path) {
+                    if (node is LeafNode) {
+                        map[path.name] = node
+                    } else {
+                        node.children.forEach { (key, child) ->
+                            traverseTree(child, path + key)
+                        }
+                    }
+                }
+                traverseTree(this, "".toPath())
+            }
+        }
 }
 
 interface LeafNode : TreeNode
 
 interface MapNode : TreeNode
 
+val emptyMutableMap: MutableMap<String, TreeNode> = Collections.unmodifiableMap(mutableMapOf())
+
 interface ValueNode : LeafNode {
     val value: Any
+    override val children: MutableMap<String, TreeNode>
+        get() = emptyMutableMap
 }
 
 interface NullNode : LeafNode
@@ -229,7 +269,9 @@ interface ListNode : LeafNode {
 /**
  * Tree node that contains children nodes.
  */
-open class ContainerNode(override val children: MutableMap<String, TreeNode>) : MapNode {
+open class ContainerNode(
+    override val children: MutableMap<String, TreeNode>
+) : MapNode {
     companion object {
         fun empty(): ContainerNode = ContainerNode(mutableMapOf())
     }
@@ -239,5 +281,5 @@ open class ContainerNode(override val children: MutableMap<String, TreeNode>) : 
  * Tree node that represents a empty tree.
  */
 object EmptyNode : LeafNode {
-    override val children: MutableMap<String, TreeNode> = Collections.unmodifiableMap(mutableMapOf())
+    override val children: MutableMap<String, TreeNode> = emptyMutableMap
 }

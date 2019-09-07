@@ -65,4 +65,4 @@ private fun TreeNode.toHierarchicalMapInternal(): Any {
 /**
  * Source from an empty map.
  */
-object EmptyMapSource : MapSource(emptyMap(), "empty map")
+class EmptyMapSource : MapSource(emptyMap(), "empty map")

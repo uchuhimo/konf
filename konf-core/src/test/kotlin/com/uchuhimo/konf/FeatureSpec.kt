@@ -20,9 +20,7 @@ import com.natpryce.hamkrest.assertion.assertThat
 import com.natpryce.hamkrest.equalTo
 import com.natpryce.hamkrest.has
 import com.natpryce.hamkrest.throws
-import com.uchuhimo.konf.source.Source
 import com.uchuhimo.konf.source.UnknownPathsException
-import com.uchuhimo.konf.source.base.EmptyMapSource
 import com.uchuhimo.konf.source.asSource
 import org.jetbrains.spek.api.Spek
 import org.jetbrains.spek.api.dsl.given
@@ -120,11 +118,11 @@ object OptionalSourceByDefautSpec : Spek({
             val config = Config().enable(Feature.OPTIONAL_SOURCE_BY_DEFAULT)
             it("should load empty source") {
                 config.from.mapped {
-                    assertThat(it, equalTo<Source>(EmptyMapSource))
+                    assertThat(it.tree.children, equalTo(mutableMapOf()))
                     it
                 }.file("not_existed.json")
                 config.from.mapped {
-                    assertThat(it, equalTo<Source>(EmptyMapSource))
+                    assertThat(it.tree.children, equalTo(mutableMapOf()))
                     it
                 }.json.file("not_existed.json")
             }

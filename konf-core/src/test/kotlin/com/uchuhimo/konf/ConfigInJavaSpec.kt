@@ -192,7 +192,7 @@ object ConfigInJavaSpec : SubjectSpek<Config>({
                 assertThat(newConfig[name], equalTo("buffer"))
                 assertThat(newConfig[type], equalTo(NetworkBuffer.Type.ON_HEAP))
                 assertThat(newConfig[offset], equalTo(0))
-                assertThat(newConfig, equalTo(subject))
+                assertThat(newConfig.toMap(), equalTo(subject.toMap()))
             }
         }
         on("export values to hierarchical map") {
@@ -239,7 +239,7 @@ object ConfigInJavaSpec : SubjectSpek<Config>({
                 assertThat(newConfig[name], equalTo("buffer"))
                 assertThat(newConfig[type], equalTo(NetworkBuffer.Type.ON_HEAP))
                 assertThat(newConfig[offset], equalTo(0))
-                assertThat(newConfig, equalTo(subject))
+                assertThat(newConfig.toMap(), equalTo(subject.toMap()))
             }
         }
         on("object methods") {
@@ -253,9 +253,6 @@ object ConfigInJavaSpec : SubjectSpek<Config>({
             }
             it("should equal to itself") {
                 assertThat(subject, equalTo(subject))
-            }
-            it("should have same hash code with map with same content") {
-                assertThat(subject.hashCode(), equalTo(map.hashCode()))
             }
             it("should convert to string in map-like format") {
                 assertThat(subject.toString(), equalTo("Config(items=$map)"))
