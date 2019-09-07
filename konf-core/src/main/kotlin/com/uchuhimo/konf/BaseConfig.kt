@@ -51,12 +51,12 @@ open class BaseConfig(
     override val name: String = "",
     override val parent: BaseConfig? = null,
     override val mapper: ObjectMapper = createDefaultMapper(),
-    val specsInLayer: MutableList<Spec> = mutableListOf(),
-    val featuresInLayer: MutableMap<Feature, Boolean> = mutableMapOf(),
-    val nodeByItem: MutableMap<Item<*>, ItemNode> = mutableMapOf(),
-    val tree: TreeNode = ContainerNode.empty(),
-    val hasChildren: Value<Boolean> = Value(false),
-    val lock: ReentrantReadWriteLock = ReentrantReadWriteLock()
+    private val specsInLayer: MutableList<Spec> = mutableListOf(),
+    private val featuresInLayer: MutableMap<Feature, Boolean> = mutableMapOf(),
+    private val nodeByItem: MutableMap<Item<*>, ItemNode> = mutableMapOf(),
+    private val tree: TreeNode = ContainerNode.empty(),
+    private val hasChildren: Value<Boolean> = Value(false),
+    private val lock: ReentrantReadWriteLock = ReentrantReadWriteLock()
 ) : Config {
     private val _source: Value<Source> = Value(EmptyMapSource())
     open val source: Source get() = _source.value
