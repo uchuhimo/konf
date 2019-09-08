@@ -523,46 +523,46 @@ object SourceSpec : Spek({
                     }
                 }
             }
-            on("load when SUBSTITUTE_SOURCE_WHEN_LOADED is enabled on config") {
+            on("load when SUBSTITUTE_SOURCE_WHEN_LOADED is disabled on config") {
                 val source = mapOf("item" to mapOf("key1" to "a", "key2" to "b\${item.key1}")).asSource()
                 val config = Config {
                     addSpec(object : ConfigSpec() {
                         @Suppress("unused")
                         val item by required<Map<String, String>>()
                     })
-                }.enable(Feature.SUBSTITUTE_SOURCE_WHEN_LOADED)
+                }.disable(Feature.SUBSTITUTE_SOURCE_BEFORE_LOADED)
                     .withSource(source)
-                it("should substitue path variables before loaded") {
-                    assertThat(config<Map<String, String>>("item"),
-                        equalTo(mapOf("key1" to "a", "key2" to "ba")))
-                }
-            }
-            on("load when SUBSTITUTE_SOURCE_WHEN_LOADED is enabled on source") {
-                val source = mapOf("item" to mapOf("key1" to "a", "key2" to "b\${item.key1}")).asSource()
-                    .enabled(Feature.SUBSTITUTE_SOURCE_WHEN_LOADED)
-                val config = Config {
-                    addSpec(object : ConfigSpec() {
-                        @Suppress("unused")
-                        val item by required<Map<String, String>>()
-                    })
-                }.withSource(source)
-                it("should substitue path variables before loaded") {
-                    assertThat(config<Map<String, String>>("item"),
-                        equalTo(mapOf("key1" to "a", "key2" to "ba")))
-                }
-            }
-            on("load when SUBSTITUTE_SOURCE_WHEN_LOADED is disable") {
-                val source = mapOf("item" to mapOf("key1" to "a", "key2" to "b\${item.key1}")).asSource()
-                val config = Config {
-                    addSpec(object : ConfigSpec() {
-                        @Suppress("unused")
-                        val item by required<Map<String, String>>()
-                    })
-                }.withSource(source)
-                it("should not substitue path variables") {
-                    assertFalse { Feature.SUBSTITUTE_SOURCE_WHEN_LOADED.enabledByDefault }
+                it("should not substitue path variables before loaded") {
                     assertThat(config<Map<String, String>>("item"),
                         equalTo(mapOf("key1" to "a", "key2" to "b\${item.key1}")))
+                }
+            }
+            on("load when SUBSTITUTE_SOURCE_WHEN_LOADED is disabled on source") {
+                val source = mapOf("item" to mapOf("key1" to "a", "key2" to "b\${item.key1}")).asSource()
+                    .disabled(Feature.SUBSTITUTE_SOURCE_BEFORE_LOADED)
+                val config = Config {
+                    addSpec(object : ConfigSpec() {
+                        @Suppress("unused")
+                        val item by required<Map<String, String>>()
+                    })
+                }.withSource(source)
+                it("should substitue path variables before loaded") {
+                    assertThat(config<Map<String, String>>("item"),
+                        equalTo(mapOf("key1" to "a", "key2" to "b\${item.key1}")))
+                }
+            }
+            on("load when SUBSTITUTE_SOURCE_WHEN_LOADED is enabled") {
+                val source = mapOf("item" to mapOf("key1" to "a", "key2" to "b\${item.key1}")).asSource()
+                val config = Config {
+                    addSpec(object : ConfigSpec() {
+                        @Suppress("unused")
+                        val item by required<Map<String, String>>()
+                    })
+                }.withSource(source)
+                it("should substitue path variables") {
+                    assertTrue { Feature.SUBSTITUTE_SOURCE_BEFORE_LOADED.enabledByDefault }
+                    assertThat(config<Map<String, String>>("item"),
+                        equalTo(mapOf("key1" to "a", "key2" to "ba")))
                 }
             }
         }
@@ -630,6 +630,15 @@ object SourceSpec : Spek({
                         equalTo(mapOf<String, Any>(
                             "key1" to mapOf("key3" to "a", "key4" to "b"),
                             "key2" to mapOf("key3" to "a", "key4" to "b"))))
+                }
+            }
+            on("contains path variable in different sources") {
+                val map1 = mapOf("key1" to "a")
+                val map2 = mapOf("key2" to "b\${key1}")
+                val source = (map2.asSource() + map1.asSource()).substituted()
+                it("should substitue path variables") {
+                    assertThat(source.tree.toHierarchicalMap(),
+                        equalTo(mapOf<String, Any>("key1" to "a", "key2" to "ba")))
                 }
             }
         }
