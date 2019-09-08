@@ -39,5 +39,11 @@ enum class Feature(val enabledByDefault: Boolean) {
      *
      * Feature is disabled by default.
      */
-    OPTIONAL_SOURCE_BY_DEFAULT(false)
+    OPTIONAL_SOURCE_BY_DEFAULT(false),
+    /**
+     * Feature that determines whether sources should be substituted when loaded.
+     *
+     * Feature is disabled by default.
+     */
+    SUBSTITUTE_SOURCE_WHEN_LOADED(false)
 }

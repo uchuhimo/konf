@@ -29,9 +29,9 @@ import java.io.Reader
  */
 @RegisterExtension(["toml"])
 object TomlProvider : Provider {
-    override fun fromReader(reader: Reader): Source =
+    override fun reader(reader: Reader): Source =
         Toml().read(reader).toMap().asSource(type = "TOML")
 
-    override fun fromInputStream(inputStream: InputStream): Source =
+    override fun inputStream(inputStream: InputStream): Source =
         Toml().read(inputStream).toMap().asSource(type = "TOML")
 }

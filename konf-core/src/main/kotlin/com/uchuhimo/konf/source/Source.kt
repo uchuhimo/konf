@@ -43,6 +43,7 @@ import com.uchuhimo.konf.ContainerNode
 import com.uchuhimo.konf.EmptyNode
 import com.uchuhimo.konf.Feature
 import com.uchuhimo.konf.Item
+import com.uchuhimo.konf.LeafNode
 import com.uchuhimo.konf.ListNode
 import com.uchuhimo.konf.MapNode
 import com.uchuhimo.konf.MergedMap
@@ -53,6 +54,9 @@ import com.uchuhimo.konf.TreeNode
 import com.uchuhimo.konf.ValueNode
 import com.uchuhimo.konf.toPath
 import com.uchuhimo.konf.toTree
+import org.apache.commons.text.StringSubstitutor
+import org.apache.commons.text.lookup.StringLookup
+import org.apache.commons.text.lookup.StringLookupFactory
 import java.lang.reflect.InvocationTargetException
 import java.math.BigDecimal
 import java.math.BigInteger
@@ -69,12 +73,14 @@ import java.time.ZoneOffset
 import java.time.ZonedDateTime
 import java.time.format.DateTimeParseException
 import java.util.ArrayDeque
+import java.util.Collections
 import java.util.Date
 import java.util.Queue
 import java.util.SortedMap
 import java.util.SortedSet
 import java.util.TreeMap
 import java.util.TreeSet
+import java.util.regex.Pattern
 import kotlin.Byte
 import kotlin.Char
 import kotlin.Double
@@ -122,6 +128,11 @@ interface Source {
     val tree: TreeNode
 
     /**
+     * Feature flags in this source.
+     */
+    val features: Map<Feature, Boolean> get() = emptyMap()
+
+    /**
      * Whether this source contains value(s) in specified path or not.
      *
      * @param path item path
@@ -142,7 +153,7 @@ interface Source {
             return this
         } else {
             return tree.getOrNull(path)?.let {
-                Source(info = info, tree = it)
+                Source(info = info, tree = it, features = features)
             }
         }
     }
@@ -203,7 +214,8 @@ interface Source {
             }
             Source(
                 info = this@Source.info,
-                tree = prefixedTree
+                tree = prefixedTree,
+                features = features
             )
         }
     }
@@ -232,6 +244,11 @@ interface Source {
         )
 
         override val tree: TreeNode = this@Source.tree.withFallback(fallback.tree)
+
+        override val features: Map<Feature, Boolean>
+            get() = MergedMap(
+                Collections.unmodifiableMap(fallback.features),
+                Collections.unmodifiableMap(this@Source.features))
     }
 
     /**
@@ -246,12 +263,27 @@ interface Source {
     operator fun plus(facade: Source): Source = facade.withFallback(this)
 
     /**
+     * Return a source that substitutes path variables within all strings by values.
+     *
+     * See [StringSubstitutor](https://commons.apache.org/proper/commons-text/apidocs/org/apache/commons/text/StringSubstitutor.html)
+     * for detailed substitution rules. An exception is when the string is in reference format like `${path}`,
+     * the whole node will be replace by a reference to the sub-tree in the specified path.
+     *
+     * @return a source that substitutes path variables within all strings by values
+     */
+    fun substituted(): Source = Source(info, tree.substituted(this), features)
+
+    /**
      * Returns a new source that enables the specified feature.
      *
      * @param feature the specified feature
      * @return a new source
      */
-    fun enabled(feature: Feature): Source = FeaturedSource(this, feature, true)
+    fun enabled(feature: Feature): Source = Source(
+        info,
+        tree,
+        MergedMap(Collections.unmodifiableMap(features), mutableMapOf(feature to true))
+    )
 
     /**
      * Returns a new source that disables the specified feature.
@@ -259,7 +291,11 @@ interface Source {
      * @param feature the specified feature
      * @return a new source
      */
-    fun disabled(feature: Feature): Source = FeaturedSource(this, feature, false)
+    fun disabled(feature: Feature): Source = Source(
+        info,
+        tree,
+        MergedMap(Collections.unmodifiableMap(features), mutableMapOf(feature to false))
+    )
 
     /**
      * Check whether the specified feature is enabled or not.
@@ -267,18 +303,74 @@ interface Source {
      * @param feature the specified feature
      * @return whether the specified feature is enabled or not
      */
-    fun isEnabled(feature: Feature): Boolean = feature.enabledByDefault
+    fun isEnabled(feature: Feature): Boolean = features[feature] ?: feature.enabledByDefault
 
     companion object {
-        operator fun invoke(info: SourceInfo = SourceInfo(), tree: TreeNode = ContainerNode.empty()): Source {
-            return BaseSource(info, tree)
+        operator fun invoke(
+            info: SourceInfo = SourceInfo(),
+            tree: TreeNode = ContainerNode.empty(),
+            features: Map<Feature, Boolean> = emptyMap()
+        ): Source {
+            return BaseSource(info, tree, features)
+        }
+    }
+}
+
+private val singleVariablePattern = Pattern.compile("^\\$\\{([\\w\\.]+)}$")
+
+private fun TreeNode.substituted(
+    source: Source,
+    lookup: TreeLookup = TreeLookup(this)
+): TreeNode {
+    when (this) {
+        is LeafNode -> {
+            if (this is ValueNode && value is String) {
+                val text = value as String
+                val matcher = singleVariablePattern.matcher(text.trim())
+                if (matcher.find()) {
+                    return lookup.root.getOrNull(matcher.group(1))
+                        ?: throw UndefinedPathVariableException(source, text)
+                } else {
+                    try {
+                        return ValueSourceNode(lookup.substitutor.replace(text))
+                    } catch (_: IllegalArgumentException) {
+                        throw UndefinedPathVariableException(source, text)
+                    }
+                }
+            } else {
+                return this
+            }
+        }
+        else -> {
+            for ((key, child) in children) {
+                children[key] = child.substituted(source, lookup)
+            }
+            return this
+        }
+    }
+}
+
+class TreeLookup(val root: TreeNode) : StringLookup {
+    val substitutor: StringSubstitutor = StringSubstitutor(
+        StringLookupFactory.INSTANCE.interpolatorStringLookup(this)).apply {
+        isEnableSubstitutionInVariables = true
+        isEnableUndefinedVariableException = true
+    }
+
+    override fun lookup(key: String): String? {
+        val node = root.getOrNull(key)
+        if (node != null && node is ValueNode && node.value is String) {
+            return substitutor.replace(node.value as String)
+        } else {
+            return null
         }
     }
 }
 
 open class BaseSource(
     override val info: SourceInfo = SourceInfo(),
-    override val tree: TreeNode = ContainerNode.empty()
+    override val tree: TreeNode = ContainerNode.empty(),
+    override val features: Map<Feature, Boolean> = emptyMap()
 ) : Source
 
 /**
@@ -295,22 +387,6 @@ class SourceInfo(
 
     fun with(sourceInfo: SourceInfo): SourceInfo {
         return SourceInfo(MergedMap(fallback = this, facade = sourceInfo.toMutableMap()))
-    }
-}
-
-/**
- * Source with the specified feature enabled/disabled.
- */
-class FeaturedSource(
-    source: Source,
-    private val feature: Feature,
-    private val isEnabled: Boolean
-) : Source by source {
-    override val info: SourceInfo = source.info.with(
-        "feature:${feature.name}" to if (isEnabled) "enabled" else "disabled")
-
-    override fun isEnabled(feature: Feature): Boolean {
-        return if (feature == this.feature) isEnabled else super.isEnabled(feature)
     }
 }
 

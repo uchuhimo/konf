@@ -30,7 +30,7 @@ object HoconProviderSpec : SubjectSpek<HoconProvider>({
 
     given("a HOCON provider") {
         on("create source from reader") {
-            val source = subject.fromReader("type = reader".reader())
+            val source = subject.reader("type = reader".reader())
             it("should have correct type") {
                 assertThat(source.info["type"], equalTo("HOCON"))
             }
@@ -39,7 +39,7 @@ object HoconProviderSpec : SubjectSpek<HoconProvider>({
             }
         }
         on("create source from input stream") {
-            val source = subject.fromInputStream(
+            val source = subject.inputStream(
                 tempFileOf("type = inputStream").inputStream())
             it("should have correct type") {
                 assertThat(source.info["type"], equalTo("HOCON"))

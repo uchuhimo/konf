@@ -59,7 +59,7 @@ class Loader(
      * @return a child config containing values from specified reader
      */
     fun reader(reader: Reader): Config =
-        config.withSource(provider.fromReader(reader))
+        config.withSource(provider.reader(reader))
 
     /**
      * Returns a child config containing values from specified input stream.
@@ -68,7 +68,7 @@ class Loader(
      * @return a child config containing values from specified input stream
      */
     fun inputStream(inputStream: InputStream): Config =
-        config.withSource(provider.fromInputStream(inputStream))
+        config.withSource(provider.inputStream(inputStream))
 
     /**
      * Returns a child config containing values from specified file.
@@ -78,7 +78,7 @@ class Loader(
      * @return a child config containing values from specified file
      */
     fun file(file: File, optional: Boolean = this.optional): Config =
-        config.withSource(provider.fromFile(file, optional))
+        config.withSource(provider.file(file, optional))
 
     /**
      * Returns a child config containing values from specified file path.
@@ -88,7 +88,7 @@ class Loader(
      * @return a child config containing values from specified file path
      */
     fun file(file: String, optional: Boolean = this.optional): Config =
-        config.withSource(provider.fromFile(file, optional))
+        config.withSource(provider.file(file, optional))
 
     private val File.digest: ByteArray
         get() {
@@ -115,7 +115,7 @@ class Loader(
         context: CoroutineContext = Dispatchers.Default,
         optional: Boolean = this.optional
     ): Config {
-        return provider.fromFile(file, optional).let { source ->
+        return provider.file(file, optional).let { source ->
             config.withLoadTrigger("watch ${source.description}") { newConfig, load ->
                 load(source)
                 val path = file.toPath().parent
@@ -136,7 +136,7 @@ class Loader(
                                 digest = newDigest
                                 newConfig.lock {
                                     newConfig.clear()
-                                    load(provider.fromFile(file, optional))
+                                    load(provider.file(file, optional))
                                 }
                             }
                         } else {
@@ -154,7 +154,7 @@ class Loader(
                                             kind == StandardWatchEventKinds.ENTRY_CREATE) {
                                             newConfig.lock {
                                                 newConfig.clear()
-                                                load(provider.fromFile(file, optional))
+                                                load(provider.file(file, optional))
                                             }
                                         }
                                     }
@@ -199,7 +199,7 @@ class Loader(
      * @return a child config containing values from specified string
      */
     fun string(content: String): Config =
-        config.withSource(provider.fromString(content))
+        config.withSource(provider.string(content))
 
     /**
      * Returns a child config containing values from specified byte array.
@@ -208,7 +208,7 @@ class Loader(
      * @return a child config containing values from specified byte array
      */
     fun bytes(content: ByteArray): Config =
-        config.withSource(provider.fromBytes(content))
+        config.withSource(provider.bytes(content))
 
     /**
      * Returns a child config containing values from specified portion of byte array.
@@ -219,7 +219,7 @@ class Loader(
      * @return a child config containing values from specified portion of byte array
      */
     fun bytes(content: ByteArray, offset: Int, length: Int): Config =
-        config.withSource(provider.fromBytes(content, offset, length))
+        config.withSource(provider.bytes(content, offset, length))
 
     /**
      * Returns a child config containing values from specified url.
@@ -229,7 +229,7 @@ class Loader(
      * @return a child config containing values from specified url
      */
     fun url(url: URL, optional: Boolean = this.optional): Config =
-        config.withSource(provider.fromUrl(url, optional))
+        config.withSource(provider.url(url, optional))
 
     /**
      * Returns a child config containing values from specified url string.
@@ -239,7 +239,7 @@ class Loader(
      * @return a child config containing values from specified url string
      */
     fun url(url: String, optional: Boolean = this.optional): Config =
-        config.withSource(provider.fromUrl(url, optional))
+        config.withSource(provider.url(url, optional))
 
     /**
      * Returns a child config containing values from specified url,
@@ -259,7 +259,7 @@ class Loader(
         context: CoroutineContext = Dispatchers.Default,
         optional: Boolean = this.optional
     ): Config {
-        return provider.fromUrl(url, optional).let { source ->
+        return provider.url(url, optional).let { source ->
             config.withLoadTrigger("watch ${source.description}") { newConfig, load ->
                 load(source)
                 GlobalScope.launch(context) {
@@ -267,7 +267,7 @@ class Loader(
                         delay(unit.toMillis(period))
                         newConfig.lock {
                             newConfig.clear()
-                            load(provider.fromUrl(url, optional))
+                            load(provider.url(url, optional))
                         }
                     }
                 }
@@ -303,5 +303,5 @@ class Loader(
      * @return a child config containing values from specified resource
      */
     fun resource(resource: String, optional: Boolean = this.optional): Config =
-        config.withSource(provider.fromResource(resource, optional))
+        config.withSource(provider.resource(resource, optional))
 }

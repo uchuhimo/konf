@@ -75,9 +75,9 @@ allprojects {
 subprojects {
     dependencyManagement {
         dependencies {
-            dependency("org.apiguardian:apiguardian-api:${Versions.apiguardian}")
             dependency("org.jetbrains.kotlinx:kotlinx-coroutines-core:${Versions.coroutines}")
             dependency("org.reflections:reflections:${Versions.reflections}")
+            dependency("org.apache.commons:commons-text:${Versions.commonsText}")
 
             arrayOf("stdlib", "reflect", "stdlib-jdk8").forEach { name ->
                 dependency(kotlin(name, Versions.kotlin))
@@ -114,8 +114,8 @@ subprojects {
         implementation(kotlin("stdlib-jdk8"))
         implementation(kotlin("reflect"))
         implementation("org.jetbrains.kotlinx:kotlinx-coroutines-core")
-        implementation("org.apiguardian:apiguardian-api")
         implementation("org.reflections:reflections")
+        implementation("org.apache.commons:commons-text")
         arrayOf("core", "annotations", "databind").forEach { name ->
             implementation(jacksonCore(name))
         }
@@ -146,6 +146,7 @@ subprojects {
     test {
         useJUnitPlatform()
         testLogging.showStandardStreams = true
+        systemProperty("org.slf4j.simpleLogger.defaultLogLevel", "warn")
         val properties = Properties()
         properties.load(rootProject.file("konf-core/src/test/kotlin/com/uchuhimo/konf/source/env/env.properties").inputStream())
         properties.forEach { key, value ->

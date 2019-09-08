@@ -42,7 +42,7 @@ import kotlin.test.assertTrue
 object JsonSourceSpec : Spek({
     given("a JSON source") {
         group("get operation") {
-            val source by memoized { JsonProvider.fromString("""{ "key": 1 }""") }
+            val source by memoized { JsonProvider.string("""{ "key": 1 }""") }
             on("get underlying JSON node") {
                 val intSource = JsonSource(IntNode.valueOf(1))
                 it("should return corresponding node") {

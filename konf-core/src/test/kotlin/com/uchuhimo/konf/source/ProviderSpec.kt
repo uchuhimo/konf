@@ -39,12 +39,25 @@ object ProviderSpec : SubjectSpek<Provider>({
 
     given("a provider") {
         on("create source from reader") {
+            val source = subject.reader("type = reader".reader())
+            it("should return a source which contains value from reader") {
+                assertThat(source["type"].asValue<String>(), equalTo("reader"))
+            }
+        }
+        on("create source from reader (deprecated)") {
             val source = subject.fromReader("type = reader".reader())
             it("should return a source which contains value from reader") {
                 assertThat(source["type"].asValue<String>(), equalTo("reader"))
             }
         }
         on("create source from input stream") {
+            val source = subject.inputStream(
+                tempFileOf("type = inputStream").inputStream())
+            it("should return a source which contains value from input stream") {
+                assertThat(source["type"].asValue<String>(), equalTo("inputStream"))
+            }
+        }
+        on("create source from input stream (deprecated)") {
             val source = subject.fromInputStream(
                 tempFileOf("type = inputStream").inputStream())
             it("should return a source which contains value from input stream") {
@@ -52,6 +65,19 @@ object ProviderSpec : SubjectSpek<Provider>({
             }
         }
         on("create source from file") {
+            val file = tempFileOf("type = file")
+            val source = subject.file(file)
+            it("should create from the specified file") {
+                assertThat(source.info["file"], equalTo(file.toString()))
+            }
+            it("should return a source which contains value in file") {
+                assertThat(source["type"].asValue<String>(), equalTo("file"))
+            }
+            it("should not lock the file") {
+                assertTrue { file.delete() }
+            }
+        }
+        on("create source from file (deprecated)") {
             val file = tempFileOf("type = file")
             val source = subject.fromFile(file)
             it("should create from the specified file") {
@@ -66,14 +92,24 @@ object ProviderSpec : SubjectSpek<Provider>({
         }
         on("create source from not-existed file") {
             it("should throw exception") {
-                assertThrows<FileNotFoundException> { subject.fromFile(File("not_existed.json")) }
+                assertThrows<FileNotFoundException> { subject.file(File("not_existed.json")) }
             }
             it("should return an empty source if optional") {
-                assertThat(subject.fromFile(File("not_existed.json"), optional = true).tree.children,
+                assertThat(subject.file(File("not_existed.json"), optional = true).tree.children,
                     equalTo(mutableMapOf()))
             }
         }
         on("create source from file path") {
+            val file = tempFileOf("type = file").toString()
+            val source = subject.file(file)
+            it("should create from the specified file path") {
+                assertThat(source.info["file"], equalTo(file))
+            }
+            it("should return a source which contains value in file") {
+                assertThat(source["type"].asValue<String>(), equalTo("file"))
+            }
+        }
+        on("create source from file path (deprecated)") {
             val file = tempFileOf("type = file").toString()
             val source = subject.fromFile(file)
             it("should create from the specified file path") {
@@ -85,14 +121,24 @@ object ProviderSpec : SubjectSpek<Provider>({
         }
         on("create source from not-existed file path") {
             it("should throw exception") {
-                assertThrows<FileNotFoundException> { subject.fromFile("not_existed.json") }
+                assertThrows<FileNotFoundException> { subject.file("not_existed.json") }
             }
             it("should return an empty source if optional") {
-                assertThat(subject.fromFile("not_existed.json", optional = true).tree.children,
+                assertThat(subject.file("not_existed.json", optional = true).tree.children,
                     equalTo(mutableMapOf()))
             }
         }
         on("create source from string") {
+            val content = "type = string"
+            val source = subject.string(content)
+            it("should create from the specified string") {
+                assertThat(source.info["content"], equalTo("\"\n$content\n\""))
+            }
+            it("should return a source which contains value in string") {
+                assertThat(source["type"].asValue<String>(), equalTo("string"))
+            }
+        }
+        on("create source from string (deprecated)") {
             val content = "type = string"
             val source = subject.fromString(content)
             it("should create from the specified string") {
@@ -103,12 +149,24 @@ object ProviderSpec : SubjectSpek<Provider>({
             }
         }
         on("create source from byte array") {
+            val source = subject.bytes("type = bytes".toByteArray())
+            it("should return a source which contains value in byte array") {
+                assertThat(source["type"].asValue<String>(), equalTo("bytes"))
+            }
+        }
+        on("create source from byte array (deprecated)") {
             val source = subject.fromBytes("type = bytes".toByteArray())
             it("should return a source which contains value in byte array") {
                 assertThat(source["type"].asValue<String>(), equalTo("bytes"))
             }
         }
         on("create source from byte array slice") {
+            val source = subject.bytes("|type = slice|".toByteArray(), 1, 12)
+            it("should return a source which contains value in byte array slice") {
+                assertThat(source["type"].asValue<String>(), equalTo("slice"))
+            }
+        }
+        on("create source from byte array slice (deprecated)") {
             val source = subject.fromBytes("|type = slice|".toByteArray(), 1, 12)
             it("should return a source which contains value in byte array slice") {
                 assertThat(source["type"].asValue<String>(), equalTo("slice"))
@@ -120,7 +178,7 @@ object ProviderSpec : SubjectSpek<Provider>({
             service.get("/source") { _, _ -> "type = http" }
             service.awaitInitialization()
             val urlPath = "http://localhost:${service.port()}/source"
-            val source = subject.fromUrl(URL(urlPath))
+            val source = subject.url(URL(urlPath))
             it("should create from the specified URL") {
                 assertThat(source.info["url"], equalTo(urlPath))
             }
@@ -131,14 +189,28 @@ object ProviderSpec : SubjectSpek<Provider>({
         }
         on("create source from not-existed HTTP URL") {
             it("should throw exception") {
-                assertThrows<IOException> { subject.fromUrl(URL("http://localhost/not_existed.json")) }
+                assertThrows<IOException> { subject.url(URL("http://localhost/not_existed.json")) }
             }
             it("should return an empty source if optional") {
-                assertThat(subject.fromUrl(URL("http://localhost/not_existed.json"), optional = true).tree.children,
+                assertThat(subject.url(URL("http://localhost/not_existed.json"), optional = true).tree.children,
                     equalTo(mutableMapOf()))
             }
         }
         on("create source from file URL") {
+            val file = tempFileOf("type = fileUrl")
+            val url = file.toURI().toURL()
+            val source = subject.url(url)
+            it("should create from the specified URL") {
+                assertThat(source.info["url"], equalTo(url.toString()))
+            }
+            it("should return a source which contains value in URL") {
+                assertThat(source["type"].asValue<String>(), equalTo("fileUrl"))
+            }
+            it("should not lock the file") {
+                assertTrue { file.delete() }
+            }
+        }
+        on("create source from file URL (deprecated)") {
             val file = tempFileOf("type = fileUrl")
             val url = file.toURI().toURL()
             val source = subject.fromUrl(url)
@@ -154,14 +226,25 @@ object ProviderSpec : SubjectSpek<Provider>({
         }
         on("create source from not-existed file URL") {
             it("should throw exception") {
-                assertThrows<FileNotFoundException> { subject.fromUrl(URL("file://localhost/not_existed.json")) }
+                assertThrows<FileNotFoundException> { subject.url(URL("file://localhost/not_existed.json")) }
             }
             it("should return an empty source if optional") {
-                assertThat(subject.fromUrl(URL("file://localhost/not_existed.json"), optional = true).tree.children,
+                assertThat(subject.url(URL("file://localhost/not_existed.json"), optional = true).tree.children,
                     equalTo(mutableMapOf()))
             }
         }
         on("create source from file URL string") {
+            val file = tempFileOf("type = fileUrl")
+            val url = file.toURI().toURL().toString()
+            val source = subject.url(url)
+            it("should create from the specified URL string") {
+                assertThat(source.info["url"], equalTo(url))
+            }
+            it("should return a source which contains value in URL") {
+                assertThat(source["type"].asValue<String>(), equalTo("fileUrl"))
+            }
+        }
+        on("create source from file URL string (deprecated)") {
             val file = tempFileOf("type = fileUrl")
             val url = file.toURI().toURL().toString()
             val source = subject.fromUrl(url)
@@ -174,14 +257,24 @@ object ProviderSpec : SubjectSpek<Provider>({
         }
         on("create source from not-existed file URL string") {
             it("should throw exception") {
-                assertThrows<FileNotFoundException> { subject.fromUrl("file://localhost/not_existed.json") }
+                assertThrows<FileNotFoundException> { subject.url("file://localhost/not_existed.json") }
             }
             it("should return an empty source if optional") {
-                assertThat(subject.fromUrl("file://localhost/not_existed.json", optional = true).tree.children,
+                assertThat(subject.url("file://localhost/not_existed.json", optional = true).tree.children,
                     equalTo(mutableMapOf()))
             }
         }
         on("create source from resource") {
+            val resource = "source/provider.properties"
+            val source = subject.resource(resource)
+            it("should create from the specified resource") {
+                assertThat(source.info["resource"], equalTo(resource))
+            }
+            it("should return a source which contains value in resource") {
+                assertThat(source["type"].asValue<String>(), equalTo("resource"))
+            }
+        }
+        on("create source from resource (deprecated)") {
             val resource = "source/provider.properties"
             val source = subject.fromResource(resource)
             it("should create from the specified resource") {
@@ -193,11 +286,11 @@ object ProviderSpec : SubjectSpek<Provider>({
         }
         on("create source from non-existed resource") {
             it("should throw SourceNotFoundException") {
-                assertThat({ subject.fromResource("source/no-provider.properties") },
+                assertThat({ subject.resource("source/no-provider.properties") },
                     throws<SourceNotFoundException>())
             }
             it("should return an empty source if optional") {
-                assertThat(subject.fromResource("source/no-provider.properties", optional = true).tree.children,
+                assertThat(subject.resource("source/no-provider.properties", optional = true).tree.children,
                     equalTo(mutableMapOf()))
             }
         }

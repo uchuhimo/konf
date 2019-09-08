@@ -30,10 +30,10 @@ object PropertiesProvider : Provider {
     @Suppress("UNCHECKED_CAST")
     private fun Properties.toMap(): Map<String, String> = this as Map<String, String>
 
-    override fun fromReader(reader: Reader): Source =
+    override fun reader(reader: Reader): Source =
         FlatSource(Properties().apply { load(reader) }.toMap(), type = "properties")
 
-    override fun fromInputStream(inputStream: InputStream): Source =
+    override fun inputStream(inputStream: InputStream): Source =
         FlatSource(Properties().apply { load(inputStream) }.toMap(), type = "properties")
 
     /**

@@ -29,7 +29,7 @@ import kotlin.test.assertNull
 import kotlin.test.assertTrue
 
 object HoconSourceSpec : SubjectSpek<HoconSource>({
-    subject { HoconProvider.fromString("key = 1") as HoconSource }
+    subject { HoconProvider.string("key = 1") as HoconSource }
 
     given("a HOCON source") {
         on("get underlying config") {
@@ -55,7 +55,7 @@ object HoconSourceSpec : SubjectSpek<HoconSource>({
             }
         }
         on("use substitutions in source") {
-            val source = HoconProvider.fromString("""
+            val source = HoconProvider.string("""
                 key1 = 1
                 key2 = ${'$'}{key1}
             """.trimIndent())

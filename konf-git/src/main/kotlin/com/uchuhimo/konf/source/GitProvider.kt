@@ -84,6 +84,6 @@ fun Provider.fromGit(
                 else -> throw ex
             }
         }
-        fromFile(Paths.get(directory.path, file).toFile(), optional).apply(extendContext)
+        file(Paths.get(directory.path, file).toFile(), optional).apply(extendContext)
     }
 }

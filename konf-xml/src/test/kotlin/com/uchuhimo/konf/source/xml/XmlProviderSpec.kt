@@ -40,7 +40,7 @@ object XmlProviderSpec : SubjectSpek<XmlProvider>({
 
     given("a XML provider") {
         on("create source from reader") {
-            val source = subject.fromReader(xmlDoc("type", "reader").reader())
+            val source = subject.reader(xmlDoc("type", "reader").reader())
             it("should have correct type") {
                 assertThat(source.info["type"], equalTo("XML"))
             }
@@ -49,7 +49,7 @@ object XmlProviderSpec : SubjectSpek<XmlProvider>({
             }
         }
         on("create source from input stream") {
-            val source = subject.fromInputStream(
+            val source = subject.inputStream(
                 tempFileOf(xmlDoc("type", "inputStream")).inputStream())
             it("should have correct type") {
                 assertThat(source.info["type"], equalTo("XML"))

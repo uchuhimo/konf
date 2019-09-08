@@ -102,3 +102,9 @@ class SourceNotFoundException(message: String) : SourceException(message)
 class UnsupportedExtensionException(source: String) : SourceException(
     "cannot detect supported extension for \"$source\"," +
         " supported extensions: conf, json, properties, toml, xml, yml, yaml")
+
+/**
+ * Exception indicates that undefined paths occur during variable substitution.
+ */
+class UndefinedPathVariableException(source: Source, text: String) : SourceException(
+    "\"$text\" in source ${source.description} contains undefined path variables during path substitution")

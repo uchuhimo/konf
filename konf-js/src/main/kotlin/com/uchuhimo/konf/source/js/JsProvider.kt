@@ -30,21 +30,21 @@ import java.util.stream.Collectors
  */
 @RegisterExtension(["js"])
 object JsProvider : Provider {
-    override fun fromReader(reader: Reader): Source {
+    override fun reader(reader: Reader): Source {
         val sourceString = reader.buffered().lines().collect(Collectors.joining("\n"))
         Context.create().use { context ->
             val value = context.eval("js", sourceString)
             context.getBindings("js").putMember("source", value)
             val jsonString = context.eval("js", "JSON.stringify(source)").asString()
-            return JsonProvider.fromString(jsonString).apply {
+            return JsonProvider.string(jsonString).apply {
                 this.info["type"] = "JavaScript"
             }
         }
     }
 
-    override fun fromInputStream(inputStream: InputStream): Source {
+    override fun inputStream(inputStream: InputStream): Source {
         inputStream.reader().use {
-            return fromReader(it)
+            return reader(it)
         }
     }
 }

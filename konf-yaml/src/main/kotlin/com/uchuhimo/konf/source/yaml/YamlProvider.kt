@@ -34,12 +34,12 @@ import java.io.Reader
  */
 @RegisterExtension(["yml", "yaml"])
 object YamlProvider : Provider {
-    override fun fromReader(reader: Reader): Source {
+    override fun reader(reader: Reader): Source {
         val yaml = Yaml(YamlConstructor())
         return yaml.load<Any>(reader).asSource("YAML")
     }
 
-    override fun fromInputStream(inputStream: InputStream): Source {
+    override fun inputStream(inputStream: InputStream): Source {
         val yaml = Yaml(YamlConstructor())
         return yaml.load<Any>(inputStream).asSource("YAML")
     }

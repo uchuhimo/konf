@@ -40,11 +40,11 @@ object XmlProvider : Provider {
         }
     }
 
-    override fun fromReader(reader: Reader): Source {
+    override fun reader(reader: Reader): Source {
         return FlatSource(SAXReader().read(reader).toMap(), type = "XML")
     }
 
-    override fun fromInputStream(inputStream: InputStream): Source {
+    override fun inputStream(inputStream: InputStream): Source {
         return FlatSource(SAXReader().read(inputStream).toMap(), type = "XML")
     }
 }

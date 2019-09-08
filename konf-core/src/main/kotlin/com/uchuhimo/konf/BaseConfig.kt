@@ -582,7 +582,12 @@ open class BaseConfig(
     override fun withSource(source: Source): Config =
         withLayer("source: ${source.description}").also { config ->
             config.lock.write {
-                load(config, source)
+                if (config.isEnabled(Feature.SUBSTITUTE_SOURCE_WHEN_LOADED) ||
+                    source.isEnabled(Feature.SUBSTITUTE_SOURCE_WHEN_LOADED)) {
+                    load(config, source.substituted())
+                } else {
+                    load(config, source)
+                }
                 config._source.value = source
             }
         }

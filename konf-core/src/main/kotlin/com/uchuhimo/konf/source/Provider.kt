@@ -37,7 +37,16 @@ interface Provider {
      * @param reader specified reader for reading character streams
      * @return a new source from specified reader
      */
-    fun fromReader(reader: Reader): Source
+    fun reader(reader: Reader): Source
+
+    /**
+     * Returns a new source from specified reader.
+     *
+     * @param reader specified reader for reading character streams
+     * @return a new source from specified reader
+     */
+    @Deprecated("use `reader` instead", replaceWith = ReplaceWith("reader"))
+    fun fromReader(reader: Reader): Source = reader(reader)
 
     /**
      * Returns a new source from specified input stream.
@@ -45,7 +54,16 @@ interface Provider {
      * @param inputStream specified input stream of bytes
      * @return a new source from specified input stream
      */
-    fun fromInputStream(inputStream: InputStream): Source
+    fun inputStream(inputStream: InputStream): Source
+
+    /**
+     * Returns a new source from specified input stream.
+     *
+     * @param inputStream specified input stream of bytes
+     * @return a new source from specified input stream
+     */
+    @Deprecated("use `inputStream` instead", replaceWith = ReplaceWith("inputStream"))
+    fun fromInputStream(inputStream: InputStream): Source = inputStream(inputStream)
 
     /**
      * Returns a new source from specified file.
@@ -54,7 +72,7 @@ interface Provider {
      * @param optional whether this source is optional
      * @return a new source from specified file
      */
-    fun fromFile(file: File, optional: Boolean = false): Source {
+    fun file(file: File, optional: Boolean = false): Source {
         val extendContext: Source.() -> Unit = {
             info["file"] = file.toString()
         }
@@ -62,9 +80,19 @@ interface Provider {
             return EmptyMapSource().apply(extendContext)
         }
         return file.inputStream().buffered().use { inputStream ->
-            fromInputStream(inputStream).apply(extendContext)
+            inputStream(inputStream).apply(extendContext)
         }
     }
+
+    /**
+     * Returns a new source from specified file.
+     *
+     * @param file specified file
+     * @param optional whether this source is optional
+     * @return a new source from specified file
+     */
+    @Deprecated("use `file` instead", replaceWith = ReplaceWith("file"))
+    fun fromFile(file: File, optional: Boolean = false): Source = file(file, optional)
 
     /**
      * Returns a new source from specified file path.
@@ -73,7 +101,17 @@ interface Provider {
      * @param optional whether this source is optional
      * @return a new source from specified file path
      */
-    fun fromFile(file: String, optional: Boolean = false): Source = fromFile(File(file), optional)
+    fun file(file: String, optional: Boolean = false): Source = file(File(file), optional)
+
+    /**
+     * Returns a new source from specified file path.
+     *
+     * @param file specified file path
+     * @param optional whether this source is optional
+     * @return a new source from specified file path
+     */
+    @Deprecated("use `file` instead", replaceWith = ReplaceWith("file"))
+    fun fromFile(file: String, optional: Boolean = false): Source = file(file, optional)
 
     /**
      * Returns a new source from specified string.
@@ -81,8 +119,29 @@ interface Provider {
      * @param content specified string
      * @return a new source from specified string
      */
-    fun fromString(content: String): Source = fromReader(content.reader()).apply {
+    fun string(content: String): Source = reader(content.reader()).apply {
         info["content"] = "\"\n$content\n\""
+    }
+
+    /**
+     * Returns a new source from specified string.
+     *
+     * @param content specified string
+     * @return a new source from specified string
+     */
+    @Deprecated("use `string` instead", replaceWith = ReplaceWith("string"))
+    fun fromString(content: String): Source = string(content)
+
+    /**
+     * Returns a new source from specified byte array.
+     *
+     * @param content specified byte array
+     * @return a new source from specified byte array
+     */
+    fun bytes(content: ByteArray): Source {
+        return content.inputStream().use {
+            inputStream(it)
+        }
     }
 
     /**
@@ -91,9 +150,20 @@ interface Provider {
      * @param content specified byte array
      * @return a new source from specified byte array
      */
-    fun fromBytes(content: ByteArray): Source {
-        return content.inputStream().use {
-            fromInputStream(it)
+    @Deprecated("use `bytes` instead", replaceWith = ReplaceWith("bytes"))
+    fun fromBytes(content: ByteArray): Source = bytes(content)
+
+    /**
+     * Returns a new source from specified portion of byte array.
+     *
+     * @param content specified byte array
+     * @param offset the start offset of the portion of the array to read
+     * @param length the length of the portion of the array to read
+     * @return a new source from specified portion of byte array
+     */
+    fun bytes(content: ByteArray, offset: Int, length: Int): Source {
+        return content.inputStream(offset, length).use {
+            inputStream(it)
         }
     }
 
@@ -105,11 +175,8 @@ interface Provider {
      * @param length the length of the portion of the array to read
      * @return a new source from specified portion of byte array
      */
-    fun fromBytes(content: ByteArray, offset: Int, length: Int): Source {
-        return content.inputStream(offset, length).use {
-            fromInputStream(it)
-        }
-    }
+    @Deprecated("use `bytes` instead", replaceWith = ReplaceWith("bytes"))
+    fun fromBytes(content: ByteArray, offset: Int, length: Int): Source = bytes(content, offset, length)
 
     /**
      * Returns a new source from specified url.
@@ -118,7 +185,7 @@ interface Provider {
      * @param optional whether this source is optional
      * @return a new source from specified url
      */
-    fun fromUrl(url: URL, optional: Boolean = false): Source {
+    fun url(url: URL, optional: Boolean = false): Source {
         // from com.fasterxml.jackson.core.JsonFactory._optimizedStreamFromURL in version 2.8.9
         val extendContext: Source.() -> Unit = {
             info["url"] = url.toString()
@@ -133,7 +200,7 @@ interface Provider {
                         return EmptyMapSource().apply(extendContext)
                     }
                     return file.inputStream().use {
-                        fromInputStream(it).apply(extendContext)
+                        inputStream(it).apply(extendContext)
                     }
                 }
             }
@@ -141,7 +208,7 @@ interface Provider {
         return try {
             val stream = url.openStream()
             stream.use {
-                fromInputStream(it).apply(extendContext)
+                inputStream(it).apply(extendContext)
             }
         } catch (ex: IOException) {
             if (optional) {
@@ -153,13 +220,33 @@ interface Provider {
     }
 
     /**
+     * Returns a new source from specified url.
+     *
+     * @param url specified url
+     * @param optional whether this source is optional
+     * @return a new source from specified url
+     */
+    @Deprecated("use `url` instead", replaceWith = ReplaceWith("url"))
+    fun fromUrl(url: URL, optional: Boolean = false): Source = url(url, optional)
+
+    /**
      * Returns a new source from specified url string.
      *
      * @param url specified url string
      * @param optional whether this source is optional
      * @return a new source from specified url string
      */
-    fun fromUrl(url: String, optional: Boolean = false): Source = fromUrl(URL(url), optional)
+    fun url(url: String, optional: Boolean = false): Source = url(URL(url), optional)
+
+    /**
+     * Returns a new source from specified url string.
+     *
+     * @param url specified url string
+     * @param optional whether this source is optional
+     * @return a new source from specified url string
+     */
+    @Deprecated("use `url` instead", replaceWith = ReplaceWith("url"))
+    fun fromUrl(url: String, optional: Boolean = false): Source = url(url, optional)
 
     /**
      * Returns a new source from specified resource.
@@ -168,7 +255,7 @@ interface Provider {
      * @param optional whether this source is optional
      * @return a new source from specified resource
      */
-    fun fromResource(resource: String, optional: Boolean = false): Source {
+    fun resource(resource: String, optional: Boolean = false): Source {
         val extendContext: Source.() -> Unit = {
             info["resource"] = resource
         }
@@ -192,12 +279,22 @@ interface Provider {
         val sources = mutableListOf<Source>()
         while (e.hasMoreElements()) {
             val url = e.nextElement()
-            val source = fromUrl(url, optional)
+            val source = url(url, optional)
             sources.add(source)
         }
 
         return sources.reduce(Source::withFallback).apply(extendContext)
     }
+
+    /**
+     * Returns a new source from specified resource.
+     *
+     * @param resource path of specified resource
+     * @param optional whether this source is optional
+     * @return a new source from specified resource
+     */
+    @Deprecated("use `resource` instead", replaceWith = ReplaceWith("resource"))
+    fun fromResource(resource: String, optional: Boolean = false): Source = resource(resource, optional)
 
     /**
      * Returns a provider providing sources that applying the given [transform] function.
@@ -207,35 +304,35 @@ interface Provider {
      */
     fun map(transform: (Source) -> Source): Provider {
         return object : Provider {
-            override fun fromReader(reader: Reader): Source =
-                this@Provider.fromReader(reader).let(transform)
+            override fun reader(reader: Reader): Source =
+                this@Provider.reader(reader).let(transform)
 
-            override fun fromInputStream(inputStream: InputStream): Source =
-                this@Provider.fromInputStream(inputStream).let(transform)
+            override fun inputStream(inputStream: InputStream): Source =
+                this@Provider.inputStream(inputStream).let(transform)
 
-            override fun fromFile(file: File, optional: Boolean): Source =
-                this@Provider.fromFile(file, optional).let(transform)
+            override fun file(file: File, optional: Boolean): Source =
+                this@Provider.file(file, optional).let(transform)
 
-            override fun fromFile(file: String, optional: Boolean): Source =
-                this@Provider.fromFile(file, optional).let(transform)
+            override fun file(file: String, optional: Boolean): Source =
+                this@Provider.file(file, optional).let(transform)
 
-            override fun fromString(content: String): Source =
-                this@Provider.fromString(content).let(transform)
+            override fun string(content: String): Source =
+                this@Provider.string(content).let(transform)
 
-            override fun fromBytes(content: ByteArray): Source =
-                this@Provider.fromBytes(content).let(transform)
+            override fun bytes(content: ByteArray): Source =
+                this@Provider.bytes(content).let(transform)
 
-            override fun fromBytes(content: ByteArray, offset: Int, length: Int): Source =
-                this@Provider.fromBytes(content, offset, length).let(transform)
+            override fun bytes(content: ByteArray, offset: Int, length: Int): Source =
+                this@Provider.bytes(content, offset, length).let(transform)
 
-            override fun fromUrl(url: URL, optional: Boolean): Source =
-                this@Provider.fromUrl(url, optional).let(transform)
+            override fun url(url: URL, optional: Boolean): Source =
+                this@Provider.url(url, optional).let(transform)
 
-            override fun fromUrl(url: String, optional: Boolean): Source =
-                this@Provider.fromUrl(url, optional).let(transform)
+            override fun url(url: String, optional: Boolean): Source =
+                this@Provider.url(url, optional).let(transform)
 
-            override fun fromResource(resource: String, optional: Boolean): Source =
-                this@Provider.fromResource(resource, optional).let(transform)
+            override fun resource(resource: String, optional: Boolean): Source =
+                this@Provider.resource(resource, optional).let(transform)
         }
     }
 

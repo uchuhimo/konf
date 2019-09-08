@@ -536,7 +536,7 @@ All of source/config/config spec support add prefix operation, remove prefix ope
 
 | Type | Add Prefix | Remove Prefix | Merge
 | - | - | - | - |
-| `Source` | `source.withPrefix(prefix)` or `Prefix(prefix) + source` | `source[prefix]` | `fallback + facade` or `facade.withFallback(fallback)` |
+| `Source` | `source.withPrefix(prefix)` or `Prefix(prefix) + source` or `config.from.prefixed(prefix).file(file)` | `source[prefix]` or `config.from.scoped(prefix).file(file)` | `fallback + facade` or `facade.withFallback(fallback)` |
 | `Config` | `config.withPrefix(prefix)` or `Prefix(prefix) + config` | `config.at(prefix)` | `fallback + facade` or `facade.withFallback(fallback)` |
 | `Spec` | `spec.withPrefix(prefix)` or `Prefix(prefix) + spec` | `spec[prefix]` | `fallback + facade` or `facade.withFallback(fallback)` |
 
