@@ -34,6 +34,7 @@ import org.jetbrains.spek.subject.SubjectSpek
 import org.jetbrains.spek.subject.itBehavesLike
 import spark.Service
 import java.net.URL
+import java.util.UUID
 import java.util.concurrent.TimeUnit
 
 object DefaultLoadersSpec : SubjectSpek<DefaultLoaders>({
@@ -64,9 +65,10 @@ object DefaultLoadersSpec : SubjectSpek<DefaultLoaders>({
                 assertThat({ subject.dispatchExtension("txt") }, throws<UnsupportedExtensionException>())
             }
             it("should return the corresponding loader when the extension is registered") {
-                Provider.registerExtension("txt", PropertiesProvider)
-                subject.dispatchExtension("txt")
-                Provider.unregisterExtension("txt")
+                val extension = UUID.randomUUID().toString()
+                Provider.registerExtension(extension, PropertiesProvider)
+                subject.dispatchExtension(extension)
+                Provider.unregisterExtension(extension)
             }
         }
         on("load from provider") {

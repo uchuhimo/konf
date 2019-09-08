@@ -16,6 +16,7 @@
 
 package com.uchuhimo.konf.source.yaml
 
+import com.uchuhimo.konf.annotation.JavaApi
 import com.uchuhimo.konf.source.Provider
 import com.uchuhimo.konf.source.RegisterExtension
 import com.uchuhimo.konf.source.Source
@@ -43,6 +44,10 @@ object YamlProvider : Provider {
         val yaml = Yaml(YamlConstructor())
         return yaml.load<Any>(inputStream).asSource("YAML")
     }
+
+    @JavaApi
+    @JvmStatic
+    fun get() = this
 }
 
 class YamlConstructor : SafeConstructor() {

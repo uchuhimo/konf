@@ -21,6 +21,7 @@ import com.natpryce.hamkrest.equalTo
 import com.uchuhimo.konf.Config
 import com.uchuhimo.konf.Feature
 import com.uchuhimo.konf.source.ConfigForLoad
+import com.uchuhimo.konf.source.Source
 import com.uchuhimo.konf.source.SourceLoadSpec
 import org.jetbrains.spek.api.dsl.given
 import org.jetbrains.spek.api.dsl.it
@@ -78,6 +79,18 @@ object FlatSourceReloadSpec : SubjectSpek<Config>({
             addSpec(ConfigForLoad)
             addSpec(FlatConfigForLoad)
         }.from.map.flat(config.toFlatMap())
+    }
+
+    itBehavesLike(FlatSourceLoadSpec)
+})
+
+object FlatSourceFromDefaultProvidersSpec : SubjectSpek<Config>({
+
+    subject {
+        Config {
+            addSpec(ConfigForLoad)
+            addSpec(FlatConfigForLoad)
+        }.withSource(Source.from.map.flat(loadContent))
     }
 
     itBehavesLike(FlatSourceLoadSpec)

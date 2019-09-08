@@ -145,7 +145,12 @@ subprojects {
     val test by tasks.existing(Test::class)
     test {
         useJUnitPlatform()
-        testLogging.showStandardStreams = true
+        testLogging.apply {
+            showStandardStreams = true
+            showExceptions = true
+            showCauses = true
+            showStackTraces = true
+        }
         systemProperty("org.slf4j.simpleLogger.defaultLogLevel", "warn")
         val properties = Properties()
         properties.load(rootProject.file("konf-core/src/test/kotlin/com/uchuhimo/konf/source/env/env.properties").inputStream())

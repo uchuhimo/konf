@@ -274,6 +274,17 @@ object SourceReloadFromDiskSpec : SubjectSpek<Config>({
     itBehavesLike(SourceLoadSpec)
 })
 
+object KVSourceFromDefaultProvidersSpec : SubjectSpek<Config>({
+
+    subject {
+        Config {
+            addSpec(ConfigForLoad)
+        }.withSource(Source.from.map.kv(com.uchuhimo.konf.source.loadContent))
+    }
+
+    itBehavesLike(SourceLoadSpec)
+})
+
 private val loadContent = mapOf<String, Any>(
     "empty" to "null",
     "literalEmpty" to "null",

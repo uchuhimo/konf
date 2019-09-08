@@ -14,26 +14,11 @@
  * limitations under the License.
  */
 
-package com.uchuhimo.konf.source.json
+package com.uchuhimo.konf.source
 
-import com.fasterxml.jackson.databind.ObjectMapper
-import com.uchuhimo.konf.annotation.JavaApi
-import com.uchuhimo.konf.source.Provider
-import com.uchuhimo.konf.source.Source
-import java.io.InputStream
-import java.io.Reader
+import com.uchuhimo.konf.source.toml.TomlProvider
 
 /**
- * Provider for JSON source.
+ * Provider for TOML source.
  */
-object JsonProvider : Provider {
-    override fun reader(reader: Reader): Source =
-        JsonSource(ObjectMapper().readTree(reader))
-
-    override fun inputStream(inputStream: InputStream): Source =
-        JsonSource(ObjectMapper().readTree(inputStream))
-
-    @JavaApi
-    @JvmStatic
-    fun get() = this
-}
+val DefaultProviders.toml get() = TomlProvider

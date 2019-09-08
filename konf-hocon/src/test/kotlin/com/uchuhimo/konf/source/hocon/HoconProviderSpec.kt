@@ -24,6 +24,7 @@ import org.jetbrains.spek.api.dsl.given
 import org.jetbrains.spek.api.dsl.it
 import org.jetbrains.spek.api.dsl.on
 import org.jetbrains.spek.subject.SubjectSpek
+import org.jetbrains.spek.subject.itBehavesLike
 
 object HoconProviderSpec : SubjectSpek<HoconProvider>({
     subject { HoconProvider }
@@ -49,4 +50,10 @@ object HoconProviderSpec : SubjectSpek<HoconProvider>({
             }
         }
     }
+})
+
+object HoconProviderInJavaSpec : SubjectSpek<HoconProvider>({
+    subject { HoconProvider.get() }
+
+    itBehavesLike(HoconProviderSpec)
 })

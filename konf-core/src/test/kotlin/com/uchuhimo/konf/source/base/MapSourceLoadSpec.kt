@@ -19,6 +19,7 @@ package com.uchuhimo.konf.source.base
 import com.uchuhimo.konf.Config
 import com.uchuhimo.konf.Feature
 import com.uchuhimo.konf.source.ConfigForLoad
+import com.uchuhimo.konf.source.Source
 import com.uchuhimo.konf.source.SourceLoadSpec
 import com.uchuhimo.konf.source.toDuration
 import com.uchuhimo.konf.toSizeInBytes
@@ -58,6 +59,18 @@ object MapSourceReloadSpec : SubjectSpek<Config>({
         Config {
             addSpec(ConfigForLoad)
         }.from.map.hierarchical(config.toHierarchicalMap())
+    }
+
+    itBehavesLike(SourceLoadSpec)
+})
+
+object MapSourceFromDefaultProvidersSpec : SubjectSpek<Config>({
+
+    subject {
+        Config {
+            addSpec(ConfigForLoad)
+            enable(Feature.FAIL_ON_UNKNOWN_PATH)
+        }.withSource(Source.from.map.hierarchical(loadContent))
     }
 
     itBehavesLike(SourceLoadSpec)

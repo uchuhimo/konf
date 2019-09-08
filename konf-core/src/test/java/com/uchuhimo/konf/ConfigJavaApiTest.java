@@ -19,6 +19,7 @@ package com.uchuhimo.konf;
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.equalTo;
 
+import com.uchuhimo.konf.source.Source;
 import java.util.HashMap;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
@@ -62,6 +63,15 @@ class ConfigJavaApiTest {
   void loadFromSystem() {
     System.setProperty(config.nameOf(NetworkBufferInJava.size), "1024");
     final Config newConfig = config.from().systemProperties();
+    assertThat(newConfig.get(NetworkBufferInJava.size), equalTo(1024));
+  }
+
+  @Test
+  @DisplayName("test fluent API to load from source")
+  void loadFromSource() {
+    final HashMap<String, Integer> map = new HashMap<>();
+    map.put(config.nameOf(NetworkBufferInJava.size), 1024);
+    final Config newConfig = config.withSource(Source.from().map.kv(map));
     assertThat(newConfig.get(NetworkBufferInJava.size), equalTo(1024));
   }
 

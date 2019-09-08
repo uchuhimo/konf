@@ -17,6 +17,7 @@
 package com.uchuhimo.konf.source.toml
 
 import com.moandjiezana.toml.Toml
+import com.uchuhimo.konf.annotation.JavaApi
 import com.uchuhimo.konf.source.Provider
 import com.uchuhimo.konf.source.RegisterExtension
 import com.uchuhimo.konf.source.Source
@@ -34,4 +35,8 @@ object TomlProvider : Provider {
 
     override fun inputStream(inputStream: InputStream): Source =
         Toml().read(inputStream).toMap().asSource(type = "TOML")
+
+    @JavaApi
+    @JvmStatic
+    fun get() = this
 }

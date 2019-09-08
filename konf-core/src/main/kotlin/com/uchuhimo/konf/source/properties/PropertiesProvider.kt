@@ -16,6 +16,7 @@
 
 package com.uchuhimo.konf.source.properties
 
+import com.uchuhimo.konf.annotation.JavaApi
 import com.uchuhimo.konf.source.Provider
 import com.uchuhimo.konf.source.Source
 import com.uchuhimo.konf.source.base.FlatSource
@@ -41,9 +42,21 @@ object PropertiesProvider : Provider {
      *
      * @return a new source from system properties
      */
-    fun fromSystem(): Source = FlatSource(
+    fun system(): Source = FlatSource(
         System.getProperties().toMap(),
         type = "system-properties",
         allowConflict = true
     )
+
+    /**
+     * Returns a new source from system properties.
+     *
+     * @return a new source from system properties
+     */
+    @Deprecated("use `system` instead", replaceWith = ReplaceWith("system"))
+    fun fromSystem(): Source = system()
+
+    @JavaApi
+    @JvmStatic
+    fun get() = this
 }

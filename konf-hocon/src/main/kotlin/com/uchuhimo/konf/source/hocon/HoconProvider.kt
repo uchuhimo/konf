@@ -17,6 +17,7 @@
 package com.uchuhimo.konf.source.hocon
 
 import com.typesafe.config.ConfigFactory
+import com.uchuhimo.konf.annotation.JavaApi
 import com.uchuhimo.konf.source.Provider
 import com.uchuhimo.konf.source.RegisterExtension
 import com.uchuhimo.konf.source.Source
@@ -36,4 +37,8 @@ object HoconProvider : Provider {
             return reader(it)
         }
     }
+
+    @JavaApi
+    @JvmStatic
+    fun get() = this
 }

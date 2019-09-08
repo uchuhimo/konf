@@ -17,6 +17,7 @@
 package com.uchuhimo.konf.source.env
 
 import com.uchuhimo.konf.Feature
+import com.uchuhimo.konf.annotation.JavaApi
 import com.uchuhimo.konf.source.Source
 import com.uchuhimo.konf.source.base.FlatSource
 
@@ -29,7 +30,7 @@ object EnvProvider {
      *
      * @return a new source from system environment
      */
-    fun fromEnv(): Source {
+    fun env(): Source {
         return FlatSource(
             System.getenv().mapKeys { (key, _) ->
                 key.toLowerCase().replace('_', '.')
@@ -40,4 +41,16 @@ object EnvProvider {
             allowConflict = true
         ).enabled(Feature.LOAD_KEYS_CASE_INSENSITIVELY)
     }
+
+    /**
+     * Returns a new source from system environment.
+     *
+     * @return a new source from system environment
+     */
+    @Deprecated("use `env` instead", replaceWith = ReplaceWith("env"))
+    fun fromEnv(): Source = env()
+
+    @JavaApi
+    @JvmStatic
+    fun get() = this
 }

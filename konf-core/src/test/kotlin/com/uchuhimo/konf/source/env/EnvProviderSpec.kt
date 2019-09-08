@@ -24,6 +24,7 @@ import org.jetbrains.spek.api.dsl.given
 import org.jetbrains.spek.api.dsl.it
 import org.jetbrains.spek.api.dsl.on
 import org.jetbrains.spek.subject.SubjectSpek
+import org.jetbrains.spek.subject.itBehavesLike
 import kotlin.test.assertTrue
 
 object EnvProviderSpec : SubjectSpek<EnvProvider>({
@@ -31,6 +32,22 @@ object EnvProviderSpec : SubjectSpek<EnvProvider>({
 
     given("a source provider") {
         on("create source from system environment") {
+            val source = subject.env()
+            it("should have correct type") {
+                assertThat(source.info["type"], equalTo("system-environment"))
+            }
+            it("should return a source which contains value from system environment") {
+                val config = Config { addSpec(SourceSpec) }.withSource(source)
+                assertThat(config[SourceSpec.Test.type], equalTo("env"))
+                assertTrue { config[SourceSpec.camelCase] }
+            }
+            it("should return a case-insensitive source") {
+                val config = Config().withSource(source).apply { addSpec(SourceSpec) }
+                assertThat(config[SourceSpec.Test.type], equalTo("env"))
+                assertTrue { config[SourceSpec.camelCase] }
+            }
+        }
+        on("create source from system environment (deprecated)") {
             val source = subject.fromEnv()
             it("should have correct type") {
                 assertThat(source.info["type"], equalTo("system-environment"))
@@ -47,6 +64,12 @@ object EnvProviderSpec : SubjectSpek<EnvProvider>({
             }
         }
     }
+})
+
+object EnvProviderInJavaSpec : SubjectSpek<EnvProvider>({
+    subject { EnvProvider.get() }
+
+    itBehavesLike(EnvProviderSpec)
 })
 
 object SourceSpec : ConfigSpec() {

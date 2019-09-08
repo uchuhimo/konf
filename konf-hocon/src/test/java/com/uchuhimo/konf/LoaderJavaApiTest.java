@@ -35,12 +35,12 @@ class LoaderJavaApiTest {
   }
 
   @Test
-  @DisplayName("test fluent API to load from loader")
-  void loadFromLoader() {
+  @DisplayName("test fluent API to load from default loader")
+  void loadFromDefaultLoader() {
     final Config newConfig =
         config
             .from()
-            .source(HoconProvider.INSTANCE)
+            .source(HoconProvider.get())
             .string(config.nameOf(NetworkBufferInJava.size) + " = 1024");
     assertThat(newConfig.get(NetworkBufferInJava.size), equalTo(1024));
   }

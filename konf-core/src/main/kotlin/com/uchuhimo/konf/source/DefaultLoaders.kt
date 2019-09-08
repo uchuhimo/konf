@@ -115,14 +115,14 @@ class DefaultLoaders(
      *
      * @return a child config containing values from system environment
      */
-    fun env(): Config = config.withSource(EnvProvider.fromEnv().orMapped())
+    fun env(): Config = config.withSource(EnvProvider.env().orMapped())
 
     /**
      * Returns a child config containing values from system properties.
      *
      * @return a child config containing values from system properties
      */
-    fun systemProperties(): Config = config.withSource(PropertiesProvider.fromSystem().orMapped())
+    fun systemProperties(): Config = config.withSource(PropertiesProvider.system().orMapped())
 
     /**
      * Returns corresponding loader based on extension.

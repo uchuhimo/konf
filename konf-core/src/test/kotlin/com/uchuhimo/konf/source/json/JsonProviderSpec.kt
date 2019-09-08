@@ -24,6 +24,7 @@ import org.jetbrains.spek.api.dsl.given
 import org.jetbrains.spek.api.dsl.it
 import org.jetbrains.spek.api.dsl.on
 import org.jetbrains.spek.subject.SubjectSpek
+import org.jetbrains.spek.subject.itBehavesLike
 
 object JsonProviderSpec : SubjectSpek<JsonProvider>({
     subject { JsonProvider }
@@ -49,4 +50,10 @@ object JsonProviderSpec : SubjectSpek<JsonProvider>({
             }
         }
     }
+})
+
+object JsonProviderInJavaSpec : SubjectSpek<JsonProvider>({
+    subject { JsonProvider.get() }
+
+    itBehavesLike(JsonProviderSpec)
 })

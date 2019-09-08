@@ -52,6 +52,7 @@ import com.uchuhimo.konf.Path
 import com.uchuhimo.konf.SizeInBytes
 import com.uchuhimo.konf.TreeNode
 import com.uchuhimo.konf.ValueNode
+import com.uchuhimo.konf.annotation.JavaApi
 import com.uchuhimo.konf.toPath
 import com.uchuhimo.konf.toTree
 import org.apache.commons.text.StringSubstitutor
@@ -313,6 +314,24 @@ interface Source {
         ): Source {
             return BaseSource(info, tree, features)
         }
+
+        /**
+         * Returns default providers.
+         *
+         * It is a fluent API for default providers.
+         */
+        val from = DefaultProviders
+
+        /**
+         * Returns default providers.
+         *
+         * It is a fluent API for default providers.
+         *
+         * @return default providers.
+         */
+        @JavaApi
+        @JvmStatic
+        fun from() = from
     }
 }
 

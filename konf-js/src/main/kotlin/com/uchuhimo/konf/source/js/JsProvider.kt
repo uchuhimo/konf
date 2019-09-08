@@ -16,6 +16,7 @@
 
 package com.uchuhimo.konf.source.js
 
+import com.uchuhimo.konf.annotation.JavaApi
 import com.uchuhimo.konf.source.Provider
 import com.uchuhimo.konf.source.RegisterExtension
 import com.uchuhimo.konf.source.Source
@@ -47,4 +48,8 @@ object JsProvider : Provider {
             return reader(it)
         }
     }
+
+    @JavaApi
+    @JvmStatic
+    fun get() = this
 }

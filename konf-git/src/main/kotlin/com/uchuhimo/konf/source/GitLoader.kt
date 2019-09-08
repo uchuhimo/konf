@@ -45,7 +45,7 @@ fun Loader.git(
     optional: Boolean = this.optional,
     action: TransportCommand<*, *>.() -> Unit = {}
 ): Config =
-    config.withSource(provider.fromGit(repo, file, dir, branch, optional, action))
+    config.withSource(provider.git(repo, file, dir, branch, optional, action))
 
 /**
  * Returns a child config containing values from a specified git repository,
@@ -74,7 +74,7 @@ fun Loader.watchGit(
     action: TransportCommand<*, *>.() -> Unit = {}
 ): Config {
     return (dir ?: createTempDir(prefix = "local_git_repo").path).let { directory ->
-        provider.fromGit(repo, file, directory, branch, optional, action).let { source ->
+        provider.git(repo, file, directory, branch, optional, action).let { source ->
             config.withLoadTrigger("watch ${source.description}") { newConfig, load ->
                 load(source)
                 GlobalScope.launch(context) {
@@ -82,7 +82,7 @@ fun Loader.watchGit(
                         delay(unit.toMillis(period))
                         newConfig.lock {
                             newConfig.clear()
-                            load(provider.fromGit(repo, file, directory, branch, optional, action))
+                            load(provider.git(repo, file, directory, branch, optional, action))
                         }
                     }
                 }

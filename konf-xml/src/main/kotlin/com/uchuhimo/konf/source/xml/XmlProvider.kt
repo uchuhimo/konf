@@ -16,6 +16,7 @@
 
 package com.uchuhimo.konf.source.xml
 
+import com.uchuhimo.konf.annotation.JavaApi
 import com.uchuhimo.konf.source.Provider
 import com.uchuhimo.konf.source.RegisterExtension
 import com.uchuhimo.konf.source.Source
@@ -47,4 +48,8 @@ object XmlProvider : Provider {
     override fun inputStream(inputStream: InputStream): Source {
         return FlatSource(SAXReader().read(inputStream).toMap(), type = "XML")
     }
+
+    @JavaApi
+    @JvmStatic
+    fun get() = this
 }
