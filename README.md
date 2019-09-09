@@ -45,12 +45,14 @@ A type-safe cascading configuration library for Kotlin/Java, supporting most con
     - [Fork from another config](#fork-from-another-config)
   - [Load values from source](#load-values-from-source)
     - [Strict parsing when loading](#strict-parsing-when-loading)
+    - [Path substitution](path-substitution)
   - [Prefix/Merge operations for source/config/config spec](#prefixmerge-operations-for-sourceconfigconfig-spec)
   - [Export/Reload values in config](#exportreload-values-in-config)
   - [Supported item types](#supported-item-types)
   - [Optional features](#optional-features)
   - [Build from source](#build-from-source)
   - [Breaking Changes](#breaking-changes)
+    - [v0.19.0](#v0190)
     - [v0.17.0](#v0170)
     - [v0.15](#v015)
     - [v0.10](#v010)
@@ -169,6 +171,17 @@ compile(group = "com.github.uchuhimo.konf", name = "konf", version = "master-SNA
             .from.json.resource("server.json")
             .from.env()
             .from.systemProperties()
+    ```
+   
+   or:
+
+    ```kotlin
+    val config = Config { addSpec(ServerSpec) }.withSource(
+        Source.from.yaml.file("/path/to/server.yml") +
+        Source.from.json.resource("server.json") +
+        Source.from.env() +
+        Source.from.systemProperties()
+    )
     ```
 
     This config contains all items defined in `ServerSpec`, and load values from 4 different sources. Values in resource file `server.json` will override those in file `/path/to/server.yml`, values from system environment will override those in `server.json`, and values from system properties will override those from system environment.
@@ -479,6 +492,23 @@ All out-of-box supported sources are declared in [`DefaultLoaders`](https://gith
 
 These sources can also be manually created using their provider, and then loaded into config by `config.withSource(source)`.
 
+All `from` APIs also have their standalone version that return sources without loading them into the config, shown below:
+
+| Type | Usage | 
+| - | - | 
+| [HOCON](https://github.com/typesafehub/config/blob/master/HOCON.md) | `Source.from.hocon` | 
+| JSON | `Source.from.json` | 
+| properties | `Source.from.properties` | 
+| [TOML](https://github.com/toml-lang/toml) | `Source.from.toml` | 
+| XML | `Source.from.xml` | 
+| YAML | `Source.from.yaml` | 
+| JavaScript | `Source.from.js` | 
+| hierarchical map | `Source.from.map.hierarchical` | 
+| map in key-value format | `Source.from.map.kv` | 
+| map in flat format | `Source.from.map.flat` | 
+| system properties | `Source.from.env()` | 
+| system environment | `Source.from.systemProperties()` | 
+
 Format of system properties source is same with that of properties source. System environment source follows the same mapping convention with properties source, but with the following name convention:
 
 - All letters in name are in uppercase
@@ -529,6 +559,26 @@ Then `config` will validate paths from both the properties file and the JSON res
 config.from.enable(Feature.FAIL_ON_UNKNOWN_PATH).properties.file("/path/to/file")
     .from.json.resource("server.json")
 ```
+
+### Path substitution
+
+Path substitution is a feature that path references in source will be substituted by their values.
+
+Path substitution rules are shown below:
+
+- Only quoted string value will be substituted. It means that Konf's path substitutions will not conflict with HOCON's substitutions.
+- The definition of a path variable is `${path}`, e.g., `${java.version}`.
+- The path variable is resolved in the context of the current source.
+- If the string value only contains the path variable, it will be replaced by the whole sub-tree in the path; otherwise, it will be replaced by the string value in the path.
+- Use `${path:-default}` to provide a default value when the path is unresolved, e.g., `${java.version:-8}`.
+- Use `$${path}` to escape the path variable, e.g., `$${java.version}` will be resolved to `${java.version}` instead of the value in `java.version`.
+- Path substitution works in a recursive way, so nested path variables like `${jre-${java.specification.version}}` are allowed.
+- Konf also supports all key prefix of [StringSubstitutor](https://commons.apache.org/proper/commons-text/apidocs/org/apache/commons/text/StringSubstitutor.html)'s default interpolator. 
+
+By default, Konf will perform path substitution for every source (except system environment source) when loading them into the config.
+You can disable this behaviour by using `config.disable(Feature.SUBSTITUTE_SOURCE_BEFORE_LOADED)` for the config 
+or `source.disabled(Feature.SUBSTITUTE_SOURCE_BEFORE_LOADED)` for a single source.
+By default, Konf will throw exception when some path variables are unresolved. You can use `source.substituted(false)` manually to ignore these unresolved variables.
 
 ## Prefix/Merge operations for source/config/config spec
 
@@ -650,6 +700,7 @@ These features include:
 - `FAIL_ON_UNKNOWN_PATH`: feature that determines what happens when unknown paths appear in the source. If enabled, an exception is thrown when loading from the source to indicate it contains unknown paths. This feature is disabled by default.
 - `LOAD_KEYS_CASE_INSENSITIVELY`: feature that determines whether loading keys from sources case-insensitively. This feature is disabled by default except for system environment.
 - `OPTIONAL_SOURCE_BY_DEFAULT`: feature that determines whether sources are optional by default. This feature is disabled by default.
+- `SUBSTITUTE_SOURCE_BEFORE_LOADED`: feature that determines whether sources should be substituted before loaded into config. This feature is enabled by default.
 
 ## Build from source
 
@@ -674,6 +725,10 @@ Install library in a local Maven repository for consumption in other projects vi
 ```
 
 ## Breaking Changes
+
+### v0.19.0
+
+Since all sources are substituted before loaded into config by default, all path variables will be substituted now. You can use `config.disable(Feature.SUBSTITUTE_SOURCE_BEFORE_LOADED)` to disable this change.
 
 ### v0.17.0
 

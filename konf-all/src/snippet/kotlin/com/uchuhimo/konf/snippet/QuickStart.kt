@@ -18,6 +18,7 @@ package com.uchuhimo.konf.snippet
 
 import com.uchuhimo.konf.Config
 import com.uchuhimo.konf.ConfigSpec
+import com.uchuhimo.konf.source.Source
 import com.uchuhimo.konf.source.yaml
 
 object ServerSpec : ConfigSpec() {
@@ -31,6 +32,14 @@ fun main(args: Array<String>) {
         .from.json.resource("server.json")
         .from.env()
         .from.systemProperties()
+    run {
+        val config = Config { addSpec(ServerSpec) }.withSource(
+            Source.from.yaml.file("/path/to/server.yml") +
+                Source.from.json.resource("server.json") +
+                Source.from.env() +
+                Source.from.systemProperties()
+        )
+    }
     run {
         val config = Config { addSpec(ServerSpec) }
             .from.yaml.watchFile("/path/to/server.yml")
