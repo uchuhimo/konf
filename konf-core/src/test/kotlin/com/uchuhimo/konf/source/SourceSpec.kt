@@ -583,6 +583,16 @@ object SourceSpec : Spek({
                         equalTo(mapOf<String, Any>("key1" to "a", "key2" to "ba")))
                 }
             }
+            on("contains path variables with string list value") {
+                val map = mapOf("key1" to "a,b,c", "key2" to "a\${key1}")
+                val source = Source.from.map.flat(map).substituted().substituted()
+                it("should substitute path variables") {
+                    assertThat(source.tree.toHierarchicalMap(),
+                        equalTo(mapOf<String, Any>(
+                            "key1" to "a,b,c",
+                            "key2" to "aa,b,c")))
+                }
+            }
             on("contains path variables in list") {
                 val map = mapOf("top" to listOf(mapOf("key1" to "a", "key2" to "b\${top.0.key1}")))
                 val source = map.asSource().substituted()

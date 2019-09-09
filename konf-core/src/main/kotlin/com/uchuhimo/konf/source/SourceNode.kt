@@ -44,9 +44,8 @@ object NullSourceNode : NullNode {
     override val children: MutableMap<String, TreeNode> = emptyMutableMap
 }
 
-class ListSourceNode(
-    override val list: List<TreeNode>,
-    val originalValue: Any? = null
+open class ListSourceNode(
+    override val list: List<TreeNode>
 ) : ListNode, MapNode {
     override val children: MutableMap<String, TreeNode>
         get() = Collections.unmodifiableMap(
@@ -55,6 +54,4 @@ class ListSourceNode(
     override fun withList(list: List<TreeNode>): ListNode {
         return ListSourceNode(list)
     }
-
-    override fun withMap(map: Map<String, TreeNode>): MapNode = throw NotImplementedError()
 }

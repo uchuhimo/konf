@@ -52,7 +52,7 @@ import com.uchuhimo.konf.SizeInBytes
 import com.uchuhimo.konf.TreeNode
 import com.uchuhimo.konf.ValueNode
 import com.uchuhimo.konf.annotation.JavaApi
-import com.uchuhimo.konf.source.base.promoteToList
+import com.uchuhimo.konf.source.base.ListStringNode
 import com.uchuhimo.konf.toPath
 import com.uchuhimo.konf.toTree
 import org.apache.commons.text.StringSubstitutor
@@ -372,11 +372,7 @@ private fun TreeNode.substituted(
             }
         }
         is ListNode -> {
-            if (this is ListSourceNode && originalValue != null) {
-                return (originalValue as String).promoteToList().substituted(source, errorWhenUndefined, lookup)
-            } else {
-                return withList(list.map { it.substituted(source, errorWhenUndefined, lookup) })
-            }
+            return withList(list.map { it.substituted(source, errorWhenUndefined, lookup) })
         }
         is MapNode -> {
             return withMap(children.mapValues { (_, child) ->
@@ -895,6 +891,12 @@ private fun TreeNode.toMap(source: Source): Map<String, TreeNode> {
 private fun TreeNode.toJsonNode(source: Source): JsonNode {
     return when (this) {
         is NullNode -> JacksonNullNode.instance
+        is ListStringNode ->
+            ArrayNode(
+                JsonNodeFactory.instance,
+                list.map {
+                    it.toJsonNode(source)
+                })
         is ValueNode -> {
             when (value) {
                 is Boolean -> BooleanNode.valueOf(value as Boolean)
@@ -923,11 +925,12 @@ private fun TreeNode.toJsonNode(source: Source): JsonNode {
                 else -> throw ParseException("fail to cast source ${source.description} to JSON node")
             }
         }
-        is ListNode -> ArrayNode(
-            JsonNodeFactory.instance,
-            list.map {
-                it.toJsonNode(source)
-            })
+        is ListNode ->
+            ArrayNode(
+                JsonNodeFactory.instance,
+                list.map {
+                    it.toJsonNode(source)
+                })
         is MapNode -> ObjectNode(
             JsonNodeFactory.instance,
             children.mapValues { (_, value) ->

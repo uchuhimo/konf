@@ -251,7 +251,7 @@ interface TreeNode {
 interface LeafNode : TreeNode
 
 interface MapNode : TreeNode {
-    fun withMap(map: Map<String, TreeNode>): MapNode
+    fun withMap(map: Map<String, TreeNode>): MapNode = throw NotImplementedError()
 }
 
 val emptyMutableMap: MutableMap<String, TreeNode> = Collections.unmodifiableMap(mutableMapOf())
@@ -266,7 +266,7 @@ interface NullNode : LeafNode
 
 interface ListNode : LeafNode {
     val list: List<TreeNode>
-    fun withList(list: List<TreeNode>): ListNode
+    fun withList(list: List<TreeNode>): ListNode = throw NotImplementedError()
 }
 
 /**

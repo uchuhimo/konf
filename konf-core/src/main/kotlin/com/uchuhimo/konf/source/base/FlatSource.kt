@@ -66,7 +66,6 @@ object EmptyStringNode : SubstitutableNode, ListNode {
         check(value.isEmpty())
         return this
     }
-    override fun withList(list: List<TreeNode>): ListNode = throw NotImplementedError()
 }
 
 class SingleStringListNode(
@@ -77,13 +76,24 @@ class SingleStringListNode(
     override val children: MutableMap<String, TreeNode> = Collections.unmodifiableMap(
         mutableMapOf("0" to value.asTree()))
     override val list: List<TreeNode> = listOf(value.asTree())
-    override fun substitute(value: String): TreeNode = value.promoteToList(true, originalValue ?: this.value)
-    override fun withList(list: List<TreeNode>): ListNode = throw NotImplementedError()
+    override fun substitute(value: String): TreeNode = value.promoteToList(true, originalValue
+        ?: this.value)
+}
+
+class ListStringNode(
+    override val value: String,
+    override val substituted: Boolean = false,
+    override val originalValue: Any? = null
+) : ListSourceNode(value.split(',').map { ValueSourceNode(it) }), SubstitutableNode {
+    override fun substitute(value: String): TreeNode =
+        value.promoteToList(true, originalValue ?: this.value)
+
+    override val children: MutableMap<String, TreeNode> get() = super<ListSourceNode>.children
 }
 
 fun String.promoteToList(substitute: Boolean = false, originalValue: Any? = null): TreeNode {
     return when {
-        ',' in this -> ListSourceNode(split(',').map { ValueSourceNode(it) }, originalValue)
+        ',' in this -> ListStringNode(this, substitute, originalValue)
         this == "" -> EmptyStringNode
         else -> SingleStringListNode(this, substitute, originalValue)
     }
