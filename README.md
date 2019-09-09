@@ -45,7 +45,7 @@ A type-safe cascading configuration library for Kotlin/Java, supporting most con
     - [Fork from another config](#fork-from-another-config)
   - [Load values from source](#load-values-from-source)
     - [Strict parsing when loading](#strict-parsing-when-loading)
-    - [Path substitution](path-substitution)
+    - [Path substitution](#path-substitution)
   - [Prefix/Merge operations for source/config/config spec](#prefixmerge-operations-for-sourceconfigconfig-spec)
   - [Export/Reload values in config](#exportreload-values-in-config)
   - [Supported item types](#supported-item-types)
@@ -578,7 +578,35 @@ Path substitution rules are shown below:
 By default, Konf will perform path substitution for every source (except system environment source) when loading them into the config.
 You can disable this behaviour by using `config.disable(Feature.SUBSTITUTE_SOURCE_BEFORE_LOADED)` for the config 
 or `source.disabled(Feature.SUBSTITUTE_SOURCE_BEFORE_LOADED)` for a single source.
+
 By default, Konf will throw exception when some path variables are unresolved. You can use `source.substituted(false)` manually to ignore these unresolved variables.
+
+To resolve path variables refer to other sources, you can merge these sources before loading them into the config.
+For example, if we have two sources `source1.json` and `source2.properties`,
+`source1.json` is:
+
+```json
+{ 
+  "base" : { "user" : "konf" , "password" : "passwd" }
+}
+```
+
+`source2.properties` is:
+
+```properties
+connection.jdbc=mysql://${base.user}:${base.password}@server:port
+```
+
+use:
+
+```kotlin
+config.withSource(
+    Source.from.file("source1.json") +
+    Source.from.file("source2.properties")
+)
+```
+
+We can resolve `mysql://${base.user}:${base.password}@server:port` as `mysql://konf:passwd@server:port`.
 
 ## Prefix/Merge operations for source/config/config spec
 
