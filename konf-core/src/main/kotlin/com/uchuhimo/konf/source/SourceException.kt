@@ -18,6 +18,7 @@ package com.uchuhimo.konf.source
 
 import com.uchuhimo.konf.ConfigException
 import com.uchuhimo.konf.Path
+import com.uchuhimo.konf.TreeNode
 import com.uchuhimo.konf.name
 
 /**
@@ -31,8 +32,8 @@ open class SourceException : ConfigException {
 /**
  * Exception indicates that actual type of value in source is unmatched with expected type.
  */
-class WrongTypeException(val source: Source, actual: String, expected: String) :
-    SourceException("source ${source.description} has type $actual rather than $expected")
+class WrongTypeException(val source: String, actual: String, expected: String) :
+    SourceException("source $source has type $actual rather than $expected")
 
 /**
  * Exception indicates that expected value in specified path is not existed in the source.
@@ -69,8 +70,8 @@ class InvalidRemoteRepoException(repo: String, dir: String) :
 /**
  * Exception indicates failure to map source to value of specified class.
  */
-class ObjectMappingException(source: Source, clazz: Class<*>, cause: Throwable) :
-    SourceException("unable to map source ${source.description} to value of type ${clazz.simpleName}", cause)
+class ObjectMappingException(source: String, clazz: Class<*>, cause: Throwable) :
+    SourceException("unable to map source $source to value of type ${clazz.simpleName}", cause)
 
 /**
  * Exception indicates that value of specified class is unsupported as key of map.
@@ -106,5 +107,11 @@ class UnsupportedExtensionException(source: String) : SourceException(
 /**
  * Exception indicates that undefined paths occur during variable substitution.
  */
-class UndefinedPathVariableException(source: Source, text: String) : SourceException(
+class UndefinedPathVariableException(val source: Source, val text: String) : SourceException(
     "\"$text\" in source ${source.description} contains undefined path variables during path substitution")
+
+/**
+ * Exception indicates that the specified node has unsupported type.
+ */
+class UnsupportedNodeTypeException(val source: Source, val node: TreeNode) : SourceException(
+    "$node of type ${node::class.java.simpleName} in source ${source.description} is unsupported")

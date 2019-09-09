@@ -26,6 +26,8 @@ import com.uchuhimo.konf.notEmptyOr
 import com.uchuhimo.konf.source.ListSourceNode
 import com.uchuhimo.konf.source.Source
 import com.uchuhimo.konf.source.SourceInfo
+import com.uchuhimo.konf.source.SubstitutableNode
+import com.uchuhimo.konf.source.ValueSourceNode
 import com.uchuhimo.konf.source.asTree
 import java.util.Collections
 
@@ -55,15 +57,36 @@ open class FlatSource(
     }.promoteToList()
 }
 
-object EmptyStringNode : ValueNode, ListNode {
+object EmptyStringNode : SubstitutableNode, ListNode {
     override val value: Any = ""
     override val list: List<TreeNode> = listOf()
+    override val originalValue: Any? = null
+    override val substituted: Boolean = false
+    override fun substitute(value: String): TreeNode {
+        check(value.isEmpty())
+        return this
+    }
+    override fun withList(list: List<TreeNode>): ListNode = throw NotImplementedError()
 }
 
-class SingleStringListNode(override val value: String) : ValueNode, ListNode {
+class SingleStringListNode(
+    override val value: String,
+    override val substituted: Boolean = false,
+    override val originalValue: Any? = null
+) : SubstitutableNode, ListNode {
     override val children: MutableMap<String, TreeNode> = Collections.unmodifiableMap(
         mutableMapOf("0" to value.asTree()))
     override val list: List<TreeNode> = listOf(value.asTree())
+    override fun substitute(value: String): TreeNode = value.promoteToList(true, originalValue ?: this.value)
+    override fun withList(list: List<TreeNode>): ListNode = throw NotImplementedError()
+}
+
+fun String.promoteToList(substitute: Boolean = false, originalValue: Any? = null): TreeNode {
+    return when {
+        ',' in this -> ListSourceNode(split(',').map { ValueSourceNode(it) }, originalValue)
+        this == "" -> EmptyStringNode
+        else -> SingleStringListNode(this, substitute, originalValue)
+    }
 }
 
 fun ContainerNode.promoteToList(): TreeNode {
@@ -73,13 +96,7 @@ fun ContainerNode.promoteToList(): TreeNode {
         } else if (child is ValueNode) {
             val value = child.value
             if (value is String) {
-                if (',' in value) {
-                    children[key] = ListSourceNode(value.split(',').map { it.asTree() })
-                } else if (value == "") {
-                    children[key] = EmptyStringNode
-                } else {
-                    children[key] = SingleStringListNode(value)
-                }
+                children[key] = value.promoteToList()
             }
         }
     }

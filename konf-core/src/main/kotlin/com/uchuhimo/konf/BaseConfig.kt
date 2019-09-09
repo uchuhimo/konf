@@ -582,13 +582,7 @@ open class BaseConfig(
     override fun withSource(source: Source): Config =
         withLayer("source: ${source.description}").also { config ->
             config.lock.write {
-                if (!config.isEnabled(Feature.SUBSTITUTE_SOURCE_BEFORE_LOADED) ||
-                    !source.isEnabled(Feature.SUBSTITUTE_SOURCE_BEFORE_LOADED)) {
-                    load(config, source)
-                } else {
-                    load(config, source.substituted())
-                }
-                config._source.value = source
+                config._source.value = load(config, source)
             }
         }
 
@@ -601,8 +595,7 @@ open class BaseConfig(
     ): Config {
         return withLayer("trigger: $description").apply {
             trigger(this) { source ->
-                load(this, source)
-                this._source.value = source
+                this._source.value = load(this, source)
             }
         }
     }

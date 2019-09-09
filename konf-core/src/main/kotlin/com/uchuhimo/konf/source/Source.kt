@@ -43,7 +43,6 @@ import com.uchuhimo.konf.ContainerNode
 import com.uchuhimo.konf.EmptyNode
 import com.uchuhimo.konf.Feature
 import com.uchuhimo.konf.Item
-import com.uchuhimo.konf.LeafNode
 import com.uchuhimo.konf.ListNode
 import com.uchuhimo.konf.MapNode
 import com.uchuhimo.konf.MergedMap
@@ -53,6 +52,7 @@ import com.uchuhimo.konf.SizeInBytes
 import com.uchuhimo.konf.TreeNode
 import com.uchuhimo.konf.ValueNode
 import com.uchuhimo.konf.annotation.JavaApi
+import com.uchuhimo.konf.source.base.promoteToList
 import com.uchuhimo.konf.toPath
 import com.uchuhimo.konf.toTree
 import org.apache.commons.text.StringSubstitutor
@@ -270,9 +270,12 @@ interface Source {
      * for detailed substitution rules. An exception is when the string is in reference format like `${path}`,
      * the whole node will be replace by a reference to the sub-tree in the specified path.
      *
+     * @param errorWhenUndefined whether throw exception when this source contains undefined path variables
      * @return a source that substitutes path variables within all strings by values
+     * @throws UndefinedPathVariableException
      */
-    fun substituted(): Source = Source(info, tree.substituted(this), features)
+    fun substituted(errorWhenUndefined: Boolean = true): Source =
+        Source(info, tree.substituted(this, errorWhenUndefined), features)
 
     /**
      * Returns a new source that enables the specified feature.
@@ -335,54 +338,74 @@ interface Source {
     }
 }
 
-private val singleVariablePattern = Pattern.compile("^\\$\\{([\\w\\.]+)}$")
+private val singleVariablePattern = Pattern.compile("^\\$\\{(.+)}$")
 
 private fun TreeNode.substituted(
     source: Source,
-    lookup: TreeLookup = TreeLookup(this)
+    errorWhenUndefined: Boolean,
+    lookup: TreeLookup = TreeLookup(this, source, errorWhenUndefined)
 ): TreeNode {
     when (this) {
-        is LeafNode -> {
-            if (this is ValueNode && value is String) {
-                val text = value as String
+        is NullNode -> return this
+        is ValueNode -> {
+            if (this is SubstitutableNode && value is String) {
+                val text = (if (substituted) originalValue else value) as String
                 val matcher = singleVariablePattern.matcher(text.trim())
                 if (matcher.find()) {
-                    return lookup.root.getOrNull(matcher.group(1))
-                        ?: throw UndefinedPathVariableException(source, text)
-                } else {
+                    val matchedValue = matcher.group(1)
                     try {
-                        return ValueSourceNode(lookup.substitutor.replace(text))
-                    } catch (_: IllegalArgumentException) {
-                        throw UndefinedPathVariableException(source, text)
+                        val resolvedValue = lookup.replace(matchedValue)
+                        val node = lookup.root.getOrNull(resolvedValue)
+                        if (node != null) {
+                            return node.substituted(source, true, lookup)
+                        }
+                    } catch (_: Exception) {
                     }
+                }
+                try {
+                    return substitute(lookup.replace(text))
+                } catch (_: IllegalArgumentException) {
+                    throw UndefinedPathVariableException(source, text)
                 }
             } else {
                 return this
             }
         }
-        else -> {
-            for ((key, child) in children) {
-                children[key] = child.substituted(source, lookup)
+        is ListNode -> {
+            if (this is ListSourceNode && originalValue != null) {
+                return (originalValue as String).promoteToList().substituted(source, errorWhenUndefined, lookup)
+            } else {
+                return withList(list.map { it.substituted(source, errorWhenUndefined, lookup) })
             }
-            return this
         }
+        is MapNode -> {
+            return withMap(children.mapValues { (_, child) ->
+                child.substituted(source, errorWhenUndefined, lookup)
+            })
+        }
+        else -> throw UnsupportedNodeTypeException(source, this)
     }
 }
 
-class TreeLookup(val root: TreeNode) : StringLookup {
+class TreeLookup(val root: TreeNode, val source: Source, errorWhenUndefined: Boolean) : StringLookup {
     val substitutor: StringSubstitutor = StringSubstitutor(
         StringLookupFactory.INSTANCE.interpolatorStringLookup(this)).apply {
         isEnableSubstitutionInVariables = true
-        isEnableUndefinedVariableException = true
+        isEnableUndefinedVariableException = errorWhenUndefined
     }
 
     override fun lookup(key: String): String? {
         val node = root.getOrNull(key)
-        if (node != null && node is ValueNode && node.value is String) {
-            return substitutor.replace(node.value as String)
+        if (node != null && node is ValueNode) {
+            val value = node.asValueOf(source, String::class.java) as String
+            return substitutor.replace(value)
         } else {
             return null
         }
+    }
+
+    fun replace(text: String): String {
+        return substitutor.replace(text)
     }
 }
 
@@ -410,14 +433,15 @@ class SourceInfo(
 }
 
 inline fun <reified T> Source.asValue(): T {
-    return asValueOf(T::class.java) as T
+    return tree.asValueOf(this, T::class.java) as T
 }
 
-fun Source.asValueOf(type: Class<*>): Any {
-    return tree.castOrNull(this, type)
+fun TreeNode.asValueOf(source: Source, type: Class<*>): Any {
+    return castOrNull(source, type)
         ?: throw WrongTypeException(
-            this,
-            if (tree is ValueNode) (tree as ValueNode).value::class.java.simpleName else "Unknown",
+            if (this is ValueNode) "${this.value} in ${source.description}"
+            else "$this in ${source.description}",
+            if (this is ValueNode) this.value::class.java.simpleName else "Unknown",
             type.simpleName
         )
 }
@@ -500,34 +524,39 @@ internal fun Config.loadItem(item: Item<*>, path: Path, source: Source): Boolean
     }
 }
 
-internal fun load(config: Config, source: Source): Config {
-    return config.apply {
-        lock {
-            for (item in this) {
-                loadItem(item, pathOf(item), source)
-            }
-            if (source.isEnabled(Feature.FAIL_ON_UNKNOWN_PATH) ||
-                config.isEnabled(Feature.FAIL_ON_UNKNOWN_PATH)) {
-                val treeFromSource = source.tree
-                val treeFromConfig = config.toTree()
-                val diffTree = treeFromSource - treeFromConfig
-                if (diffTree != EmptyNode) {
-                    val unknownPaths = diffTree.paths
-                    throw UnknownPathsException(source, unknownPaths)
-                }
+internal fun load(config: Config, source: Source): Source {
+    val substitutedSource = if (!config.isEnabled(Feature.SUBSTITUTE_SOURCE_BEFORE_LOADED) ||
+        !source.isEnabled(Feature.SUBSTITUTE_SOURCE_BEFORE_LOADED)) {
+        source
+    } else {
+        source.substituted()
+    }
+    config.lock {
+        for (item in config) {
+            config.loadItem(item, config.pathOf(item), substitutedSource)
+        }
+        if (substitutedSource.isEnabled(Feature.FAIL_ON_UNKNOWN_PATH) ||
+            config.isEnabled(Feature.FAIL_ON_UNKNOWN_PATH)) {
+            val treeFromSource = substitutedSource.tree
+            val treeFromConfig = config.toTree()
+            val diffTree = treeFromSource - treeFromConfig
+            if (diffTree != EmptyNode) {
+                val unknownPaths = diffTree.paths
+                throw UnknownPathsException(substitutedSource, unknownPaths)
             }
         }
     }
+    return substitutedSource
 }
 
 private inline fun <reified T> TreeNode.cast(source: Source): T {
     if (this !is ValueNode) {
-        throw WrongTypeException(source, "Unknown", T::class.java.simpleName)
+        throw WrongTypeException("$this in ${source.description}", this::class.java.simpleName, T::class.java.simpleName)
     }
     if (T::class.java.isInstance(value)) {
         return value as T
     } else {
-        throw WrongTypeException(source, value::class.java.simpleName, T::class.java.simpleName)
+        throw WrongTypeException("$value in ${source.description}", value::class.java.simpleName, T::class.java.simpleName)
     }
 }
 
@@ -598,13 +627,13 @@ private fun <In, Out> ((In) -> Out).asPromote(): PromoteFunc<*> {
     }
 }
 
-private fun <T> tryParseAsPromote(block: (String) -> T): PromoteFunc<*> {
+private inline fun <reified T> tryParseAsPromote(noinline block: (String) -> T): PromoteFunc<*> {
     return { value, _ ->
         try {
             block(value as String)
         } catch (cause: Exception) {
             if (cause is DateTimeParseException || cause is NumberFormatException) {
-                throw ParseException("fail to parse \"$value\" as data time", cause)
+                throw ParseException("fail to parse \"$value\" as ${T::class.simpleName}", cause)
             } else {
                 throw cause
             }
@@ -792,7 +821,7 @@ private fun TreeNode.toValue(source: Source, type: JavaType, mapper: ObjectMappe
                             type
                         )
                     } catch (cause: JsonProcessingException) {
-                        throw ObjectMappingException(source, clazz, cause)
+                        throw ObjectMappingException("$this in ${source.description}", clazz, cause)
                     }
                 }
             }
@@ -852,14 +881,14 @@ private fun TreeNode.toValue(source: Source, type: JavaType, mapper: ObjectMappe
 private fun TreeNode.toListValue(source: Source, type: JavaType, mapper: ObjectMapper): List<*> {
     return when (this) {
         is ListNode -> list.map { it.toValue(source, type, mapper) }
-        else -> throw WrongTypeException(source, "Unknown", List::class.java.simpleName)
+        else -> throw WrongTypeException("$this in ${source.description}", this::class.java.simpleName, List::class.java.simpleName)
     }
 }
 
 private fun TreeNode.toMap(source: Source): Map<String, TreeNode> {
     return when (this) {
         is MapNode -> children
-        else -> throw WrongTypeException(source, "Unknown", Map::class.java.simpleName)
+        else -> throw WrongTypeException("$this in ${source.description}", this::class.java.simpleName, Map::class.java.simpleName)
     }
 }
 
@@ -923,12 +952,19 @@ fun Any.asTree(): TreeNode =
     when (this) {
         is TreeNode -> this
         is Source -> this.tree
-        is List<*> -> @Suppress("UNCHECKED_CAST")
-        (ListSourceNode((this as List<Any>).map { it.asTree() }))
-        is Map<*, *> -> @Suppress("UNCHECKED_CAST")
-        (ContainerNode((this as Map<String, Any>).mapValues { (_, value) ->
-            value.asTree()
-        }.toMutableMap()))
+        is List<*> ->
+            @Suppress("UNCHECKED_CAST")
+            (ListSourceNode((this as List<Any>).map { it.asTree() }))
+        is Map<*, *> -> {
+            if (this.size != 0 && this.keys.toList()[0] !is String) {
+                ValueSourceNode(this)
+            } else {
+                @Suppress("UNCHECKED_CAST")
+                (ContainerNode((this as Map<String, Any>).mapValues { (_, value) ->
+                    value.asTree()
+                }.toMutableMap()))
+            }
+        }
         else -> ValueSourceNode(this)
     }
 

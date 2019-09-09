@@ -24,14 +24,37 @@ import com.uchuhimo.konf.ValueNode
 import com.uchuhimo.konf.emptyMutableMap
 import java.util.Collections
 
-class ValueSourceNode(override val value: Any) : ValueNode
+interface SubstitutableNode : ValueNode {
+    fun substitute(value: String): TreeNode
+    val substituted: Boolean
+    val originalValue: Any?
+}
+
+class ValueSourceNode(
+    override val value: Any,
+    override val substituted: Boolean = false,
+    override val originalValue: Any? = null
+) : SubstitutableNode {
+    override fun substitute(value: String): TreeNode {
+        return ValueSourceNode(value, true, originalValue ?: this.value)
+    }
+}
 
 object NullSourceNode : NullNode {
     override val children: MutableMap<String, TreeNode> = emptyMutableMap
 }
 
-class ListSourceNode(override val list: List<TreeNode>) : ListNode, MapNode {
+class ListSourceNode(
+    override val list: List<TreeNode>,
+    val originalValue: Any? = null
+) : ListNode, MapNode {
     override val children: MutableMap<String, TreeNode>
         get() = Collections.unmodifiableMap(
             list.withIndex().associate { (key, value) -> key.toString() to value })
+
+    override fun withList(list: List<TreeNode>): ListNode {
+        return ListSourceNode(list)
+    }
+
+    override fun withMap(map: Map<String, TreeNode>): MapNode = throw NotImplementedError()
 }

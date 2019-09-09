@@ -19,6 +19,7 @@ package com.uchuhimo.konf.source.hocon
 import com.natpryce.hamkrest.assertion.assertThat
 import com.natpryce.hamkrest.equalTo
 import com.typesafe.config.ConfigObject
+import com.uchuhimo.konf.source.asSource
 import com.uchuhimo.konf.source.asValue
 import com.uchuhimo.konf.toPath
 import org.jetbrains.spek.api.dsl.given
@@ -61,6 +62,22 @@ object HoconSourceSpec : SubjectSpek<HoconSource>({
             """.trimIndent())
             it("should resolve the key") {
                 assertThat(source["key2"].asValue<Int>(), equalTo(1))
+            }
+        }
+        on("use substitutions in source when variables are in other sources") {
+            val source = (HoconProvider.string("""
+                key1 = "1"
+                key2 = ${'$'}{key1}
+                key3 = "${'$'}{key4}"
+                key5 = "${'$'}{key1}+${'$'}{key4}"
+                key6 = "${"$$"}{key1}"
+            """.trimIndent()) +
+                mapOf("key4" to "4", "key1" to "2").asSource()).substituted().substituted()
+            it("should resolve the key") {
+                assertThat(source["key2"].asValue<Int>(), equalTo(1))
+                assertThat(source["key3"].asValue<Int>(), equalTo(4))
+                assertThat(source["key5"].asValue<String>(), equalTo("2+4"))
+                assertThat(source["key6"].asValue<String>(), equalTo("\${key1}"))
             }
         }
     }

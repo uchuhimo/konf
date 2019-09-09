@@ -250,7 +250,9 @@ interface TreeNode {
 
 interface LeafNode : TreeNode
 
-interface MapNode : TreeNode
+interface MapNode : TreeNode {
+    fun withMap(map: Map<String, TreeNode>): MapNode
+}
 
 val emptyMutableMap: MutableMap<String, TreeNode> = Collections.unmodifiableMap(mutableMapOf())
 
@@ -264,6 +266,7 @@ interface NullNode : LeafNode
 
 interface ListNode : LeafNode {
     val list: List<TreeNode>
+    fun withList(list: List<TreeNode>): ListNode
 }
 
 /**
@@ -272,6 +275,14 @@ interface ListNode : LeafNode {
 open class ContainerNode(
     override val children: MutableMap<String, TreeNode>
 ) : MapNode {
+    override fun withMap(map: Map<String, TreeNode>): MapNode {
+        if (map is MutableMap<String, TreeNode>) {
+            return ContainerNode(map)
+        } else {
+            return ContainerNode(map.toMutableMap())
+        }
+    }
+
     companion object {
         fun empty(): ContainerNode = ContainerNode(mutableMapOf())
     }

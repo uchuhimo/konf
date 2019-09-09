@@ -40,6 +40,7 @@ object EnvProvider {
             type = "system-environment",
             allowConflict = true
         ).enabled(Feature.LOAD_KEYS_CASE_INSENSITIVELY)
+            .disabled(Feature.SUBSTITUTE_SOURCE_BEFORE_LOADED)
     }
 
     /**
