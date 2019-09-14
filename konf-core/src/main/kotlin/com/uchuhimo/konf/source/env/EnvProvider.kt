@@ -25,6 +25,8 @@ import com.uchuhimo.konf.source.base.FlatSource
  * Provider for system environment source.
  */
 object EnvProvider {
+    private val validEnv = Regex("(\\w+)(.\\w+)*")
+
     /**
      * Returns a new source from system environment.
      *
@@ -35,7 +37,7 @@ object EnvProvider {
             System.getenv().mapKeys { (key, _) ->
                 key.toLowerCase().replace('_', '.')
             }.filter { (key, _) ->
-                !(key.startsWith('.') || key.endsWith('.'))
+                key.matches(validEnv)
             }.toSortedMap(),
             type = "system-environment",
             allowConflict = true

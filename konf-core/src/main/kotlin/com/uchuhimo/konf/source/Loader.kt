@@ -115,10 +115,11 @@ class Loader(
         context: CoroutineContext = Dispatchers.Default,
         optional: Boolean = this.optional
     ): Config {
-        return provider.file(file, optional).let { source ->
+        val absoluteFile = file.absoluteFile
+        return provider.file(absoluteFile, optional).let { source ->
             config.withLoadTrigger("watch ${source.description}") { newConfig, load ->
                 load(source)
-                val path = file.toPath().parent
+                val path = absoluteFile.toPath().parent
                 val isMac = "mac" in System.getProperty("os.name").toLowerCase()
                 val watcher = FileSystems.getDefault().newWatchService()
                 path.register(
@@ -126,12 +127,12 @@ class Loader(
                     StandardWatchEventKinds.ENTRY_MODIFY,
                     StandardWatchEventKinds.ENTRY_CREATE
                 )
-                var digest = file.digest
+                var digest = absoluteFile.digest
                 GlobalScope.launch(context) {
                     while (true) {
                         delay(unit.toMillis(delayTime))
                         if (isMac) {
-                            val newDigest = file.digest
+                            val newDigest = absoluteFile.digest
                             if (!newDigest.contentEquals(digest)) {
                                 digest = newDigest
                                 newConfig.lock {
@@ -147,7 +148,7 @@ class Loader(
                                     @Suppress("UNCHECKED_CAST")
                                     event as WatchEvent<Path>
                                     val filename = event.context()
-                                    if (filename.toString() == file.name) {
+                                    if (filename.toString() == absoluteFile.name) {
                                         if (kind == StandardWatchEventKinds.OVERFLOW) {
                                             continue
                                         } else if (kind == StandardWatchEventKinds.ENTRY_MODIFY ||

@@ -31,4 +31,6 @@ dependencies {
 
     val main by sourceSets
     snippetImplementation(main.output)
+    val snippet by sourceSets
+    testImplementation(snippet.output)
 }

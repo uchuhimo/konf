@@ -45,7 +45,8 @@ object NullSourceNode : NullNode {
 }
 
 open class ListSourceNode(
-    override val list: List<TreeNode>
+    override val list: List<TreeNode>,
+    override var isPlaceHolder: Boolean = false
 ) : ListNode, MapNode {
     override val children: MutableMap<String, TreeNode>
         get() = Collections.unmodifiableMap(

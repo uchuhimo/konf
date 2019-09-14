@@ -40,25 +40,23 @@ open class MapSource(
  * This map can be loaded into config as [com.uchuhimo.konf.source.base.MapSource] using
  * `config.from.map.hierarchical(map)`.
  */
+@Suppress("UNCHECKED_CAST")
 fun Config.toHierarchicalMap(): Map<String, Any> {
-    return toTree().toHierarchicalMap()
+    return toTree().toHierarchical() as Map<String, Any>
 }
 
 /**
- * Returns a hierarchical map for this tree node.
+ * Returns a hierarchical value for this tree node.
  *
- * The returned map contains all items in this tree node.
- * This map can be loaded into config as [com.uchuhimo.konf.source.base.MapSource] using
- * `config.from.map.hierarchical(map)`.
+ * The returned value contains all items in this tree node.
  */
-@Suppress("UNCHECKED_CAST")
-fun TreeNode.toHierarchicalMap(): Map<String, Any> = toHierarchicalMapInternal() as Map<String, Any>
+fun TreeNode.toHierarchical(): Any = withoutPlaceHolder().toHierarchicalInternal()
 
-private fun TreeNode.toHierarchicalMapInternal(): Any {
+private fun TreeNode.toHierarchicalInternal(): Any {
     when (this) {
         is ValueNode -> return value
-        is ListNode -> return list.map { it.toHierarchicalMapInternal() }
-        else -> return children.mapValues { (_, child) -> child.toHierarchicalMapInternal() }
+        is ListNode -> return list.map { it.toHierarchicalInternal() }
+        else -> return children.mapValues { (_, child) -> child.toHierarchicalInternal() }
     }
 }
 

@@ -38,10 +38,11 @@ interface TreeNode {
             throw PathConflictException(path.name)
         }
         val key = path.first()
+        if (this is LeafNode) {
+            throw PathConflictException(path.name)
+        }
         try {
-            return if (this is LeafNode) {
-                throw PathConflictException(path.name)
-            } else if (path.size == 1) {
+            return if (path.size == 1) {
                 children[key] = node
             } else {
                 val rest = path.drop(1)
@@ -54,6 +55,10 @@ interface TreeNode {
             }
         } catch (_: PathConflictException) {
             throw PathConflictException(path.name)
+        } finally {
+            if (this is MapNode && isPlaceHolder) {
+                isPlaceHolder = false
+            }
         }
     }
 
@@ -125,11 +130,8 @@ interface TreeNode {
      */
     fun withFallback(fallback: TreeNode): TreeNode {
         fun traverseTree(facade: TreeNode, fallback: TreeNode, path: Path): TreeNode {
-            if (facade is LeafNode && fallback is LeafNode) {
+            if (facade is LeafNode || fallback is LeafNode) {
                 return facade
-            } else if ((facade is LeafNode && fallback !is LeafNode) ||
-                (facade !is LeafNode && fallback is LeafNode)) {
-                throw PathConflictException(path.name)
             } else {
                 return ContainerNode(facade.children.toMutableMap().also { map ->
                     for ((key, child) in fallback.children) {
@@ -246,12 +248,55 @@ interface TreeNode {
                 traverseTree(this, "".toPath())
             }
         }
+
+    fun withoutPlaceHolder(): TreeNode {
+        when (this) {
+            is NullNode -> return this
+            is ValueNode -> return this
+            is ListNode -> return this
+            is MapNode -> {
+                val newChildren = children.mapValues { (_, child) ->
+                    child.withoutPlaceHolder()
+                }
+                if (newChildren.isNotEmpty() && newChildren.all { (_, child) -> child is MapNode && child.isPlaceHolder }) {
+                    return ContainerNode.placeHolder()
+                } else {
+                    return withMap(newChildren.filterValues { !(it is MapNode && it.isPlaceHolder) })
+                }
+            }
+            else -> return this
+        }
+    }
+
+    fun isEmpty(): Boolean {
+        when (this) {
+            is EmptyNode -> return true
+            is MapNode -> {
+                return children.isEmpty() || children.all { (_, child) -> child.isEmpty() }
+            }
+            else -> return false
+        }
+    }
+
+    fun isPlaceHolderNode(): Boolean {
+        when (this) {
+            is MapNode -> {
+                if (isPlaceHolder) {
+                    return true
+                } else {
+                    return children.isNotEmpty() && children.all { (_, child) -> child.isPlaceHolderNode() }
+                }
+            }
+            else -> return false
+        }
+    }
 }
 
 interface LeafNode : TreeNode
 
 interface MapNode : TreeNode {
     fun withMap(map: Map<String, TreeNode>): MapNode = throw NotImplementedError()
+    var isPlaceHolder: Boolean
 }
 
 val emptyMutableMap: MutableMap<String, TreeNode> = Collections.unmodifiableMap(mutableMapOf())
@@ -273,18 +318,21 @@ interface ListNode : LeafNode {
  * Tree node that contains children nodes.
  */
 open class ContainerNode(
-    override val children: MutableMap<String, TreeNode>
+    override val children: MutableMap<String, TreeNode>,
+    override var isPlaceHolder: Boolean = false
 ) : MapNode {
     override fun withMap(map: Map<String, TreeNode>): MapNode {
+        val isPlaceHolder = map.isEmpty() && this.isPlaceHolder
         if (map is MutableMap<String, TreeNode>) {
-            return ContainerNode(map)
+            return ContainerNode(map, isPlaceHolder)
         } else {
-            return ContainerNode(map.toMutableMap())
+            return ContainerNode(map.toMutableMap(), isPlaceHolder)
         }
     }
 
     companion object {
         fun empty(): ContainerNode = ContainerNode(mutableMapOf())
+        fun placeHolder(): ContainerNode = ContainerNode(mutableMapOf(), true)
     }
 }
 

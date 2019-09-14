@@ -20,6 +20,8 @@ import com.uchuhimo.konf.Config
 import com.uchuhimo.konf.ConfigSpec
 import com.uchuhimo.konf.source.Source
 import com.uchuhimo.konf.source.yaml
+import com.uchuhimo.konf.toValue
+import java.io.File
 
 object ServerSpec : ConfigSpec() {
     val host by optional("0.0.0.0")
@@ -27,14 +29,21 @@ object ServerSpec : ConfigSpec() {
 }
 
 fun main(args: Array<String>) {
+    val file = File("server.yml")
+    file.writeText("""
+        server:
+            host: 127.0.0.1
+            port: 8080
+    """.trimIndent())
+    file.deleteOnExit()
     val config = Config { addSpec(ServerSpec) }
-        .from.yaml.file("/path/to/server.yml")
+        .from.yaml.file("server.yml")
         .from.json.resource("server.json")
         .from.env()
         .from.systemProperties()
     run {
         val config = Config { addSpec(ServerSpec) }.withSource(
-            Source.from.yaml.file("/path/to/server.yml") +
+            Source.from.yaml.file("server.yml") +
                 Source.from.json.resource("server.json") +
                 Source.from.env() +
                 Source.from.systemProperties()
@@ -42,11 +51,21 @@ fun main(args: Array<String>) {
     }
     run {
         val config = Config { addSpec(ServerSpec) }
-            .from.yaml.watchFile("/path/to/server.yml")
+            .from.yaml.watchFile("server.yml")
             .from.json.resource("server.json")
             .from.env()
             .from.systemProperties()
     }
     val server = Server(config[ServerSpec.host], config[ServerSpec.port])
     server.start()
+    run {
+        val server = Config()
+            .from.yaml.file("server.yml")
+            .from.json.resource("server.json")
+            .from.env()
+            .from.systemProperties()
+            .at("server")
+            .toValue<Server>()
+        server.start()
+    }
 }

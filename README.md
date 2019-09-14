@@ -167,7 +167,7 @@ compile(group = "com.github.uchuhimo.konf", name = "konf", version = "master-SNA
 
     ```kotlin
     val config = Config { addSpec(ServerSpec) }
-            .from.yaml.file("/path/to/server.yml")
+            .from.yaml.file("server.yml")
             .from.json.resource("server.json")
             .from.env()
             .from.systemProperties()
@@ -177,27 +177,27 @@ compile(group = "com.github.uchuhimo.konf", name = "konf", version = "master-SNA
 
     ```kotlin
     val config = Config { addSpec(ServerSpec) }.withSource(
-        Source.from.yaml.file("/path/to/server.yml") +
+        Source.from.yaml.file("server.yml") +
         Source.from.json.resource("server.json") +
         Source.from.env() +
         Source.from.systemProperties()
     )
     ```
 
-    This config contains all items defined in `ServerSpec`, and load values from 4 different sources. Values in resource file `server.json` will override those in file `/path/to/server.yml`, values from system environment will override those in `server.json`, and values from system properties will override those from system environment.
+    This config contains all items defined in `ServerSpec`, and load values from 4 different sources. Values in resource file `server.json` will override those in file `server.yml`, values from system environment will override those in `server.json`, and values from system properties will override those from system environment.
 
-    If you want to watch file `/path/to/server.yml` and reload values when file content is changed, you can use `watchFile` instead of `file`:
+    If you want to watch file `server.yml` and reload values when file content is changed, you can use `watchFile` instead of `file`:
 
     ```kotlin
     val config = Config { addSpec(ServerSpec) }
-            .from.yaml.watchFile("/path/to/server.yml")
+            .from.yaml.watchFile("server.yml")
             .from.json.resource("server.json")
             .from.env()
             .from.systemProperties()
     ```
 
 3. Define values in source. You can define in any of these sources:
-    - in `/path/to/server.yml`:
+    - in `server.yml`:
         ```yaml
         server:
             host: 0.0.0.0
@@ -224,7 +224,24 @@ compile(group = "com.github.uchuhimo.konf", name = "konf", version = "master-SNA
 
 4. Retrieve values from config with type-safe APIs:
     ```kotlin
+    data class Server(val host: String, val port: Int) {
+        fun start() {}
+    }
+    
     val server = Server(config[ServerSpec.host], config[ServerSpec.port])
+    server.start()
+    ```
+
+5. Retrieve values from multiple sources without using config spec:
+
+    ```kotlin
+    val server = Config()
+            .from.yaml.file("server.yml")
+            .from.json.resource("server.json")
+            .from.env()
+            .from.systemProperties()
+            .at("server")
+            .toValue<Server>()
     server.start()
     ```
 
@@ -356,6 +373,14 @@ or:
 
 ```kotlin
 val host = config<String>("server.host")
+```
+
+### Cast config to value
+
+Cast config to a value with the target type:
+
+```kotlin
+val server = config.toValue<Server>()
 ```
 
 ### Check whether an item exists in config or not

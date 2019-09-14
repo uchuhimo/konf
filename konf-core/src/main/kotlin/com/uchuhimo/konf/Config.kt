@@ -355,7 +355,17 @@ interface Config : ItemContainer {
  * @return a property that can read/set associated value casted from config
  */
 inline fun <reified T> Config.cast() =
-    object : RequiredConfigProperty<T>(this.withPrefix("root"), name = "root") {}
+    object : RequiredConfigProperty<T>(this.withPrefix("root").withLayer(), name = "root") {}
+
+/**
+ * Returns a value casted from config.
+ *
+ * @return a value casted from config
+ */
+inline fun <reified T> Config.toValue(): T {
+    val value by cast<T>()
+    return value
+}
 
 /**
  * Returns a property that can read/set associated value for specified required item.
@@ -383,8 +393,7 @@ open class RequiredConfigProperty<T>(
     private val type: JavaType = TypeFactory.defaultInstance().constructType(this::class.java)
         .findSuperType(RequiredConfigProperty::class.java).bindings.typeParameters[0]
 
-    operator fun provideDelegate(thisRef: Any?, property: KProperty<*>):
-        ReadWriteProperty<Any?, T> {
+    operator fun provideDelegate(thisRef: Any?, property: KProperty<*>): ReadWriteProperty<Any?, T> {
         val item = object : RequiredItem<T>(Spec.dummy, name
             ?: property.name, description, type, nullable) {}
         config.addItem(item, prefix)

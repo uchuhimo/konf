@@ -23,7 +23,7 @@ import com.natpryce.hamkrest.sameInstance
 import com.natpryce.hamkrest.throws
 import com.uchuhimo.konf.source.asSource
 import com.uchuhimo.konf.source.asTree
-import com.uchuhimo.konf.source.base.toHierarchicalMap
+import com.uchuhimo.konf.source.base.toHierarchical
 import org.jetbrains.spek.api.dsl.given
 import org.jetbrains.spek.api.dsl.it
 import org.jetbrains.spek.api.dsl.on
@@ -81,29 +81,30 @@ object TreeNodeSpec : SubjectSpek<TreeNode>({
                 "key4" to mapOf("level2" to fallbackNode)
             ).asTree()
             it("should return the merged tree when valid") {
-                assertThat((fallback + facade).toHierarchicalMap(), equalTo(mapOf(
+                assertThat((fallback + facade).toHierarchical(), equalTo(mapOf(
                     "key1" to facadeNode,
                     "key2" to EmptyNode,
                     "key3" to fallbackNode,
                     "key4" to mapOf("level2" to facadeNode)
-                ).asTree().toHierarchicalMap()))
-                assertThat(facade.withFallback(fallback).toHierarchicalMap(), equalTo(mapOf(
+                ).asTree().toHierarchical()))
+                assertThat(facade.withFallback(fallback).toHierarchical(), equalTo(mapOf(
                     "key1" to facadeNode,
                     "key2" to EmptyNode,
                     "key3" to fallbackNode,
                     "key4" to mapOf("level2" to facadeNode)
-                ).asTree().toHierarchicalMap()))
-            }
-            it("should throw PathConflictException when invalid") {
-                assertThat(
-                    { EmptyNode + facade },
-                    throws(has(PathConflictException::path, equalTo(""))))
-                assertThat(
-                    { fallback + EmptyNode },
-                    throws(has(PathConflictException::path, equalTo(""))))
-                assertThat(
-                    { fallback + mapOf("key1" to mapOf("key2" to EmptyNode)).asTree() },
-                    throws(has(PathConflictException::path, equalTo("key1"))))
+                ).asTree().toHierarchical()))
+                assertThat((EmptyNode + facade).toHierarchical(),
+                    equalTo(facade.toHierarchical()))
+                assertThat((fallback + EmptyNode).toHierarchical(),
+                    equalTo(EmptyNode.toHierarchical()))
+                assertThat((fallback + mapOf("key1" to mapOf("key2" to EmptyNode)).asTree()).toHierarchical(),
+                    equalTo(mapOf(
+                        "key1" to mapOf(
+                            "key2" to EmptyNode),
+                        "key2" to fallbackNode,
+                        "key3" to fallbackNode,
+                        "key4" to mapOf("level2" to fallbackNode)
+                    ).asTree().toHierarchical()))
             }
         }
     }

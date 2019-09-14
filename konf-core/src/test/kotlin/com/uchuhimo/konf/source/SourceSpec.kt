@@ -32,7 +32,7 @@ import com.uchuhimo.konf.ValueNode
 import com.uchuhimo.konf.name
 import com.uchuhimo.konf.source.base.ValueSource
 import com.uchuhimo.konf.source.base.asKVSource
-import com.uchuhimo.konf.source.base.toHierarchicalMap
+import com.uchuhimo.konf.source.base.toHierarchical
 import com.uchuhimo.konf.toPath
 import org.jetbrains.spek.api.Spek
 import org.jetbrains.spek.api.dsl.given
@@ -569,26 +569,26 @@ object SourceSpec : Spek({
         }
         group("substitution operation") {
             on("doesn't contain any path variable") {
-                val map = mapOf<String, Any>("key1" to "a", "key2" to "b")
+                val map = mapOf("key1" to "a", "key2" to "b")
                 val source = map.asSource().substituted()
                 it("should keep it unchanged") {
-                    assertThat(source.tree.toHierarchicalMap(), equalTo(map))
+                    assertThat(source.tree.toHierarchical(), equalTo<Any>(map))
                 }
             }
             on("contains single path variable") {
                 val map = mapOf("key1" to "a", "key2" to "b\${key1}")
                 val source = map.asSource().substituted()
                 it("should substitute path variables") {
-                    assertThat(source.tree.toHierarchicalMap(),
-                        equalTo(mapOf<String, Any>("key1" to "a", "key2" to "ba")))
+                    assertThat(source.tree.toHierarchical(),
+                        equalTo<Any>(mapOf("key1" to "a", "key2" to "ba")))
                 }
             }
             on("contains path variables with string list value") {
                 val map = mapOf("key1" to "a,b,c", "key2" to "a\${key1}")
                 val source = Source.from.map.flat(map).substituted().substituted()
                 it("should substitute path variables") {
-                    assertThat(source.tree.toHierarchicalMap(),
-                        equalTo(mapOf<String, Any>(
+                    assertThat(source.tree.toHierarchical(),
+                        equalTo<Any>(mapOf(
                             "key1" to "a,b,c",
                             "key2" to "aa,b,c")))
                 }
@@ -597,8 +597,8 @@ object SourceSpec : Spek({
                 val map = mapOf("top" to listOf(mapOf("key1" to "a", "key2" to "b\${top.0.key1}")))
                 val source = map.asSource().substituted()
                 it("should substitute path variables") {
-                    assertThat(source.tree.toHierarchicalMap(),
-                        equalTo(mapOf<String, Any>("top" to listOf(mapOf("key1" to "a", "key2" to "ba")))))
+                    assertThat(source.tree.toHierarchical(),
+                        equalTo<Any>(mapOf("top" to listOf(mapOf("key1" to "a", "key2" to "ba")))))
                 }
             }
             on("contains path variable with wrong type") {
@@ -611,94 +611,94 @@ object SourceSpec : Spek({
                 val map = mapOf("key1" to "a", "key2" to "b\$\${key1}")
                 val source = map.asSource().substituted()
                 it("should not substitute path variables") {
-                    assertThat(source.tree.toHierarchicalMap(),
-                        equalTo(mapOf<String, Any>("key1" to "a", "key2" to "b\${key1}")))
+                    assertThat(source.tree.toHierarchical(),
+                        equalTo<Any>(mapOf("key1" to "a", "key2" to "b\${key1}")))
                 }
             }
             on("contains nested escaped path variables") {
                 val map = mapOf("key1" to "a", "key2" to "b\$\$\$\${key1}")
                 val source = map.asSource().substituted()
                 it("should escaped only once") {
-                    assertThat(source.tree.toHierarchicalMap(),
-                        equalTo(mapOf<String, Any>("key1" to "a", "key2" to "b\$\$\${key1}")))
+                    assertThat(source.tree.toHierarchical(),
+                        equalTo<Any>(mapOf("key1" to "a", "key2" to "b\$\$\${key1}")))
                 }
             }
             on("contains nested escaped path variables and substitute multiple times") {
                 val map = mapOf("key1" to "a", "key2" to "b\$\$\$\${key1}")
                 val source = map.asSource().substituted().substituted()
                 it("should escaped only once") {
-                    assertThat(source.tree.toHierarchicalMap(),
-                        equalTo(mapOf<String, Any>("key1" to "a", "key2" to "b\$\$\${key1}")))
+                    assertThat(source.tree.toHierarchical(),
+                        equalTo<Any>(mapOf("key1" to "a", "key2" to "b\$\$\${key1}")))
                 }
             }
             on("contains undefined path variable") {
-                val map = mapOf<String, Any>("key2" to "b\${key1}")
+                val map = mapOf("key2" to "b\${key1}")
                 it("should throw UndefinedPathVariableException by default") {
                     assertThat({ map.asSource().substituted() },
                         throws(has(UndefinedPathVariableException::text, equalTo("b\${key1}"))))
                 }
                 it("should keep unsubstituted when errorWhenUndefined is `false`") {
                     val source = map.asSource().substituted(errorWhenUndefined = false)
-                    assertThat(source.tree.toHierarchicalMap(), equalTo(map))
+                    assertThat(source.tree.toHierarchical(), equalTo<Any>(map))
                 }
             }
             on("contains undefined path variable in reference format") {
-                val map = mapOf<String, Any>("key2" to "\${key1}")
+                val map = mapOf("key2" to "\${key1}")
                 it("should throw UndefinedPathVariableException by default") {
                     assertThat({ map.asSource().substituted() },
                         throws(has(UndefinedPathVariableException::text, equalTo("\${key1}"))))
                 }
                 it("should keep unsubstituted when errorWhenUndefined is `false`") {
                     val source = map.asSource().substituted(errorWhenUndefined = false)
-                    assertThat(source.tree.toHierarchicalMap(), equalTo(map))
+                    assertThat(source.tree.toHierarchical(), equalTo<Any>(map))
                 }
             }
             on("contains multiple path variables") {
                 val map = mapOf("key1" to "a", "key2" to "\${key1}b\${key3}", "key3" to "c")
                 val source = map.asSource().substituted()
                 it("should substitute path variables") {
-                    assertThat(source.tree.toHierarchicalMap(),
-                        equalTo(mapOf<String, Any>("key1" to "a", "key2" to "abc", "key3" to "c")))
+                    assertThat(source.tree.toHierarchical(),
+                        equalTo<Any>(mapOf("key1" to "a", "key2" to "abc", "key3" to "c")))
                 }
             }
             on("contains chained path variables") {
                 val map = mapOf("key1" to "a", "key2" to "\${key1}b", "key3" to "\${key2}c")
                 val source = map.asSource().substituted()
                 it("should substitute path variables") {
-                    assertThat(source.tree.toHierarchicalMap(),
-                        equalTo(mapOf<String, Any>("key1" to "a", "key2" to "ab", "key3" to "abc")))
+                    assertThat(source.tree.toHierarchical(),
+                        equalTo<Any>(mapOf("key1" to "a", "key2" to "ab", "key3" to "abc")))
                 }
             }
             on("contains nested path variables") {
                 val map = mapOf("key1" to "a", "key2" to "\${\${key3}}b", "key3" to "key1")
                 val source = map.asSource().substituted()
                 it("should substitute path variables") {
-                    assertThat(source.tree.toHierarchicalMap(),
-                        equalTo(mapOf<String, Any>("key1" to "a", "key2" to "ab", "key3" to "key1")))
+                    assertThat(source.tree.toHierarchical(),
+                        equalTo<Any>(mapOf("key1" to "a", "key2" to "ab", "key3" to "key1")))
                 }
             }
             on("contains a path variable with default value") {
                 val map = mapOf("key1" to "a", "key2" to "b\${key3:-c}")
                 val source = map.asSource().substituted()
                 it("should substitute path variables") {
-                    assertThat(source.tree.toHierarchicalMap(),
-                        equalTo(mapOf<String, Any>("key1" to "a", "key2" to "bc")))
+                    assertThat(source.tree.toHierarchical(),
+                        equalTo<Any>(mapOf("key1" to "a", "key2" to "bc")))
                 }
             }
             on("contains a path variable with key") {
                 val map = mapOf("key1" to "a", "key2" to "\${key1}\${base64Decoder:SGVsbG9Xb3JsZCE=}")
                 val source = map.asSource().substituted()
                 it("should substitute path variables") {
-                    assertThat(source.tree.toHierarchicalMap(),
-                        equalTo(mapOf<String, Any>("key1" to "a", "key2" to "aHelloWorld!")))
+                    assertThat(source.tree.toHierarchical(),
+                        equalTo<Any>(mapOf("key1" to "a", "key2" to "aHelloWorld!")))
                 }
             }
             on("contains a path variable in reference format") {
                 val map = mapOf("key1" to mapOf("key3" to "a", "key4" to "b"), "key2" to "\${key1}")
                 val source = map.asSource().substituted()
                 it("should substitute path variables") {
-                    assertThat(source.tree.toHierarchicalMap(),
-                        equalTo(mapOf<String, Any>(
+                    assertThat(source.tree.toHierarchical(),
+                        equalTo<Any>(mapOf(
                             "key1" to mapOf("key3" to "a", "key4" to "b"),
                             "key2" to mapOf("key3" to "a", "key4" to "b"))))
                 }
@@ -707,8 +707,8 @@ object SourceSpec : Spek({
                 val map = mapOf("key1" to mapOf("key3" to "a", "key4" to "b"), "key2" to "\${\${key3}}", "key3" to "key1")
                 val source = map.asSource().substituted()
                 it("should substitute path variables") {
-                    assertThat(source.tree.toHierarchicalMap(),
-                        equalTo(mapOf<String, Any>(
+                    assertThat(source.tree.toHierarchical(),
+                        equalTo<Any>(mapOf(
                             "key1" to mapOf("key3" to "a", "key4" to "b"),
                             "key2" to mapOf("key3" to "a", "key4" to "b"),
                             "key3" to "key1")))
@@ -719,8 +719,8 @@ object SourceSpec : Spek({
                 val map2 = mapOf("key2" to "b\${key1}")
                 val source = (map2.asSource() + map1.asSource()).substituted()
                 it("should substitute path variables") {
-                    assertThat(source.tree.toHierarchicalMap(),
-                        equalTo(mapOf<String, Any>("key1" to "a", "key2" to "ba")))
+                    assertThat(source.tree.toHierarchical(),
+                        equalTo<Any>(mapOf("key1" to "a", "key2" to "ba")))
                 }
             }
         }

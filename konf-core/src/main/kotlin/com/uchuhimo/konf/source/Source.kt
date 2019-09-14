@@ -53,6 +53,7 @@ import com.uchuhimo.konf.TreeNode
 import com.uchuhimo.konf.ValueNode
 import com.uchuhimo.konf.annotation.JavaApi
 import com.uchuhimo.konf.source.base.ListStringNode
+import com.uchuhimo.konf.source.base.toHierarchical
 import com.uchuhimo.konf.toPath
 import com.uchuhimo.konf.toTree
 import org.apache.commons.text.StringSubstitutor
@@ -503,7 +504,7 @@ internal fun Config.loadItem(item: Item<*>, path: Path, source: Source): Boolean
             path
         }
         val itemNode = source.tree.getOrNull(uniformPath)
-        if (itemNode != null) {
+        if (itemNode != null && !itemNode.isPlaceHolderNode()) {
             if (item.nullable &&
                 ((itemNode is NullNode) ||
                     (itemNode is ValueNode && itemNode.value == "null"))) {
@@ -813,11 +814,11 @@ private fun TreeNode.toValue(source: Source, type: JavaType, mapper: ObjectMappe
                 } else {
                     try {
                         return mapper.readValue<Any>(
-                            TreeTraversingParser(toJsonNode(source), mapper),
+                            TreeTraversingParser(withoutPlaceHolder().toJsonNode(source), mapper),
                             type
                         )
                     } catch (cause: JsonProcessingException) {
-                        throw ObjectMappingException("$this in ${source.description}", clazz, cause)
+                        throw ObjectMappingException("${this.toHierarchical()} in ${source.description}", clazz, cause)
                     }
                 }
             }

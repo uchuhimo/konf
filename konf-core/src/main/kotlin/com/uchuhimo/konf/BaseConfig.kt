@@ -54,7 +54,7 @@ open class BaseConfig(
     private val specsInLayer: MutableList<Spec> = mutableListOf(),
     private val featuresInLayer: MutableMap<Feature, Boolean> = mutableMapOf(),
     private val nodeByItem: MutableMap<Item<*>, ItemNode> = mutableMapOf(),
-    private val tree: TreeNode = ContainerNode.empty(),
+    private val tree: TreeNode = ContainerNode.placeHolder(),
     private val hasChildren: Value<Boolean> = Value(false),
     private val lock: ReentrantReadWriteLock = ReentrantReadWriteLock()
 ) : Config {
@@ -68,6 +68,7 @@ open class BaseConfig(
         if (path.isEmpty()) {
             return this
         } else {
+            val originalConfig = this
             return object : BaseConfig(
                 name = name,
                 parent = parent?.at(path) as BaseConfig?,
@@ -75,7 +76,7 @@ open class BaseConfig(
                 specsInLayer = specsInLayer,
                 featuresInLayer = featuresInLayer,
                 nodeByItem = nodeByItem,
-                tree = tree.getOrNull(path) ?: ContainerNode.empty().also {
+                tree = tree.getOrNull(path) ?: ContainerNode.placeHolder().also {
                     lock.write { tree[path] = it }
                 },
                 hasChildren = hasChildren,
@@ -83,10 +84,10 @@ open class BaseConfig(
             ) {
                 override val source: Source
                     get() {
-                        if (path !in this@BaseConfig.source) {
-                            this@BaseConfig.source.tree[path] = ContainerNode.empty()
+                        if (path !in originalConfig.source) {
+                            originalConfig.source.tree[path] = ContainerNode.placeHolder()
                         }
-                        return this@BaseConfig.source[path]
+                        return originalConfig.source[path]
                     }
             }
         }
@@ -96,6 +97,7 @@ open class BaseConfig(
         if (prefix.isEmpty()) {
             return this
         } else {
+            val originalConfig = this
             return object : BaseConfig(
                 name = name,
                 parent = parent?.withPrefix(prefix) as BaseConfig?,
@@ -104,11 +106,13 @@ open class BaseConfig(
                 featuresInLayer = featuresInLayer,
                 nodeByItem = nodeByItem,
                 tree = if (prefix.isEmpty()) tree
-                else ContainerNode.empty().apply { set(prefix, tree) },
+                else ContainerNode.empty().apply {
+                    set(prefix, tree)
+                },
                 hasChildren = hasChildren,
                 lock = lock
             ) {
-                override val source: Source get() = this@BaseConfig.source.withPrefix(prefix)
+                override val source: Source get() = originalConfig.source.withPrefix(prefix)
             }
         }
     }
@@ -303,7 +307,7 @@ open class BaseConfig(
         return if (this is LeafNode) {
             true
         } else if (path.isEmpty()) {
-            children.isNotEmpty()
+            !isEmpty()
         } else {
             val key = path.first()
             val rest = path.drop(1)
@@ -424,6 +428,9 @@ open class BaseConfig(
         lock.write {
             nodeByItem.clear()
             tree.children.clear()
+            if (tree is MapNode) {
+                tree.isPlaceHolder = true
+            }
         }
     }
 
