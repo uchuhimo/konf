@@ -39,6 +39,7 @@ object JsonWriterSpec : SubjectSpek<Writer>({
     }
 
     given("a writer") {
+        //language=Json
         val expectedString = """
             {
               "key" : "value"

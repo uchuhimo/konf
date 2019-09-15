@@ -98,6 +98,7 @@ object QuickStartSpec : Spek({
 
 private fun <T> useFile(block: () -> T): T {
     val file = File("server.yml")
+    //language=YAML
     file.writeText("""
         server:
             host: 127.0.0.1

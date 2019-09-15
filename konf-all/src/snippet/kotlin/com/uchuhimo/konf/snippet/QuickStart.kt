@@ -31,6 +31,7 @@ object ServerSpec : ConfigSpec() {
 
 fun main(args: Array<String>) {
     val file = File("server.yml")
+    //language=YAML
     file.writeText("""
         server:
             host: 127.0.0.1

@@ -29,6 +29,7 @@ import org.jetbrains.spek.subject.itBehavesLike
 object XmlProviderSpec : SubjectSpek<XmlProvider>({
     subject { XmlProvider }
 
+    //language=XML
     fun xmlDoc(name: String, value: String) = """
         <?xml version="1.0" encoding="UTF-8"?>
         <configuration>

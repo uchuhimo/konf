@@ -30,6 +30,7 @@ import org.junit.jupiter.api.assertThrows
 import java.io.FileNotFoundException
 
 object FailOnUnknownPathSpec : Spek({
+    //language=Json
     val source = """
         {
             "level1": {

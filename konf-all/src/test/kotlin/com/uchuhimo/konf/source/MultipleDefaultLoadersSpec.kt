@@ -60,6 +60,7 @@ object MultipleDefaultLoadersSpec : Spek({
     }
 })
 
+//language=Json
 const val jsonContent = """
 {
   "source": {
