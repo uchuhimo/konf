@@ -19,6 +19,7 @@ package com.uchuhimo.konf.snippet
 import com.uchuhimo.konf.Config
 import com.uchuhimo.konf.ConfigSpec
 import com.uchuhimo.konf.source.Source
+import com.uchuhimo.konf.source.toValue
 import com.uchuhimo.konf.source.yaml
 import com.uchuhimo.konf.toValue
 import java.io.File
@@ -65,6 +66,16 @@ fun main(args: Array<String>) {
             .from.env()
             .from.systemProperties()
             .at("server")
+            .toValue<Server>()
+        server.start()
+    }
+    run {
+        val server = (
+            Source.from.yaml.file("server.yml") +
+                Source.from.json.resource("server.json") +
+                Source.from.env() +
+                Source.from.systemProperties()
+            )["server"]
             .toValue<Server>()
         server.start()
     }

@@ -56,6 +56,7 @@ import com.uchuhimo.konf.source.base.ListStringNode
 import com.uchuhimo.konf.source.base.toHierarchical
 import com.uchuhimo.konf.toPath
 import com.uchuhimo.konf.toTree
+import com.uchuhimo.konf.toValue
 import org.apache.commons.text.StringSubstitutor
 import org.apache.commons.text.lookup.StringLookup
 import org.apache.commons.text.lookup.StringLookupFactory
@@ -337,6 +338,15 @@ interface Source {
         @JvmStatic
         fun from() = from
     }
+}
+
+/**
+ * Returns a value casted from source.
+ *
+ * @return a value casted from source
+ */
+inline fun <reified T> Source.toValue(): T {
+    return Config().withSource(this).toValue()
 }
 
 private val singleVariablePattern = Pattern.compile("^\\$\\{(.+)}$")

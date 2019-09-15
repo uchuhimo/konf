@@ -68,7 +68,7 @@ object QuickStartSpec : Spek({
                 equalTo(mapOf("server.host" to "127.0.0.1", "server.port" to 8080)))
         }
     }
-    on("cast to value") {
+    on("cast config to value") {
         val config = useFile {
             Config()
                 .from.yaml.file("server.yml")
@@ -78,6 +78,18 @@ object QuickStartSpec : Spek({
                 .at("server")
         }
         val server = config.toValue<Server>()
+        it("should load all values") {
+            assertThat(server, equalTo(Server(host = "127.0.0.1", port = 8080)))
+        }
+    }
+    on("cast source to value") {
+        val source = useFile {
+            (Source.from.yaml.file("server.yml") +
+                Source.from.json.resource("server.json") +
+                Source.from.env() +
+                Source.from.systemProperties())["server"]
+        }
+        val server = source.toValue<Server>()
         it("should load all values") {
             assertThat(server, equalTo(Server(host = "127.0.0.1", port = 8080)))
         }
