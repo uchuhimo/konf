@@ -16,13 +16,13 @@
 
 package com.uchuhimo.konf
 
+import java.util.concurrent.TimeUnit.NANOSECONDS
 import org.openjdk.jmh.annotations.Benchmark
 import org.openjdk.jmh.annotations.BenchmarkMode
 import org.openjdk.jmh.annotations.Mode.AverageTime
 import org.openjdk.jmh.annotations.OutputTimeUnit
 import org.openjdk.jmh.annotations.Scope
 import org.openjdk.jmh.annotations.State
-import java.util.concurrent.TimeUnit.NANOSECONDS
 
 class Buffer {
     companion object : ConfigSpec("network.buffer") {

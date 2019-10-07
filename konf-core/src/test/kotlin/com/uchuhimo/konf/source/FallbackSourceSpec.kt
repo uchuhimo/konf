@@ -21,12 +21,12 @@ import com.natpryce.hamkrest.equalTo
 import com.uchuhimo.konf.name
 import com.uchuhimo.konf.source.base.asKVSource
 import com.uchuhimo.konf.toPath
+import kotlin.test.assertFalse
+import kotlin.test.assertTrue
 import org.jetbrains.spek.api.Spek
 import org.jetbrains.spek.api.dsl.given
 import org.jetbrains.spek.api.dsl.it
 import org.jetbrains.spek.api.dsl.on
-import kotlin.test.assertFalse
-import kotlin.test.assertTrue
 
 object FallbackSourceSpec : Spek({
     given("a source with fallback") {

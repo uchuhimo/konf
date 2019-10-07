@@ -21,8 +21,8 @@ import com.natpryce.hamkrest.equalTo
 import com.natpryce.hamkrest.sameInstance
 import com.natpryce.hamkrest.throws
 import com.uchuhimo.konf.source.ParseException
-import com.uchuhimo.konf.source.asValue
 import com.uchuhimo.konf.source.asSource
+import com.uchuhimo.konf.source.asValue
 import org.jetbrains.spek.api.Spek
 import org.jetbrains.spek.api.dsl.given
 import org.jetbrains.spek.api.dsl.it

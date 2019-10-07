@@ -18,9 +18,9 @@ package com.uchuhimo.konf.source.js
 
 import com.uchuhimo.konf.Config
 import com.uchuhimo.konf.Feature
-import com.uchuhimo.konf.source.js
 import com.uchuhimo.konf.source.ConfigForLoad
 import com.uchuhimo.konf.source.SourceLoadSpec
+import com.uchuhimo.konf.source.js
 import org.jetbrains.spek.subject.SubjectSpek
 import org.jetbrains.spek.subject.itBehavesLike
 

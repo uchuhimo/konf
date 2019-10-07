@@ -21,11 +21,6 @@ import com.natpryce.hamkrest.equalTo
 import com.uchuhimo.konf.Config
 import com.uchuhimo.konf.SizeInBytes
 import com.uchuhimo.konf.toSizeInBytes
-import org.jetbrains.spek.api.dsl.given
-import org.jetbrains.spek.api.dsl.it
-import org.jetbrains.spek.api.dsl.on
-import org.jetbrains.spek.subject.SubjectSpek
-import org.jetbrains.spek.subject.itBehavesLike
 import java.io.ObjectInputStream
 import java.io.ObjectOutputStream
 import java.math.BigDecimal
@@ -45,6 +40,11 @@ import java.util.Date
 import java.util.SortedSet
 import kotlin.test.assertNull
 import kotlin.test.assertTrue
+import org.jetbrains.spek.api.dsl.given
+import org.jetbrains.spek.api.dsl.it
+import org.jetbrains.spek.api.dsl.on
+import org.jetbrains.spek.subject.SubjectSpek
+import org.jetbrains.spek.subject.itBehavesLike
 
 object SourceLoadSpec : SubjectSpek<Config>({
 

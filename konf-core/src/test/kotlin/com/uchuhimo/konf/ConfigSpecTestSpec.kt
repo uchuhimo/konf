@@ -23,12 +23,12 @@ import com.natpryce.hamkrest.has
 import com.natpryce.hamkrest.isIn
 import com.natpryce.hamkrest.sameInstance
 import com.natpryce.hamkrest.throws
+import kotlin.test.assertFalse
+import kotlin.test.assertTrue
 import org.jetbrains.spek.api.Spek
 import org.jetbrains.spek.api.dsl.given
 import org.jetbrains.spek.api.dsl.it
 import org.jetbrains.spek.api.dsl.on
-import kotlin.test.assertFalse
-import kotlin.test.assertTrue
 
 object ConfigSpecTestSpec : Spek({
     given("a configSpec") {

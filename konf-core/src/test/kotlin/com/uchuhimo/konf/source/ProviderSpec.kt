@@ -21,6 +21,11 @@ import com.natpryce.hamkrest.equalTo
 import com.natpryce.hamkrest.throws
 import com.uchuhimo.konf.source.properties.PropertiesProvider
 import com.uchuhimo.konf.tempFileOf
+import java.io.File
+import java.io.FileNotFoundException
+import java.io.IOException
+import java.net.URL
+import kotlin.test.assertTrue
 import org.jetbrains.spek.api.dsl.given
 import org.jetbrains.spek.api.dsl.it
 import org.jetbrains.spek.api.dsl.on
@@ -28,11 +33,6 @@ import org.jetbrains.spek.subject.SubjectSpek
 import org.jetbrains.spek.subject.itBehavesLike
 import org.junit.jupiter.api.assertThrows
 import spark.Service
-import java.io.File
-import java.io.FileNotFoundException
-import java.io.IOException
-import java.net.URL
-import kotlin.test.assertTrue
 
 object ProviderSpec : SubjectSpek<Provider>({
     subject { PropertiesProvider }

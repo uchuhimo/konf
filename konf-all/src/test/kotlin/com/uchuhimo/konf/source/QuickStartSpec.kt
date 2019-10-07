@@ -22,10 +22,10 @@ import com.uchuhimo.konf.Config
 import com.uchuhimo.konf.snippet.Server
 import com.uchuhimo.konf.snippet.ServerSpec
 import com.uchuhimo.konf.toValue
+import java.io.File
 import org.jetbrains.spek.api.Spek
 import org.jetbrains.spek.api.dsl.it
 import org.jetbrains.spek.api.dsl.on
-import java.io.File
 
 object QuickStartSpec : Spek({
     on("use default loaders") {

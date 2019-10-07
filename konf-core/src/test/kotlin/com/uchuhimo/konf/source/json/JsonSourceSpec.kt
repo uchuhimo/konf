@@ -30,14 +30,14 @@ import com.natpryce.hamkrest.throws
 import com.uchuhimo.konf.source.WrongTypeException
 import com.uchuhimo.konf.source.asValue
 import com.uchuhimo.konf.toPath
-import org.jetbrains.spek.api.Spek
-import org.jetbrains.spek.api.dsl.given
-import org.jetbrains.spek.api.dsl.it
-import org.jetbrains.spek.api.dsl.on
 import java.math.BigDecimal
 import java.math.BigInteger
 import kotlin.test.assertNull
 import kotlin.test.assertTrue
+import org.jetbrains.spek.api.Spek
+import org.jetbrains.spek.api.dsl.given
+import org.jetbrains.spek.api.dsl.it
+import org.jetbrains.spek.api.dsl.on
 
 object JsonSourceSpec : Spek({
     given("a JSON source") {

@@ -29,6 +29,7 @@ import com.fasterxml.jackson.databind.node.FloatNode
 import com.fasterxml.jackson.databind.node.IntNode
 import com.fasterxml.jackson.databind.node.JsonNodeFactory
 import com.fasterxml.jackson.databind.node.LongNode
+import com.fasterxml.jackson.databind.node.NullNode as JacksonNullNode
 import com.fasterxml.jackson.databind.node.ObjectNode
 import com.fasterxml.jackson.databind.node.ShortNode
 import com.fasterxml.jackson.databind.node.TextNode
@@ -57,9 +58,6 @@ import com.uchuhimo.konf.source.base.toHierarchical
 import com.uchuhimo.konf.toPath
 import com.uchuhimo.konf.toTree
 import com.uchuhimo.konf.toValue
-import org.apache.commons.text.StringSubstitutor
-import org.apache.commons.text.lookup.StringLookup
-import org.apache.commons.text.lookup.StringLookupFactory
 import java.lang.reflect.InvocationTargetException
 import java.math.BigDecimal
 import java.math.BigInteger
@@ -95,7 +93,9 @@ import kotlin.String
 import kotlin.reflect.KClass
 import kotlin.reflect.full.isSubclassOf
 import kotlin.reflect.full.starProjectedType
-import com.fasterxml.jackson.databind.node.NullNode as JacksonNullNode
+import org.apache.commons.text.StringSubstitutor
+import org.apache.commons.text.lookup.StringLookup
+import org.apache.commons.text.lookup.StringLookupFactory
 
 /**
  * Source to provide values for config.

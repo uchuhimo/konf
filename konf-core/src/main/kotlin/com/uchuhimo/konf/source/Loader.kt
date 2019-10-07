@@ -18,10 +18,6 @@ package com.uchuhimo.konf.source
 
 import com.uchuhimo.konf.Config
 import com.uchuhimo.konf.Feature
-import kotlinx.coroutines.Dispatchers
-import kotlinx.coroutines.GlobalScope
-import kotlinx.coroutines.delay
-import kotlinx.coroutines.launch
 import java.io.File
 import java.io.InputStream
 import java.io.Reader
@@ -34,6 +30,10 @@ import java.security.DigestInputStream
 import java.security.MessageDigest
 import java.util.concurrent.TimeUnit
 import kotlin.coroutines.CoroutineContext
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.GlobalScope
+import kotlinx.coroutines.delay
+import kotlinx.coroutines.launch
 
 /**
  * Loader to load source from various input formats.

@@ -20,8 +20,6 @@ import com.uchuhimo.konf.Config
 import com.uchuhimo.konf.Feature
 import com.uchuhimo.konf.source.base.toHierarchicalMap
 import com.uchuhimo.konf.toSizeInBytes
-import org.jetbrains.spek.subject.SubjectSpek
-import org.jetbrains.spek.subject.itBehavesLike
 import java.math.BigDecimal
 import java.math.BigInteger
 import java.time.Instant
@@ -34,6 +32,8 @@ import java.time.Year
 import java.time.YearMonth
 import java.time.ZonedDateTime
 import java.util.Date
+import org.jetbrains.spek.subject.SubjectSpek
+import org.jetbrains.spek.subject.itBehavesLike
 
 object MergedSourceLoadSpec : SubjectSpek<Config>({
 

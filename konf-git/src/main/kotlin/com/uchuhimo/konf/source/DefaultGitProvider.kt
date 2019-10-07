@@ -16,9 +16,9 @@
 
 package com.uchuhimo.konf.source
 
+import java.io.File
 import org.eclipse.jgit.api.TransportCommand
 import org.eclipse.jgit.lib.Constants
-import java.io.File
 
 /**
  * Returns a source from a specified git repository.

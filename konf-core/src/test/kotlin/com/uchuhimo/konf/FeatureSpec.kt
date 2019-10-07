@@ -22,12 +22,12 @@ import com.natpryce.hamkrest.has
 import com.natpryce.hamkrest.throws
 import com.uchuhimo.konf.source.UnknownPathsException
 import com.uchuhimo.konf.source.asSource
+import java.io.FileNotFoundException
 import org.jetbrains.spek.api.Spek
 import org.jetbrains.spek.api.dsl.given
 import org.jetbrains.spek.api.dsl.it
 import org.jetbrains.spek.api.dsl.on
 import org.junit.jupiter.api.assertThrows
-import java.io.FileNotFoundException
 
 object FailOnUnknownPathSpec : Spek({
     //language=Json

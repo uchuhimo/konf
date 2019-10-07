@@ -18,12 +18,12 @@ package com.uchuhimo.konf.source
 
 import com.natpryce.hamkrest.assertion.assertThat
 import com.natpryce.hamkrest.equalTo
+import java.nio.file.Paths
 import org.eclipse.jgit.api.Git
 import org.jetbrains.spek.api.dsl.given
 import org.jetbrains.spek.api.dsl.it
 import org.jetbrains.spek.api.dsl.on
 import org.jetbrains.spek.subject.SubjectSpek
-import java.nio.file.Paths
 
 object DefaultGitProviderSpec : SubjectSpek<DefaultProviders>({
     subject { Source.from }

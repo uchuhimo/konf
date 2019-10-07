@@ -23,13 +23,13 @@ import com.natpryce.hamkrest.throws
 import com.uchuhimo.konf.Config
 import com.uchuhimo.konf.source.properties.PropertiesProvider
 import com.uchuhimo.konf.tempFileOf
+import java.net.URL
+import java.util.UUID
 import org.jetbrains.spek.api.dsl.given
 import org.jetbrains.spek.api.dsl.it
 import org.jetbrains.spek.api.dsl.on
 import org.jetbrains.spek.subject.SubjectSpek
 import spark.Service
-import java.net.URL
-import java.util.UUID
 
 object DefaultProvidersSpec : SubjectSpek<DefaultProviders>({
     subject { Source.from }

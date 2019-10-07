@@ -20,14 +20,14 @@ import com.natpryce.hamkrest.assertion.assertThat
 import com.natpryce.hamkrest.equalTo
 import com.natpryce.hamkrest.throws
 import com.uchuhimo.konf.source.properties.PropertiesProvider
+import java.nio.file.Paths
+import kotlin.test.assertTrue
 import org.eclipse.jgit.api.Git
 import org.eclipse.jgit.lib.Constants
 import org.jetbrains.spek.api.dsl.given
 import org.jetbrains.spek.api.dsl.it
 import org.jetbrains.spek.api.dsl.on
 import org.jetbrains.spek.subject.SubjectSpek
-import java.nio.file.Paths
-import kotlin.test.assertTrue
 
 object GitProviderSpec : SubjectSpek<Provider>({
     subject { PropertiesProvider }

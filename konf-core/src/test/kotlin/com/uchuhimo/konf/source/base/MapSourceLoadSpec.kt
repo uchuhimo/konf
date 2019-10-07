@@ -23,8 +23,6 @@ import com.uchuhimo.konf.source.Source
 import com.uchuhimo.konf.source.SourceLoadSpec
 import com.uchuhimo.konf.source.toDuration
 import com.uchuhimo.konf.toSizeInBytes
-import org.jetbrains.spek.subject.SubjectSpek
-import org.jetbrains.spek.subject.itBehavesLike
 import java.math.BigDecimal
 import java.math.BigInteger
 import java.time.Instant
@@ -37,6 +35,8 @@ import java.time.Year
 import java.time.YearMonth
 import java.time.ZonedDateTime
 import java.util.Date
+import org.jetbrains.spek.subject.SubjectSpek
+import org.jetbrains.spek.subject.itBehavesLike
 
 object MapSourceLoadSpec : SubjectSpek<Config>({
 

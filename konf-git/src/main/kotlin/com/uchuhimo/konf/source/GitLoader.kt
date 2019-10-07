@@ -17,14 +17,14 @@
 package com.uchuhimo.konf.source
 
 import com.uchuhimo.konf.Config
+import java.util.concurrent.TimeUnit
+import kotlin.coroutines.CoroutineContext
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.GlobalScope
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
 import org.eclipse.jgit.api.TransportCommand
 import org.eclipse.jgit.lib.Constants
-import java.util.concurrent.TimeUnit
-import kotlin.coroutines.CoroutineContext
 
 /**
  * Returns a child config containing values from a specified git repository.

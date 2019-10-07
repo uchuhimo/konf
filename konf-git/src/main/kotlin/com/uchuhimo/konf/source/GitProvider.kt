@@ -17,14 +17,14 @@
 package com.uchuhimo.konf.source
 
 import com.uchuhimo.konf.source.base.EmptyMapSource
+import java.io.File
+import java.io.IOException
+import java.nio.file.Paths
 import org.eclipse.jgit.api.Git
 import org.eclipse.jgit.api.TransportCommand
 import org.eclipse.jgit.api.errors.GitAPIException
 import org.eclipse.jgit.lib.Constants
 import org.eclipse.jgit.transport.URIish
-import java.io.File
-import java.io.IOException
-import java.nio.file.Paths
 
 /**
  * Returns a new source from a specified git repository.

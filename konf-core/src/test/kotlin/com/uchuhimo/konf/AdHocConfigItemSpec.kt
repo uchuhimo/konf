@@ -20,10 +20,10 @@ import com.natpryce.hamkrest.assertion.assertThat
 import com.natpryce.hamkrest.equalTo
 import com.uchuhimo.konf.source.Source
 import com.uchuhimo.konf.source.toValue
+import kotlin.test.assertNull
 import org.jetbrains.spek.api.Spek
 import org.jetbrains.spek.api.dsl.it
 import org.jetbrains.spek.api.dsl.on
-import kotlin.test.assertNull
 
 object AdHocConfigItemSpec : Spek({
     on("load config into ad-hoc config class with ad-hoc config items") {

@@ -21,12 +21,12 @@ import com.natpryce.hamkrest.equalTo
 import com.uchuhimo.konf.Config
 import com.uchuhimo.konf.ConfigSpec
 import com.uchuhimo.konf.source.Writer
+import java.io.ByteArrayOutputStream
+import java.io.StringWriter
 import org.jetbrains.spek.api.dsl.given
 import org.jetbrains.spek.api.dsl.it
 import org.jetbrains.spek.api.dsl.on
 import org.jetbrains.spek.subject.SubjectSpek
-import java.io.ByteArrayOutputStream
-import java.io.StringWriter
 
 object JsWriterSpec : SubjectSpek<Writer>({
     subject {

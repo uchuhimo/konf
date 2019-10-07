@@ -28,12 +28,12 @@ import com.uchuhimo.konf.source.ParseException
 import com.uchuhimo.konf.source.Source
 import com.uchuhimo.konf.source.asValue
 import com.uchuhimo.konf.toPath
+import kotlin.test.assertTrue
 import org.jetbrains.spek.api.dsl.given
 import org.jetbrains.spek.api.dsl.it
 import org.jetbrains.spek.api.dsl.on
 import org.jetbrains.spek.subject.SubjectSpek
 import org.junit.jupiter.api.assertThrows
-import kotlin.test.assertTrue
 
 object FlatSourceSpec : SubjectSpek<FlatSource>({
     given("a flat map source") {

@@ -34,11 +34,6 @@ import com.uchuhimo.konf.source.base.ValueSource
 import com.uchuhimo.konf.source.base.asKVSource
 import com.uchuhimo.konf.source.base.toHierarchical
 import com.uchuhimo.konf.toPath
-import org.jetbrains.spek.api.Spek
-import org.jetbrains.spek.api.dsl.given
-import org.jetbrains.spek.api.dsl.it
-import org.jetbrains.spek.api.dsl.on
-import org.junit.jupiter.api.assertThrows
 import java.math.BigDecimal
 import java.math.BigInteger
 import java.time.Duration
@@ -56,6 +51,11 @@ import java.util.Date
 import java.util.concurrent.ConcurrentHashMap
 import kotlin.test.assertFalse
 import kotlin.test.assertTrue
+import org.jetbrains.spek.api.Spek
+import org.jetbrains.spek.api.dsl.given
+import org.jetbrains.spek.api.dsl.it
+import org.jetbrains.spek.api.dsl.on
+import org.junit.jupiter.api.assertThrows
 
 object SourceSpec : Spek({
     given("a source") {

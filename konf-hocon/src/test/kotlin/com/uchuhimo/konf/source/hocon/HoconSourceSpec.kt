@@ -22,12 +22,12 @@ import com.typesafe.config.ConfigObject
 import com.uchuhimo.konf.source.asSource
 import com.uchuhimo.konf.source.asValue
 import com.uchuhimo.konf.toPath
+import kotlin.test.assertNull
+import kotlin.test.assertTrue
 import org.jetbrains.spek.api.dsl.given
 import org.jetbrains.spek.api.dsl.it
 import org.jetbrains.spek.api.dsl.on
 import org.jetbrains.spek.subject.SubjectSpek
-import kotlin.test.assertNull
-import kotlin.test.assertTrue
 
 object HoconSourceSpec : SubjectSpek<HoconSource>({
     subject { HoconProvider.string("key = 1") as HoconSource }

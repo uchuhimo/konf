@@ -19,14 +19,14 @@ package com.uchuhimo.konf.source
 import com.uchuhimo.konf.source.base.EmptyMapSource
 import com.uchuhimo.konf.source.json.JsonProvider
 import com.uchuhimo.konf.source.properties.PropertiesProvider
-import org.reflections.ReflectionUtils
-import org.reflections.Reflections
 import java.io.File
 import java.io.IOException
 import java.io.InputStream
 import java.io.Reader
 import java.net.URL
 import java.util.concurrent.ConcurrentHashMap
+import org.reflections.ReflectionUtils
+import org.reflections.Reflections
 
 /**
  * Provides source from various input format.
