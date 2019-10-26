@@ -500,39 +500,39 @@ check(childConfig.parent === config)
 
 All out-of-box supported sources are declared in [`DefaultLoaders`](https://github.com/uchuhimo/konf/blob/master/konf-core/src/main/kotlin/com/uchuhimo/konf/source/DefaultLoaders.kt), shown below (the corresponding config spec for these samples is [`ConfigForLoad`](https://github.com/uchuhimo/konf/blob/master/konf-core/src/test/kotlin/com/uchuhimo/konf/source/ConfigForLoad.kt)):
 
-| Type | Usage | Provider | Sample |
-| - | - | - | - |
-| [HOCON](https://github.com/typesafehub/config/blob/master/HOCON.md) | `config.from.hocon` | [`HoconProvider`](https://github.com/uchuhimo/konf/blob/master/konf-hocon/src/main/kotlin/com/uchuhimo/konf/source/hocon/HoconProvider.kt) | [`source.conf`](https://github.com/uchuhimo/konf/blob/master/konf-hocon/src/test/resources/source/source.conf) |
-| JSON | `config.from.json` | [`JsonProvider`](https://github.com/uchuhimo/konf/blob/master/konf-core/src/main/kotlin/com/uchuhimo/konf/source/json/JsonProvider.kt) | [`source.json`](https://github.com/uchuhimo/konf/blob/master/konf-core/src/test/resources/source/source.json) |
-| properties | `config.from.properties` | [`PropertiesProvider`](https://github.com/uchuhimo/konf/blob/master/konf-core/src/main/kotlin/com/uchuhimo/konf/source/properties/PropertiesProvider.kt) | [`source.properties`](https://github.com/uchuhimo/konf/blob/master/konf-core/src/test/resources/source/source.properties) |
-| [TOML](https://github.com/toml-lang/toml) | `config.from.toml` | [`TomlProvider`](https://github.com/uchuhimo/konf/blob/master/konf-toml/src/main/kotlin/com/uchuhimo/konf/source/toml/TomlProvider.kt) | [`source.toml`](https://github.com/uchuhimo/konf/blob/master/konf-toml/src/test/resources/source/source.toml) |
-| XML | `config.from.xml` | [`XmlProvider`](https://github.com/uchuhimo/konf/blob/master/konf-xml/src/main/kotlin/com/uchuhimo/konf/source/xml/XmlProvider.kt) | [`source.xml`](https://github.com/uchuhimo/konf/blob/master/konf-xml/src/test/resources/source/source.xml) |
-| YAML | `config.from.yaml` | [`YamlProvider`](https://github.com/uchuhimo/konf/blob/master/konf-yaml/src/main/kotlin/com/uchuhimo/konf/source/yaml/YamlProvider.kt) | [`source.yaml`](https://github.com/uchuhimo/konf/blob/master/konf-yaml/src/test/resources/source/source.yaml) |
-| JavaScript | `config.from.js` | [`JsProvider`](https://github.com/uchuhimo/konf/blob/master/konf-js/src/main/kotlin/com/uchuhimo/konf/source/js/JsProvider.kt) | [`source.js`](https://github.com/uchuhimo/konf/blob/master/konf-js/src/test/resources/source/source.js) |
-| hierarchical map | `config.from.map.hierarchical` | - | [`MapSourceLoadSpec`](https://github.com/uchuhimo/konf/blob/master/konf-core/src/test/kotlin/com/uchuhimo/konf/source/base/MapSourceLoadSpec.kt) |
-| map in key-value format | `config.from.map.kv` | - | [`KVSourceSpec`](https://github.com/uchuhimo/konf/blob/master/konf-core/src/test/kotlin/com/uchuhimo/konf/source/base/KVSourceSpec.kt) |
-| map in flat format | `config.from.map.flat` | - | [`FlatSourceLoadSpec`](https://github.com/uchuhimo/konf/blob/master/konf-core/src/test/kotlin/com/uchuhimo/konf/source/base/FlatSourceLoadSpec.kt) |
-| system properties | `config.from.env()` | [`EnvProvider`](https://github.com/uchuhimo/konf/blob/master/konf-core/src/main/kotlin/com/uchuhimo/konf/source/env/EnvProvider.kt) | - |
-| system environment | `config.from.systemProperties()` | [`PropertiesProvider`](https://github.com/uchuhimo/konf/blob/master/konf-core/src/main/kotlin/com/uchuhimo/konf/source/properties/PropertiesProvider.kt) | - |
+| Type                                                         | Usage                            | Provider                                                     | Sample                                                       |
+| ------------------------------------------------------------ | -------------------------------- | ------------------------------------------------------------ | ------------------------------------------------------------ |
+| [HOCON](https://github.com/typesafehub/config/blob/master/HOCON.md) | `config.from.hocon`              | [`HoconProvider`](https://github.com/uchuhimo/konf/blob/master/konf-hocon/src/main/kotlin/com/uchuhimo/konf/source/hocon/HoconProvider.kt) | [`source.conf`](https://github.com/uchuhimo/konf/blob/master/konf-hocon/src/test/resources/source/source.conf) |
+| JSON                                                         | `config.from.json`               | [`JsonProvider`](https://github.com/uchuhimo/konf/blob/master/konf-core/src/main/kotlin/com/uchuhimo/konf/source/json/JsonProvider.kt) | [`source.json`](https://github.com/uchuhimo/konf/blob/master/konf-core/src/test/resources/source/source.json) |
+| properties                                                   | `config.from.properties`         | [`PropertiesProvider`](https://github.com/uchuhimo/konf/blob/master/konf-core/src/main/kotlin/com/uchuhimo/konf/source/properties/PropertiesProvider.kt) | [`source.properties`](https://github.com/uchuhimo/konf/blob/master/konf-core/src/test/resources/source/source.properties) |
+| [TOML](https://github.com/toml-lang/toml)                    | `config.from.toml`               | [`TomlProvider`](https://github.com/uchuhimo/konf/blob/master/konf-toml/src/main/kotlin/com/uchuhimo/konf/source/toml/TomlProvider.kt) | [`source.toml`](https://github.com/uchuhimo/konf/blob/master/konf-toml/src/test/resources/source/source.toml) |
+| XML                                                          | `config.from.xml`                | [`XmlProvider`](https://github.com/uchuhimo/konf/blob/master/konf-xml/src/main/kotlin/com/uchuhimo/konf/source/xml/XmlProvider.kt) | [`source.xml`](https://github.com/uchuhimo/konf/blob/master/konf-xml/src/test/resources/source/source.xml) |
+| YAML                                                         | `config.from.yaml`               | [`YamlProvider`](https://github.com/uchuhimo/konf/blob/master/konf-yaml/src/main/kotlin/com/uchuhimo/konf/source/yaml/YamlProvider.kt) | [`source.yaml`](https://github.com/uchuhimo/konf/blob/master/konf-yaml/src/test/resources/source/source.yaml) |
+| JavaScript                                                   | `config.from.js`                 | [`JsProvider`](https://github.com/uchuhimo/konf/blob/master/konf-js/src/main/kotlin/com/uchuhimo/konf/source/js/JsProvider.kt) | [`source.js`](https://github.com/uchuhimo/konf/blob/master/konf-js/src/test/resources/source/source.js) |
+| hierarchical map                                             | `config.from.map.hierarchical`   | -                                                            | [`MapSourceLoadSpec`](https://github.com/uchuhimo/konf/blob/master/konf-core/src/test/kotlin/com/uchuhimo/konf/source/base/MapSourceLoadSpec.kt) |
+| map in key-value format                                      | `config.from.map.kv`             | -                                                            | [`KVSourceSpec`](https://github.com/uchuhimo/konf/blob/master/konf-core/src/test/kotlin/com/uchuhimo/konf/source/base/KVSourceSpec.kt) |
+| map in flat format                                           | `config.from.map.flat`           | -                                                            | [`FlatSourceLoadSpec`](https://github.com/uchuhimo/konf/blob/master/konf-core/src/test/kotlin/com/uchuhimo/konf/source/base/FlatSourceLoadSpec.kt) |
+| system properties                                            | `config.from.env()`              | [`EnvProvider`](https://github.com/uchuhimo/konf/blob/master/konf-core/src/main/kotlin/com/uchuhimo/konf/source/env/EnvProvider.kt) | -                                                            |
+| system environment                                           | `config.from.systemProperties()` | [`PropertiesProvider`](https://github.com/uchuhimo/konf/blob/master/konf-core/src/main/kotlin/com/uchuhimo/konf/source/properties/PropertiesProvider.kt) | -                                                            |
 
 These sources can also be manually created using their provider, and then loaded into config by `config.withSource(source)`.
 
 All `from` APIs also have their standalone version that return sources without loading them into the config, shown below:
 
-| Type | Usage | 
-| - | - | 
-| [HOCON](https://github.com/typesafehub/config/blob/master/HOCON.md) | `Source.from.hocon` | 
-| JSON | `Source.from.json` | 
-| properties | `Source.from.properties` | 
-| [TOML](https://github.com/toml-lang/toml) | `Source.from.toml` | 
-| XML | `Source.from.xml` | 
-| YAML | `Source.from.yaml` | 
-| JavaScript | `Source.from.js` | 
-| hierarchical map | `Source.from.map.hierarchical` | 
-| map in key-value format | `Source.from.map.kv` | 
-| map in flat format | `Source.from.map.flat` | 
-| system properties | `Source.from.env()` | 
-| system environment | `Source.from.systemProperties()` | 
+| Type                                                         | Usage                            |
+| ------------------------------------------------------------ | -------------------------------- |
+| [HOCON](https://github.com/typesafehub/config/blob/master/HOCON.md) | `Source.from.hocon`              |
+| JSON                                                         | `Source.from.json`               |
+| properties                                                   | `Source.from.properties`         |
+| [TOML](https://github.com/toml-lang/toml)                    | `Source.from.toml`               |
+| XML                                                          | `Source.from.xml`                |
+| YAML                                                         | `Source.from.yaml`               |
+| JavaScript                                                   | `Source.from.js`                 |
+| hierarchical map                                             | `Source.from.map.hierarchical`   |
+| map in key-value format                                      | `Source.from.map.kv`             |
+| map in flat format                                           | `Source.from.map.flat`           |
+| system properties                                            | `Source.from.env()`              |
+| system environment                                           | `Source.from.systemProperties()` |
 
 Format of system properties source is same with that of properties source. System environment source follows the same mapping convention with properties source, but with the following name convention:
 
@@ -556,15 +556,15 @@ HOCON/JSON/properties/TOML/XML/YAML/JavaScript source can be loaded from a varie
 
 If source is from file, file extension can be auto detected. Thus, you can use `config.from.file("/path/to/source.json")` instead of `config.from.json.file("/path/to/source.json")`, or use `config.from.watchFile("/path/to/source.json")` instead of `config.from.json.watchFile("/path/to/source.json")`. Source from URL also support auto-detected extension (use `config.from.url` or `config.from.watchUrl`). The following file extensions can be supported:
 
-| Type | Extension |
-| - | - |
-| HOCON | conf |
-| JSON | json |
+| Type       | Extension  |
+| ---------- | ---------- |
+| HOCON      | conf       |
+| JSON       | json       |
 | Properties | properties |
-| TOML | toml |
-| XML | xml |
-| YAML | yml, yaml |
-| JavaScript | js |
+| TOML       | toml       |
+| XML        | xml        |
+| YAML       | yml, yaml  |
+| JavaScript | js         |
 
 You can also implement [`Source`](https://github.com/uchuhimo/konf/blob/master/konf-core/src/main/kotlin/com/uchuhimo/konf/source/Source.kt) to customize your new source, which can be loaded into config by `config.withSource(source)`.
 
@@ -637,11 +637,11 @@ We can resolve `mysql://${base.user}:${base.password}@server:port` as `mysql://k
 
 All of source/config/config spec support add prefix operation, remove prefix operation and merge operation as shown below:
 
-| Type | Add Prefix | Remove Prefix | Merge
-| - | - | - | - |
+| Type     | Add Prefix                                                   | Remove Prefix                                               | Merge                                                  |
+| -------- | ------------------------------------------------------------ | ----------------------------------------------------------- | ------------------------------------------------------ |
 | `Source` | `source.withPrefix(prefix)` or `Prefix(prefix) + source` or `config.from.prefixed(prefix).file(file)` | `source[prefix]` or `config.from.scoped(prefix).file(file)` | `fallback + facade` or `facade.withFallback(fallback)` |
-| `Config` | `config.withPrefix(prefix)` or `Prefix(prefix) + config` | `config.at(prefix)` | `fallback + facade` or `facade.withFallback(fallback)` |
-| `Spec` | `spec.withPrefix(prefix)` or `Prefix(prefix) + spec` | `spec[prefix]` | `fallback + facade` or `facade.withFallback(fallback)` |
+| `Config` | `config.withPrefix(prefix)` or `Prefix(prefix) + config`     | `config.at(prefix)`                                         | `fallback + facade` or `facade.withFallback(fallback)` |
+| `Spec`   | `spec.withPrefix(prefix)` or `Prefix(prefix) + spec`         | `spec[prefix]`                                              | `fallback + facade` or `facade.withFallback(fallback)` |
 
 ## Export/Reload values in config
 
