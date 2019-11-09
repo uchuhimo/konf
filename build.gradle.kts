@@ -1,8 +1,6 @@
 import com.github.benmanes.gradle.versions.updates.DependencyUpdatesTask
 import com.jfrog.bintray.gradle.BintrayExtension
-import org.jetbrains.dokka.DokkaConfiguration
 import org.jetbrains.dokka.gradle.DokkaTask
-import org.jetbrains.dokka.gradle.LinkMapping
 import org.jetbrains.kotlin.gradle.tasks.KotlinCompile
 import java.net.URL
 import java.util.Properties
@@ -12,19 +10,22 @@ val bintrayKeyProperty by extra { getPrivateProperty("bintrayKey") }
 val ossUserToken by extra { getPrivateProperty("ossUserToken") }
 val ossUserPassword by extra { getPrivateProperty("ossUserPassword") }
 val gpgPassphrase by extra { getPrivateProperty("gpgPassphrase") }
+val useAliyun by extra { shouldUseAliyun() }
 
 val wrapper by tasks.existing(Wrapper::class)
 wrapper {
-    gradleVersion = "5.6.2"
+    gradleVersion = "6.0"
     distributionType = Wrapper.DistributionType.ALL
 }
 
 buildscript {
     repositories {
-        if (useAliyun) {
+        if (shouldUseAliyun()) {
+            aliyunJCenter()
             aliyunMaven()
+        } else {
+            jcenter()
         }
-        jcenter()
         maven(url = "https://dl.bintray.com/kotlin/kotlin-eap")
     }
     dependencies {
@@ -33,7 +34,6 @@ buildscript {
 }
 
 plugins {
-    `build-scan`
     java
     jacoco
     `maven-publish`
@@ -66,9 +66,29 @@ allprojects {
 
     repositories {
         if (useAliyun) {
+            aliyunJCenter()
             aliyunMaven()
+        } else {
+            jcenter()
         }
-        jcenter()
+    }
+
+    val dependencyUpdates by tasks.existing(DependencyUpdatesTask::class)
+    dependencyUpdates {
+        revision = "release"
+        outputFormatter = "plain"
+        resolutionStrategy {
+            componentSelection {
+                all {
+                    val rejected = listOf("alpha", "beta", "rc", "cr", "m", "preview", "b", "ea", "eap", "pr")
+                        .map { qualifier -> Regex("(?i).*[.-]$qualifier[.\\d-+]*") }
+                        .any { it.matches(candidate.version) }
+                    if (rejected) {
+                        reject("Release candidate")
+                    }
+                }
+            }
+        }
     }
 }
 
@@ -229,17 +249,17 @@ subprojects {
     }
 
     val dokka by tasks.existing(DokkaTask::class) {
-        outputFormat = "javadoc"
+        outputFormat = "html"
         outputDirectory = tasks.javadoc.get().destinationDir!!.path
-        jdkVersion = 8
-        linkMapping(delegateClosureOf<LinkMapping> {
-            dir = project.rootDir.toPath().resolve("src/main/kotlin").toFile().path.replace('\\', '/')
-            url = "https://github.com/uchuhimo/konf/blob/v${project.version}/src/main/kotlin"
-            suffix = "#L"
-        })
-        externalDocumentationLink(delegateClosureOf<DokkaConfiguration.ExternalDocumentationLink.Builder> {
-            url = URL("http://fasterxml.github.io/jackson-databind/javadoc/${Versions.jacksonMinor}/")
-        })
+        configuration {
+            jdkVersion = 8
+            reportUndocumented = false
+            sourceLink {
+                path = "./"
+                url = "https://github.com/uchuhimo/konf/blob/v${project.version}/"
+                lineSuffix = "#L"
+            }
+        }
     }
 
     val sourcesJar by tasks.registering(Jar::class) {
@@ -343,27 +363,4 @@ subprojects {
             bintrayUpload { dependsOn(check, install) }
         }
     }
-
-    val dependencyUpdates by tasks.existing(DependencyUpdatesTask::class)
-    dependencyUpdates {
-        revision = "release"
-        outputFormatter = "plain"
-        resolutionStrategy {
-            componentSelection {
-                all {
-                    val rejected = listOf("alpha", "beta", "rc", "cr", "m", "preview", "b", "ea", "eap", "pr")
-                        .map { qualifier -> Regex("(?i).*[.-]$qualifier[.\\d-+]*") }
-                        .any { it.matches(candidate.version) }
-                    if (rejected) {
-                        reject("Release candidate")
-                    }
-                }
-            }
-        }
-    }
-}
-
-buildScan {
-    termsOfServiceUrl = "https://gradle.com/terms-of-service"
-    termsOfServiceAgree = "yes"
 }

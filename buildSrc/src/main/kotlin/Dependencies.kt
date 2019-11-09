@@ -11,33 +11,33 @@ object Versions {
     const val jackson = "$jacksonMinor.0"
     const val bintrayPlugin = "1.8.4"
     const val taskTree = "1.4"
-    const val jmh = "1.21"
-    const val jmhPlugin = "0.4.8"
+    const val jmh = "1.22"
+    const val jmhPlugin = "0.5.0"
     const val spotless = "3.25.0"
     const val dependencyManagement = "1.0.8.RELEASE"
-    const val dependencyUpdate = "0.25.0"
-    // don't upgrade to 0.9.18 (issue: https://github.com/Kotlin/dokka/issues/464)
-    // wait for 0.9.20 if using JDK11 (issue: https://github.com/Kotlin/dokka/issues/428)
-    const val dokka = "0.9.17"
+    const val dependencyUpdate = "0.27.0"
+    // wait for bugfix if using JDK11 (issue: https://github.com/Kotlin/dokka/issues/428)
+    const val dokka = "0.10.0"
     const val reflections = "0.9.11"
     const val commonsText = "1.8"
-    const val hocon = "1.3.4"
+    const val hocon = "1.4.0"
     const val yaml = "1.25"
     const val toml4j = "0.7.2"
     const val graal = "19.2.0.1"
-    // don't upgrade to 2.1.1
-    const val dom4j = "2.1.0"
+    const val dom4j = "2.1.1"
+    const val jaxen = "1.2.0"
     const val coroutines = "1.3.2"
-    const val jgit = "5.5.0.201909110433-r"
+    const val jgit = "5.5.1.201910021850-r"
     const val hamkrest = "1.7.0.0"
     const val hamcrest = "1.3"
     const val spark = "2.9.1"
-    const val slf4j = "1.7.28"
+    const val slf4j = "1.7.29"
+    const val jacoco = "0.8.5"
 
     const val googleJavaFormat = "1.7"
     const val ktlint = "0.34.2"
-    const val jacoco = "0.8.4"
 }
+
 
 fun String?.withColon() = this?.let { ":$this" } ?: ""
 
