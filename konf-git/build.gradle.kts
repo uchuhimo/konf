@@ -5,8 +5,8 @@ dependencyManagement {
 }
 
 dependencies {
-    implementation(project(":konf-core"))
-    implementation("org.eclipse.jgit:org.eclipse.jgit")
+    api(project(":konf-core"))
+    api("org.eclipse.jgit:org.eclipse.jgit")
 
     val test by project(":konf-core").dependencyProject.sourceSets
     testImplementation(test.output)

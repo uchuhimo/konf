@@ -29,7 +29,7 @@ import org.jetbrains.spek.api.dsl.it
 import org.jetbrains.spek.api.dsl.on
 import org.jetbrains.spek.subject.SubjectSpek
 
-object HoconSourceSpec : SubjectSpek<HoconSource>({
+internal object HoconSourceSpec : SubjectSpek<HoconSource>({
     subject { HoconProvider.string("key = 1") as HoconSource }
 
     given("a HOCON source") {

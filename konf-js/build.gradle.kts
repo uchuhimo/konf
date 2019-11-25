@@ -6,7 +6,7 @@ dependencyManagement {
 }
 
 dependencies {
-    implementation(project(":konf-core"))
+    api(project(":konf-core"))
     implementation("org.graalvm.sdk:graal-sdk")
     implementation("org.graalvm.js:js")
 

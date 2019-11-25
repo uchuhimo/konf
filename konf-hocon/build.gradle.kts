@@ -5,7 +5,7 @@ dependencyManagement {
 }
 
 dependencies {
-    implementation(project(":konf-core"))
+    api(project(":konf-core"))
     implementation("com.typesafe:config")
 
     val test by project(":konf-core").dependencyProject.sourceSets

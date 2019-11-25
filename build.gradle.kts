@@ -131,13 +131,13 @@ subprojects {
     }
 
     dependencies {
-        implementation(kotlin("stdlib-jdk8"))
+        api(kotlin("stdlib-jdk8"))
+        api("org.jetbrains.kotlinx:kotlinx-coroutines-core")
         implementation(kotlin("reflect"))
-        implementation("org.jetbrains.kotlinx:kotlinx-coroutines-core")
         implementation("org.reflections:reflections")
         implementation("org.apache.commons:commons-text")
         arrayOf("core", "annotations", "databind").forEach { name ->
-            implementation(jacksonCore(name))
+            api(jacksonCore(name))
         }
         implementation(jackson("module", "kotlin"))
         implementation(jackson("datatype", "jsr310"))

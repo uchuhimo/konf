@@ -6,7 +6,7 @@ dependencyManagement {
 }
 
 dependencies {
-    implementation(project(":konf-core"))
+    api(project(":konf-core"))
     implementation("org.dom4j:dom4j")
     implementation("jaxen:jaxen")
 

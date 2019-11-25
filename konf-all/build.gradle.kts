@@ -26,7 +26,7 @@ dependencies {
         ":konf-xml",
         ":konf-yaml"
     )) {
-        implementation(project(name))
+        api(project(name))
         testImplementation(project(name).dependencyProject.sourceSets["test"].output)
     }
 

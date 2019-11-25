@@ -50,7 +50,7 @@ object YamlProvider : Provider {
     fun get() = this
 }
 
-class YamlConstructor : SafeConstructor() {
+private class YamlConstructor : SafeConstructor() {
     init {
         yamlConstructors[Tag.NULL] = object : AbstractConstruct() {
             override fun construct(node: Node): Any? {

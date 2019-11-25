@@ -28,7 +28,7 @@ import com.uchuhimo.konf.source.Source
 import com.uchuhimo.konf.source.SourceInfo
 import com.uchuhimo.konf.source.ValueSourceNode
 
-fun ConfigValue.toTree(): TreeNode {
+private fun ConfigValue.toTree(): TreeNode {
     return when (valueType()!!) {
         ConfigValueType.NULL -> NullSourceNode
         ConfigValueType.BOOLEAN, ConfigValueType.NUMBER, ConfigValueType.STRING -> ValueSourceNode(unwrapped())
@@ -48,7 +48,7 @@ fun ConfigValue.toTree(): TreeNode {
 /**
  * Source from a HOCON value.
  */
-class HoconSource(
+internal class HoconSource(
     val value: ConfigValue
 ) : Source {
     override val info: SourceInfo = SourceInfo("type" to "HOCON")
