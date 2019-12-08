@@ -14,7 +14,7 @@ val useAliyun by extra { shouldUseAliyun() }
 
 val wrapper by tasks.existing(Wrapper::class)
 wrapper {
-    gradleVersion = "6.0"
+    gradleVersion = "6.0.1"
     distributionType = Wrapper.DistributionType.ALL
 }
 
