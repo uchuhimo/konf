@@ -47,6 +47,14 @@ object EnvProviderSpec : SubjectSpek<EnvProvider>({
                 assertTrue { config[SourceSpec.camelCase] }
             }
         }
+        on("create flatten source from system environment") {
+            val source = subject.env(nested = false)
+            it("should return a source which contains value from system environment") {
+                val config = Config { addSpec(FlattenSourceSpec) }.withSource(source)
+                assertThat(config[FlattenSourceSpec.SOURCE_TEST_TYPE], equalTo("env"))
+                assertTrue { config[FlattenSourceSpec.SOURCE_CAMELCASE] }
+            }
+        }
         on("create source from system environment (deprecated)") {
             val source = subject.fromEnv()
             it("should have correct type") {
@@ -78,4 +86,9 @@ object SourceSpec : ConfigSpec() {
     }
 
     val camelCase by required<Boolean>()
+}
+
+object FlattenSourceSpec : ConfigSpec("") {
+    val SOURCE_CAMELCASE by required<Boolean>()
+    val SOURCE_TEST_TYPE by required<String>()
 }

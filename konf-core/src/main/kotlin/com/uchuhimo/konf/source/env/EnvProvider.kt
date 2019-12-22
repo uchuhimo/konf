@@ -32,11 +32,13 @@ object EnvProvider {
      *
      * @return a new source from system environment
      */
-    fun env(): Source {
+    @JvmOverloads
+    fun env(nested: Boolean = true): Source {
         return FlatSource(
             System.getenv().mapKeys { (key, _) ->
-                key.toLowerCase().replace('_', '.')
-            }.filter { (key, _) ->
+                val lowerCasedKey = key.toLowerCase()
+                if (nested) lowerCasedKey.replace('_', '.') else lowerCasedKey
+                }.filter { (key, _) ->
                 key.matches(validEnv)
             }.toSortedMap(),
             type = "system-environment",

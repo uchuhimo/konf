@@ -970,13 +970,13 @@ fun Any.asTree(): TreeNode =
             @Suppress("UNCHECKED_CAST")
             (ListSourceNode((this as List<Any>).map { it.asTree() }))
         is Map<*, *> -> {
-            if (this.size != 0 && this.keys.toList()[0] !is String) {
+            if (this.size != 0 && this.keys.toList()[0] !is String && this.keys.toList()[0] !is Int) {
                 ValueSourceNode(this)
             } else {
                 @Suppress("UNCHECKED_CAST")
-                (ContainerNode((this as Map<String, Any>).mapValues { (_, value) ->
-                    value.asTree()
-                }.toMutableMap()))
+                (ContainerNode((this as Map<Any, Any>).map { (key, value) ->
+                    key.toString() to value.asTree()
+                }.toMap().toMutableMap()))
             }
         }
         else -> ValueSourceNode(this)
