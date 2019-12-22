@@ -30,6 +30,7 @@ import java.util.concurrent.TimeUnit
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.runBlocking
+import org.jetbrains.spek.api.Spek
 import org.jetbrains.spek.api.dsl.given
 import org.jetbrains.spek.api.dsl.it
 import org.jetbrains.spek.api.dsl.on
@@ -271,6 +272,19 @@ object DefaultLoadersSpec : SubjectSpek<DefaultLoaders>({
     }
 })
 
+object DefaultLoadersWithFlattenEnvSpec : Spek({
+    given("a loader") {
+        on("load as flatten format from system environment") {
+            val config = Config {
+                addSpec(FlattenDefaultLoadersConfig)
+            }.from.env(nested = false)
+            it("should return a config which contains value from system environment") {
+                assertThat(config[FlattenDefaultLoadersConfig.SOURCE_TEST_TYPE], equalTo("env"))
+            }
+        }
+    }
+})
+
 object MappedDefaultLoadersSpec : SubjectSpek<DefaultLoaders>({
     subject {
         Config {
@@ -303,6 +317,10 @@ object ScopedDefaultLoadersSpec : SubjectSpek<DefaultLoaders>({
 
 object DefaultLoadersConfig : ConfigSpec("source.test") {
     val type by required<String>()
+}
+
+object FlattenDefaultLoadersConfig : ConfigSpec("") {
+    val SOURCE_TEST_TYPE by required<String>()
 }
 
 const val propertiesContent = "source.test.type = properties"

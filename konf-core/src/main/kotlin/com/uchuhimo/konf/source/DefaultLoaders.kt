@@ -113,9 +113,11 @@ class DefaultLoaders(
     /**
      * Returns a child config containing values from system environment.
      *
+     * @param nested whether to treat "AA_BB_CC" as nested format "AA.BB.CC" or not. True by default.
      * @return a child config containing values from system environment
      */
-    fun env(): Config = config.withSource(EnvProvider.env().orMapped())
+    @JvmOverloads
+    fun env(nested: Boolean = true): Config = config.withSource(EnvProvider.env(nested).orMapped())
 
     /**
      * Returns a child config containing values from system properties.

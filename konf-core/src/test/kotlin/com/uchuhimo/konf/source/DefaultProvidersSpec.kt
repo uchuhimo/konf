@@ -43,6 +43,12 @@ object DefaultProvidersSpec : SubjectSpek<DefaultProviders>({
                 assertThat(config[item], equalTo("env"))
             }
         }
+        on("provide flatten source from system environment") {
+            val config = subject.env(nested = false).toFlattenConfig()
+            it("should return a source which contains value from system environment") {
+                assertThat(config[FlattenDefaultLoadersConfig.SOURCE_TEST_TYPE], equalTo("env"))
+            }
+        }
         on("provide source from system properties") {
             System.setProperty(DefaultLoadersConfig.qualify(DefaultLoadersConfig.type), "system")
             val config = subject.systemProperties().toConfig()
@@ -101,4 +107,8 @@ object DefaultProvidersSpec : SubjectSpek<DefaultProviders>({
 
 fun Source.toConfig(): Config = Config {
     addSpec(DefaultLoadersConfig)
+}.withSource(this)
+
+fun Source.toFlattenConfig(): Config = Config {
+    addSpec(FlattenDefaultLoadersConfig)
 }.withSource(this)

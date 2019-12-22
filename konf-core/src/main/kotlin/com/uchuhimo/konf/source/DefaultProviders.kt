@@ -50,9 +50,11 @@ object DefaultProviders {
     /**
      * Returns a source from system environment.
      *
+     * @param nested whether to treat "AA_BB_CC" as nested format "AA.BB.CC" or not. True by default.
      * @return a source from system environment
      */
-    fun env(): Source = EnvProvider.env()
+    @JvmOverloads
+    fun env(nested: Boolean = true): Source = EnvProvider.env(nested)
 
     /**
      * Returns a source from system properties.

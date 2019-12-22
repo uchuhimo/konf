@@ -30,6 +30,7 @@ object EnvProvider {
     /**
      * Returns a new source from system environment.
      *
+     * @param nested whether to treat "AA_BB_CC" as nested format "AA.BB.CC" or not. True by default.
      * @return a new source from system environment
      */
     @JvmOverloads
