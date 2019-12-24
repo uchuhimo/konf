@@ -800,6 +800,9 @@ private fun <T : Any> TreeNode.castOrNull(source: Source, clazz: Class<T>): T? {
     }
 }
 
+private val promotedFromStringTypes = promoteMap.getValue(String::class).map { it.first }
+private val promotedFromStringMap = promoteMap.getValue(String::class).toMap()
+
 private fun TreeNode.toValue(source: Source, type: JavaType, mapper: ObjectMapper): Any {
     if (this is ValueNode &&
         type == TypeFactory.defaultInstance().constructType(value::class.java)) {
@@ -872,6 +875,14 @@ private fun TreeNode.toValue(source: Source, type: JavaType, mapper: ObjectMappe
                     return (implOf(type.rawClass).getDeclaredConstructor().newInstance() as MutableMap<String, Any>).apply {
                         putAll(this@toValue.toMap(source).mapValues { (_, value) ->
                             value.toValue(source, type.contentType, mapper)
+                        })
+                    }
+                } else if (type.keyType.rawClass.kotlin in promotedFromStringTypes) {
+                    val promoteFunc = promotedFromStringMap.getValue(type.keyType.rawClass.kotlin)
+                    @Suppress("UNCHECKED_CAST")
+                    return (implOf(type.rawClass).getDeclaredConstructor().newInstance() as MutableMap<Any, Any>).apply {
+                        putAll(this@toValue.toMap(source).map { (key, value) ->
+                            promoteFunc(key, source)!! to value.toValue(source, type.contentType, mapper)
                         })
                     }
                 } else {
@@ -970,13 +981,28 @@ fun Any.asTree(): TreeNode =
             @Suppress("UNCHECKED_CAST")
             (ListSourceNode((this as List<Any>).map { it.asTree() }))
         is Map<*, *> -> {
-            if (this.size != 0 && this.keys.toList()[0] !is String && this.keys.toList()[0] !is Int) {
-                ValueSourceNode(this)
-            } else {
-                @Suppress("UNCHECKED_CAST")
-                (ContainerNode((this as Map<Any, Any>).map { (key, value) ->
-                    key.toString() to value.asTree()
-                }.toMap().toMutableMap()))
+            when {
+                this.size == 0 -> ContainerNode(mutableMapOf())
+                this.iterator().next().key is String -> {
+                    @Suppress("UNCHECKED_CAST")
+                    (ContainerNode((this as Map<String, Any>).mapValues { (_, value) ->
+                        value.asTree()
+                    }.toMutableMap()))
+                }
+                this.iterator().next().key!!::class in listOf(
+                    Char::class,
+                    Byte::class,
+                    Short::class,
+                    Int::class,
+                    Long::class,
+                    BigInteger::class
+                ) -> {
+                    @Suppress("UNCHECKED_CAST")
+                    (ContainerNode((this as Map<Any, Any>).map { (key, value) ->
+                        key.toString() to value.asTree()
+                    }.toMap().toMutableMap()))
+                }
+                else -> ValueSourceNode(this)
             }
         }
         else -> ValueSourceNode(this)

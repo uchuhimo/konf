@@ -158,6 +158,8 @@ object SourceLoadSpec : SubjectSpek<Config>({
 
                 assertThat(subject[ConfigForLoad.map],
                     equalTo(mapOf("a" to 1, "b" to 2, "c" to 3)))
+                assertThat(subject[ConfigForLoad.intMap],
+                    equalTo(mapOf(1 to "a", 2 to "b", 3 to "c")))
                 assertThat(subject[ConfigForLoad.sortedMap],
                     equalTo(sortedMapOf("a" to 1, "b" to 2, "c" to 3)))
                 assertThat(subject[ConfigForLoad.sortedMap].firstKey(), equalTo("a"))
@@ -345,6 +347,10 @@ private val loadContent = mapOf<String, Any>(
         "a" to 1,
         "b" to 2,
         "c" to 3),
+    "intMap" to mapOf(
+        1 to "a",
+        2 to "b",
+        3 to "c"),
     "sortedMap" to mapOf(
         "c" to 3,
         "b" to 2,

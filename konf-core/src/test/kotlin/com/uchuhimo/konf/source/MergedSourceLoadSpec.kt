@@ -97,6 +97,9 @@ private val facadeContent = mapOf("level1" to mapOf("level2" to
         "map" to mapOf(
             "a" to 1,
             "c" to 3),
+        "intMap" to mapOf(
+            1 to "a",
+            3 to "c"),
         "sortedMap" to mapOf(
             "c" to 3,
             "a" to 1
@@ -194,6 +197,9 @@ private val fallbackContent = mapOf("level1" to mapOf("level2" to
         "map" to mapOf(
             "b" to 2,
             "c" to 3),
+        "intMap" to mapOf(
+            2 to "b",
+            3 to "c"),
         "sortedMap" to mapOf(
             "b" to 2,
             "a" to 1

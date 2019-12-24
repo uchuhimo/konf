@@ -149,6 +149,18 @@
         <value>3</value>
     </property>
     <property>
+        <name>level1.level2.intMap.1</name>
+        <value>a</value>
+    </property>
+    <property>
+        <name>level1.level2.intMap.2</name>
+        <value>b</value>
+    </property>
+    <property>
+        <name>level1.level2.intMap.3</name>
+        <value>c</value>
+    </property>
+    <property>
         <name>level1.level2.sortedMap.c</name>
         <value>3</value>
     </property>

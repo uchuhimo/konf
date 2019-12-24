@@ -141,6 +141,10 @@ private val loadContent = mapOf("level1" to mapOf("level2" to
             "a" to 1,
             "b" to 2,
             "c" to 3),
+        "intMap" to mapOf(
+            1 to "a",
+            2 to "b",
+            3 to "c"),
         "sortedMap" to mapOf(
             "c" to 3,
             "b" to 2,
