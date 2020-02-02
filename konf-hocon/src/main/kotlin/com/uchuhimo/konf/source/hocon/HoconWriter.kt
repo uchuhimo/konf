@@ -50,11 +50,11 @@ class HoconWriter(val config: Config) : Writer {
 
     private fun TreeNode.toConfigValue(): ConfigValue {
         val value = when (this) {
-            is ValueNode -> ConfigValueFactory.fromAnyRef(this.value)
-            is ListNode -> ConfigValueFactory.fromIterable(this.list.map { it.toConfigValue() })
-            else -> ConfigValueFactory.fromMap(this.children.mapValues { (_, value) -> value.toConfigValue() })
+            is ValueNode -> ConfigValueFactory.fromAnyRef(value)
+            is ListNode -> ConfigValueFactory.fromIterable(list.map { it.toConfigValue() })
+            else -> ConfigValueFactory.fromMap(children.mapValues { (_, value) -> value.toConfigValue() })
         }
-        val comments = this.comments
+        val comments = comments
         if (comments != null) {
             return value.withOrigin(value.origin().withComments(comments.split("\n")))
         }
