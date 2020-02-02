@@ -17,16 +17,21 @@
 package com.uchuhimo.konf.source.hocon
 
 import com.typesafe.config.ConfigRenderOptions
+import com.typesafe.config.ConfigValue
 import com.typesafe.config.ConfigValueFactory
 import com.uchuhimo.konf.Config
+import com.uchuhimo.konf.Feature
 import com.uchuhimo.konf.source.Writer
+import com.uchuhimo.konf.source.base.HierarchicalTreeNode
 import com.uchuhimo.konf.source.base.toHierarchicalMap
+import com.uchuhimo.konf.source.base.toHierarchicalMapNode
 import java.io.OutputStream
 
 /**
  * Writer for HOCON source.
  */
 class HoconWriter(val config: Config) : Writer {
+
     private val renderOpts = ConfigRenderOptions.defaults()
         .setOriginComments(false)
         .setComments(false)
@@ -42,9 +47,27 @@ class HoconWriter(val config: Config) : Writer {
         }
     }
 
+    private fun HierarchicalTreeNode.toConfigValue(): ConfigValue {
+        val value = when (this) {
+            is HierarchicalTreeNode.Value -> ConfigValueFactory.fromAnyRef(this.value)
+            is HierarchicalTreeNode.Map -> ConfigValueFactory.fromMap(
+                    this.map.mapValues { (_, value) -> value.toConfigValue() })
+            is HierarchicalTreeNode.List -> ConfigValueFactory.fromIterable(this.list.map { it.toConfigValue() })
+        }
+        val comments = this.comments
+        if (comments != null) {
+            return value.withOrigin(value.origin().withComments(comments.split("\n")))
+        }
+        return value
+    }
+
     override fun toText(): String {
-        return ConfigValueFactory.fromMap(config.toHierarchicalMap()).render(renderOpts)
-            .replace("\n", System.lineSeparator())
+        val output = if (config.isEnabled(Feature.WRITE_DESCRIPTIONS_AS_COMMENTS)) {
+            config.toHierarchicalMapNode().toConfigValue().render(renderOpts.setComments(true))
+        } else {
+            ConfigValueFactory.fromMap(config.toHierarchicalMap()).render(renderOpts)
+        }
+        return output.replace("\n", System.lineSeparator())
     }
 }
 

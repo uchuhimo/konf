@@ -23,6 +23,7 @@ import com.fasterxml.jackson.databind.module.SimpleModule
 import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule
 import com.fasterxml.jackson.module.kotlin.jacksonObjectMapper
 import com.uchuhimo.konf.source.Source
+import com.uchuhimo.konf.source.asTree
 import com.uchuhimo.konf.source.base.EmptyMapSource
 import com.uchuhimo.konf.source.deserializer.DurationDeserializer
 import com.uchuhimo.konf.source.deserializer.EmptyStringToCollectionDeserializerModifier
@@ -161,6 +162,23 @@ open class BaseConfig(
                     ValueState.Unset
                 }
             }.filter { (_, value) -> value != ValueState.Unset }.toMap()
+        }
+    }
+
+    override fun toTree(): TreeNode {
+        return ContainerNode(mutableMapOf()).apply {
+            lock.read {
+                itemWithNames.forEach { (item, name) ->
+                    val value = try {
+                        getOrNull(item, errorWhenNotFound = true).toCompatibleValue(mapper)
+                    } catch (_: UnsetValueException) {
+                        return@forEach
+                    }
+                    val description = item.description
+                    val comment = if (description.isEmpty()) null else description
+                    set(name, value.asTree(comment))
+                }
+            }
         }
     }
 
@@ -611,7 +629,11 @@ open class BaseConfig(
         return "Config(items=${toMap()})"
     }
 
-    class ItemNode(override var value: ValueState, val item: Item<*>) : ValueNode
+    class ItemNode(override var value: ValueState, val item: Item<*>) : ValueNode {
+
+        override val comments: String?
+            get() = if (this.item.description.isEmpty()) null else this.item.description
+    }
 
     data class Value<T>(var value: T)
 

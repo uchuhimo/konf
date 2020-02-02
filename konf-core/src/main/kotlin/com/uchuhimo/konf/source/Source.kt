@@ -56,7 +56,6 @@ import com.uchuhimo.konf.annotation.JavaApi
 import com.uchuhimo.konf.source.base.ListStringNode
 import com.uchuhimo.konf.source.base.toHierarchical
 import com.uchuhimo.konf.toPath
-import com.uchuhimo.konf.toTree
 import com.uchuhimo.konf.toValue
 import java.lang.reflect.InvocationTargetException
 import java.math.BigDecimal
@@ -973,13 +972,15 @@ private fun implOf(clazz: Class<*>): Class<*> =
         else -> clazz
     }
 
-fun Any.asTree(): TreeNode =
+fun Any.asTree(): TreeNode = asTree(null)
+
+fun Any.asTree(comment: String?): TreeNode =
     when (this) {
         is TreeNode -> this
         is Source -> this.tree
         is List<*> ->
             @Suppress("UNCHECKED_CAST")
-            (ListSourceNode((this as List<Any>).map { it.asTree() }))
+            (ListSourceNode((this as List<Any>).map { it.asTree() }, comments = comment))
         is Map<*, *> -> {
             when {
                 this.size == 0 -> ContainerNode(mutableMapOf())
@@ -987,7 +988,7 @@ fun Any.asTree(): TreeNode =
                     @Suppress("UNCHECKED_CAST")
                     (ContainerNode((this as Map<String, Any>).mapValues { (_, value) ->
                         value.asTree()
-                    }.toMutableMap()))
+                    }.toMutableMap(), comments = comment))
                 }
                 this.iterator().next().key!!::class in listOf(
                     Char::class,
@@ -1000,12 +1001,12 @@ fun Any.asTree(): TreeNode =
                     @Suppress("UNCHECKED_CAST")
                     (ContainerNode((this as Map<Any, Any>).map { (key, value) ->
                         key.toString() to value.asTree()
-                    }.toMap().toMutableMap()))
+                    }.toMap().toMutableMap(), comments = comment))
                 }
-                else -> ValueSourceNode(this)
+                else -> ValueSourceNode(this, comments = comment)
             }
         }
-        else -> ValueSourceNode(this)
+        else -> ValueSourceNode(this, comments = comment)
     }
 
 fun Any.asSource(type: String = "", info: SourceInfo = SourceInfo()): Source =

@@ -308,6 +308,15 @@ interface Config : ItemContainer {
     fun toMap(): Map<String, Any>
 
     /**
+     * Convert this config to a tree node.
+     *
+     * @return a tree node
+     */
+    fun toTree(): TreeNode {
+        return toMap().kvToTree()
+    }
+
+    /**
      * Enables the specified feature and returns this config.
      *
      * @param feature the specified feature
@@ -477,11 +486,8 @@ open class LazyConfigProperty<T>(
     }
 }
 
-/**
- * Convert the config to a tree node.
- *
- * @return a tree node
- */
+@Suppress("EXTENSION_SHADOWED_BY_MEMBER")
+@Deprecated(message = "Use method in Config.", replaceWith = ReplaceWith("toTree()"))
 fun Config.toTree(): TreeNode {
-    return toMap().kvToTree()
+    return toTree()
 }

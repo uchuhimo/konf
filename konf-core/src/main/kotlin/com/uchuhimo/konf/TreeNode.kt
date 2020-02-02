@@ -292,9 +292,17 @@ interface TreeNode {
     }
 }
 
-interface LeafNode : TreeNode
+/**
+ * A node which can hold a comment, if any.
+ */
+interface CommentableNode : TreeNode {
 
-interface MapNode : TreeNode {
+    val comments: String?
+}
+
+interface LeafNode : TreeNode, CommentableNode
+
+interface MapNode : TreeNode, CommentableNode {
     fun withMap(map: Map<String, TreeNode>): MapNode = throw NotImplementedError()
     var isPlaceHolder: Boolean
 }
@@ -319,8 +327,12 @@ interface ListNode : LeafNode {
  */
 open class ContainerNode(
     override val children: MutableMap<String, TreeNode>,
-    override var isPlaceHolder: Boolean = false
+    override var isPlaceHolder: Boolean = false,
+    override val comments: String? = null
 ) : MapNode {
+
+    constructor(children: MutableMap<String, TreeNode>, isPlaceHolder: Boolean = false) : this(children, isPlaceHolder, null)
+
     override fun withMap(map: Map<String, TreeNode>): MapNode {
         val isPlaceHolder = map.isEmpty() && this.isPlaceHolder
         if (map is MutableMap<String, TreeNode>) {
@@ -341,4 +353,5 @@ open class ContainerNode(
  */
 object EmptyNode : LeafNode {
     override val children: MutableMap<String, TreeNode> = emptyMutableMap
+    override val comments: String? = null
 }
