@@ -174,9 +174,15 @@ open class BaseConfig(
                     } catch (_: UnsetValueException) {
                         return@forEach
                     }
-                    val description = item.description
-                    val comment = if (description.isEmpty()) null else description
-                    set(name, value.asTree(comment))
+                    set(name, value.asTree(item.description))
+                }
+                // Add spec descriptions
+                specs.forEach { spec ->
+                    val path = spec.prefix.toPath()
+                    val node = tree.getOrNull(path)
+                    if (node != null && node.comments.isNotEmpty()) {
+                        getOrNull(path)?.comments = node.comments
+                    }
                 }
             }
         }
@@ -592,6 +598,13 @@ open class BaseConfig(
                     throw RepeatedItemException(name)
                 }
             }
+            val description = spec.description
+            if (description.isNotEmpty()) {
+                val node = this.tree.getOrNull(spec.prefix.toPath())
+                if (node != null && node.comments.isEmpty()) {
+                    node.comments = description
+                }
+            }
             spec.innerSpecs.forEach { innerSpec ->
                 addSpec(innerSpec.withPrefix(spec.prefix))
             }
@@ -631,8 +644,7 @@ open class BaseConfig(
 
     class ItemNode(override var value: ValueState, val item: Item<*>) : ValueNode {
 
-        override val comments: String?
-            get() = if (this.item.description.isEmpty()) null else this.item.description
+        override var comments = this.item.description
     }
 
     data class Value<T>(var value: T)

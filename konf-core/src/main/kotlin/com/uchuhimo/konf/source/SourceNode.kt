@@ -30,14 +30,12 @@ interface SubstitutableNode : ValueNode {
     val originalValue: Any?
 }
 
-class ValueSourceNode(
+class ValueSourceNode @JvmOverloads constructor(
     override val value: Any,
     override val substituted: Boolean = false,
     override val originalValue: Any? = null,
-    override val comments: String? = null
+    override var comments: String = ""
 ) : SubstitutableNode {
-
-    constructor(value: Any, substituted: Boolean = false, originalValue: Any? = null) : this(value, substituted, originalValue, null)
 
     override fun substitute(value: String): TreeNode {
         return ValueSourceNode(value, true, originalValue ?: this.value, this.comments)
@@ -46,19 +44,17 @@ class ValueSourceNode(
 
 object NullSourceNode : NullNode {
     override val children: MutableMap<String, TreeNode> = emptyMutableMap
-    override val comments: String? = null
+    override var comments: String = ""
 }
 
-open class ListSourceNode(
+open class ListSourceNode @JvmOverloads constructor(
     override val list: List<TreeNode>,
     override var isPlaceHolder: Boolean = false,
-    override val comments: String? = null
+    override var comments: String = ""
 ) : ListNode, MapNode {
     override val children: MutableMap<String, TreeNode>
         get() = Collections.unmodifiableMap(
             list.withIndex().associate { (key, value) -> key.toString() to value })
-
-    constructor(list: List<TreeNode>, isPlaceHolder: Boolean = false) : this(list, isPlaceHolder, null)
 
     override fun withList(list: List<TreeNode>): ListNode {
         return ListSourceNode(list, comments = this.comments)

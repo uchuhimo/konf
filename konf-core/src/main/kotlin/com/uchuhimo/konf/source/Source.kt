@@ -972,9 +972,9 @@ private fun implOf(clazz: Class<*>): Class<*> =
         else -> clazz
     }
 
-fun Any.asTree(): TreeNode = asTree(null)
+fun Any.asTree(): TreeNode = asTree("")
 
-fun Any.asTree(comment: String?): TreeNode =
+fun Any.asTree(comment: String = ""): TreeNode =
     when (this) {
         is TreeNode -> this
         is Source -> this.tree

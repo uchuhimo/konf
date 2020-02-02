@@ -122,7 +122,7 @@ internal object NewArrayValueWriter : ArrayValueWriter() {
         var first = true
         var firstWriter: ValueWriter? = null
 
-        val hasAnyComments = values.filter { it is TreeNode && it.comments != null }.any()
+        val hasAnyComments = values.filter { it is TreeNode && it.comments.isNotEmpty() }.any()
         if (hasAnyComments)
             context.write('\n')
 
@@ -180,7 +180,9 @@ private val TreeNode.value: Any
     }
 
 private fun WriterContext.writeComments(node: TreeNode?, newLineAfter: Boolean = true) {
-    val comments = node?.comments?.split("\n") ?: return
+    if (node == null || node.comments.isEmpty())
+        return
+    val comments = node.comments.split("\n")
     comments.forEach { comment ->
         indent()
         write("\n# $comment")
