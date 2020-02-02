@@ -28,6 +28,11 @@ interface TreeNode {
     val children: MutableMap<String, TreeNode>
 
     /**
+     * The comments assigned to this tree node.
+     */
+    val comments: String?
+
+    /**
      * Associate path with specified node.
      *
      * @param path path
@@ -292,17 +297,9 @@ interface TreeNode {
     }
 }
 
-/**
- * A node which can hold a comment, if any.
- */
-interface CommentableNode : TreeNode {
+interface LeafNode : TreeNode
 
-    val comments: String?
-}
-
-interface LeafNode : TreeNode, CommentableNode
-
-interface MapNode : TreeNode, CommentableNode {
+interface MapNode : TreeNode {
     fun withMap(map: Map<String, TreeNode>): MapNode = throw NotImplementedError()
     var isPlaceHolder: Boolean
 }

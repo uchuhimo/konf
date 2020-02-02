@@ -19,7 +19,6 @@ package com.uchuhimo.konf.source.hocon
 import com.typesafe.config.ConfigRenderOptions
 import com.typesafe.config.ConfigValue
 import com.typesafe.config.ConfigValueFactory
-import com.uchuhimo.konf.CommentableNode
 import com.uchuhimo.konf.Config
 import com.uchuhimo.konf.Feature
 import com.uchuhimo.konf.ListNode
@@ -55,11 +54,9 @@ class HoconWriter(val config: Config) : Writer {
             is ListNode -> ConfigValueFactory.fromIterable(this.list.map { it.toConfigValue() })
             else -> ConfigValueFactory.fromMap(this.children.mapValues { (_, value) -> value.toConfigValue() })
         }
-        if (this is CommentableNode) {
-            val comments = this.comments
-            if (comments != null) {
-                return value.withOrigin(value.origin().withComments(comments.split("\n")))
-            }
+        val comments = this.comments
+        if (comments != null) {
+            return value.withOrigin(value.origin().withComments(comments.split("\n")))
         }
         return value
     }
