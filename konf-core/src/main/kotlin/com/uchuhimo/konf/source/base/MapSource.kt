@@ -16,7 +16,6 @@
 
 package com.uchuhimo.konf.source.base
 
-import com.uchuhimo.konf.CommentableNode
 import com.uchuhimo.konf.Config
 import com.uchuhimo.konf.ListNode
 import com.uchuhimo.konf.TreeNode
@@ -46,29 +45,11 @@ fun Config.toHierarchicalMap(): Map<String, Any> {
 }
 
 /**
- * Returns a hierarchical map for this config.
- *
- * The returned map contains all items in this config.
- * This map can be loaded into config as [com.uchuhimo.konf.source.base.MapSource] using
- * `config.from.map.hierarchical(map)`.
- */
-fun Config.toHierarchicalMapNode(): HierarchicalTreeNode.Map {
-    return toTree().toHierarchicalNode() as HierarchicalTreeNode.Map
-}
-
-/**
  * Returns a hierarchical value for this tree node.
  *
  * The returned value contains all items in this tree node.
  */
 fun TreeNode.toHierarchical(): Any = withoutPlaceHolder().toHierarchicalInternal()
-
-/**
- * Returns a hierarchical value for this tree node.
- *
- * The returned value contains all items in this tree node.
- */
-fun TreeNode.toHierarchicalNode(): HierarchicalTreeNode = withoutPlaceHolder().toHierarchicalNodeInternal()
 
 private fun TreeNode.toHierarchicalInternal(): Any {
     return when (this) {
@@ -76,29 +57,6 @@ private fun TreeNode.toHierarchicalInternal(): Any {
         is ListNode -> list.map { it.toHierarchicalInternal() }
         else -> children.mapValues { (_, child) -> child.toHierarchicalInternal() }
     }
-}
-
-private fun TreeNode.toHierarchicalNodeInternal(): HierarchicalTreeNode {
-    return when (this) {
-        is ValueNode -> HierarchicalTreeNode.Value(value, this.comments)
-        is ListNode -> HierarchicalTreeNode.List(list.map { it.toHierarchicalNodeInternal() }, this.comments)
-        else -> HierarchicalTreeNode.Map(children.mapValues { (_, child) -> child.toHierarchicalNodeInternal() },
-                if (this is CommentableNode) this.comments else null)
-    }
-}
-
-/**
- * Represents a value of a hierarchical map.
- */
-sealed class HierarchicalTreeNode {
-
-    abstract val comments: String?
-
-    class Value(val value: Any, override val comments: String?) : HierarchicalTreeNode()
-
-    class Map(val map: kotlin.collections.Map<String, HierarchicalTreeNode>, override val comments: String?) : HierarchicalTreeNode()
-
-    class List(val list: kotlin.collections.List<HierarchicalTreeNode>, override val comments: String?) : HierarchicalTreeNode()
 }
 
 /**
