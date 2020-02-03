@@ -476,10 +476,9 @@ internal fun Any?.toCompatibleValue(mapper: ObjectMapper): Any {
         is LongArray -> this.toList()
         is DoubleArray -> this.toList()
         is FloatArray -> this.toList()
-        is List<*> -> this.map { it!!.toCompatibleValue(mapper) }
-        is Set<*> -> this.map { it!!.toCompatibleValue(mapper) }
-        is Array<*> -> this.map { it!!.toCompatibleValue(mapper) }
-        is Map<*, *> -> this.mapValues { (_, value) -> value!!.toCompatibleValue(mapper) }
+        is Iterable<*> -> this.map { it.toCompatibleValue(mapper) }
+        is Array<*> -> this.map { it.toCompatibleValue(mapper) }
+        is Map<*, *> -> this.mapValues { (_, value) -> value.toCompatibleValue(mapper) }
         is Char -> this.toString()
         is String,
         is Boolean,
@@ -495,10 +494,7 @@ internal fun Any?.toCompatibleValue(mapper: ObjectMapper): Any {
             if (this == null) {
                 "null"
             } else {
-                val result = mapper.convertValue(this, Map::class.java).mapValues { (_, value) ->
-                    value.toCompatibleValue(mapper)
-                }
-                result
+                mapper.convertValue(this, Any::class.java).toCompatibleValue(mapper)
             }
         }
     }
