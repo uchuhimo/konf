@@ -118,7 +118,7 @@ private class YamlTreeNodeWriter(
             }
             decreaseIndent()
         } else {
-            write(quoteStringIfNeeded(string))
+            write(quoteValueIfNeeded(string))
             writeNewLine()
         }
     }
@@ -165,10 +165,17 @@ private class YamlTreeNodeWriter(
         }
     }
 
-    private fun quoteStringIfNeeded(s: String): String {
-        if (':' in s || '\"' in s || '\'' in s) {
-            return "\"${s.replace("\"", "\\\"")}\""
-        }
+    private fun quoteString(s: String) = "\"${s.replace("\"", "\\\"")}\""
+
+    private fun hasQuoteChar(s: String) = '\"' in s || '\'' in s
+
+    private fun hasTrailingWhitespace(s: String) = s.isNotEmpty() && (s.first() == ' ' || s.last() == ' ')
+
+    private fun quoteValueIfNeeded(s: String): String {
+        if (s.isEmpty())
+            return s
+        if (s.last() == ':' || hasTrailingWhitespace(s) || hasQuoteChar(s))
+            return quoteString(s)
         return s
     }
 
@@ -180,7 +187,7 @@ private class YamlTreeNodeWriter(
             writeComments(node)
             writeIndent()
         }
-        write(quoteStringIfNeeded(name))
+        write(quoteValueIfNeeded(name))
         write(':')
         when (node) {
             is ValueNode -> {

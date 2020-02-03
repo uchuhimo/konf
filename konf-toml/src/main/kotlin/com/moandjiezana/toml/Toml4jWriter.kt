@@ -184,8 +184,9 @@ private fun WriterContext.writeComments(node: TreeNode?, newLineAfter: Boolean =
         return
     val comments = node.comments.split("\n")
     comments.forEach { comment ->
+        write('\n')
         indent()
-        write("\n# $comment")
+        write("# $comment")
     }
     if (newLineAfter)
         write('\n')
