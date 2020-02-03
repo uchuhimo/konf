@@ -17,8 +17,13 @@
 package com.uchuhimo.konf.source.hocon
 
 import com.typesafe.config.ConfigRenderOptions
+import com.typesafe.config.ConfigValue
 import com.typesafe.config.ConfigValueFactory
 import com.uchuhimo.konf.Config
+import com.uchuhimo.konf.Feature
+import com.uchuhimo.konf.ListNode
+import com.uchuhimo.konf.TreeNode
+import com.uchuhimo.konf.ValueNode
 import com.uchuhimo.konf.source.Writer
 import com.uchuhimo.konf.source.base.toHierarchicalMap
 import java.io.OutputStream
@@ -27,6 +32,7 @@ import java.io.OutputStream
  * Writer for HOCON source.
  */
 class HoconWriter(val config: Config) : Writer {
+
     private val renderOpts = ConfigRenderOptions.defaults()
         .setOriginComments(false)
         .setComments(false)
@@ -42,9 +48,26 @@ class HoconWriter(val config: Config) : Writer {
         }
     }
 
+    private fun TreeNode.toConfigValue(): ConfigValue {
+        val value = when (this) {
+            is ValueNode -> ConfigValueFactory.fromAnyRef(value)
+            is ListNode -> ConfigValueFactory.fromIterable(list.map { it.toConfigValue() })
+            else -> ConfigValueFactory.fromMap(children.mapValues { (_, value) -> value.toConfigValue() })
+        }
+        val comments = comments
+        if (comments != null) {
+            return value.withOrigin(value.origin().withComments(comments.split("\n")))
+        }
+        return value
+    }
+
     override fun toText(): String {
-        return ConfigValueFactory.fromMap(config.toHierarchicalMap()).render(renderOpts)
-            .replace("\n", System.lineSeparator())
+        val output = if (config.isEnabled(Feature.WRITE_DESCRIPTIONS_AS_COMMENTS)) {
+            config.toTree().toConfigValue().render(renderOpts.setComments(true))
+        } else {
+            ConfigValueFactory.fromMap(config.toHierarchicalMap()).render(renderOpts)
+        }
+        return output.replace("\n", System.lineSeparator())
     }
 }
 

@@ -45,5 +45,12 @@ enum class Feature(val enabledByDefault: Boolean) {
      *
      * Feature is enabled by default.
      */
-    SUBSTITUTE_SOURCE_BEFORE_LOADED(true)
+    SUBSTITUTE_SOURCE_BEFORE_LOADED(true),
+    /**
+     * Feature that writes descriptions assigned to [Item]s as comments
+     * above the written configuration value.
+     *
+     * Feature is disabled by default.
+     */
+    WRITE_DESCRIPTIONS_AS_COMMENTS(false)
 }

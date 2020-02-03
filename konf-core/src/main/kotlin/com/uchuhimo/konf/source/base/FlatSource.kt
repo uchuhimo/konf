@@ -62,6 +62,7 @@ object EmptyStringNode : SubstitutableNode, ListNode {
     override val list: List<TreeNode> = listOf()
     override val originalValue: Any? = null
     override val substituted: Boolean = false
+    override var comments: String = ""
     override fun substitute(value: String): TreeNode {
         check(value.isEmpty())
         return this
@@ -71,7 +72,8 @@ object EmptyStringNode : SubstitutableNode, ListNode {
 class SingleStringListNode(
     override val value: String,
     override val substituted: Boolean = false,
-    override val originalValue: Any? = null
+    override val originalValue: Any? = null,
+    override var comments: String = ""
 ) : SubstitutableNode, ListNode {
     override val children: MutableMap<String, TreeNode> = Collections.unmodifiableMap(
         mutableMapOf("0" to value.asTree()))
@@ -83,8 +85,9 @@ class SingleStringListNode(
 class ListStringNode(
     override val value: String,
     override val substituted: Boolean = false,
-    override val originalValue: Any? = null
-) : ListSourceNode(value.split(',').map { ValueSourceNode(it) }), SubstitutableNode {
+    override val originalValue: Any? = null,
+    override var comments: String = ""
+) : ListSourceNode(value.split(',').map { ValueSourceNode(it) }, comments = comments), SubstitutableNode {
     override fun substitute(value: String): TreeNode =
         value.promoteToList(true, originalValue ?: this.value)
 

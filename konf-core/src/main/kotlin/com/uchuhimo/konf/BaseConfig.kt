@@ -23,6 +23,7 @@ import com.fasterxml.jackson.databind.module.SimpleModule
 import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule
 import com.fasterxml.jackson.module.kotlin.jacksonObjectMapper
 import com.uchuhimo.konf.source.Source
+import com.uchuhimo.konf.source.asTree
 import com.uchuhimo.konf.source.base.EmptyMapSource
 import com.uchuhimo.konf.source.deserializer.DurationDeserializer
 import com.uchuhimo.konf.source.deserializer.EmptyStringToCollectionDeserializerModifier
@@ -161,6 +162,29 @@ open class BaseConfig(
                     ValueState.Unset
                 }
             }.filter { (_, value) -> value != ValueState.Unset }.toMap()
+        }
+    }
+
+    override fun toTree(): TreeNode {
+        return ContainerNode(mutableMapOf()).apply {
+            lock.read {
+                itemWithNames.forEach { (item, name) ->
+                    val value = try {
+                        getOrNull(item, errorWhenNotFound = true).toCompatibleValue(mapper)
+                    } catch (_: UnsetValueException) {
+                        return@forEach
+                    }
+                    set(name, value.asTree(item.description))
+                }
+                // Add spec descriptions
+                specs.forEach { spec ->
+                    val path = spec.prefix.toPath()
+                    val node = tree.getOrNull(path)
+                    if (node != null && node.comments.isNotEmpty()) {
+                        getOrNull(path)?.comments = node.comments
+                    }
+                }
+            }
         }
     }
 
@@ -574,6 +598,13 @@ open class BaseConfig(
                     throw RepeatedItemException(name)
                 }
             }
+            val description = spec.description
+            if (description.isNotEmpty()) {
+                val node = this.tree.getOrNull(spec.prefix.toPath())
+                if (node != null && node.comments.isEmpty()) {
+                    node.comments = description
+                }
+            }
             spec.innerSpecs.forEach { innerSpec ->
                 addSpec(innerSpec.withPrefix(spec.prefix))
             }
@@ -611,7 +642,10 @@ open class BaseConfig(
         return "Config(items=${toMap()})"
     }
 
-    class ItemNode(override var value: ValueState, val item: Item<*>) : ValueNode
+    class ItemNode(override var value: ValueState, val item: Item<*>) : ValueNode {
+
+        override var comments = this.item.description
+    }
 
     data class Value<T>(var value: T)
 

@@ -22,7 +22,6 @@ import com.uchuhimo.konf.TreeNode
 import com.uchuhimo.konf.ValueNode
 import com.uchuhimo.konf.notEmptyOr
 import com.uchuhimo.konf.source.SourceInfo
-import com.uchuhimo.konf.toTree
 
 /**
  * Source from a hierarchical map.
@@ -53,10 +52,10 @@ fun Config.toHierarchicalMap(): Map<String, Any> {
 fun TreeNode.toHierarchical(): Any = withoutPlaceHolder().toHierarchicalInternal()
 
 private fun TreeNode.toHierarchicalInternal(): Any {
-    when (this) {
-        is ValueNode -> return value
-        is ListNode -> return list.map { it.toHierarchicalInternal() }
-        else -> return children.mapValues { (_, child) -> child.toHierarchicalInternal() }
+    return when (this) {
+        is ValueNode -> value
+        is ListNode -> list.map { it.toHierarchicalInternal() }
+        else -> children.mapValues { (_, child) -> child.toHierarchicalInternal() }
     }
 }
 

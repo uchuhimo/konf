@@ -40,6 +40,12 @@ interface Spec {
     val prefix: String
 
     /**
+     * The description of the spec.
+     */
+    val description: String
+        get() = ""
+
+    /**
      * Qualify item name with prefix of this config spec.
      *
      * When prefix is empty, original item name will be returned.
@@ -162,8 +168,20 @@ interface Spec {
         return if (newPrefix.isEmpty()) {
             this
         } else {
-            ConfigSpec((newPrefix + prefix).name, items, innerSpecs)
+            ConfigSpec((newPrefix + prefix).name, items, innerSpecs, description)
         }
+    }
+
+    /**
+     * Returns config spec with the specified description.
+     *
+     * @param description description
+     * @return config spec with the specified description
+     */
+    fun withDescription(description: String): Spec {
+        if (this.description == description)
+            return this
+        return ConfigSpec(prefix, items, innerSpecs, description)
     }
 
     companion object {

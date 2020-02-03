@@ -28,6 +28,11 @@ interface TreeNode {
     val children: MutableMap<String, TreeNode>
 
     /**
+     * The comments assigned to this tree node.
+     */
+    var comments: String
+
+    /**
      * Associate path with specified node.
      *
      * @param path path
@@ -317,16 +322,18 @@ interface ListNode : LeafNode {
 /**
  * Tree node that contains children nodes.
  */
-open class ContainerNode(
+open class ContainerNode @JvmOverloads constructor(
     override val children: MutableMap<String, TreeNode>,
-    override var isPlaceHolder: Boolean = false
+    override var isPlaceHolder: Boolean = false,
+    override var comments: String = ""
 ) : MapNode {
+
     override fun withMap(map: Map<String, TreeNode>): MapNode {
         val isPlaceHolder = map.isEmpty() && this.isPlaceHolder
-        if (map is MutableMap<String, TreeNode>) {
-            return ContainerNode(map, isPlaceHolder)
+        return if (map is MutableMap<String, TreeNode>) {
+            ContainerNode(map, isPlaceHolder, comments)
         } else {
-            return ContainerNode(map.toMutableMap(), isPlaceHolder)
+            ContainerNode(map.toMutableMap(), isPlaceHolder, comments)
         }
     }
 
@@ -341,4 +348,5 @@ open class ContainerNode(
  */
 object EmptyNode : LeafNode {
     override val children: MutableMap<String, TreeNode> = emptyMutableMap
+    override var comments: String = ""
 }
