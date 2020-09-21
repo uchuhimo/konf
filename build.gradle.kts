@@ -62,7 +62,7 @@ allprojects {
     apply(plugin = "com.jfrog.bintray")
 
     group = "com.uchuhimo"
-    version = "0.22.1"
+    version = "0.22.2-SNAPSHOT"
 
     repositories {
         if (useAliyun) {
