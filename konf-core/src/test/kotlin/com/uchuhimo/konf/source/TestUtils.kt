@@ -23,8 +23,15 @@ import com.natpryce.hamkrest.throws
 
 inline fun <reified T : Any> assertCausedBy(noinline block: () -> Unit) {
     @Suppress("UNCHECKED_CAST")
-    (com.natpryce.hamkrest.assertion.assertThat(block,
-        throws(has(
-            LoadException::cause,
-            isA<T>() as Matcher<Throwable?>))))
+    (
+        com.natpryce.hamkrest.assertion.assertThat(
+            block,
+            throws(
+                has(
+                    LoadException::cause,
+                    isA<T>() as Matcher<Throwable?>
+                )
+            )
+        )
+        )
 }

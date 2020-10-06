@@ -34,14 +34,18 @@ object SourceInfoSpec : SubjectSpek<SourceInfo>({
         }
         on("with new KV pairs") {
             it("should contain the new KV pairs") {
-                assertThat(subject.with("b" to "2", "c" to "3").toMap(),
-                    equalTo(mapOf("a" to "1", "b" to "2", "c" to "3")))
+                assertThat(
+                    subject.with("b" to "2", "c" to "3").toMap(),
+                    equalTo(mapOf("a" to "1", "b" to "2", "c" to "3"))
+                )
             }
         }
         on("with another source info") {
             it("should contain the new KV pairs in another source info") {
-                assertThat(subject.with(SourceInfo("b" to "2", "c" to "3")).toMap(),
-                    equalTo(mapOf("a" to "1", "b" to "2", "c" to "3")))
+                assertThat(
+                    subject.with(SourceInfo("b" to "2", "c" to "3")).toMap(),
+                    equalTo(mapOf("a" to "1", "b" to "2", "c" to "3"))
+                )
             }
         }
     }

@@ -32,11 +32,13 @@ object ServerSpec : ConfigSpec() {
 fun main(args: Array<String>) {
     val file = File("server.yml")
     //language=YAML
-    file.writeText("""
+    file.writeText(
+        """
         server:
             host: 127.0.0.1
             port: 8080
-    """.trimIndent())
+        """.trimIndent()
+    )
     file.deleteOnExit()
     val config = Config { addSpec(ServerSpec) }
         .from.yaml.file("server.yml")

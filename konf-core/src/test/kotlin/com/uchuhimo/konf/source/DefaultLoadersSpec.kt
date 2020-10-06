@@ -24,9 +24,6 @@ import com.uchuhimo.konf.Config
 import com.uchuhimo.konf.ConfigSpec
 import com.uchuhimo.konf.source.properties.PropertiesProvider
 import com.uchuhimo.konf.tempFileOf
-import java.net.URL
-import java.util.UUID
-import java.util.concurrent.TimeUnit
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.runBlocking
@@ -37,6 +34,9 @@ import org.jetbrains.spek.api.dsl.on
 import org.jetbrains.spek.subject.SubjectSpek
 import org.jetbrains.spek.subject.itBehavesLike
 import spark.Service
+import java.net.URL
+import java.util.UUID
+import java.util.concurrent.TimeUnit
 
 object DefaultLoadersSpec : SubjectSpek<DefaultLoaders>({
     subject {

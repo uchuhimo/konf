@@ -133,15 +133,17 @@ interface TreeNode {
             if (facade is LeafNode || fallback is LeafNode) {
                 return facade
             } else {
-                return ContainerNode(facade.children.toMutableMap().also { map ->
-                    for ((key, child) in fallback.children) {
-                        if (key in facade.children) {
-                            map[key] = traverseTree(facade.children.getValue(key), child, path + key)
-                        } else {
-                            map[key] = child
+                return ContainerNode(
+                    facade.children.toMutableMap().also { map ->
+                        for ((key, child) in fallback.children) {
+                            if (key in facade.children) {
+                                map[key] = traverseTree(facade.children.getValue(key), child, path + key)
+                            } else {
+                                map[key] = child
+                            }
                         }
                     }
-                })
+                )
             }
         }
         return traverseTree(this, fallback, "".toPath())

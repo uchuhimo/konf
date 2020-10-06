@@ -32,16 +32,20 @@ private fun ConfigValue.toTree(): TreeNode {
     return when (valueType()!!) {
         ConfigValueType.NULL -> NullSourceNode
         ConfigValueType.BOOLEAN, ConfigValueType.NUMBER, ConfigValueType.STRING -> ValueSourceNode(unwrapped())
-        ConfigValueType.LIST -> ListSourceNode(mutableListOf<TreeNode>().apply {
-            for (value in (this@toTree as ConfigList)) {
-                add(value.toTree())
+        ConfigValueType.LIST -> ListSourceNode(
+            mutableListOf<TreeNode>().apply {
+                for (value in (this@toTree as ConfigList)) {
+                    add(value.toTree())
+                }
             }
-        })
-        ConfigValueType.OBJECT -> ContainerNode(mutableMapOf<String, TreeNode>().apply {
-            for ((key, value) in (this@toTree as ConfigObject)) {
-                put(key, value.toTree())
+        )
+        ConfigValueType.OBJECT -> ContainerNode(
+            mutableMapOf<String, TreeNode>().apply {
+                for ((key, value) in (this@toTree as ConfigObject)) {
+                    put(key, value.toTree())
+                }
             }
-        })
+        )
     }
 }
 

@@ -23,13 +23,13 @@ import com.natpryce.hamkrest.has
 import com.natpryce.hamkrest.throws
 import com.uchuhimo.konf.source.base.asKVSource
 import com.uchuhimo.konf.source.base.toHierarchicalMap
-import kotlin.test.assertFalse
-import kotlin.test.assertNull
-import kotlin.test.assertTrue
 import org.jetbrains.spek.api.dsl.given
 import org.jetbrains.spek.api.dsl.it
 import org.jetbrains.spek.api.dsl.on
 import org.jetbrains.spek.subject.SubjectSpek
+import kotlin.test.assertFalse
+import kotlin.test.assertNull
+import kotlin.test.assertTrue
 
 object ConfigInJavaSpec : SubjectSpek<Config>({
 
@@ -70,9 +70,15 @@ object ConfigInJavaSpec : SubjectSpek<Config>({
             }
             on("add repeated item") {
                 it("should throw RepeatedItemException") {
-                    assertThat({ subject.addSpec(spec) }, throws(has(
-                        RepeatedItemException::name,
-                        equalTo(spec.qualify(size)))))
+                    assertThat(
+                        { subject.addSpec(spec) },
+                        throws(
+                            has(
+                                RepeatedItemException::name,
+                                equalTo(spec.qualify(size))
+                            )
+                        )
+                    )
                 }
             }
             on("add repeated name") {
@@ -90,10 +96,14 @@ object ConfigInJavaSpec : SubjectSpek<Config>({
                     val buffer by required<Int>()
                 }
                 it("should throw NameConflictException") {
-                    assertThat({
-                        subject.addSpec(
-                            newSpec.withPrefix(prefix.toPath().let { it.subList(0, it.size - 1) }.name))
-                    }, throws<NameConflictException>())
+                    assertThat(
+                        {
+                            subject.addSpec(
+                                newSpec.withPrefix(prefix.toPath().let { it.subList(0, it.size - 1) }.name)
+                            )
+                        },
+                        throws<NameConflictException>()
+                    )
                 }
             }
             on("add conflict name, and an existed name is prefix of it") {
@@ -122,9 +132,15 @@ object ConfigInJavaSpec : SubjectSpek<Config>({
             }
             on("add repeated item") {
                 it("should throw RepeatedItemException") {
-                    assertThat({ subject.addItem(size, spec.prefix) }, throws(has(
-                        RepeatedItemException::name,
-                        equalTo(spec.qualify(size)))))
+                    assertThat(
+                        { subject.addItem(size, spec.prefix) },
+                        throws(
+                            has(
+                                RepeatedItemException::name,
+                                equalTo(spec.qualify(size))
+                            )
+                        )
+                    )
                 }
             }
             on("add repeated name") {
@@ -137,11 +153,15 @@ object ConfigInJavaSpec : SubjectSpek<Config>({
             on("add conflict name, which is prefix of existed name") {
                 val buffer by Spec.dummy.required<Int>()
                 it("should throw NameConflictException") {
-                    assertThat({
-                        subject.addItem(
-                            buffer,
-                            prefix.toPath().let { it.subList(0, it.size - 1) }.name)
-                    }, throws<NameConflictException>())
+                    assertThat(
+                        {
+                            subject.addItem(
+                                buffer,
+                                prefix.toPath().let { it.subList(0, it.size - 1) }.name
+                            )
+                        },
+                        throws<NameConflictException>()
+                    )
                 }
             }
             on("add conflict name, and an existed name is prefix of it") {
@@ -163,22 +183,34 @@ object ConfigInJavaSpec : SubjectSpek<Config>({
         }
         on("export values to map") {
             it("should not contain unset items in map") {
-                assertThat(subject.toMap(), equalTo(mapOf<String, Any>(
-                    qualify(name.name) to "buffer",
-                    qualify(type.name) to NetworkBuffer.Type.OFF_HEAP.name,
-                    qualify(offset.name) to "null")))
+                assertThat(
+                    subject.toMap(),
+                    equalTo(
+                        mapOf<String, Any>(
+                            qualify(name.name) to "buffer",
+                            qualify(type.name) to NetworkBuffer.Type.OFF_HEAP.name,
+                            qualify(offset.name) to "null"
+                        )
+                    )
+                )
             }
             it("should contain corresponding items in map") {
                 subject[size] = 4
                 subject[type] = NetworkBuffer.Type.ON_HEAP
                 subject[offset] = 0
                 val map = subject.toMap()
-                assertThat(map, equalTo(mapOf(
-                    qualify(size.name) to 4,
-                    qualify(maxSize.name) to 8,
-                    qualify(name.name) to "buffer",
-                    qualify(type.name) to NetworkBuffer.Type.ON_HEAP.name,
-                    qualify(offset.name) to 0)))
+                assertThat(
+                    map,
+                    equalTo(
+                        mapOf(
+                            qualify(size.name) to 4,
+                            qualify(maxSize.name) to 8,
+                            qualify(name.name) to "buffer",
+                            qualify(type.name) to NetworkBuffer.Type.ON_HEAP.name,
+                            qualify(offset.name) to 0
+                        )
+                    )
+                )
             }
             it("should recover all items when reloaded from map") {
                 subject[size] = 4
@@ -201,31 +233,46 @@ object ConfigInJavaSpec : SubjectSpek<Config>({
                     prefix.contains('.') ->
                         mapOf<String, Any>(
                             prefix.substring(0, prefix.indexOf('.')) to
-                                prefixToMap(prefix.substring(prefix.indexOf('.') + 1), value))
+                                prefixToMap(prefix.substring(prefix.indexOf('.') + 1), value)
+                        )
                     else -> mapOf(prefix to value)
                 }
             }
             it("should not contain unset items in map") {
-                assertThat(subject.toHierarchicalMap(),
-                    equalTo(prefixToMap(prefix, mapOf(
-                        "name" to "buffer",
-                        "type" to NetworkBuffer.Type.OFF_HEAP.name,
-                        "offset" to "null"
-                    ))))
+                assertThat(
+                    subject.toHierarchicalMap(),
+                    equalTo(
+                        prefixToMap(
+                            prefix,
+                            mapOf(
+                                "name" to "buffer",
+                                "type" to NetworkBuffer.Type.OFF_HEAP.name,
+                                "offset" to "null"
+                            )
+                        )
+                    )
+                )
             }
             it("should contain corresponding items in map") {
                 subject[size] = 4
                 subject[type] = NetworkBuffer.Type.ON_HEAP
                 subject[offset] = 0
                 val map = subject.toHierarchicalMap()
-                assertThat(map,
-                    equalTo(prefixToMap(prefix, mapOf(
-                        "size" to 4,
-                        "maxSize" to 8,
-                        "name" to "buffer",
-                        "type" to NetworkBuffer.Type.ON_HEAP.name,
-                        "offset" to 0
-                    ))))
+                assertThat(
+                    map,
+                    equalTo(
+                        prefixToMap(
+                            prefix,
+                            mapOf(
+                                "size" to 4,
+                                "maxSize" to 8,
+                                "name" to "buffer",
+                                "type" to NetworkBuffer.Type.ON_HEAP.name,
+                                "offset" to 0
+                            )
+                        )
+                    )
+                )
             }
             it("should recover all items when reloaded from map") {
                 subject[size] = 4
@@ -275,8 +322,10 @@ object ConfigInJavaSpec : SubjectSpek<Config>({
             }
             on("get with invalid item") {
                 it("should throw NoSuchItemException when using `get`") {
-                    assertThat({ subject[invalidItem] },
-                        throws(has(NoSuchItemException::name, equalTo(invalidItem.asName))))
+                    assertThat(
+                        { subject[invalidItem] },
+                        throws(has(NoSuchItemException::name, equalTo(invalidItem.asName)))
+                    )
                 }
                 it("should return null when using `getOrNull`") {
                     assertThat(subject.getOrNull(invalidItem), absent())
@@ -292,8 +341,15 @@ object ConfigInJavaSpec : SubjectSpek<Config>({
             }
             on("get with invalid name") {
                 it("should throw NoSuchItemException when using `get`") {
-                    assertThat({ subject<String>(spec.qualify(invalidItem)) }, throws(has(
-                        NoSuchItemException::name, equalTo(spec.qualify(invalidItem)))))
+                    assertThat(
+                        { subject<String>(spec.qualify(invalidItem)) },
+                        throws(
+                            has(
+                                NoSuchItemException::name,
+                                equalTo(spec.qualify(invalidItem))
+                            )
+                        )
+                    )
                 }
                 it("should return null when using `getOrNull`") {
                     assertThat(subject.getOrNull<String>(spec.qualify(invalidItem)), absent())
@@ -302,12 +358,24 @@ object ConfigInJavaSpec : SubjectSpek<Config>({
             }
             on("get unset item") {
                 it("should throw UnsetValueException") {
-                    assertThat({ subject[size] }, throws(has(
-                        UnsetValueException::name,
-                        equalTo(size.asName))))
-                    assertThat({ subject[maxSize] }, throws(has(
-                        UnsetValueException::name,
-                        equalTo(size.asName))))
+                    assertThat(
+                        { subject[size] },
+                        throws(
+                            has(
+                                UnsetValueException::name,
+                                equalTo(size.asName)
+                            )
+                        )
+                    )
+                    assertThat(
+                        { subject[maxSize] },
+                        throws(
+                            has(
+                                UnsetValueException::name,
+                                equalTo(size.asName)
+                            )
+                        )
+                    )
                     assertTrue { size in subject }
                     assertTrue { maxSize in subject }
                 }
@@ -353,8 +421,10 @@ object ConfigInJavaSpec : SubjectSpek<Config>({
                 }
             }
             on("set with valid item when corresponding value is lazy") {
-                test("before set, the item should be lazy; after set," +
-                    " the item should be no longer lazy, and it contains the specified value") {
+                test(
+                    "before set, the item should be lazy; after set," +
+                        " the item should be no longer lazy, and it contains the specified value"
+                ) {
                     subject[size] = 1024
                     assertThat(subject[maxSize], equalTo(subject[size] * 2))
                     subject[maxSize] = 0
@@ -366,8 +436,10 @@ object ConfigInJavaSpec : SubjectSpek<Config>({
             }
             on("set with invalid item") {
                 it("should throw NoSuchItemException") {
-                    assertThat({ subject[invalidItem] = 1024 },
-                        throws(has(NoSuchItemException::name, equalTo(invalidItem.asName))))
+                    assertThat(
+                        { subject[invalidItem] = 1024 },
+                        throws(has(NoSuchItemException::name, equalTo(invalidItem.asName)))
+                    )
                 }
             }
             on("set with valid name") {
@@ -378,8 +450,10 @@ object ConfigInJavaSpec : SubjectSpek<Config>({
             }
             on("set with invalid name") {
                 it("should throw NoSuchItemException") {
-                    assertThat({ subject[invalidItemName] = 1024 },
-                        throws(has(NoSuchItemException::name, equalTo(invalidItemName))))
+                    assertThat(
+                        { subject[invalidItemName] = 1024 },
+                        throws(has(NoSuchItemException::name, equalTo(invalidItemName)))
+                    )
                 }
             }
             on("set with incorrect type of value") {
@@ -397,8 +471,10 @@ object ConfigInJavaSpec : SubjectSpek<Config>({
             }
             on("lazy set with invalid item") {
                 it("should throw NoSuchItemException") {
-                    assertThat({ subject.lazySet(invalidItem) { 1024 } },
-                        throws(has(NoSuchItemException::name, equalTo(invalidItem.asName))))
+                    assertThat(
+                        { subject.lazySet(invalidItem) { 1024 } },
+                        throws(has(NoSuchItemException::name, equalTo(invalidItem.asName)))
+                    )
                 }
             }
             on("lazy set with valid name") {
@@ -416,8 +492,10 @@ object ConfigInJavaSpec : SubjectSpek<Config>({
             }
             on("lazy set with invalid name") {
                 it("should throw NoSuchItemException") {
-                    assertThat({ subject.lazySet(invalidItemName) { 1024 } },
-                        throws(has(NoSuchItemException::name, equalTo(invalidItemName))))
+                    assertThat(
+                        { subject.lazySet(invalidItemName) { 1024 } },
+                        throws(has(NoSuchItemException::name, equalTo(invalidItemName)))
+                    )
                 }
             }
             on("unset with valid item") {
@@ -428,8 +506,10 @@ object ConfigInJavaSpec : SubjectSpek<Config>({
             }
             on("unset with invalid item") {
                 it("should throw NoSuchItemException") {
-                    assertThat({ subject.unset(invalidItem) },
-                        throws(has(NoSuchItemException::name, equalTo(invalidItem.asName))))
+                    assertThat(
+                        { subject.unset(invalidItem) },
+                        throws(has(NoSuchItemException::name, equalTo(invalidItem.asName)))
+                    )
                 }
             }
             on("unset with valid name") {
@@ -440,8 +520,10 @@ object ConfigInJavaSpec : SubjectSpek<Config>({
             }
             on("unset with invalid name") {
                 it("should throw NoSuchItemException") {
-                    assertThat({ subject.unset(invalidItemName) },
-                        throws(has(NoSuchItemException::name, equalTo(invalidItemName))))
+                    assertThat(
+                        { subject.unset(invalidItemName) },
+                        throws(has(NoSuchItemException::name, equalTo(invalidItemName)))
+                    )
                 }
             }
         }
@@ -470,10 +552,13 @@ object ConfigInJavaSpec : SubjectSpek<Config>({
             }
             on("declare a property by invalid item") {
                 it("should throw NoSuchItemException") {
-                    assertThat({
-                        @Suppress("UNUSED_VARIABLE")
-                        var nameProperty by subject.property(invalidItem)
-                    }, throws(has(NoSuchItemException::name, equalTo(invalidItem.asName))))
+                    assertThat(
+                        {
+                            @Suppress("UNUSED_VARIABLE")
+                            var nameProperty by subject.property(invalidItem)
+                        },
+                        throws(has(NoSuchItemException::name, equalTo(invalidItem.asName)))
+                    )
                 }
             }
             on("declare a property by name") {
@@ -488,10 +573,13 @@ object ConfigInJavaSpec : SubjectSpek<Config>({
             }
             on("declare a property by invalid name") {
                 it("should throw NoSuchItemException") {
-                    assertThat({
-                        @Suppress("UNUSED_VARIABLE")
-                        var nameProperty by subject.property<Int>(invalidItemName)
-                    }, throws(has(NoSuchItemException::name, equalTo(invalidItemName))))
+                    assertThat(
+                        {
+                            @Suppress("UNUSED_VARIABLE")
+                            var nameProperty by subject.property<Int>(invalidItemName)
+                        },
+                        throws(has(NoSuchItemException::name, equalTo(invalidItemName)))
+                    )
                 }
             }
         }

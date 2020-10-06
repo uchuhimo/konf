@@ -19,11 +19,11 @@ package com.uchuhimo.konf.source.xml
 import com.uchuhimo.konf.Config
 import com.uchuhimo.konf.source.Writer
 import com.uchuhimo.konf.source.base.toFlatMap
-import java.io.OutputStream
 import org.dom4j.Document
 import org.dom4j.DocumentHelper
 import org.dom4j.io.OutputFormat
 import org.dom4j.io.XMLWriter
+import java.io.OutputStream
 
 /**
  * Writer for XML source.

@@ -227,7 +227,8 @@ open class BaseConfig(
                         } else {
                             throw InvalidLazySetException(
                                 "fail to cast null to ${item.type.rawClass}" +
-                                    " when getting item ${item.name} in config")
+                                    " when getting item ${item.name} in config"
+                            )
                         }
                     } else {
                         if (item.type.rawClass.isInstance(value)) {
@@ -235,7 +236,8 @@ open class BaseConfig(
                         } else {
                             throw InvalidLazySetException(
                                 "fail to cast $value with ${value::class} to ${item.type.rawClass}" +
-                                    " when getting item ${item.name} in config")
+                                    " when getting item ${item.name} in config"
+                            )
                         }
                     }
                 }
@@ -352,7 +354,8 @@ open class BaseConfig(
                 } else {
                     throw ClassCastException(
                         "fail to cast null to ${item.type.rawClass}" +
-                            " when setting item ${item.name} in config")
+                            " when setting item ${item.name} in config"
+                    )
                 }
             } else {
                 if (item.type.rawClass.isInstance(value)) {
@@ -363,7 +366,8 @@ open class BaseConfig(
                 } else {
                     throw ClassCastException(
                         "fail to cast $value with ${value::class} to ${item.type.rawClass}" +
-                            " when setting item ${item.name} in config")
+                            " when setting item ${item.name} in config"
+                    )
                 }
             }
         } else {
@@ -639,4 +643,5 @@ fun createDefaultMapper(): ObjectMapper = jacksonObjectMapper()
         JavaTimeModule()
             .addDeserializer(Duration::class.java, DurationDeserializer)
             .addDeserializer(OffsetDateTime::class.java, OffsetDateTimeDeserializer)
-            .addDeserializer(ZonedDateTime::class.java, ZoneDateTimeDeserializer))
+            .addDeserializer(ZonedDateTime::class.java, ZoneDateTimeDeserializer)
+    )

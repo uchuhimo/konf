@@ -41,9 +41,14 @@ object MultipleDefaultLoadersSpec : Spek({
         val afterLoadFlat = afterLoadYaml.from.map.flat(mapOf("source.test.type" to "flat"))
         val afterLoadKv = afterLoadFlat.from.map.kv(mapOf("source.test.type" to "kv"))
         val afterLoadHierarchical = afterLoadKv.from.map.hierarchical(
-            mapOf("source" to
-                mapOf("test" to
-                    mapOf("type" to "hierarchical"))))
+            mapOf(
+                "source" to
+                    mapOf(
+                        "test" to
+                            mapOf("type" to "hierarchical")
+                    )
+            )
+        )
         it("should load the corresponding value in each layer") {
             assertThat(afterLoadEnv[item], equalTo("env"))
             assertThat(afterLoadSystemProperties[item], equalTo("system"))
@@ -61,7 +66,8 @@ object MultipleDefaultLoadersSpec : Spek({
 })
 
 //language=Json
-const val jsonContent = """
+const val jsonContent =
+    """
 {
   "source": {
     "test": {

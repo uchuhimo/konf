@@ -50,7 +50,8 @@ open class ListSourceNode(
 ) : ListNode, MapNode {
     override val children: MutableMap<String, TreeNode>
         get() = Collections.unmodifiableMap(
-            list.withIndex().associate { (key, value) -> key.toString() to value })
+            list.withIndex().associate { (key, value) -> key.toString() to value }
+        )
 
     override fun withList(list: List<TreeNode>): ListNode {
         return ListSourceNode(list)

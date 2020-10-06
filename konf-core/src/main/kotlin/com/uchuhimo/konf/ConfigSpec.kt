@@ -45,8 +45,9 @@ open class ConfigSpec @JvmOverloads constructor(
                         when (firstLowerCaseIndex) {
                             0 -> name
                             1 -> name[0].toLowerCase() + name.drop(1)
-                            else -> name.substring(0, firstLowerCaseIndex - 1).toLowerCase() +
-                                name.substring(firstLowerCaseIndex - 1)
+                            else ->
+                                name.substring(0, firstLowerCaseIndex - 1).toLowerCase() +
+                                    name.substring(firstLowerCaseIndex - 1)
                         }
                     }
                 }

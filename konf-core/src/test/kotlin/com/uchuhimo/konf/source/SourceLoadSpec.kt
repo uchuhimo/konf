@@ -21,6 +21,11 @@ import com.natpryce.hamkrest.equalTo
 import com.uchuhimo.konf.Config
 import com.uchuhimo.konf.SizeInBytes
 import com.uchuhimo.konf.toSizeInBytes
+import org.jetbrains.spek.api.dsl.given
+import org.jetbrains.spek.api.dsl.it
+import org.jetbrains.spek.api.dsl.on
+import org.jetbrains.spek.subject.SubjectSpek
+import org.jetbrains.spek.subject.itBehavesLike
 import java.io.ObjectInputStream
 import java.io.ObjectOutputStream
 import java.math.BigDecimal
@@ -40,11 +45,6 @@ import java.util.Date
 import java.util.SortedSet
 import kotlin.test.assertNull
 import kotlin.test.assertTrue
-import org.jetbrains.spek.api.dsl.given
-import org.jetbrains.spek.api.dsl.it
-import org.jetbrains.spek.api.dsl.on
-import org.jetbrains.spek.subject.SubjectSpek
-import org.jetbrains.spek.subject.itBehavesLike
 
 object SourceLoadSpec : SubjectSpek<Config>({
 
@@ -74,99 +74,176 @@ object SourceLoadSpec : SubjectSpek<Config>({
                 assertThat(subject[ConfigForLoad.char], equalTo('a'))
 
                 assertThat(subject[ConfigForLoad.string], equalTo("string"))
-                assertThat(subject[ConfigForLoad.offsetTime],
-                    equalTo(OffsetTime.parse("10:15:30+01:00")))
-                assertThat(subject[ConfigForLoad.offsetDateTime],
-                    equalTo(OffsetDateTime.parse("2007-12-03T10:15:30+01:00")))
-                assertThat(subject[ConfigForLoad.zonedDateTime],
-                    equalTo(ZonedDateTime.parse("2007-12-03T10:15:30+01:00[Europe/Paris]")))
-                assertThat(subject[ConfigForLoad.localDate],
-                    equalTo(LocalDate.parse("2007-12-03")))
-                assertThat(subject[ConfigForLoad.localTime],
-                    equalTo(LocalTime.parse("10:15:30")))
-                assertThat(subject[ConfigForLoad.localDateTime],
-                    equalTo(LocalDateTime.parse("2007-12-03T10:15:30")))
-                assertThat(subject[ConfigForLoad.date],
-                    equalTo(Date.from(Instant.parse("2007-12-03T10:15:30Z"))))
-                assertThat(subject[ConfigForLoad.year],
-                    equalTo(Year.parse("2007")))
-                assertThat(subject[ConfigForLoad.yearMonth],
-                    equalTo(YearMonth.parse("2007-12")))
-                assertThat(subject[ConfigForLoad.instant],
-                    equalTo(Instant.parse("2007-12-03T10:15:30.00Z")))
-                assertThat(subject[ConfigForLoad.duration],
-                    equalTo(Duration.parse("P2DT3H4M")))
-                assertThat(subject[ConfigForLoad.simpleDuration],
-                    equalTo(Duration.ofMillis(200)))
+                assertThat(
+                    subject[ConfigForLoad.offsetTime],
+                    equalTo(OffsetTime.parse("10:15:30+01:00"))
+                )
+                assertThat(
+                    subject[ConfigForLoad.offsetDateTime],
+                    equalTo(OffsetDateTime.parse("2007-12-03T10:15:30+01:00"))
+                )
+                assertThat(
+                    subject[ConfigForLoad.zonedDateTime],
+                    equalTo(ZonedDateTime.parse("2007-12-03T10:15:30+01:00[Europe/Paris]"))
+                )
+                assertThat(
+                    subject[ConfigForLoad.localDate],
+                    equalTo(LocalDate.parse("2007-12-03"))
+                )
+                assertThat(
+                    subject[ConfigForLoad.localTime],
+                    equalTo(LocalTime.parse("10:15:30"))
+                )
+                assertThat(
+                    subject[ConfigForLoad.localDateTime],
+                    equalTo(LocalDateTime.parse("2007-12-03T10:15:30"))
+                )
+                assertThat(
+                    subject[ConfigForLoad.date],
+                    equalTo(Date.from(Instant.parse("2007-12-03T10:15:30Z")))
+                )
+                assertThat(
+                    subject[ConfigForLoad.year],
+                    equalTo(Year.parse("2007"))
+                )
+                assertThat(
+                    subject[ConfigForLoad.yearMonth],
+                    equalTo(YearMonth.parse("2007-12"))
+                )
+                assertThat(
+                    subject[ConfigForLoad.instant],
+                    equalTo(Instant.parse("2007-12-03T10:15:30.00Z"))
+                )
+                assertThat(
+                    subject[ConfigForLoad.duration],
+                    equalTo(Duration.parse("P2DT3H4M"))
+                )
+                assertThat(
+                    subject[ConfigForLoad.simpleDuration],
+                    equalTo(Duration.ofMillis(200))
+                )
                 assertThat(subject[ConfigForLoad.size].bytes, equalTo(10240L))
 
                 assertThat(subject[ConfigForLoad.enum], equalTo(EnumForLoad.LABEL2))
 
                 // array items
-                assertTrue(Arrays.equals(
-                    subject[ConfigForLoad.booleanArray],
-                    booleanArrayOf(true, false)))
-                assertTrue(Arrays.equals(
-                    subject[ConfigForLoad.byteArray],
-                    byteArrayOf(1, 2, 3)))
-                assertTrue(Arrays.equals(
-                    subject[ConfigForLoad.shortArray],
-                    shortArrayOf(1, 2, 3)))
-                assertTrue(Arrays.equals(
-                    subject[ConfigForLoad.intArray],
-                    intArrayOf(1, 2, 3)))
-                assertTrue(Arrays.equals(
-                    subject[ConfigForLoad.longArray],
-                    longArrayOf(4, 5, 6)))
-                assertTrue(Arrays.equals(
-                    subject[ConfigForLoad.floatArray],
-                    floatArrayOf(-1.0F, 0.0F, 1.0F)))
-                assertTrue(Arrays.equals(
-                    subject[ConfigForLoad.doubleArray],
-                    doubleArrayOf(-1.0, 0.0, 1.0)))
-                assertTrue(Arrays.equals(
-                    subject[ConfigForLoad.charArray],
-                    charArrayOf('a', 'b', 'c')))
+                assertTrue(
+                    Arrays.equals(
+                        subject[ConfigForLoad.booleanArray],
+                        booleanArrayOf(true, false)
+                    )
+                )
+                assertTrue(
+                    Arrays.equals(
+                        subject[ConfigForLoad.byteArray],
+                        byteArrayOf(1, 2, 3)
+                    )
+                )
+                assertTrue(
+                    Arrays.equals(
+                        subject[ConfigForLoad.shortArray],
+                        shortArrayOf(1, 2, 3)
+                    )
+                )
+                assertTrue(
+                    Arrays.equals(
+                        subject[ConfigForLoad.intArray],
+                        intArrayOf(1, 2, 3)
+                    )
+                )
+                assertTrue(
+                    Arrays.equals(
+                        subject[ConfigForLoad.longArray],
+                        longArrayOf(4, 5, 6)
+                    )
+                )
+                assertTrue(
+                    Arrays.equals(
+                        subject[ConfigForLoad.floatArray],
+                        floatArrayOf(-1.0F, 0.0F, 1.0F)
+                    )
+                )
+                assertTrue(
+                    Arrays.equals(
+                        subject[ConfigForLoad.doubleArray],
+                        doubleArrayOf(-1.0, 0.0, 1.0)
+                    )
+                )
+                assertTrue(
+                    Arrays.equals(
+                        subject[ConfigForLoad.charArray],
+                        charArrayOf('a', 'b', 'c')
+                    )
+                )
 
                 // object array items
-                assertTrue(Arrays.equals(
-                    subject[ConfigForLoad.booleanObjectArray],
-                    arrayOf(true, false)))
-                assertTrue(Arrays.equals(
-                    subject[ConfigForLoad.intObjectArray],
-                    arrayOf(1, 2, 3)))
-                assertTrue(Arrays.equals(
-                    subject[ConfigForLoad.stringArray],
-                    arrayOf("one", "two", "three")))
-                assertTrue(Arrays.equals(
-                    subject[ConfigForLoad.enumArray],
-                    arrayOf(EnumForLoad.LABEL1, EnumForLoad.LABEL2, EnumForLoad.LABEL3)))
+                assertTrue(
+                    Arrays.equals(
+                        subject[ConfigForLoad.booleanObjectArray],
+                        arrayOf(true, false)
+                    )
+                )
+                assertTrue(
+                    Arrays.equals(
+                        subject[ConfigForLoad.intObjectArray],
+                        arrayOf(1, 2, 3)
+                    )
+                )
+                assertTrue(
+                    Arrays.equals(
+                        subject[ConfigForLoad.stringArray],
+                        arrayOf("one", "two", "three")
+                    )
+                )
+                assertTrue(
+                    Arrays.equals(
+                        subject[ConfigForLoad.enumArray],
+                        arrayOf(EnumForLoad.LABEL1, EnumForLoad.LABEL2, EnumForLoad.LABEL3)
+                    )
+                )
 
                 assertThat(subject[ConfigForLoad.list], equalTo(listOf(1, 2, 3)))
 
-                assertTrue(Arrays.equals(
-                    subject[ConfigForLoad.mutableList].toTypedArray(),
-                    arrayOf(1, 2, 3)))
+                assertTrue(
+                    Arrays.equals(
+                        subject[ConfigForLoad.mutableList].toTypedArray(),
+                        arrayOf(1, 2, 3)
+                    )
+                )
 
-                assertThat(subject[ConfigForLoad.listOfList],
-                    equalTo(listOf(listOf(1, 2), listOf(3, 4))))
+                assertThat(
+                    subject[ConfigForLoad.listOfList],
+                    equalTo(listOf(listOf(1, 2), listOf(3, 4)))
+                )
 
                 assertThat(subject[ConfigForLoad.set], equalTo(setOf(1, 2)))
 
-                assertThat(subject[ConfigForLoad.sortedSet],
-                    equalTo<SortedSet<Int>>(sortedSetOf(1, 2, 3)))
+                assertThat(
+                    subject[ConfigForLoad.sortedSet],
+                    equalTo<SortedSet<Int>>(sortedSetOf(1, 2, 3))
+                )
 
-                assertThat(subject[ConfigForLoad.map],
-                    equalTo(mapOf("a" to 1, "b" to 2, "c" to 3)))
-                assertThat(subject[ConfigForLoad.sortedMap],
-                    equalTo(sortedMapOf("a" to 1, "b" to 2, "c" to 3)))
+                assertThat(
+                    subject[ConfigForLoad.map],
+                    equalTo(mapOf("a" to 1, "b" to 2, "c" to 3))
+                )
+                assertThat(
+                    subject[ConfigForLoad.sortedMap],
+                    equalTo(sortedMapOf("a" to 1, "b" to 2, "c" to 3))
+                )
                 assertThat(subject[ConfigForLoad.sortedMap].firstKey(), equalTo("a"))
                 assertThat(subject[ConfigForLoad.sortedMap].lastKey(), equalTo("c"))
-                assertThat(subject[ConfigForLoad.listOfMap],
-                    equalTo(listOf(mapOf("a" to 1, "b" to 2), mapOf("a" to 3, "b" to 4))))
+                assertThat(
+                    subject[ConfigForLoad.listOfMap],
+                    equalTo(listOf(mapOf("a" to 1, "b" to 2), mapOf("a" to 3, "b" to 4)))
+                )
 
-                assertTrue(Arrays.equals(subject[ConfigForLoad.nested],
-                    arrayOf(listOf(setOf(mapOf("a" to 1))))))
+                assertTrue(
+                    Arrays.equals(
+                        subject[ConfigForLoad.nested],
+                        arrayOf(listOf(setOf(mapOf("a" to 1))))
+                    )
+                )
 
                 assertThat(subject[ConfigForLoad.pair], equalTo(1 to 2))
 
@@ -200,7 +277,8 @@ object SourceLoadSpec : SubjectSpek<Config>({
                     size = SizeInBytes.parse("10k"),
                     enum = EnumForLoad.LABEL2,
                     booleanArray = booleanArrayOf(true, false),
-                    nested = arrayOf(listOf(setOf(mapOf("a" to 1)))))
+                    nested = arrayOf(listOf(setOf(mapOf("a" to 1))))
+                )
                 assertThat(subject[ConfigForLoad.clazz].empty, equalTo(classForLoad.empty))
                 assertThat(subject[ConfigForLoad.clazz].literalEmpty, equalTo(classForLoad.literalEmpty))
                 assertThat(subject[ConfigForLoad.clazz].present, equalTo(classForLoad.present))
@@ -344,7 +422,8 @@ private val loadContent = mapOf<String, Any>(
     "map" to mapOf(
         "a" to 1,
         "b" to 2,
-        "c" to 3),
+        "c" to 3
+    ),
     "sortedMap" to mapOf(
         "c" to 3,
         "b" to 2,

@@ -23,12 +23,12 @@ import com.natpryce.hamkrest.has
 import com.natpryce.hamkrest.isIn
 import com.natpryce.hamkrest.sameInstance
 import com.natpryce.hamkrest.throws
-import kotlin.test.assertFalse
-import kotlin.test.assertTrue
 import org.jetbrains.spek.api.Spek
 import org.jetbrains.spek.api.dsl.given
 import org.jetbrains.spek.api.dsl.it
 import org.jetbrains.spek.api.dsl.on
+import kotlin.test.assertFalse
+import kotlin.test.assertTrue
 
 object ConfigSpecTestSpec : Spek({
     given("a configSpec") {
@@ -51,9 +51,13 @@ object ConfigSpecTestSpec : Spek({
                         assertThat(item.spec, equalTo(spec))
                     }
                     it("should have specified type") {
-                        assertThat(item.type,
-                            equalTo(TypeFactory.defaultInstance()
-                                .constructType(Int::class.javaObjectType)))
+                        assertThat(
+                            item.type,
+                            equalTo(
+                                TypeFactory.defaultInstance()
+                                    .constructType(Int::class.javaObjectType)
+                            )
+                        )
                     }
                 }
             }
@@ -125,8 +129,10 @@ object ConfigSpecTestSpec : Spek({
             val item by Spec.dummy.required<Int>()
             spec.addItem(item)
             it("should throw RepeatedItemException") {
-                assertThat({ spec.addItem(item) },
-                    throws(has(RepeatedItemException::name, equalTo("item"))))
+                assertThat(
+                    { spec.addItem(item) },
+                    throws(has(RepeatedItemException::name, equalTo("item")))
+                )
             }
         }
         on("add inner spec") {
@@ -137,8 +143,10 @@ object ConfigSpecTestSpec : Spek({
                 assertThat(spec.innerSpecs, equalTo(setOf(innerSpec)))
             }
             it("should throw RepeatedInnerSpecException when adding repeated spec") {
-                assertThat({ spec.addInnerSpec(innerSpec) },
-                    throws(has(RepeatedInnerSpecException::spec, equalTo(innerSpec))))
+                assertThat(
+                    { spec.addInnerSpec(innerSpec) },
+                    throws(has(RepeatedInnerSpecException::spec, equalTo(innerSpec)))
+                )
             }
         }
         val spec = Nested
@@ -173,9 +181,12 @@ object ConfigSpecTestSpec : Spek({
                     assertThat({ spec["b"] }, throws(has(NoSuchPathException::path, equalTo("b"))))
                     assertThat({ spec["a."] }, throws<InvalidPathException>())
                     assertThat({ spec["a.b"] }, throws(has(NoSuchPathException::path, equalTo("a.b"))))
-                    assertThat({
-                        spec["a.bb.inner4"]
-                    }, throws(has(NoSuchPathException::path, equalTo("a.bb.inner4"))))
+                    assertThat(
+                        {
+                            spec["a.bb.inner4"]
+                        },
+                        throws(has(NoSuchPathException::path, equalTo("a.bb.inner4")))
+                    )
                 }
             }
         }
@@ -215,8 +226,10 @@ object ConfigSpecTestSpec : Spek({
             }
             on("add a repeated item") {
                 it("should throw RepeatedItemException") {
-                    assertThat({ spec.addItem(spec1.item1) },
-                        throws(has(RepeatedItemException::name, equalTo("item1"))))
+                    assertThat(
+                        { spec.addItem(spec1.item1) },
+                        throws(has(RepeatedItemException::name, equalTo("item1")))
+                    )
                 }
             }
             on("get the list of items") {
@@ -250,8 +263,10 @@ object ConfigSpecTestSpec : Spek({
             }
             on("add a repeated item") {
                 it("should throw RepeatedItemException") {
-                    assertThat({ spec.addItem(spec1.item1) },
-                        throws(has(RepeatedItemException::name, equalTo("item1"))))
+                    assertThat(
+                        { spec.addItem(spec1.item1) },
+                        throws(has(RepeatedItemException::name, equalTo("item1")))
+                    )
                 }
             }
             on("get the list of items") {

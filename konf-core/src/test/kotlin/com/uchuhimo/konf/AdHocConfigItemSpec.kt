@@ -20,18 +20,20 @@ import com.natpryce.hamkrest.assertion.assertThat
 import com.natpryce.hamkrest.equalTo
 import com.uchuhimo.konf.source.Source
 import com.uchuhimo.konf.source.toValue
-import kotlin.test.assertNull
 import org.jetbrains.spek.api.Spek
 import org.jetbrains.spek.api.dsl.it
 import org.jetbrains.spek.api.dsl.on
+import kotlin.test.assertNull
 
 object AdHocConfigItemSpec : Spek({
     on("load config into ad-hoc config class with ad-hoc config items") {
-        val config = Config().from.map.kv(mapOf(
-            "network.buffer.size" to 1,
-            "network.buffer.heap.type" to AdHocNetworkBuffer.Type.ON_HEAP,
-            "network.buffer.offset" to 0
-        ))
+        val config = Config().from.map.kv(
+            mapOf(
+                "network.buffer.size" to 1,
+                "network.buffer.heap.type" to AdHocNetworkBuffer.Type.ON_HEAP,
+                "network.buffer.offset" to 0
+            )
+        )
         val networkBuffer = AdHocNetworkBuffer(config)
         it("should load correct values") {
             assertThat(networkBuffer.size, equalTo(1))
@@ -41,13 +43,15 @@ object AdHocConfigItemSpec : Spek({
             assertThat(networkBuffer.offset, equalTo(0))
         }
     }
-    val configForCast = Config().from.map.hierarchical(mapOf(
-        "size" to 1,
-        "maxSize" to 2,
-        "name" to "buffer",
-        "type" to "ON_HEAP",
-        "offset" to "null"
-    ))
+    val configForCast = Config().from.map.hierarchical(
+        mapOf(
+            "size" to 1,
+            "maxSize" to 2,
+            "name" to "buffer",
+            "type" to "ON_HEAP",
+            "offset" to "null"
+        )
+    )
     on("cast config to config class property") {
         val networkBufferForCast: NetworkBufferForCast by configForCast.cast()
         it("should load correct values") {
@@ -69,13 +73,15 @@ object AdHocConfigItemSpec : Spek({
         }
     }
     on("cast source to config class") {
-        val networkBufferForCast = Source.from.map.hierarchical(mapOf(
-            "size" to 1,
-            "maxSize" to 2,
-            "name" to "buffer",
-            "type" to "ON_HEAP",
-            "offset" to "null"
-        )).toValue<NetworkBufferForCast>()
+        val networkBufferForCast = Source.from.map.hierarchical(
+            mapOf(
+                "size" to 1,
+                "maxSize" to 2,
+                "name" to "buffer",
+                "type" to "ON_HEAP",
+                "offset" to "null"
+            )
+        ).toValue<NetworkBufferForCast>()
         it("should load correct values") {
             assertThat(networkBufferForCast.size, equalTo(1))
             assertThat(networkBufferForCast.maxSize, equalTo(2))

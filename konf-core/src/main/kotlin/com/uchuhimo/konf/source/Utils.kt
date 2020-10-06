@@ -58,7 +58,8 @@ internal fun parseDuration(input: String): Long {
 
     // note that this is deliberately case-sensitive
     val units = if (unitString == "" || unitString == "ms" || unitString == "millis" ||
-        unitString == "milliseconds") {
+        unitString == "milliseconds"
+    ) {
         TimeUnit.MILLISECONDS
     } else if (unitString == "us" || unitString == "micros" || unitString == "microseconds") {
         TimeUnit.MICROSECONDS

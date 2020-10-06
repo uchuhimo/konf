@@ -22,10 +22,10 @@ import com.uchuhimo.konf.Config
 import com.uchuhimo.konf.snippet.Server
 import com.uchuhimo.konf.snippet.ServerSpec
 import com.uchuhimo.konf.toValue
-import java.io.File
 import org.jetbrains.spek.api.Spek
 import org.jetbrains.spek.api.dsl.it
 import org.jetbrains.spek.api.dsl.on
+import java.io.File
 
 object QuickStartSpec : Spek({
     on("use default loaders") {
@@ -37,8 +37,10 @@ object QuickStartSpec : Spek({
                 .from.systemProperties()
         }
         it("should load all values") {
-            assertThat(config.toMap(),
-                equalTo(mapOf("server.host" to "127.0.0.1", "server.port" to 8080)))
+            assertThat(
+                config.toMap(),
+                equalTo(mapOf("server.host" to "127.0.0.1", "server.port" to 8080))
+            )
         }
     }
     on("use default providers") {
@@ -51,8 +53,10 @@ object QuickStartSpec : Spek({
             )
         }
         it("should load all values") {
-            assertThat(config.toMap(),
-                equalTo(mapOf("server.host" to "127.0.0.1", "server.port" to 8080)))
+            assertThat(
+                config.toMap(),
+                equalTo(mapOf("server.host" to "127.0.0.1", "server.port" to 8080))
+            )
         }
     }
     on("watch file") {
@@ -64,8 +68,10 @@ object QuickStartSpec : Spek({
                 .from.systemProperties()
         }
         it("should load all values") {
-            assertThat(config.toMap(),
-                equalTo(mapOf("server.host" to "127.0.0.1", "server.port" to 8080)))
+            assertThat(
+                config.toMap(),
+                equalTo(mapOf("server.host" to "127.0.0.1", "server.port" to 8080))
+            )
         }
     }
     on("cast config to value") {
@@ -84,10 +90,12 @@ object QuickStartSpec : Spek({
     }
     on("cast source to value") {
         val source = useFile {
-            (Source.from.yaml.file("server.yml") +
-                Source.from.json.resource("server.json") +
-                Source.from.env() +
-                Source.from.systemProperties())["server"]
+            (
+                Source.from.yaml.file("server.yml") +
+                    Source.from.json.resource("server.json") +
+                    Source.from.env() +
+                    Source.from.systemProperties()
+                )["server"]
         }
         val server = source.toValue<Server>()
         it("should load all values") {
@@ -99,11 +107,13 @@ object QuickStartSpec : Spek({
 private fun <T> useFile(block: () -> T): T {
     val file = File("server.yml")
     //language=YAML
-    file.writeText("""
+    file.writeText(
+        """
         server:
             host: 127.0.0.1
             port: 8080
-    """.trimIndent())
+        """.trimIndent()
+    )
     try {
         return block()
     } finally {

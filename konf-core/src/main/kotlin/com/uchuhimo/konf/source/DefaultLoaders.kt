@@ -24,11 +24,11 @@ import com.uchuhimo.konf.source.base.MapSource
 import com.uchuhimo.konf.source.env.EnvProvider
 import com.uchuhimo.konf.source.json.JsonProvider
 import com.uchuhimo.konf.source.properties.PropertiesProvider
+import kotlinx.coroutines.Dispatchers
 import java.io.File
 import java.net.URL
 import java.util.concurrent.TimeUnit
 import kotlin.coroutines.CoroutineContext
-import kotlinx.coroutines.Dispatchers
 
 /**
  * Default loaders for config.
@@ -134,8 +134,11 @@ class DefaultLoaders(
      * @return the corresponding loader based on extension
      */
     fun dispatchExtension(extension: String, source: String = ""): Loader =
-        Loader(config, Provider.of(extension)?.orMapped()
-            ?: throw UnsupportedExtensionException(source))
+        Loader(
+            config,
+            Provider.of(extension)?.orMapped()
+                ?: throw UnsupportedExtensionException(source)
+        )
 
     /**
      * Returns a child config containing values from specified file.

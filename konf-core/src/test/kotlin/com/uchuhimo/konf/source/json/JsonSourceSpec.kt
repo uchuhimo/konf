@@ -30,14 +30,14 @@ import com.natpryce.hamkrest.throws
 import com.uchuhimo.konf.source.WrongTypeException
 import com.uchuhimo.konf.source.asValue
 import com.uchuhimo.konf.toPath
-import java.math.BigDecimal
-import java.math.BigInteger
-import kotlin.test.assertNull
-import kotlin.test.assertTrue
 import org.jetbrains.spek.api.Spek
 import org.jetbrains.spek.api.dsl.given
 import org.jetbrains.spek.api.dsl.it
 import org.jetbrains.spek.api.dsl.on
+import java.math.BigDecimal
+import java.math.BigInteger
+import kotlin.test.assertNull
+import kotlin.test.assertTrue
 
 object JsonSourceSpec : Spek({
     given("a JSON source") {
@@ -122,26 +122,34 @@ object JsonSourceSpec : Spek({
             }
             on("get BigInteger from BigInteger source") {
                 it("should succeed") {
-                    assertThat(JsonSource(BigIntegerNode.valueOf(BigInteger.valueOf(1L))).asValue<BigInteger>(),
-                        equalTo(BigInteger.valueOf(1L)))
+                    assertThat(
+                        JsonSource(BigIntegerNode.valueOf(BigInteger.valueOf(1L))).asValue<BigInteger>(),
+                        equalTo(BigInteger.valueOf(1L))
+                    )
                 }
             }
             on("get BigInteger from long source") {
                 it("should succeed") {
-                    assertThat(JsonSource(LongNode.valueOf(1L)).asValue<BigInteger>(),
-                        equalTo(BigInteger.valueOf(1L)))
+                    assertThat(
+                        JsonSource(LongNode.valueOf(1L)).asValue<BigInteger>(),
+                        equalTo(BigInteger.valueOf(1L))
+                    )
                 }
             }
             on("get BigDecimal from BigDecimal source") {
                 it("should succeed") {
-                    assertThat(JsonSource(DecimalNode.valueOf(BigDecimal.valueOf(1.0))).asValue<BigDecimal>(),
-                        equalTo(BigDecimal.valueOf(1.0)))
+                    assertThat(
+                        JsonSource(DecimalNode.valueOf(BigDecimal.valueOf(1.0))).asValue<BigDecimal>(),
+                        equalTo(BigDecimal.valueOf(1.0))
+                    )
                 }
             }
             on("get BigDecimal from double source") {
                 it("should succeed") {
-                    assertThat(JsonSource(DoubleNode.valueOf(1.0)).asValue<BigDecimal>(),
-                        equalTo(BigDecimal.valueOf(1.0)))
+                    assertThat(
+                        JsonSource(DoubleNode.valueOf(1.0)).asValue<BigDecimal>(),
+                        equalTo(BigDecimal.valueOf(1.0))
+                    )
                 }
             }
         }

@@ -21,10 +21,10 @@ import com.uchuhimo.konf.source.Provider
 import com.uchuhimo.konf.source.RegisterExtension
 import com.uchuhimo.konf.source.Source
 import com.uchuhimo.konf.source.base.FlatSource
-import java.io.InputStream
-import java.io.Reader
 import org.dom4j.Document
 import org.dom4j.io.SAXReader
+import java.io.InputStream
+import java.io.Reader
 
 /**
  * Provider for XML source.

@@ -39,7 +39,7 @@ object EnvProvider {
             System.getenv().mapKeys { (key, _) ->
                 val lowerCasedKey = key.toLowerCase()
                 if (nested) lowerCasedKey.replace('_', '.') else lowerCasedKey
-                }.filter { (key, _) ->
+            }.filter { (key, _) ->
                 key.matches(validEnv)
             }.toSortedMap(),
             type = "system-environment",

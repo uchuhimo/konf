@@ -41,7 +41,8 @@ object TomlProviderSpec : SubjectSpek<TomlProvider>({
         }
         on("create source from input stream") {
             val source = subject.inputStream(
-                tempFileOf("type = \"inputStream\"").inputStream())
+                tempFileOf("type = \"inputStream\"").inputStream()
+            )
             it("should have correct type") {
                 assertThat(source.info["type"], equalTo("TOML"))
             }

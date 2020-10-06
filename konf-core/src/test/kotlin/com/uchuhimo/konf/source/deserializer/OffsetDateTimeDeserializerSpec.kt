@@ -22,11 +22,11 @@ import com.uchuhimo.konf.Config
 import com.uchuhimo.konf.ConfigSpec
 import com.uchuhimo.konf.source.ObjectMappingException
 import com.uchuhimo.konf.source.assertCausedBy
-import java.time.OffsetDateTime
 import org.jetbrains.spek.api.Spek
 import org.jetbrains.spek.api.dsl.given
 import org.jetbrains.spek.api.dsl.it
 import org.jetbrains.spek.api.dsl.on
+import java.time.OffsetDateTime
 
 object OffsetDateTimeDeserializerSpec : Spek({
     val spec = object : ConfigSpec() {
@@ -42,8 +42,10 @@ object OffsetDateTimeDeserializerSpec : Spek({
         on("deserialize valid string") {
             config.from.map.kv(mapOf("item" to mapOf("offsetDateTime" to "2007-12-03T10:15:30+01:00"))).apply {
                 it("should succeed") {
-                    assertThat(this@apply[spec.item].offsetDateTime,
-                        equalTo(OffsetDateTime.parse("2007-12-03T10:15:30+01:00")))
+                    assertThat(
+                        this@apply[spec.item].offsetDateTime,
+                        equalTo(OffsetDateTime.parse("2007-12-03T10:15:30+01:00"))
+                    )
                 }
             }
         }

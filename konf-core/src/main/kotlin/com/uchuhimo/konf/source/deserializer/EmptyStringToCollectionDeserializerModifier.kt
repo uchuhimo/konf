@@ -51,8 +51,13 @@ object EmptyStringToCollectionDeserializerModifier : BeanDeserializerModifier() 
                 ctx: DeserializationContext?,
                 property: BeanProperty?
             ): JsonDeserializer<*>? =
-                modifyMapDeserializer(config, type, beanDesc, (deserializer as ContextualDeserializer)
-                    .createContextual(ctx, property))
+                modifyMapDeserializer(
+                    config,
+                    type,
+                    beanDesc,
+                    (deserializer as ContextualDeserializer)
+                        .createContextual(ctx, property)
+                )
 
             override fun resolve(ctx: DeserializationContext?) {
                 (deserializer as? ResolvableDeserializer)?.resolve(ctx)
@@ -78,8 +83,13 @@ object EmptyStringToCollectionDeserializerModifier : BeanDeserializerModifier() 
                 ctx: DeserializationContext?,
                 property: BeanProperty?
             ): JsonDeserializer<*>? =
-                modifyCollectionDeserializer(config, type, beanDesc, (deserializer as ContextualDeserializer)
-                    .createContextual(ctx, property))
+                modifyCollectionDeserializer(
+                    config,
+                    type,
+                    beanDesc,
+                    (deserializer as ContextualDeserializer)
+                        .createContextual(ctx, property)
+                )
         }
 
     override fun modifyArrayDeserializer(
@@ -106,7 +116,12 @@ object EmptyStringToCollectionDeserializerModifier : BeanDeserializerModifier() 
                 ctx: DeserializationContext?,
                 property: BeanProperty?
             ): JsonDeserializer<*>? =
-                modifyArrayDeserializer(config, valueType, beanDesc, (deserializer as ContextualDeserializer)
-                    .createContextual(ctx, property))
+                modifyArrayDeserializer(
+                    config,
+                    valueType,
+                    beanDesc,
+                    (deserializer as ContextualDeserializer)
+                        .createContextual(ctx, property)
+                )
         }
 }

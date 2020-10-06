@@ -21,10 +21,10 @@ import com.natpryce.hamkrest.equalTo
 import com.natpryce.hamkrest.throws
 import com.uchuhimo.konf.source.ParseException
 import com.uchuhimo.konf.source.toDuration
-import java.time.Duration
 import org.jetbrains.spek.api.Spek
 import org.jetbrains.spek.api.dsl.it
 import org.jetbrains.spek.api.dsl.on
+import java.time.Duration
 
 object ParseDurationSpec : Spek({
     on("parse empty string") {

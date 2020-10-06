@@ -22,12 +22,12 @@ import com.typesafe.config.ConfigObject
 import com.uchuhimo.konf.source.asSource
 import com.uchuhimo.konf.source.asValue
 import com.uchuhimo.konf.toPath
-import kotlin.test.assertNull
-import kotlin.test.assertTrue
 import org.jetbrains.spek.api.dsl.given
 import org.jetbrains.spek.api.dsl.it
 import org.jetbrains.spek.api.dsl.on
 import org.jetbrains.spek.subject.SubjectSpek
+import kotlin.test.assertNull
+import kotlin.test.assertTrue
 
 internal object HoconSourceSpec : SubjectSpek<HoconSource>({
     subject { HoconProvider.string("key = 1") as HoconSource }
@@ -56,23 +56,29 @@ internal object HoconSourceSpec : SubjectSpek<HoconSource>({
             }
         }
         on("use substitutions in source") {
-            val source = HoconProvider.string("""
+            val source = HoconProvider.string(
+                """
                 key1 = 1
                 key2 = ${'$'}{key1}
-            """.trimIndent())
+                """.trimIndent()
+            )
             it("should resolve the key") {
                 assertThat(source["key2"].asValue<Int>(), equalTo(1))
             }
         }
         on("use substitutions in source when variables are in other sources") {
-            val source = (HoconProvider.string("""
+            val source = (
+                HoconProvider.string(
+                    """
                 key1 = "1"
                 key2 = ${'$'}{key1}
                 key3 = "${'$'}{key4}"
                 key5 = "${'$'}{key1}+${'$'}{key4}"
                 key6 = "${"$$"}{key1}"
-            """.trimIndent()) +
-                mapOf("key4" to "4", "key1" to "2").asSource()).substituted().substituted()
+                    """.trimIndent()
+                ) +
+                    mapOf("key4" to "4", "key1" to "2").asSource()
+                ).substituted().substituted()
             it("should resolve the key") {
                 assertThat(source["key2"].asValue<Int>(), equalTo(1))
                 assertThat(source["key3"].asValue<Int>(), equalTo(4))

@@ -22,7 +22,6 @@ import com.natpryce.hamkrest.throws
 import com.uchuhimo.konf.Config
 import com.uchuhimo.konf.ConfigSpec
 import com.uchuhimo.konf.tempFileOf
-import java.util.concurrent.TimeUnit
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.runBlocking
@@ -31,6 +30,7 @@ import org.jetbrains.spek.api.dsl.it
 import org.jetbrains.spek.api.dsl.on
 import org.jetbrains.spek.subject.SubjectSpek
 import spark.Service
+import java.util.concurrent.TimeUnit
 
 object LoaderSpec : SubjectSpek<Loader>({
     val parentConfig = Config {
@@ -52,7 +52,8 @@ object LoaderSpec : SubjectSpek<Loader>({
         }
         on("load from input stream") {
             val config = subject.inputStream(
-                tempFileOf("type = inputStream").inputStream())
+                tempFileOf("type = inputStream").inputStream()
+            )
             it("should return a config which contains value from input stream") {
                 assertThat(config[SourceType.type], equalTo("inputStream"))
             }
@@ -290,8 +291,10 @@ object LoaderSpec : SubjectSpek<Loader>({
         }
         on("load from non-existed resource") {
             it("should throw SourceNotFoundException") {
-                assertThat({ subject.resource("source/no-provider.properties") },
-                    throws<SourceNotFoundException>())
+                assertThat(
+                    { subject.resource("source/no-provider.properties") },
+                    throws<SourceNotFoundException>()
+                )
             }
         }
     }

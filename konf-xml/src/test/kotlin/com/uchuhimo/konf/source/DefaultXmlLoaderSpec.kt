@@ -45,7 +45,8 @@ object DefaultXmlLoaderSpec : SubjectSpek<DefaultLoaders>({
 })
 
 //language=XML
-val xmlContent = """
+val xmlContent =
+    """
 <?xml version="1.0" encoding="UTF-8"?>
 <configuration>
     <property>

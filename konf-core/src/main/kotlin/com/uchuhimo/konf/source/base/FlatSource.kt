@@ -74,10 +74,14 @@ class SingleStringListNode(
     override val originalValue: Any? = null
 ) : SubstitutableNode, ListNode {
     override val children: MutableMap<String, TreeNode> = Collections.unmodifiableMap(
-        mutableMapOf("0" to value.asTree()))
+        mutableMapOf("0" to value.asTree())
+    )
     override val list: List<TreeNode> = listOf(value.asTree())
-    override fun substitute(value: String): TreeNode = value.promoteToList(true, originalValue
-        ?: this.value)
+    override fun substitute(value: String): TreeNode = value.promoteToList(
+        true,
+        originalValue
+            ?: this.value
+    )
 }
 
 class ListStringNode(

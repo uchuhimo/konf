@@ -28,12 +28,12 @@ import com.uchuhimo.konf.source.ParseException
 import com.uchuhimo.konf.source.Source
 import com.uchuhimo.konf.source.asValue
 import com.uchuhimo.konf.toPath
-import kotlin.test.assertTrue
 import org.jetbrains.spek.api.dsl.given
 import org.jetbrains.spek.api.dsl.it
 import org.jetbrains.spek.api.dsl.on
 import org.jetbrains.spek.subject.SubjectSpek
 import org.junit.jupiter.api.assertThrows
+import kotlin.test.assertTrue
 
 object FlatSourceSpec : SubjectSpek<FlatSource>({
     given("a flat map source") {
@@ -57,11 +57,13 @@ object FlatSourceSpec : SubjectSpek<FlatSource>({
         }
         group("get operation for list value") {
             val source by memoized {
-                FlatSource(map = mapOf(
-                    "empty" to "",
-                    "single" to "a",
-                    "multiple" to "a,b"
-                ))
+                FlatSource(
+                    map = mapOf(
+                        "empty" to "",
+                        "single" to "a",
+                        "multiple" to "a,b"
+                    )
+                )
             }
             on("empty string value") {
                 it("should return an empty list") {
@@ -72,14 +74,16 @@ object FlatSourceSpec : SubjectSpek<FlatSource>({
                 it("should return a list containing a single element") {
                     assertThat(
                         (source["single"].tree as ListNode).list.map { (it as ValueNode).value as String },
-                        equalTo(listOf("a")))
+                        equalTo(listOf("a"))
+                    )
                 }
             }
             on("string value with commas") {
                 it("should return a list containing multiple elements") {
                     assertThat(
                         (source["multiple"].tree as ListNode).list.map { (it as ValueNode).value as String },
-                        equalTo(listOf("a", "b")))
+                        equalTo(listOf("a", "b"))
+                    )
                 }
             }
         }

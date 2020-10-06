@@ -22,12 +22,12 @@ import com.uchuhimo.konf.source.ConfigForLoad
 import com.uchuhimo.konf.source.SourceLoadSpec
 import com.uchuhimo.konf.source.yaml
 import com.uchuhimo.konf.toValue
-import kotlin.test.assertTrue
 import org.jetbrains.spek.api.dsl.given
 import org.jetbrains.spek.api.dsl.it
 import org.jetbrains.spek.api.dsl.on
 import org.jetbrains.spek.subject.SubjectSpek
 import org.jetbrains.spek.subject.itBehavesLike
+import kotlin.test.assertTrue
 
 object YamlSourceLoadSpec : SubjectSpek<Config>({
 
@@ -42,11 +42,13 @@ object YamlSourceLoadSpec : SubjectSpek<Config>({
 
     given("a config") {
         on("load a YAML with a numeric key") {
-            val config = Config().from.yaml.string("""
+            val config = Config().from.yaml.string(
+                """
                 tree:
                   1:
                     myVal: true
-            """.trimIndent())
+                """.trimIndent()
+            )
             it("should treat it as a string key") {
                 assertTrue { config.at("tree.1.myVal").toValue() }
             }

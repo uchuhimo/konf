@@ -42,16 +42,20 @@ fun JsonNode.toTree(): TreeNode {
         isBoolean -> ValueSourceNode(booleanValue())
         isNumber -> ValueSourceNode(numberValue())
         isTextual -> ValueSourceNode(textValue())
-        isArray -> ListSourceNode(mutableListOf<TreeNode>().apply {
-            elements().forEach {
-                add(it.toTree())
+        isArray -> ListSourceNode(
+            mutableListOf<TreeNode>().apply {
+                elements().forEach {
+                    add(it.toTree())
+                }
             }
-        })
-        isObject -> ContainerNode(mutableMapOf<String, TreeNode>().apply {
-            for ((key, value) in fields()) {
-                put(key, value.toTree())
+        )
+        isObject -> ContainerNode(
+            mutableMapOf<String, TreeNode>().apply {
+                for ((key, value) in fields()) {
+                    put(key, value.toTree())
+                }
             }
-        })
+        )
         else -> throw NotImplementedError()
     }
 }

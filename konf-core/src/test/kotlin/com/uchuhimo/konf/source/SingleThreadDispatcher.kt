@@ -16,10 +16,10 @@
 
 package com.uchuhimo.konf.source
 
-import java.util.concurrent.Executors
 import kotlinx.coroutines.CoroutineDispatcher
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.asCoroutineDispatcher
+import java.util.concurrent.Executors
 
 fun newSequentialDispatcher() = Executors.newSingleThreadExecutor().asCoroutineDispatcher()
 

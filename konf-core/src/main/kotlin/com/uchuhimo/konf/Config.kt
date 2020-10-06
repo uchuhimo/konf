@@ -394,8 +394,14 @@ open class RequiredConfigProperty<T>(
         .findSuperType(RequiredConfigProperty::class.java).bindings.typeParameters[0]
 
     operator fun provideDelegate(thisRef: Any?, property: KProperty<*>): ReadWriteProperty<Any?, T> {
-        val item = object : RequiredItem<T>(Spec.dummy, name
-            ?: property.name, description, type, nullable) {}
+        val item = object : RequiredItem<T>(
+            Spec.dummy,
+            name
+                ?: property.name,
+            description,
+            type,
+            nullable
+        ) {}
         config.addItem(item, prefix)
         return config.property(item)
     }
@@ -432,11 +438,18 @@ open class OptionalConfigProperty<T>(
 
     operator fun provideDelegate(thisRef: Any?, property: KProperty<*>):
         ReadWriteProperty<Any?, T> {
-        val item = object : OptionalItem<T>(Spec.dummy, name
-            ?: property.name, default, description, type, nullable) {}
-        config.addItem(item, prefix)
-        return config.property(item)
-    }
+            val item = object : OptionalItem<T>(
+                Spec.dummy,
+                name
+                    ?: property.name,
+                default,
+                description,
+                type,
+                nullable
+            ) {}
+            config.addItem(item, prefix)
+            return config.property(item)
+        }
 }
 
 /**
@@ -470,11 +483,18 @@ open class LazyConfigProperty<T>(
 
     operator fun provideDelegate(thisRef: Any?, property: KProperty<*>):
         ReadWriteProperty<Any?, T> {
-        val item = object : LazyItem<T>(Spec.dummy, name
-            ?: property.name, thunk, description, type, nullable) {}
-        config.addItem(item, prefix)
-        return config.property(item)
-    }
+            val item = object : LazyItem<T>(
+                Spec.dummy,
+                name
+                    ?: property.name,
+                thunk,
+                description,
+                type,
+                nullable
+            ) {}
+            config.addItem(item, prefix)
+            return config.property(item)
+        }
 }
 
 /**

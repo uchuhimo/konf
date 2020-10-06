@@ -19,14 +19,14 @@ package com.uchuhimo.konf.source
 import com.uchuhimo.konf.source.base.EmptyMapSource
 import com.uchuhimo.konf.source.json.JsonProvider
 import com.uchuhimo.konf.source.properties.PropertiesProvider
+import org.reflections.ReflectionUtils
+import org.reflections.Reflections
 import java.io.File
 import java.io.IOException
 import java.io.InputStream
 import java.io.Reader
 import java.net.URL
 import java.util.concurrent.ConcurrentHashMap
-import org.reflections.ReflectionUtils
-import org.reflections.Reflections
 
 /**
  * Provides source from various input format.
@@ -338,19 +338,23 @@ interface Provider {
     }
 
     companion object {
-        private val extensionToProvider = ConcurrentHashMap(mutableMapOf(
-            "json" to JsonProvider,
-            "properties" to PropertiesProvider
-        ))
+        private val extensionToProvider = ConcurrentHashMap(
+            mutableMapOf(
+                "json" to JsonProvider,
+                "properties" to PropertiesProvider
+            )
+        )
 
         init {
             val reflections = Reflections("")
             val providers = reflections.getSubTypesOf(Provider::class.java)
                 .intersect(reflections.getTypesAnnotatedWith(RegisterExtension::class.java))
             for (provider in providers) {
-                for (annotation in ReflectionUtils.getAnnotations(provider).filter {
-                    it.annotationClass == RegisterExtension::class
-                }) {
+                for (
+                    annotation in ReflectionUtils.getAnnotations(provider).filter {
+                        it.annotationClass == RegisterExtension::class
+                    }
+                ) {
                     for (extension in (annotation as RegisterExtension).value) {
                         registerExtension(extension, provider.kotlin.objectInstance!! as Provider)
                     }

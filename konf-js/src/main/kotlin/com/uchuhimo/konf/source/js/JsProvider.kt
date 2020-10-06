@@ -21,10 +21,10 @@ import com.uchuhimo.konf.source.Provider
 import com.uchuhimo.konf.source.RegisterExtension
 import com.uchuhimo.konf.source.Source
 import com.uchuhimo.konf.source.json.JsonProvider
+import org.graalvm.polyglot.Context
 import java.io.InputStream
 import java.io.Reader
 import java.util.stream.Collectors
-import org.graalvm.polyglot.Context
 
 /**
  * Provider for JavaScript source.

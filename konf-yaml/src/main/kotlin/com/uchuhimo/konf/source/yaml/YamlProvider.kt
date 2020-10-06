@@ -21,14 +21,14 @@ import com.uchuhimo.konf.source.Provider
 import com.uchuhimo.konf.source.RegisterExtension
 import com.uchuhimo.konf.source.Source
 import com.uchuhimo.konf.source.asSource
-import java.io.InputStream
-import java.io.Reader
 import org.yaml.snakeyaml.Yaml
 import org.yaml.snakeyaml.constructor.AbstractConstruct
 import org.yaml.snakeyaml.constructor.SafeConstructor
 import org.yaml.snakeyaml.nodes.Node
 import org.yaml.snakeyaml.nodes.ScalarNode
 import org.yaml.snakeyaml.nodes.Tag
+import java.io.InputStream
+import java.io.Reader
 
 /**
  * Provider for YAML source.

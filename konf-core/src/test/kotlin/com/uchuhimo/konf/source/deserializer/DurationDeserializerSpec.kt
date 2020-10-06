@@ -22,11 +22,11 @@ import com.uchuhimo.konf.Config
 import com.uchuhimo.konf.ConfigSpec
 import com.uchuhimo.konf.source.ObjectMappingException
 import com.uchuhimo.konf.source.assertCausedBy
-import java.time.Duration
 import org.jetbrains.spek.api.Spek
 import org.jetbrains.spek.api.dsl.given
 import org.jetbrains.spek.api.dsl.it
 import org.jetbrains.spek.api.dsl.on
+import java.time.Duration
 
 object DurationDeserializerSpec : Spek({
     val spec = object : ConfigSpec() {
@@ -42,8 +42,10 @@ object DurationDeserializerSpec : Spek({
         on("deserialize valid string") {
             config.from.map.kv(mapOf("item" to mapOf("duration" to "P2DT3H4M"))).apply {
                 it("should succeed") {
-                    assertThat(this@apply[spec.item].duration,
-                        equalTo(Duration.parse("P2DT3H4M")))
+                    assertThat(
+                        this@apply[spec.item].duration,
+                        equalTo(Duration.parse("P2DT3H4M"))
+                    )
                 }
             }
         }

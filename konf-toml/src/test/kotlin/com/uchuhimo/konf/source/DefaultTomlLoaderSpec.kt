@@ -45,7 +45,8 @@ object DefaultTomlLoaderSpec : SubjectSpek<DefaultLoaders>({
 })
 
 //language=TOML
-const val tomlContent = """
+const val tomlContent =
+    """
 [source.test]
 type = "toml"
 """

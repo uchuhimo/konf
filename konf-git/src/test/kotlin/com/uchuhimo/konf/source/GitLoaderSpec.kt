@@ -21,8 +21,6 @@ import com.natpryce.hamkrest.equalTo
 import com.uchuhimo.konf.Config
 import com.uchuhimo.konf.ConfigSpec
 import com.uchuhimo.konf.source.properties.PropertiesProvider
-import java.nio.file.Paths
-import java.util.concurrent.TimeUnit
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.runBlocking
@@ -32,6 +30,8 @@ import org.jetbrains.spek.api.dsl.given
 import org.jetbrains.spek.api.dsl.it
 import org.jetbrains.spek.api.dsl.on
 import org.jetbrains.spek.subject.SubjectSpek
+import java.nio.file.Paths
+import java.util.concurrent.TimeUnit
 
 object GitLoaderSpec : SubjectSpek<Loader>({
     val parentConfig = Config {
@@ -62,25 +62,28 @@ object GitLoaderSpec : SubjectSpek<Loader>({
                 }
             }
         }
-        mapOf("load from watched git repository" to { loader: Loader, repo: String ->
-            loader.watchGit(
-                repo,
-                "test",
-                period = 1,
-                unit = TimeUnit.SECONDS,
-                context = Dispatchers.Sequential
-            )
-        }, "load from watched git repository to the given directory" to { loader: Loader, repo: String ->
-            loader.watchGit(
-                repo,
-                "test",
-                dir = createTempDir(prefix = "local_git_repo").path,
-                branch = Constants.HEAD,
-                unit = TimeUnit.SECONDS,
-                context = Dispatchers.Sequential,
-                optional = false
-            )
-        }).forEach { (description, func) ->
+        mapOf(
+            "load from watched git repository" to { loader: Loader, repo: String ->
+                loader.watchGit(
+                    repo,
+                    "test",
+                    period = 1,
+                    unit = TimeUnit.SECONDS,
+                    context = Dispatchers.Sequential
+                )
+            },
+            "load from watched git repository to the given directory" to { loader: Loader, repo: String ->
+                loader.watchGit(
+                    repo,
+                    "test",
+                    dir = createTempDir(prefix = "local_git_repo").path,
+                    branch = Constants.HEAD,
+                    unit = TimeUnit.SECONDS,
+                    context = Dispatchers.Sequential,
+                    optional = false
+                )
+            }
+        ).forEach { (description, func) ->
             on(description) {
                 createTempDir(prefix = "remote_git_repo", suffix = ".git").let { dir ->
                     val file = Paths.get(dir.path, "test").toFile()

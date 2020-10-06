@@ -24,6 +24,7 @@ package com.uchuhimo.konf.annotation
     AnnotationTarget.CONSTRUCTOR,
     AnnotationTarget.PROPERTY_GETTER,
     AnnotationTarget.PROPERTY_SETTER,
-    AnnotationTarget.CLASS)
+    AnnotationTarget.CLASS
+)
 @Retention(AnnotationRetention.SOURCE)
 annotation class JavaApi

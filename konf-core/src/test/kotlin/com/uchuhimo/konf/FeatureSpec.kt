@@ -22,16 +22,17 @@ import com.natpryce.hamkrest.has
 import com.natpryce.hamkrest.throws
 import com.uchuhimo.konf.source.UnknownPathsException
 import com.uchuhimo.konf.source.asSource
-import java.io.FileNotFoundException
 import org.jetbrains.spek.api.Spek
 import org.jetbrains.spek.api.dsl.given
 import org.jetbrains.spek.api.dsl.it
 import org.jetbrains.spek.api.dsl.on
 import org.junit.jupiter.api.assertThrows
+import java.io.FileNotFoundException
 
 object FailOnUnknownPathSpec : Spek({
     //language=Json
-    val source = """
+    val source =
+        """
         {
             "level1": {
               "level2": {
@@ -40,7 +41,7 @@ object FailOnUnknownPathSpec : Spek({
               }
             }
         }
-    """.trimIndent()
+        """.trimIndent()
     given("a config") {
         on("the feature is disabled") {
             val config = Config {
@@ -56,9 +57,15 @@ object FailOnUnknownPathSpec : Spek({
                 addSpec(Valid)
             }.enable(Feature.FAIL_ON_UNKNOWN_PATH)
             it("should throws UnknownPathsException and reports the unknown paths") {
-                assertThat({ config.from.json.string(source) }, throws(has(
-                    UnknownPathsException::paths,
-                    equalTo(listOf("level1.level2.invalid")))))
+                assertThat(
+                    { config.from.json.string(source) },
+                    throws(
+                        has(
+                            UnknownPathsException::paths,
+                            equalTo(listOf("level1.level2.invalid"))
+                        )
+                    )
+                )
             }
         }
         on("the feature is enabled on source") {
@@ -66,11 +73,17 @@ object FailOnUnknownPathSpec : Spek({
                 addSpec(Valid)
             }
             it("should throws UnknownPathsException and reports the unknown paths") {
-                assertThat({
-                    config.from.enabled(Feature.FAIL_ON_UNKNOWN_PATH).json.string(source)
-                }, throws(has(
-                    UnknownPathsException::paths,
-                    equalTo(listOf("level1.level2.invalid")))))
+                assertThat(
+                    {
+                        config.from.enabled(Feature.FAIL_ON_UNKNOWN_PATH).json.string(source)
+                    },
+                    throws(
+                        has(
+                            UnknownPathsException::paths,
+                            equalTo(listOf("level1.level2.invalid"))
+                        )
+                    )
+                )
             }
         }
     }

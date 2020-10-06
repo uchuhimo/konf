@@ -23,13 +23,13 @@ import com.uchuhimo.konf.Feature
 import com.uchuhimo.konf.source.ConfigForLoad
 import com.uchuhimo.konf.source.Source
 import com.uchuhimo.konf.source.SourceLoadSpec
-import java.util.Arrays
-import kotlin.test.assertTrue
 import org.jetbrains.spek.api.dsl.given
 import org.jetbrains.spek.api.dsl.it
 import org.jetbrains.spek.api.dsl.on
 import org.jetbrains.spek.subject.SubjectSpek
 import org.jetbrains.spek.subject.itBehavesLike
+import java.util.Arrays
+import kotlin.test.assertTrue
 
 object FlatSourceLoadSpec : SubjectSpek<Config>({
 
@@ -61,8 +61,10 @@ object FlatSourceLoadSpec : SubjectSpek<Config>({
                 assertTrue(Arrays.equals(subject[FlatConfigForLoad.emptyObjectArray], arrayOf()))
                 assertThat(subject[FlatConfigForLoad.singleElementList], equalTo(listOf(1)))
                 assertThat(subject[FlatConfigForLoad.multipleElementsList], equalTo(listOf(1, 2)))
-                assertThat(subject[FlatConfigForLoad.flatClass].stringWithComma,
-                    equalTo(classForLoad.stringWithComma))
+                assertThat(
+                    subject[FlatConfigForLoad.flatClass].stringWithComma,
+                    equalTo(classForLoad.stringWithComma)
+                )
             }
         }
     }

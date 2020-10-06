@@ -56,7 +56,7 @@ object BothConfigSpec : SubjectSpek<Config>({
         on("set item in the fallback config") {
             (subject as MergedConfig).fallback[NetworkBuffer.type] = NetworkBuffer.Type.ON_HEAP
             it("should have higher priority than the default value") {
-                assertThat(subject[NetworkBuffer.type], equalTo(NetworkBuffer.Type.ON_HEAP))
+                assertThat((subject as MergedConfig)[NetworkBuffer.type], equalTo(NetworkBuffer.Type.ON_HEAP))
             }
         }
     }

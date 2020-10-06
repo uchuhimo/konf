@@ -29,7 +29,6 @@ import com.fasterxml.jackson.databind.node.FloatNode
 import com.fasterxml.jackson.databind.node.IntNode
 import com.fasterxml.jackson.databind.node.JsonNodeFactory
 import com.fasterxml.jackson.databind.node.LongNode
-import com.fasterxml.jackson.databind.node.NullNode as JacksonNullNode
 import com.fasterxml.jackson.databind.node.ObjectNode
 import com.fasterxml.jackson.databind.node.ShortNode
 import com.fasterxml.jackson.databind.node.TextNode
@@ -58,6 +57,9 @@ import com.uchuhimo.konf.source.base.toHierarchical
 import com.uchuhimo.konf.toPath
 import com.uchuhimo.konf.toTree
 import com.uchuhimo.konf.toValue
+import org.apache.commons.text.StringSubstitutor
+import org.apache.commons.text.lookup.StringLookup
+import org.apache.commons.text.lookup.StringLookupFactory
 import java.lang.reflect.InvocationTargetException
 import java.math.BigDecimal
 import java.math.BigInteger
@@ -93,9 +95,7 @@ import kotlin.String
 import kotlin.reflect.KClass
 import kotlin.reflect.full.isSubclassOf
 import kotlin.reflect.full.starProjectedType
-import org.apache.commons.text.StringSubstitutor
-import org.apache.commons.text.lookup.StringLookup
-import org.apache.commons.text.lookup.StringLookupFactory
+import com.fasterxml.jackson.databind.node.NullNode as JacksonNullNode
 
 /**
  * Source to provide values for config.
@@ -251,7 +251,8 @@ interface Source {
         override val features: Map<Feature, Boolean>
             get() = MergedMap(
                 Collections.unmodifiableMap(fallback.features),
-                Collections.unmodifiableMap(this@Source.features))
+                Collections.unmodifiableMap(this@Source.features)
+            )
     }
 
     /**
@@ -386,9 +387,11 @@ private fun TreeNode.substituted(
             return withList(list.map { it.substituted(source, errorWhenUndefined, lookup) })
         }
         is MapNode -> {
-            return withMap(children.mapValues { (_, child) ->
-                child.substituted(source, errorWhenUndefined, lookup)
-            })
+            return withMap(
+                children.mapValues { (_, child) ->
+                    child.substituted(source, errorWhenUndefined, lookup)
+                }
+            )
         }
         else -> throw UnsupportedNodeTypeException(source, this)
     }
@@ -396,7 +399,8 @@ private fun TreeNode.substituted(
 
 class TreeLookup(val root: TreeNode, val source: Source, errorWhenUndefined: Boolean) : StringLookup {
     val substitutor: StringSubstitutor = StringSubstitutor(
-        StringLookupFactory.INSTANCE.interpolatorStringLookup(this)).apply {
+        StringLookupFactory.INSTANCE.interpolatorStringLookup(this)
+    ).apply {
         isEnableSubstitutionInVariables = true
         isEnableUndefinedVariableException = errorWhenUndefined
     }
@@ -508,7 +512,8 @@ internal fun Config.loadItem(item: Item<*>, path: Path, source: Source): Boolean
     try {
         val uniformPath = if (
             source.isEnabled(Feature.LOAD_KEYS_CASE_INSENSITIVELY) ||
-            this.isEnabled(Feature.LOAD_KEYS_CASE_INSENSITIVELY)) {
+            this.isEnabled(Feature.LOAD_KEYS_CASE_INSENSITIVELY)
+        ) {
             path.map { it.toLowerCase() }
         } else {
             path
@@ -516,8 +521,11 @@ internal fun Config.loadItem(item: Item<*>, path: Path, source: Source): Boolean
         val itemNode = source.tree.getOrNull(uniformPath)
         if (itemNode != null && !itemNode.isPlaceHolderNode()) {
             if (item.nullable &&
-                ((itemNode is NullNode) ||
-                    (itemNode is ValueNode && itemNode.value == "null"))) {
+                (
+                    (itemNode is NullNode) ||
+                        (itemNode is ValueNode && itemNode.value == "null")
+                    )
+            ) {
                 rawSet(item, null)
             } else {
                 rawSet(item, itemNode.toValue(source, item.type, mapper))
@@ -533,7 +541,8 @@ internal fun Config.loadItem(item: Item<*>, path: Path, source: Source): Boolean
 
 internal fun load(config: Config, source: Source): Source {
     val substitutedSource = if (!config.isEnabled(Feature.SUBSTITUTE_SOURCE_BEFORE_LOADED) ||
-        !source.isEnabled(Feature.SUBSTITUTE_SOURCE_BEFORE_LOADED)) {
+        !source.isEnabled(Feature.SUBSTITUTE_SOURCE_BEFORE_LOADED)
+    ) {
         source
     } else {
         source.substituted()
@@ -543,7 +552,8 @@ internal fun load(config: Config, source: Source): Source {
             config.loadItem(item, config.pathOf(item), substitutedSource)
         }
         if (substitutedSource.isEnabled(Feature.FAIL_ON_UNKNOWN_PATH) ||
-            config.isEnabled(Feature.FAIL_ON_UNKNOWN_PATH)) {
+            config.isEnabled(Feature.FAIL_ON_UNKNOWN_PATH)
+        ) {
             val treeFromSource = substitutedSource.tree
             val treeFromConfig = config.toTree()
             val diffTree = treeFromSource - treeFromConfig
@@ -616,13 +626,17 @@ internal fun stringToDate(value: String): Date {
         Date.from(value.tryParse { Instant.parse(it) })
     } catch (e: ParseException) {
         try {
-            Date.from(value.tryParse {
-                LocalDateTime.parse(it)
-            }.toInstant(ZoneOffset.UTC))
+            Date.from(
+                value.tryParse {
+                    LocalDateTime.parse(it)
+                }.toInstant(ZoneOffset.UTC)
+            )
         } catch (e: ParseException) {
-            Date.from(value.tryParse {
-                LocalDate.parse(it)
-            }.atStartOfDay().toInstant(ZoneOffset.UTC))
+            Date.from(
+                value.tryParse {
+                    LocalDate.parse(it)
+                }.atStartOfDay().toInstant(ZoneOffset.UTC)
+            )
         }
     }
 }
@@ -802,7 +816,8 @@ private fun <T : Any> TreeNode.castOrNull(source: Source, clazz: Class<T>): T? {
 
 private fun TreeNode.toValue(source: Source, type: JavaType, mapper: ObjectMapper): Any {
     if (this is ValueNode &&
-        type == TypeFactory.defaultInstance().constructType(value::class.java)) {
+        type == TypeFactory.defaultInstance().constructType(value::class.java)
+    ) {
         return value
     }
     when (type) {
@@ -815,7 +830,9 @@ private fun TreeNode.toValue(source: Source, type: JavaType, mapper: ObjectMappe
                     return valueOfMethod.invoke(null, name)
                 } catch (cause: InvocationTargetException) {
                     throw ParseException(
-                        "enum type $clazz has no constant with name $name", cause)
+                        "enum type $clazz has no constant with name $name",
+                        cause
+                    )
                 }
             } else {
                 val value = castOrNull(source, clazz)
@@ -870,9 +887,11 @@ private fun TreeNode.toValue(source: Source, type: JavaType, mapper: ObjectMappe
                 if (type.keyType.rawClass == String::class.java) {
                     @Suppress("UNCHECKED_CAST")
                     return (implOf(type.rawClass).getDeclaredConstructor().newInstance() as MutableMap<String, Any>).apply {
-                        putAll(this@toValue.toMap(source).mapValues { (_, value) ->
-                            value.toValue(source, type.contentType, mapper)
-                        })
+                        putAll(
+                            this@toValue.toMap(source).mapValues { (_, value) ->
+                                value.toValue(source, type.contentType, mapper)
+                            }
+                        )
                     }
                 } else {
                     throw UnsupportedMapKeyException(type.keyType.rawClass)
@@ -907,7 +926,8 @@ private fun TreeNode.toJsonNode(source: Source): JsonNode {
                 JsonNodeFactory.instance,
                 list.map {
                     it.toJsonNode(source)
-                })
+                }
+            )
         is ValueNode -> {
             when (value) {
                 is Boolean -> BooleanNode.valueOf(value as Boolean)
@@ -941,7 +961,8 @@ private fun TreeNode.toJsonNode(source: Source): JsonNode {
                 JsonNodeFactory.instance,
                 list.map {
                     it.toJsonNode(source)
-                })
+                }
+            )
         is MapNode -> ObjectNode(
             JsonNodeFactory.instance,
             children.mapValues { (_, value) ->
@@ -974,9 +995,13 @@ fun Any.asTree(): TreeNode =
                 ValueSourceNode(this)
             } else {
                 @Suppress("UNCHECKED_CAST")
-                (ContainerNode((this as Map<Any, Any>).map { (key, value) ->
-                    key.toString() to value.asTree()
-                }.toMap().toMutableMap()))
+                (
+                    ContainerNode(
+                        (this as Map<Any, Any>).map { (key, value) ->
+                            key.toString() to value.asTree()
+                        }.toMap().toMutableMap()
+                    )
+                    )
             }
         }
         else -> ValueSourceNode(this)

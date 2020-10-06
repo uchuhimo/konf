@@ -50,8 +50,10 @@ data class SizeInBytes(
         fun parse(input: String): SizeInBytes {
             val s = input.trim()
             val unitString = getUnits(s)
-            val numberString = s.substring(0,
-                s.length - unitString.length).trim()
+            val numberString = s.substring(
+                0,
+                s.length - unitString.length
+            ).trim()
 
             // this would be caught later anyway, but the error message
             // is more helpful if we check it here.
@@ -59,8 +61,10 @@ data class SizeInBytes(
                 throw ParseException("No number in size-in-bytes value '$input'")
 
             val units = MemoryUnit.parseUnit(unitString)
-                ?: throw ParseException("Could not parse size-in-bytes unit '$unitString'" +
-                    " (try k, K, kB, KiB, kilobytes, kibibytes)")
+                ?: throw ParseException(
+                    "Could not parse size-in-bytes unit '$unitString'" +
+                        " (try k, K, kB, KiB, kilobytes, kibibytes)"
+                )
 
             try {
                 val result: BigInteger

@@ -28,10 +28,15 @@ object ListSourceNodeSpec : SubjectSpek<ListSourceNode>({
     subject { ListSourceNode(listOf(EmptyNode, EmptyNode)) }
     on("get children") {
         it("should return a map indexed by integer") {
-            assertThat(subject.children, equalTo(mutableMapOf<String, TreeNode>(
-                "0" to EmptyNode,
-                "1" to EmptyNode
-            )))
+            assertThat(
+                subject.children,
+                equalTo(
+                    mutableMapOf<String, TreeNode>(
+                        "0" to EmptyNode,
+                        "1" to EmptyNode
+                    )
+                )
+            )
         }
     }
 })

@@ -12,9 +12,8 @@ val ossUserPassword by extra { getPrivateProperty("ossUserPassword") }
 val gpgPassphrase by extra { getPrivateProperty("gpgPassphrase") }
 val useAliyun by extra { shouldUseAliyun() }
 
-val wrapper by tasks.existing(Wrapper::class)
-wrapper {
-    gradleVersion = "6.0.1"
+tasks.named<Wrapper>("wrapper") {
+    gradleVersion = "6.6"
     distributionType = Wrapper.DistributionType.ALL
 }
 
@@ -41,7 +40,7 @@ plugins {
     kotlin("plugin.allopen") version Versions.kotlin
     id("com.dorongold.task-tree") version Versions.taskTree
     id("me.champeau.gradle.jmh") version Versions.jmhPlugin
-    id("com.diffplug.gradle.spotless") version Versions.spotless
+    id("com.diffplug.spotless") version Versions.spotless
     id("io.spring.dependency-management") version Versions.dependencyManagement
     id("com.github.ben-manes.versions") version Versions.dependencyUpdate
     id("org.jetbrains.dokka") version Versions.dokka
@@ -55,7 +54,7 @@ allprojects {
     apply(plugin = "kotlin-allopen")
     apply(plugin = "com.dorongold.task-tree")
     apply(plugin = "me.champeau.gradle.jmh")
-    apply(plugin = "com.diffplug.gradle.spotless")
+    apply(plugin = "com.diffplug.spotless")
     apply(plugin = "io.spring.dependency-management")
     apply(plugin = "com.github.ben-manes.versions")
     apply(plugin = "org.jetbrains.dokka")
@@ -80,7 +79,7 @@ allprojects {
         resolutionStrategy {
             componentSelection {
                 all {
-                    val rejected = listOf("alpha", "beta", "rc", "cr", "m", "preview", "b", "ea", "eap", "pr")
+                    val rejected = listOf("alpha", "beta", "rc", "cr", "m", "preview", "b", "ea", "eap", "pr", "dev", "mt")
                         .map { qualifier -> Regex("(?i).*[.-]$qualifier[.\\d-+]*") }
                         .any { it.matches(candidate.version) }
                     if (rejected) {
@@ -171,7 +170,10 @@ subprojects {
             showCauses = true
             showStackTraces = true
         }
-        systemProperty("org.slf4j.simpleLogger.defaultLogLevel", "warn")
+        systemProperties["org.slf4j.simpleLogger.defaultLogLevel"] = "warn"
+        systemProperties["junit.jupiter.execution.parallel.enabled"] = true
+        systemProperties["junit.jupiter.execution.parallel.mode.default"] = "concurrent"
+        maxParallelForks = (Runtime.getRuntime().availableProcessors() / 2).takeIf { it > 0 } ?: 1
         val properties = Properties()
         properties.load(rootProject.file("konf-core/src/test/kotlin/com/uchuhimo/konf/source/env/env.properties").inputStream())
         properties.forEach { key, value ->
@@ -248,16 +250,17 @@ subprojects {
         dependsOn(jacocoTestReport)
     }
 
-    val dokka by tasks.existing(DokkaTask::class) {
-        outputFormat = "html"
-        outputDirectory = tasks.javadoc.get().destinationDir!!.path
-        configuration {
-            jdkVersion = 8
-            reportUndocumented = false
-            sourceLink {
-                path = "./"
-                url = "https://github.com/uchuhimo/konf/blob/v${project.version}/"
-                lineSuffix = "#L"
+    tasks.dokkaHtml {
+        outputDirectory.set(tasks.javadoc.get().destinationDir)
+        dokkaSourceSets {
+            configureEach {
+                jdkVersion.set(9)
+                reportUndocumented.set(false)
+                sourceLink {
+                    localDirectory.set(file("./"))
+                    remoteUrl.set(URL("https://github.com/uchuhimo/konf/blob/v${project.version}/"))
+                    remoteLineSuffix.set("#L")
+                }
             }
         }
     }
@@ -269,7 +272,7 @@ subprojects {
 
     val javadocJar by tasks.registering(Jar::class) {
         archiveClassifier.set("javadoc")
-        from(dokka)
+        from(tasks.dokkaHtml)
     }
 
     val projectDescription = "A type-safe cascading configuration library for Kotlin/Java, " +
