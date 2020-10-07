@@ -66,6 +66,10 @@ level1:
       a: 1
       b: 2
       c: 3
+    intMap:
+      1: a
+      2: b
+      3: c
     sortedMap: { c: 3, b: 2, a: 1 }
     listOfMap:
       - a: 1

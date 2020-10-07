@@ -514,7 +514,7 @@ object SourceSpec : Spek({
             on("load map with unsupported key type") {
                 it("should throw LoadException caused by UnsupportedMapKeyException") {
                     assertCausedBy<UnsupportedMapKeyException> {
-                        load<Map<Int, String>>(mapOf(1 to "1"))
+                        load<Map<Pair<Int, Int>, String>>(mapOf((1 to 1) to "1"))
                     }
                 }
             }

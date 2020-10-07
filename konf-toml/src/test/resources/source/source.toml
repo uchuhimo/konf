@@ -41,6 +41,7 @@ set = [1, 2, 1]
 sortedSet = [2, 1, 1, 3]
 
 map = { a = 1, b = 2, c = 3 }
+intMap = { 1 = "a", 2 = "b", 3 = "c" }
 sortedMap = { c = 3, b = 2, a = 1 }
 
 nested = [[[{ a = 1 }]]]

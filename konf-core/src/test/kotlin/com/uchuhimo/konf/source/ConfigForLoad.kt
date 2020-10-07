@@ -94,6 +94,7 @@ object ConfigForLoad : ConfigSpec("level1.level2") {
     val sortedSet by required<SortedSet<Int>>()
 
     val map by required<Map<String, Int>>()
+    val intMap by required<Map<Int, String>>()
     val sortedMap by required<SortedMap<String, Int>>()
     val listOfMap by required<List<Map<String, Int>>>()
 

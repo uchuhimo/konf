@@ -41,7 +41,7 @@ object YamlSourceLoadSpec : SubjectSpek<Config>({
     itBehavesLike(SourceLoadSpec)
 
     given("a config") {
-        on("load a YAML with a numeric key") {
+        on("load a YAML with an int key") {
             val config = Config().from.yaml.string(
                 """
                 tree:
@@ -51,6 +51,30 @@ object YamlSourceLoadSpec : SubjectSpek<Config>({
             )
             it("should treat it as a string key") {
                 assertTrue { config.at("tree.1.myVal").toValue() }
+            }
+        }
+        on("load a YAML with a long key") {
+            val config = Config().from.yaml.string(
+                """
+                tree:
+                  2147483648:
+                    myVal: true
+                """.trimIndent()
+            )
+            it("should treat it as a string key") {
+                assertTrue { config.at("tree.2147483648.myVal").toValue() }
+            }
+        }
+        on("load a YAML with a BigInteger key") {
+            val config = Config().from.yaml.string(
+                """
+                tree:
+                  9223372036854775808:
+                    myVal: true
+                """.trimIndent()
+            )
+            it("should treat it as a string key") {
+                assertTrue { config.at("tree.9223372036854775808.myVal").toValue() }
             }
         }
     }

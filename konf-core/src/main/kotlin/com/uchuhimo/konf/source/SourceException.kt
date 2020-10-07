@@ -77,7 +77,7 @@ class ObjectMappingException(source: String, clazz: Class<*>, cause: Throwable) 
  * Exception indicates that value of specified class is unsupported as key of map.
  */
 class UnsupportedMapKeyException(val clazz: Class<*>) : SourceException(
-    "cannot support map with ${clazz.simpleName} key, only support string key"
+    "cannot support map with ${clazz.simpleName} key"
 )
 
 /**
