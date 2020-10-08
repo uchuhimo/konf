@@ -10,6 +10,5 @@ dependencies {
     implementation("org.dom4j:dom4j")
     implementation("jaxen:jaxen")
 
-    val test by project(":konf-core").dependencyProject.sourceSets
-    testImplementation(test.output)
+    testImplementation(testFixtures(project(":konf-core")))
 }

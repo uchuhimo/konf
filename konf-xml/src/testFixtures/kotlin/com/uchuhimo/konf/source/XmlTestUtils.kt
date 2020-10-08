@@ -16,22 +16,14 @@
 
 package com.uchuhimo.konf.source
 
-import com.natpryce.hamkrest.Matcher
-import com.natpryce.hamkrest.has
-import com.natpryce.hamkrest.isA
-import com.natpryce.hamkrest.throws
-
-inline fun <reified T : Any> assertCausedBy(noinline block: () -> Unit) {
-    @Suppress("UNCHECKED_CAST")
-    (
-        com.natpryce.hamkrest.assertion.assertThat(
-            block,
-            throws(
-                has(
-                    LoadException::cause,
-                    isA<T>() as Matcher<Throwable?>
-                )
-            )
-        )
-        )
-}
+//language=XML
+val xmlContent =
+    """
+<?xml version="1.0" encoding="UTF-8"?>
+<configuration>
+    <property>
+        <name>source.test.type</name>
+        <value>xml</value>
+    </property>
+</configuration>
+""".trim()

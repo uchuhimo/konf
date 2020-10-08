@@ -20,7 +20,7 @@ import com.uchuhimo.konf.Config
 import com.uchuhimo.konf.Feature
 import com.uchuhimo.konf.source.ConfigForLoad
 import com.uchuhimo.konf.source.Source
-import com.uchuhimo.konf.source.SourceLoadSpec
+import com.uchuhimo.konf.source.SourceLoadBaseSpec
 import com.uchuhimo.konf.source.toDuration
 import com.uchuhimo.konf.toSizeInBytes
 import org.jetbrains.spek.subject.SubjectSpek
@@ -47,7 +47,7 @@ object MapSourceLoadSpec : SubjectSpek<Config>({
         }.from.map.hierarchical(loadContent)
     }
 
-    itBehavesLike(SourceLoadSpec)
+    itBehavesLike(SourceLoadBaseSpec)
 })
 
 object MapSourceReloadSpec : SubjectSpek<Config>({
@@ -61,7 +61,7 @@ object MapSourceReloadSpec : SubjectSpek<Config>({
         }.from.map.hierarchical(config.toHierarchicalMap())
     }
 
-    itBehavesLike(SourceLoadSpec)
+    itBehavesLike(SourceLoadBaseSpec)
 })
 
 object MapSourceFromDefaultProvidersSpec : SubjectSpek<Config>({
@@ -73,7 +73,7 @@ object MapSourceFromDefaultProvidersSpec : SubjectSpek<Config>({
         }.withSource(Source.from.map.hierarchical(loadContent))
     }
 
-    itBehavesLike(SourceLoadSpec)
+    itBehavesLike(SourceLoadBaseSpec)
 })
 
 private val loadContent = mapOf(

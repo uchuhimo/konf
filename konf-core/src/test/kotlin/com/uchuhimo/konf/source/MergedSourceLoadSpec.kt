@@ -44,7 +44,7 @@ object MergedSourceLoadSpec : SubjectSpek<Config>({
         }.withSource(fallbackContent.asSource() + facadeContent.asSource())
     }
 
-    itBehavesLike(SourceLoadSpec)
+    itBehavesLike(SourceLoadBaseSpec)
 })
 
 object MergedSourceReloadSpec : SubjectSpek<Config>({
@@ -58,7 +58,7 @@ object MergedSourceReloadSpec : SubjectSpek<Config>({
         }.from.map.hierarchical(config.toHierarchicalMap())
     }
 
-    itBehavesLike(SourceLoadSpec)
+    itBehavesLike(SourceLoadBaseSpec)
 })
 
 private val facadeContent = mapOf(

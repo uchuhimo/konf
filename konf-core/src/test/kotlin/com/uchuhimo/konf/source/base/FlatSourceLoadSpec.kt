@@ -16,20 +16,12 @@
 
 package com.uchuhimo.konf.source.base
 
-import com.natpryce.hamkrest.assertion.assertThat
-import com.natpryce.hamkrest.equalTo
 import com.uchuhimo.konf.Config
 import com.uchuhimo.konf.Feature
 import com.uchuhimo.konf.source.ConfigForLoad
 import com.uchuhimo.konf.source.Source
-import com.uchuhimo.konf.source.SourceLoadSpec
-import org.jetbrains.spek.api.dsl.given
-import org.jetbrains.spek.api.dsl.it
-import org.jetbrains.spek.api.dsl.on
 import org.jetbrains.spek.subject.SubjectSpek
 import org.jetbrains.spek.subject.itBehavesLike
-import java.util.Arrays
-import kotlin.test.assertTrue
 
 object FlatSourceLoadSpec : SubjectSpek<Config>({
 
@@ -41,33 +33,7 @@ object FlatSourceLoadSpec : SubjectSpek<Config>({
         }.from.map.flat(loadContent)
     }
 
-    itBehavesLike(SourceLoadSpec)
-
-    given("a flat source") {
-        on("load the source into config") {
-            it("should contain every value specified in the source") {
-                val classForLoad = ClassForLoad(
-                    stringWithComma = "string,with,comma",
-                    emptyList = listOf(),
-                    emptySet = setOf(),
-                    emptyArray = intArrayOf(),
-                    emptyObjectArray = arrayOf(),
-                    singleElementList = listOf(1),
-                    multipleElementsList = listOf(1, 2)
-                )
-                assertThat(subject[FlatConfigForLoad.emptyList], equalTo(listOf()))
-                assertThat(subject[FlatConfigForLoad.emptySet], equalTo(setOf()))
-                assertTrue(Arrays.equals(subject[FlatConfigForLoad.emptyArray], intArrayOf()))
-                assertTrue(Arrays.equals(subject[FlatConfigForLoad.emptyObjectArray], arrayOf()))
-                assertThat(subject[FlatConfigForLoad.singleElementList], equalTo(listOf(1)))
-                assertThat(subject[FlatConfigForLoad.multipleElementsList], equalTo(listOf(1, 2)))
-                assertThat(
-                    subject[FlatConfigForLoad.flatClass].stringWithComma,
-                    equalTo(classForLoad.stringWithComma)
-                )
-            }
-        }
-    }
+    itBehavesLike(FlatSourceLoadBaseSpec)
 })
 
 object FlatSourceReloadSpec : SubjectSpek<Config>({
@@ -83,7 +49,7 @@ object FlatSourceReloadSpec : SubjectSpek<Config>({
         }.from.map.flat(config.toFlatMap())
     }
 
-    itBehavesLike(FlatSourceLoadSpec)
+    itBehavesLike(FlatSourceLoadBaseSpec)
 })
 
 object FlatSourceFromDefaultProvidersSpec : SubjectSpek<Config>({
@@ -95,7 +61,7 @@ object FlatSourceFromDefaultProvidersSpec : SubjectSpek<Config>({
         }.withSource(Source.from.map.flat(loadContent))
     }
 
-    itBehavesLike(FlatSourceLoadSpec)
+    itBehavesLike(FlatSourceLoadBaseSpec)
 })
 
 private val loadContent = mapOf(

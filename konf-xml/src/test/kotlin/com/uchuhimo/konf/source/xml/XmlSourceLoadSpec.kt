@@ -19,7 +19,7 @@ package com.uchuhimo.konf.source.xml
 import com.uchuhimo.konf.Config
 import com.uchuhimo.konf.source.ConfigForLoad
 import com.uchuhimo.konf.source.base.FlatConfigForLoad
-import com.uchuhimo.konf.source.base.FlatSourceLoadSpec
+import com.uchuhimo.konf.source.base.FlatSourceLoadBaseSpec
 import com.uchuhimo.konf.source.xml
 import org.jetbrains.spek.subject.SubjectSpek
 import org.jetbrains.spek.subject.itBehavesLike
@@ -33,7 +33,7 @@ object XmlSourceLoadSpec : SubjectSpek<Config>({
         }.from.xml.resource("source/source.xml")
     }
 
-    itBehavesLike(FlatSourceLoadSpec)
+    itBehavesLike(FlatSourceLoadBaseSpec)
 })
 
 object XmlSourceReloadSpec : SubjectSpek<Config>({
@@ -50,5 +50,5 @@ object XmlSourceReloadSpec : SubjectSpek<Config>({
         }.from.xml.string(xml)
     }
 
-    itBehavesLike(FlatSourceLoadSpec)
+    itBehavesLike(FlatSourceLoadBaseSpec)
 })

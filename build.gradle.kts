@@ -34,6 +34,7 @@ buildscript {
 
 plugins {
     java
+    `java-test-fixtures`
     jacoco
     `maven-publish`
     kotlin("jvm") version Versions.kotlin
@@ -48,6 +49,7 @@ plugins {
 
 allprojects {
     apply(plugin = "java")
+    apply(plugin = "java-test-fixtures")
     apply(plugin = "jacoco")
     apply(plugin = "maven-publish")
     apply(plugin = "org.jetbrains.kotlin.jvm")
@@ -109,6 +111,18 @@ subprojects {
             dependency(jackson("datatype", "jsr310", Versions.jackson))
         }
 
+        val testFixturesImplementation by configurations
+        testFixturesImplementation.withDependencies {
+            dependencies {
+                dependency(kotlin("test", Versions.kotlin))
+                dependency("com.natpryce:hamkrest:${Versions.hamkrest}")
+                dependency("org.hamcrest:hamcrest-all:${Versions.hamcrest}")
+
+                arrayOf("api", "data-driven-extension", "subject-extension", "junit-platform-engine").forEach { name ->
+                    dependency(spek(name, Versions.spek))
+                }
+            }
+        }
         val testImplementation by configurations
         testImplementation.withDependencies {
             dependencies {
@@ -141,12 +155,16 @@ subprojects {
         implementation(jackson("module", "kotlin"))
         implementation(jackson("datatype", "jsr310"))
 
+        testFixturesImplementation(kotlin("test"))
+        testFixturesImplementation("com.natpryce:hamkrest")
+        testFixturesImplementation("org.hamcrest:hamcrest-all")
         testImplementation(kotlin("test"))
         testImplementation("com.natpryce:hamkrest")
         testImplementation("org.hamcrest:hamcrest-all")
         testImplementation(junit("jupiter", "api"))
         testImplementation("com.sparkjava:spark-core")
         arrayOf("api", "data-driven-extension", "subject-extension").forEach { name ->
+            testFixturesImplementation(spek(name))
             testImplementation(spek(name))
         }
 

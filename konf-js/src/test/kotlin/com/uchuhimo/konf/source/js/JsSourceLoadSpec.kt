@@ -19,7 +19,7 @@ package com.uchuhimo.konf.source.js
 import com.uchuhimo.konf.Config
 import com.uchuhimo.konf.Feature
 import com.uchuhimo.konf.source.ConfigForLoad
-import com.uchuhimo.konf.source.SourceLoadSpec
+import com.uchuhimo.konf.source.SourceLoadBaseSpec
 import com.uchuhimo.konf.source.js
 import org.jetbrains.spek.subject.SubjectSpek
 import org.jetbrains.spek.subject.itBehavesLike
@@ -33,7 +33,7 @@ object JsSourceLoadSpec : SubjectSpek<Config>({
         }.from.js.resource("source/source.js")
     }
 
-    itBehavesLike(SourceLoadSpec)
+    itBehavesLike(SourceLoadBaseSpec)
 })
 
 object JsSourceReloadSpec : SubjectSpek<Config>({
@@ -48,5 +48,5 @@ object JsSourceReloadSpec : SubjectSpek<Config>({
         }.from.js.string(js)
     }
 
-    itBehavesLike(SourceLoadSpec)
+    itBehavesLike(SourceLoadBaseSpec)
 })

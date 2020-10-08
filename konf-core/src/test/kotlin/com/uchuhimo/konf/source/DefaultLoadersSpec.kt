@@ -315,12 +315,6 @@ object ScopedDefaultLoadersSpec : SubjectSpek<DefaultLoaders>({
     itBehavesLike(DefaultLoadersSpec)
 })
 
-object DefaultLoadersConfig : ConfigSpec("source.test") {
-    val type by required<String>()
-}
-
 object FlattenDefaultLoadersConfig : ConfigSpec("") {
     val SOURCE_TEST_TYPE by required<String>()
 }
-
-const val propertiesContent = "source.test.type = properties"

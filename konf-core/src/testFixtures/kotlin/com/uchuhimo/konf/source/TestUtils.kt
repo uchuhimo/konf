@@ -16,30 +16,33 @@
 
 package com.uchuhimo.konf.source
 
+import com.natpryce.hamkrest.Matcher
 import com.natpryce.hamkrest.assertion.assertThat
-import com.natpryce.hamkrest.equalTo
+import com.natpryce.hamkrest.has
+import com.natpryce.hamkrest.isA
+import com.natpryce.hamkrest.throws
 import com.uchuhimo.konf.Config
-import com.uchuhimo.konf.tempFileOf
-import org.jetbrains.spek.api.dsl.given
-import org.jetbrains.spek.api.dsl.it
-import org.jetbrains.spek.api.dsl.on
-import org.jetbrains.spek.subject.SubjectSpek
+import com.uchuhimo.konf.ConfigSpec
 
-object DefaultHoconLoaderSpec : SubjectSpek<DefaultLoaders>({
-    subject {
-        Config {
-            addSpec(DefaultLoadersConfig)
-        }.from
-    }
+object DefaultLoadersConfig : ConfigSpec("source.test") {
+    val type by required<String>()
+}
 
-    val item = DefaultLoadersConfig.type
+fun Source.toConfig(): Config = Config {
+    addSpec(DefaultLoadersConfig)
+}.withSource(this)
 
-    given("a loader") {
-        on("load from HOCON file") {
-            val config = subject.file(tempFileOf(hoconContent, suffix = ".conf"))
-            it("should load as auto-detected file format") {
-                assertThat(config[item], equalTo("conf"))
-            }
-        }
-    }
-})
+inline fun <reified T : Any> assertCausedBy(noinline block: () -> Unit) {
+    @Suppress("UNCHECKED_CAST")
+    assertThat(
+        block,
+        throws(
+            has(
+                LoadException::cause,
+                isA<T>() as Matcher<Throwable?>
+            )
+        )
+    )
+}
+
+const val propertiesContent = "source.test.type = properties"

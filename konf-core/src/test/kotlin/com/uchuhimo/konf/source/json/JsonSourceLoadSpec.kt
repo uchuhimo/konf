@@ -19,7 +19,7 @@ package com.uchuhimo.konf.source.json
 import com.uchuhimo.konf.Config
 import com.uchuhimo.konf.Feature
 import com.uchuhimo.konf.source.ConfigForLoad
-import com.uchuhimo.konf.source.SourceLoadSpec
+import com.uchuhimo.konf.source.SourceLoadBaseSpec
 import org.jetbrains.spek.subject.SubjectSpek
 import org.jetbrains.spek.subject.itBehavesLike
 
@@ -32,7 +32,7 @@ object JsonSourceLoadSpec : SubjectSpek<Config>({
         }.from.json.resource("source/source.json")
     }
 
-    itBehavesLike(SourceLoadSpec)
+    itBehavesLike(SourceLoadBaseSpec)
 })
 
 object JsonSourceReloadSpec : SubjectSpek<Config>({
@@ -47,5 +47,5 @@ object JsonSourceReloadSpec : SubjectSpek<Config>({
         }.from.json.string(json)
     }
 
-    itBehavesLike(SourceLoadSpec)
+    itBehavesLike(SourceLoadBaseSpec)
 })

@@ -19,7 +19,7 @@ package com.uchuhimo.konf.source.properties
 import com.uchuhimo.konf.Config
 import com.uchuhimo.konf.source.ConfigForLoad
 import com.uchuhimo.konf.source.base.FlatConfigForLoad
-import com.uchuhimo.konf.source.base.FlatSourceLoadSpec
+import com.uchuhimo.konf.source.base.FlatSourceLoadBaseSpec
 import org.jetbrains.spek.subject.SubjectSpek
 import org.jetbrains.spek.subject.itBehavesLike
 
@@ -32,7 +32,7 @@ object PropertiesSourceLoadSpec : SubjectSpek<Config>({
         }.from.properties.resource("source/source.properties")
     }
 
-    itBehavesLike(FlatSourceLoadSpec)
+    itBehavesLike(FlatSourceLoadBaseSpec)
 })
 
 object PropertiesSourceReloadSpec : SubjectSpek<Config>({
@@ -49,5 +49,5 @@ object PropertiesSourceReloadSpec : SubjectSpek<Config>({
         }.from.properties.string(properties)
     }
 
-    itBehavesLike(FlatSourceLoadSpec)
+    itBehavesLike(FlatSourceLoadBaseSpec)
 })

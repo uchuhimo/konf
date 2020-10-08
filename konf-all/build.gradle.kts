@@ -27,7 +27,7 @@ dependencies {
         ":konf-yaml"
     )) {
         api(project(name))
-        testImplementation(project(name).dependencyProject.sourceSets["test"].output)
+        testImplementation(testFixtures(project(name)))
     }
 
     val main by sourceSets

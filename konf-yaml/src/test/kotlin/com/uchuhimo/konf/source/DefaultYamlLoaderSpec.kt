@@ -43,11 +43,3 @@ object DefaultYamlLoaderSpec : SubjectSpek<DefaultLoaders>({
         }
     }
 })
-
-//language=YAML
-const val yamlContent =
-    """
-source:
-    test:
-        type: yaml
-"""

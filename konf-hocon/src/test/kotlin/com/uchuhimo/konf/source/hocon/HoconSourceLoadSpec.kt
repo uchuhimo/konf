@@ -19,7 +19,7 @@ package com.uchuhimo.konf.source.hocon
 import com.uchuhimo.konf.Config
 import com.uchuhimo.konf.Feature
 import com.uchuhimo.konf.source.ConfigForLoad
-import com.uchuhimo.konf.source.SourceLoadSpec
+import com.uchuhimo.konf.source.SourceLoadBaseSpec
 import com.uchuhimo.konf.source.hocon
 import org.jetbrains.spek.subject.SubjectSpek
 import org.jetbrains.spek.subject.itBehavesLike
@@ -33,7 +33,7 @@ object HoconSourceLoadSpec : SubjectSpek<Config>({
         }.from.hocon.resource("source/source.conf")
     }
 
-    itBehavesLike(SourceLoadSpec)
+    itBehavesLike(SourceLoadBaseSpec)
 })
 
 object HoconSourceReloadSpec : SubjectSpek<Config>({
@@ -48,5 +48,5 @@ object HoconSourceReloadSpec : SubjectSpek<Config>({
         }.from.hocon.string(hocon)
     }
 
-    itBehavesLike(SourceLoadSpec)
+    itBehavesLike(SourceLoadBaseSpec)
 })

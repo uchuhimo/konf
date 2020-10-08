@@ -19,7 +19,7 @@ package com.uchuhimo.konf.source.yaml
 import com.uchuhimo.konf.Config
 import com.uchuhimo.konf.Feature
 import com.uchuhimo.konf.source.ConfigForLoad
-import com.uchuhimo.konf.source.SourceLoadSpec
+import com.uchuhimo.konf.source.SourceLoadBaseSpec
 import com.uchuhimo.konf.source.yaml
 import com.uchuhimo.konf.toValue
 import org.jetbrains.spek.api.dsl.given
@@ -38,7 +38,7 @@ object YamlSourceLoadSpec : SubjectSpek<Config>({
         }.from.yaml.resource("source/source.yaml")
     }
 
-    itBehavesLike(SourceLoadSpec)
+    itBehavesLike(SourceLoadBaseSpec)
 
     given("a config") {
         on("load a YAML with an int key") {
@@ -92,5 +92,5 @@ object YamlSourceReloadSpec : SubjectSpek<Config>({
         }.from.yaml.string(yaml)
     }
 
-    itBehavesLike(SourceLoadSpec)
+    itBehavesLike(SourceLoadBaseSpec)
 })

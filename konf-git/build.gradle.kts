@@ -8,6 +8,5 @@ dependencies {
     api(project(":konf-core"))
     api("org.eclipse.jgit:org.eclipse.jgit")
 
-    val test by project(":konf-core").dependencyProject.sourceSets
-    testImplementation(test.output)
+    testImplementation(testFixtures(project(":konf-core")))
 }

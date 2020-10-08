@@ -21,6 +21,8 @@ import com.uchuhimo.konf.source.json.JsonProvider
 import com.uchuhimo.konf.source.properties.PropertiesProvider
 import org.reflections.ReflectionUtils
 import org.reflections.Reflections
+import org.reflections.scanners.SubTypesScanner
+import org.reflections.scanners.TypeAnnotationsScanner
 import java.io.File
 import java.io.IOException
 import java.io.InputStream
@@ -346,7 +348,11 @@ interface Provider {
         )
 
         init {
-            val reflections = Reflections("")
+            val reflections = Reflections(
+                "com.uchuhimo.konf",
+                SubTypesScanner(),
+                TypeAnnotationsScanner()
+            )
             val providers = reflections.getSubTypesOf(Provider::class.java)
                 .intersect(reflections.getTypesAnnotatedWith(RegisterExtension::class.java))
             for (provider in providers) {
