@@ -512,8 +512,8 @@ All out-of-box supported sources are declared in [`DefaultLoaders`](https://gith
 | hierarchical map                                             | `config.from.map.hierarchical`   | -                                                            | [`MapSourceLoadSpec`](https://github.com/uchuhimo/konf/blob/master/konf-core/src/test/kotlin/com/uchuhimo/konf/source/base/MapSourceLoadSpec.kt) |
 | map in key-value format                                      | `config.from.map.kv`             | -                                                            | [`KVSourceSpec`](https://github.com/uchuhimo/konf/blob/master/konf-core/src/test/kotlin/com/uchuhimo/konf/source/base/KVSourceSpec.kt) |
 | map in flat format                                           | `config.from.map.flat`           | -                                                            | [`FlatSourceLoadSpec`](https://github.com/uchuhimo/konf/blob/master/konf-core/src/test/kotlin/com/uchuhimo/konf/source/base/FlatSourceLoadSpec.kt) |
-| system properties                                            | `config.from.env()`              | [`EnvProvider`](https://github.com/uchuhimo/konf/blob/master/konf-core/src/main/kotlin/com/uchuhimo/konf/source/env/EnvProvider.kt) | -                                                            |
-| system environment                                           | `config.from.systemProperties()` | [`PropertiesProvider`](https://github.com/uchuhimo/konf/blob/master/konf-core/src/main/kotlin/com/uchuhimo/konf/source/properties/PropertiesProvider.kt) | -                                                            |
+| system environment                                           | `config.from.env()`              | [`EnvProvider`](https://github.com/uchuhimo/konf/blob/master/konf-core/src/main/kotlin/com/uchuhimo/konf/source/env/EnvProvider.kt) | -                                                            |
+| system properties                                            | `config.from.systemProperties()` | [`PropertiesProvider`](https://github.com/uchuhimo/konf/blob/master/konf-core/src/main/kotlin/com/uchuhimo/konf/source/properties/PropertiesProvider.kt) | -                                                            |
 
 These sources can also be manually created using their provider, and then loaded into config by `config.withSource(source)`.
 
@@ -531,8 +531,8 @@ All `from` APIs also have their standalone version that return sources without l
 | hierarchical map                                             | `Source.from.map.hierarchical`   |
 | map in key-value format                                      | `Source.from.map.kv`             |
 | map in flat format                                           | `Source.from.map.flat`           |
-| system properties                                            | `Source.from.env()`              |
-| system environment                                           | `Source.from.systemProperties()` |
+| system environment                                           | `Source.from.env()`              |
+| system properties                                            | `Source.from.systemProperties()` |
 
 Format of system properties source is same with that of properties source. System environment source follows the same mapping convention with properties source, but with the following name convention:
 
