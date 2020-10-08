@@ -408,8 +408,25 @@ class TreeLookup(val root: TreeNode, val source: Source, errorWhenUndefined: Boo
     override fun lookup(key: String): String? {
         val node = root.getOrNull(key)
         if (node != null && node is ValueNode) {
-            val value = node.asValueOf(source, String::class.java) as String
-            return substitutor.replace(value)
+            if (node.value::class in listOf(
+                    String::class,
+                    Char::class,
+                    Byte::class,
+                    Short::class,
+                    Int::class,
+                    Long::class,
+                    BigInteger::class
+                )
+            ) {
+                val value = node.value.toString()
+                return substitutor.replace(value)
+            } else {
+                throw WrongTypeException(
+                    "${node.value} in ${source.description}",
+                    node.value::class.java.simpleName,
+                    "String"
+                )
+            }
         } else {
             return null
         }

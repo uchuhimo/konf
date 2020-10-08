@@ -60,6 +60,15 @@ object PropertiesProviderSpec : SubjectSpek<PropertiesProvider>({
                 assertThat(source["type"].asValue<String>(), equalTo("system"))
             }
         }
+        on("create source from an empty file") {
+            val file = tempFileOf("")
+            it("should return an empty source") {
+                assertThat(
+                    subject.file(file).tree.children,
+                    equalTo(mutableMapOf())
+                )
+            }
+        }
     }
 })
 

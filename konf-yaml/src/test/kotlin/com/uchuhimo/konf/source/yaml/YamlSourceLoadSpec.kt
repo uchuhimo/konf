@@ -16,6 +16,8 @@
 
 package com.uchuhimo.konf.source.yaml
 
+import com.natpryce.hamkrest.assertion.assertThat
+import com.natpryce.hamkrest.equalTo
 import com.uchuhimo.konf.Config
 import com.uchuhimo.konf.Feature
 import com.uchuhimo.konf.source.ConfigForLoad
@@ -75,6 +77,17 @@ object YamlSourceLoadSpec : SubjectSpek<Config>({
             )
             it("should treat it as a string key") {
                 assertTrue { config.at("tree.9223372036854775808.myVal").toValue() }
+            }
+        }
+        on("load a YAML with a top-level list") {
+            val config = Config().from.yaml.string(
+                """
+                - a
+                - b
+                """.trimIndent()
+            )
+            it("should treat it as a list") {
+                assertThat(config.toValue(), equalTo(listOf("a", "b")))
             }
         }
     }

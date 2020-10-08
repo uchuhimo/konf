@@ -37,12 +37,22 @@ import java.io.Reader
 object YamlProvider : Provider {
     override fun reader(reader: Reader): Source {
         val yaml = Yaml(YamlConstructor())
-        return yaml.load<Any>(reader).asSource("YAML")
+        val value = yaml.load<Any>(reader)
+        if (value == "null") {
+            return mapOf<String, Any>().asSource("YAML")
+        } else {
+            return value.asSource("YAML")
+        }
     }
 
     override fun inputStream(inputStream: InputStream): Source {
         val yaml = Yaml(YamlConstructor())
-        return yaml.load<Any>(inputStream).asSource("YAML")
+        val value = yaml.load<Any>(inputStream)
+        if (value == "null") {
+            return mapOf<String, Any>().asSource("YAML")
+        } else {
+            return value.asSource("YAML")
+        }
     }
 
     @JavaApi
@@ -53,8 +63,10 @@ object YamlProvider : Provider {
 private class YamlConstructor : SafeConstructor() {
     init {
         yamlConstructors[Tag.NULL] = object : AbstractConstruct() {
-            override fun construct(node: Node): Any? {
-                constructScalar(node as ScalarNode)
+            override fun construct(node: Node?): Any? {
+                if (node != null) {
+                    constructScalar(node as ScalarNode)
+                }
                 return "null"
             }
         }

@@ -56,6 +56,7 @@ fun JsonNode.toTree(): TreeNode {
                 }
             }
         )
+        isMissingNode -> ContainerNode(mutableMapOf())
         else -> throw NotImplementedError()
     }
 }

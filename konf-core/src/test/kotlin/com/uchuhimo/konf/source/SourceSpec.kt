@@ -605,6 +605,16 @@ object SourceSpec : Spek({
                     )
                 }
             }
+            on("contains integer path variable") {
+                val map = mapOf("key1" to 1, "key2" to "b\${key1}", "key3" to "\${key1}")
+                val source = map.asSource().substituted()
+                it("should substitute path variables") {
+                    assertThat(
+                        source.tree.toHierarchical(),
+                        equalTo<Any>(mapOf("key1" to 1, "key2" to "b1", "key3" to 1))
+                    )
+                }
+            }
             on("contains path variables with string list value") {
                 val map = mapOf("key1" to "a,b,c", "key2" to "a\${key1}")
                 val source = Source.from.map.flat(map).substituted().substituted()
@@ -631,7 +641,7 @@ object SourceSpec : Spek({
                 }
             }
             on("contains path variable with wrong type") {
-                val map = mapOf("key1" to 1, "key2" to "b\${key1}")
+                val map = mapOf("key1" to 1.0, "key2" to "b\${key1}")
                 it("should throw WrongTypeException") {
                     assertThrows<WrongTypeException> { map.asSource().substituted() }
                 }

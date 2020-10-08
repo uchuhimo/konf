@@ -62,6 +62,15 @@ object XmlProviderSpec : SubjectSpek<XmlProvider>({
                 assertThat(source["type"].asValue<String>(), equalTo("inputStream"))
             }
         }
+        on("create source from an empty file") {
+            val file = tempFileOf("<?xml version=\"1.0\" encoding=\"UTF-8\"?><configuration></configuration>")
+            it("should return an empty source") {
+                assertThat(
+                    subject.file(file).tree.children,
+                    equalTo(mutableMapOf())
+                )
+            }
+        }
     }
 })
 
