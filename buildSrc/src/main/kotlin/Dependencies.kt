@@ -33,7 +33,7 @@ object Versions {
     const val toml4j = "0.7.2"
     const val yaml = "1.27"
 
-    const val googleJavaFormat = "1.9"
+    const val googleJavaFormat = "1.7"
     const val ktlint = "0.39.0"
 }
 
