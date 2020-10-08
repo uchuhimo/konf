@@ -43,30 +43,12 @@ interface Provider {
     fun reader(reader: Reader): Source
 
     /**
-     * Returns a new source from specified reader.
-     *
-     * @param reader specified reader for reading character streams
-     * @return a new source from specified reader
-     */
-    @Deprecated("use `reader` instead", replaceWith = ReplaceWith("reader"))
-    fun fromReader(reader: Reader): Source = reader(reader)
-
-    /**
      * Returns a new source from specified input stream.
      *
      * @param inputStream specified input stream of bytes
      * @return a new source from specified input stream
      */
     fun inputStream(inputStream: InputStream): Source
-
-    /**
-     * Returns a new source from specified input stream.
-     *
-     * @param inputStream specified input stream of bytes
-     * @return a new source from specified input stream
-     */
-    @Deprecated("use `inputStream` instead", replaceWith = ReplaceWith("inputStream"))
-    fun fromInputStream(inputStream: InputStream): Source = inputStream(inputStream)
 
     /**
      * Returns a new source from specified file.
@@ -88,16 +70,6 @@ interface Provider {
     }
 
     /**
-     * Returns a new source from specified file.
-     *
-     * @param file specified file
-     * @param optional whether this source is optional
-     * @return a new source from specified file
-     */
-    @Deprecated("use `file` instead", replaceWith = ReplaceWith("file"))
-    fun fromFile(file: File, optional: Boolean = false): Source = file(file, optional)
-
-    /**
      * Returns a new source from specified file path.
      *
      * @param file specified file path
@@ -105,16 +77,6 @@ interface Provider {
      * @return a new source from specified file path
      */
     fun file(file: String, optional: Boolean = false): Source = file(File(file), optional)
-
-    /**
-     * Returns a new source from specified file path.
-     *
-     * @param file specified file path
-     * @param optional whether this source is optional
-     * @return a new source from specified file path
-     */
-    @Deprecated("use `file` instead", replaceWith = ReplaceWith("file"))
-    fun fromFile(file: String, optional: Boolean = false): Source = file(file, optional)
 
     /**
      * Returns a new source from specified string.
@@ -125,15 +87,6 @@ interface Provider {
     fun string(content: String): Source = reader(content.reader()).apply {
         info["content"] = "\"\n$content\n\""
     }
-
-    /**
-     * Returns a new source from specified string.
-     *
-     * @param content specified string
-     * @return a new source from specified string
-     */
-    @Deprecated("use `string` instead", replaceWith = ReplaceWith("string"))
-    fun fromString(content: String): Source = string(content)
 
     /**
      * Returns a new source from specified byte array.
@@ -148,15 +101,6 @@ interface Provider {
     }
 
     /**
-     * Returns a new source from specified byte array.
-     *
-     * @param content specified byte array
-     * @return a new source from specified byte array
-     */
-    @Deprecated("use `bytes` instead", replaceWith = ReplaceWith("bytes"))
-    fun fromBytes(content: ByteArray): Source = bytes(content)
-
-    /**
      * Returns a new source from specified portion of byte array.
      *
      * @param content specified byte array
@@ -169,17 +113,6 @@ interface Provider {
             inputStream(it)
         }
     }
-
-    /**
-     * Returns a new source from specified portion of byte array.
-     *
-     * @param content specified byte array
-     * @param offset the start offset of the portion of the array to read
-     * @param length the length of the portion of the array to read
-     * @return a new source from specified portion of byte array
-     */
-    @Deprecated("use `bytes` instead", replaceWith = ReplaceWith("bytes"))
-    fun fromBytes(content: ByteArray, offset: Int, length: Int): Source = bytes(content, offset, length)
 
     /**
      * Returns a new source from specified url.
@@ -223,16 +156,6 @@ interface Provider {
     }
 
     /**
-     * Returns a new source from specified url.
-     *
-     * @param url specified url
-     * @param optional whether this source is optional
-     * @return a new source from specified url
-     */
-    @Deprecated("use `url` instead", replaceWith = ReplaceWith("url"))
-    fun fromUrl(url: URL, optional: Boolean = false): Source = url(url, optional)
-
-    /**
      * Returns a new source from specified url string.
      *
      * @param url specified url string
@@ -240,16 +163,6 @@ interface Provider {
      * @return a new source from specified url string
      */
     fun url(url: String, optional: Boolean = false): Source = url(URL(url), optional)
-
-    /**
-     * Returns a new source from specified url string.
-     *
-     * @param url specified url string
-     * @param optional whether this source is optional
-     * @return a new source from specified url string
-     */
-    @Deprecated("use `url` instead", replaceWith = ReplaceWith("url"))
-    fun fromUrl(url: String, optional: Boolean = false): Source = url(url, optional)
 
     /**
      * Returns a new source from specified resource.
@@ -288,16 +201,6 @@ interface Provider {
 
         return sources.reduce(Source::withFallback).apply(extendContext)
     }
-
-    /**
-     * Returns a new source from specified resource.
-     *
-     * @param resource path of specified resource
-     * @param optional whether this source is optional
-     * @return a new source from specified resource
-     */
-    @Deprecated("use `resource` instead", replaceWith = ReplaceWith("resource"))
-    fun fromResource(resource: String, optional: Boolean = false): Source = resource(resource, optional)
 
     /**
      * Returns a provider providing sources that applying the given [transform] function.

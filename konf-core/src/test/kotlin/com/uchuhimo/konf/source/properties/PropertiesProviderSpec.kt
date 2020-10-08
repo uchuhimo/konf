@@ -60,16 +60,6 @@ object PropertiesProviderSpec : SubjectSpek<PropertiesProvider>({
                 assertThat(source["type"].asValue<String>(), equalTo("system"))
             }
         }
-        on("create source from system properties (deprecated)") {
-            System.setProperty("type", "system")
-            val source = subject.fromSystem()
-            it("should have correct type") {
-                assertThat(source.info["type"], equalTo("system-properties"))
-            }
-            it("should return a source which contains value from system properties") {
-                assertThat(source["type"].asValue<String>(), equalTo("system"))
-            }
-        }
     }
 })
 

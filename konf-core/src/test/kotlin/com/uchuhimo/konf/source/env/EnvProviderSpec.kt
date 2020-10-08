@@ -55,22 +55,6 @@ object EnvProviderSpec : SubjectSpek<EnvProvider>({
                 assertTrue { config[FlattenSourceSpec.SOURCE_CAMELCASE] }
             }
         }
-        on("create source from system environment (deprecated)") {
-            val source = subject.fromEnv()
-            it("should have correct type") {
-                assertThat(source.info["type"], equalTo("system-environment"))
-            }
-            it("should return a source which contains value from system environment") {
-                val config = Config { addSpec(SourceSpec) }.withSource(source)
-                assertThat(config[SourceSpec.Test.type], equalTo("env"))
-                assertTrue { config[SourceSpec.camelCase] }
-            }
-            it("should return a case-insensitive source") {
-                val config = Config().withSource(source).apply { addSpec(SourceSpec) }
-                assertThat(config[SourceSpec.Test.type], equalTo("env"))
-                assertTrue { config[SourceSpec.camelCase] }
-            }
-        }
     }
 })
 

@@ -48,14 +48,6 @@ object PropertiesProvider : Provider {
         allowConflict = true
     )
 
-    /**
-     * Returns a new source from system properties.
-     *
-     * @return a new source from system properties
-     */
-    @Deprecated("use `system` instead", replaceWith = ReplaceWith("system"))
-    fun fromSystem(): Source = system()
-
     @JavaApi
     @JvmStatic
     fun get() = this

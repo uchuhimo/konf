@@ -87,24 +87,3 @@ fun Provider.git(
         file(Paths.get(directory.path, file).toFile(), optional).apply(extendContext)
     }
 }
-
-/**
- * Returns a new source from a specified git repository.
- *
- * @param repo git repository
- * @param file file in the git repository
- * @param dir local directory of the git repository
- * @param branch the initial branch
- * @param optional whether this source is optional
- * @param action additional action when cloning/pulling
- * @return a new source from a specified git repository
- */
-@Deprecated("use `git` instead", replaceWith = ReplaceWith("git"))
-fun Provider.fromGit(
-    repo: String,
-    file: String,
-    dir: String? = null,
-    branch: String = Constants.HEAD,
-    optional: Boolean = false,
-    action: TransportCommand<*, *>.() -> Unit = {}
-): Source = git(repo, file, dir, branch, optional, action)

@@ -58,31 +58,6 @@ object GitProviderSpec : SubjectSpek<Provider>({
                 }
             }
         }
-        on("create source from git repository (deprecated)") {
-            createTempDir().let { dir ->
-                Git.init().apply {
-                    setDirectory(dir)
-                }.call().use { git ->
-                    Paths.get(dir.path, "test").toFile().writeText("type = git")
-                    git.add().apply {
-                        addFilepattern("test")
-                    }.call()
-                    git.commit().apply {
-                        message = "init commit"
-                    }.call()
-                }
-                val repo = dir.toURI()
-                val source = subject.fromGit(repo.toString(), "test")
-                it("should create from the specified git repository") {
-                    assertThat(source.info["repo"], equalTo(repo.toString()))
-                    assertThat(source.info["file"], equalTo("test"))
-                    assertThat(source.info["branch"], equalTo(Constants.HEAD))
-                }
-                it("should return a source which contains value in git repository") {
-                    assertThat(source["type"].asValue<String>(), equalTo("git"))
-                }
-            }
-        }
         on("create source from invalid git repository") {
             createTempDir().let { dir ->
                 Git.init().apply {

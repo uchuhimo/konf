@@ -48,14 +48,6 @@ object EnvProvider {
             .disabled(Feature.SUBSTITUTE_SOURCE_BEFORE_LOADED)
     }
 
-    /**
-     * Returns a new source from system environment.
-     *
-     * @return a new source from system environment
-     */
-    @Deprecated("use `env` instead", replaceWith = ReplaceWith("env"))
-    fun fromEnv(): Source = env()
-
     @JavaApi
     @JvmStatic
     fun get() = this
