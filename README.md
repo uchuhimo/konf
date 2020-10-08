@@ -315,7 +315,7 @@ There are three kinds of item:
     val nextPort by lazy { config -> config[port] + 1 }
     ```
 
-You can also define config spec in Java, with a more vorbose API (compared to Kotlin version in "quick start"):
+You can also define config spec in Java, with a more verbose API (compared to Kotlin version in "quick start"):
 
 ```java
 public class ServerSpec {
