@@ -2,9 +2,8 @@ sourceSets {
     register("snippet")
 }
 
-val implementation by configurations
 val snippetImplementation by configurations
-snippetImplementation.extendsFrom(implementation)
+snippetImplementation.extendsFrom(configurations.implementation.get())
 
 dependencyManagement {
     dependencies {
@@ -30,8 +29,7 @@ dependencies {
         testImplementation(testFixtures(project(name)))
     }
 
-    val main by sourceSets
-    snippetImplementation(main.output)
+    snippetImplementation(sourceSets.main.get().output)
     val snippet by sourceSets
     testImplementation(snippet.output)
 }

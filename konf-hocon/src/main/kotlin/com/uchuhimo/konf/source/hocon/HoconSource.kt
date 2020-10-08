@@ -52,7 +52,7 @@ private fun ConfigValue.toTree(): TreeNode {
 /**
  * Source from a HOCON value.
  */
-internal class HoconSource(
+class HoconSource(
     val value: ConfigValue
 ) : Source {
     override val info: SourceInfo = SourceInfo("type" to "HOCON")

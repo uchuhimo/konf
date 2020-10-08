@@ -29,7 +29,7 @@ import org.jetbrains.spek.subject.SubjectSpek
 import kotlin.test.assertNull
 import kotlin.test.assertTrue
 
-internal object HoconSourceSpec : SubjectSpek<HoconSource>({
+object HoconSourceSpec : SubjectSpek<HoconSource>({
     subject { HoconProvider.string("key = 1") as HoconSource }
 
     given("a HOCON source") {

@@ -63,7 +63,7 @@ allprojects {
     apply(plugin = "com.jfrog.bintray")
 
     group = "com.uchuhimo"
-    version = "0.22.1"
+    version = "0.23.0"
 
     repositories {
         if (useAliyun) {
@@ -111,8 +111,7 @@ subprojects {
             dependency(jackson("datatype", "jsr310", Versions.jackson))
         }
 
-        val testFixturesImplementation by configurations
-        testFixturesImplementation.withDependencies {
+        configurations.testFixturesImplementation.get().withDependencies {
             dependencies {
                 dependency(kotlin("test", Versions.kotlin))
                 dependency("com.natpryce:hamkrest:${Versions.hamkrest}")
@@ -123,22 +122,15 @@ subprojects {
                 }
             }
         }
-        val testImplementation by configurations
-        testImplementation.withDependencies {
+        configurations.testImplementation.get().extendsFrom(configurations.testFixturesImplementation.get())
+        configurations.testImplementation.get().withDependencies {
             dependencies {
-                dependency(kotlin("test", Versions.kotlin))
-                dependency("com.natpryce:hamkrest:${Versions.hamkrest}")
-                dependency("org.hamcrest:hamcrest-all:${Versions.hamcrest}")
                 dependency("com.sparkjava:spark-core:${Versions.spark}")
                 dependency("org.slf4j:slf4j-simple:${Versions.slf4j}")
 
                 dependency(junit("platform", "launcher", Versions.junitPlatform))
                 dependency(junit("jupiter", "api", Versions.junit))
                 dependency(junit("jupiter", "engine", Versions.junit))
-
-                arrayOf("api", "data-driven-extension", "subject-extension", "junit-platform-engine").forEach { name ->
-                    dependency(spek(name, Versions.spek))
-                }
             }
         }
     }
@@ -158,14 +150,10 @@ subprojects {
         testFixturesImplementation(kotlin("test"))
         testFixturesImplementation("com.natpryce:hamkrest")
         testFixturesImplementation("org.hamcrest:hamcrest-all")
-        testImplementation(kotlin("test"))
-        testImplementation("com.natpryce:hamkrest")
-        testImplementation("org.hamcrest:hamcrest-all")
         testImplementation(junit("jupiter", "api"))
         testImplementation("com.sparkjava:spark-core")
         arrayOf("api", "data-driven-extension", "subject-extension").forEach { name ->
             testFixturesImplementation(spek(name))
-            testImplementation(spek(name))
         }
 
         testRuntimeOnly(junit("platform", "launcher"))
