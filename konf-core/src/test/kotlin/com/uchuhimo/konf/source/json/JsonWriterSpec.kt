@@ -47,7 +47,7 @@ object JsonWriterSpec : SubjectSpek<Writer>({
             {
               "key" : "value"
             }
-            """.replaceIndent().replace("\n", System.lineSeparator())
+            """.trimIndent().replace("\n", System.lineSeparator())
         on("save to writer") {
             val writer = StringWriter()
             subject.toWriter(writer)

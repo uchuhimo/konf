@@ -38,6 +38,7 @@ import com.fasterxml.jackson.databind.type.CollectionLikeType
 import com.fasterxml.jackson.databind.type.MapLikeType
 import com.fasterxml.jackson.databind.type.SimpleType
 import com.fasterxml.jackson.databind.type.TypeFactory
+import com.fasterxml.jackson.module.kotlin.convertValue
 import com.uchuhimo.konf.Config
 import com.uchuhimo.konf.ContainerNode
 import com.uchuhimo.konf.EmptyNode
@@ -500,7 +501,7 @@ internal fun Any?.toCompatibleValue(mapper: ObjectMapper): Any {
         is List<*> -> this.map { it!!.toCompatibleValue(mapper) }
         is Set<*> -> this.map { it!!.toCompatibleValue(mapper) }
         is Array<*> -> this.map { it!!.toCompatibleValue(mapper) }
-        is Map<*, *> -> this.mapValues { (_, value) -> value!!.toCompatibleValue(mapper) }
+        is Map<*, *> -> this.mapValues { (_, value) -> value.toCompatibleValue(mapper) }
         is Char -> this.toString()
         is String,
         is Boolean,
@@ -516,10 +517,7 @@ internal fun Any?.toCompatibleValue(mapper: ObjectMapper): Any {
             if (this == null) {
                 "null"
             } else {
-                val result = mapper.convertValue(this, Map::class.java).mapValues { (_, value) ->
-                    value.toCompatibleValue(mapper)
-                }
-                result
+                mapper.convertValue<Any>(this).toCompatibleValue(mapper)
             }
         }
     }
@@ -1019,19 +1017,17 @@ fun Any.asTree(): TreeNode =
         is Source -> this.tree
         is List<*> ->
             @Suppress("UNCHECKED_CAST")
-            (ListSourceNode((this as List<Any>).map { it.asTree() }))
+            ListSourceNode((this as List<Any>).map { it.asTree() })
         is Map<*, *> -> {
             when {
                 this.size == 0 -> ContainerNode(mutableMapOf())
                 this.iterator().next().key is String -> {
                     @Suppress("UNCHECKED_CAST")
-                    (
-                        ContainerNode(
-                            (this as Map<String, Any>).mapValues { (_, value) ->
-                                value.asTree()
-                            }.toMutableMap()
-                        )
-                        )
+                    ContainerNode(
+                        (this as Map<String, Any>).mapValues { (_, value) ->
+                            value.asTree()
+                        }.toMutableMap()
+                    )
                 }
                 this.iterator().next().key!!::class in listOf(
                     Char::class,
@@ -1042,13 +1038,11 @@ fun Any.asTree(): TreeNode =
                     BigInteger::class
                 ) -> {
                     @Suppress("UNCHECKED_CAST")
-                    (
-                        ContainerNode(
-                            (this as Map<Any, Any>).map { (key, value) ->
-                                key.toString() to value.asTree()
-                            }.toMap().toMutableMap()
-                        )
-                        )
+                    ContainerNode(
+                        (this as Map<Any, Any>).map { (key, value) ->
+                            key.toString() to value.asTree()
+                        }.toMap().toMutableMap()
+                    )
                 }
                 else -> ValueSourceNode(this)
             }

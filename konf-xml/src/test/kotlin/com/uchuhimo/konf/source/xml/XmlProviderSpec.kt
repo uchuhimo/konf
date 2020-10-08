@@ -39,7 +39,7 @@ object XmlProviderSpec : SubjectSpek<XmlProvider>({
                 <value>$value</value>
             </property>
         </configuration>
-        """.replaceIndent()
+        """.trimIndent()
 
     given("a XML provider") {
         on("create source from reader") {

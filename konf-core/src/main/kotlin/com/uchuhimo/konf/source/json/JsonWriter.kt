@@ -16,6 +16,9 @@
 
 package com.uchuhimo.konf.source.json
 
+import com.fasterxml.jackson.core.util.DefaultIndenter
+import com.fasterxml.jackson.core.util.DefaultPrettyPrinter
+import com.fasterxml.jackson.databind.ObjectWriter
 import com.uchuhimo.konf.Config
 import com.uchuhimo.konf.source.Writer
 import com.uchuhimo.konf.source.base.toHierarchicalMap
@@ -25,14 +28,17 @@ import java.io.OutputStream
  * Writer for JSON source.
  */
 class JsonWriter(val config: Config) : Writer {
+    private val objectWriter: ObjectWriter = config.mapper.writer(
+        DefaultPrettyPrinter().withObjectIndenter(
+            DefaultIndenter().withLinefeed(System.lineSeparator())
+        )
+    )
     override fun toWriter(writer: java.io.Writer) {
-        config.mapper.writerWithDefaultPrettyPrinter()
-            .writeValue(writer, config.toHierarchicalMap())
+        objectWriter.writeValue(writer, config.toHierarchicalMap())
     }
 
     override fun toOutputStream(outputStream: OutputStream) {
-        config.mapper.writerWithDefaultPrettyPrinter()
-            .writeValue(outputStream, config.toHierarchicalMap())
+        objectWriter.writeValue(outputStream, config.toHierarchicalMap())
     }
 }
 

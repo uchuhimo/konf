@@ -236,6 +236,7 @@ subprojects {
             ktlint(Versions.ktlint)
             trimTrailingWhitespace()
             endWithNewline()
+            // TODO: update licenses
             // licenseHeaderFile is unstable for Kotlin (i.e. will remove `@file:JvmName` when formatting)
             licenseHeaderFile(rootProject.file("config/spotless/apache-license-2.0.kt"))
         }
