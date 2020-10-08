@@ -8,6 +8,12 @@ jdk:
   - openjdk11
   - openjdk12
   - openjdk13
+  - openjdk14
+  - openjdk15
+
+jobs:
+  include:
+    - language: android
 
 after_success:
   - bash <(curl -s https://codecov.io/bash)
