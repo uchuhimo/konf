@@ -37,15 +37,17 @@ object EnvProvider {
     fun env(nested: Boolean = true): Source {
         return FlatSource(
             System.getenv().mapKeys { (key, _) ->
-                val lowerCasedKey = key.toLowerCase()
-                if (nested) lowerCasedKey.replace('_', '.') else lowerCasedKey
+                if (nested) key.replace('_', '.') else key
             }.filter { (key, _) ->
                 key.matches(validEnv)
             }.toSortedMap(),
             type = "system-environment",
             allowConflict = true
-        ).enabled(Feature.LOAD_KEYS_CASE_INSENSITIVELY)
-            .disabled(Feature.SUBSTITUTE_SOURCE_BEFORE_LOADED)
+        ).enabled(
+            Feature.LOAD_KEYS_CASE_INSENSITIVELY
+        ).disabled(
+            Feature.SUBSTITUTE_SOURCE_BEFORE_LOADED
+        )
     }
 
     @JavaApi

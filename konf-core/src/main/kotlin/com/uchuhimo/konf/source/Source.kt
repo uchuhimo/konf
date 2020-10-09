@@ -156,10 +156,22 @@ interface Source {
         if (path.isEmpty()) {
             return this
         } else {
-            return tree.getOrNull(path)?.let {
+            return transformed().tree.getOrNull(transformedPath(path, lowercased = false))?.let {
                 Source(info = info, tree = it, features = features)
             }
         }
+    }
+
+    private fun transformedPath(path: Path, lowercased: Boolean): Path {
+        var currentPath = path
+        if (lowercased || isEnabled(Feature.LOAD_KEYS_CASE_INSENSITIVELY)) {
+            currentPath = currentPath.map { it.toLowerCase() }
+        }
+        return currentPath
+    }
+
+    fun getNodeOrNull(path: Path, lowercased: Boolean): TreeNode? {
+        return tree.getOrNull(transformedPath(path, lowercased))
     }
 
     /**
@@ -241,20 +253,7 @@ interface Source {
      * @param fallback fallback source
      * @return a source backing by specified fallback source
      */
-    fun withFallback(fallback: Source): Source = object : Source {
-        override val info: SourceInfo = SourceInfo(
-            "facade" to this@Source.description,
-            "fallback" to fallback.description
-        )
-
-        override val tree: TreeNode = this@Source.tree.withFallback(fallback.tree)
-
-        override val features: Map<Feature, Boolean>
-            get() = MergedMap(
-                Collections.unmodifiableMap(fallback.features),
-                Collections.unmodifiableMap(this@Source.features)
-            )
-    }
+    fun withFallback(fallback: Source): Source = MergedSource(this, fallback)
 
     /**
      * Returns a source overlapped by the specified facade source.
@@ -274,12 +273,33 @@ interface Source {
      * for detailed substitution rules. An exception is when the string is in reference format like `${path}`,
      * the whole node will be replace by a reference to the sub-tree in the specified path.
      *
+     * @param root the root source for substitution
+     * @param disabled whether disabled or let the source decide by itself
      * @param errorWhenUndefined whether throw exception when this source contains undefined path variables
      * @return a source that substitutes path variables within all strings by values
      * @throws UndefinedPathVariableException
      */
-    fun substituted(errorWhenUndefined: Boolean = true): Source =
-        Source(info, tree.substituted(this, errorWhenUndefined), features)
+    fun substituted(root: Source = this, disabled: Boolean = false, errorWhenUndefined: Boolean = true): Source {
+        return if (disabled || !this.isEnabled(Feature.SUBSTITUTE_SOURCE_BEFORE_LOADED)) {
+            this
+        } else {
+            Source(info, tree.substituted(root, errorWhenUndefined), features)
+        }
+    }
+
+    fun lowercased(enabled: Boolean = false): Source {
+        return if (enabled || this.isEnabled(Feature.LOAD_KEYS_CASE_INSENSITIVELY)) {
+            Source(info, tree.lowercased(), features)
+        } else {
+            this
+        }
+    }
+
+    fun transformed(lowercased: Boolean = false): Source {
+        var currentSource = this
+        currentSource = currentSource.lowercased(lowercased)
+        return currentSource
+    }
 
     /**
      * Returns a new source that enables the specified feature.
@@ -356,7 +376,7 @@ private val singleVariablePattern = Pattern.compile("^\\$\\{(.+)}$")
 private fun TreeNode.substituted(
     source: Source,
     errorWhenUndefined: Boolean,
-    lookup: TreeLookup = TreeLookup(this, source, errorWhenUndefined)
+    lookup: TreeLookup = TreeLookup(source.tree, source, errorWhenUndefined)
 ): TreeNode {
     when (this) {
         is NullNode -> return this
@@ -395,6 +415,20 @@ private fun TreeNode.substituted(
             )
         }
         else -> throw UnsupportedNodeTypeException(source, this)
+    }
+}
+
+private fun TreeNode.lowercased(): TreeNode {
+    if (this is ContainerNode) {
+        return withMap(
+            children.mapKeys { (key, _) ->
+                key.toLowerCase()
+            }.mapValues { (_, child) ->
+                child.lowercased()
+            }
+        )
+    } else {
+        return this
     }
 }
 
@@ -525,15 +559,10 @@ internal fun Any?.toCompatibleValue(mapper: ObjectMapper): Any {
 
 internal fun Config.loadItem(item: Item<*>, path: Path, source: Source): Boolean {
     try {
-        val uniformPath = if (
-            source.isEnabled(Feature.LOAD_KEYS_CASE_INSENSITIVELY) ||
-            this.isEnabled(Feature.LOAD_KEYS_CASE_INSENSITIVELY)
-        ) {
-            path.map { it.toLowerCase() }
-        } else {
-            path
-        }
-        val itemNode = source.tree.getOrNull(uniformPath)
+        val itemNode = source.getNodeOrNull(
+            path,
+            lowercased = this.isEnabled(Feature.LOAD_KEYS_CASE_INSENSITIVELY)
+        )
         if (itemNode != null && !itemNode.isPlaceHolderNode()) {
             if (item.nullable &&
                 (
@@ -555,30 +584,30 @@ internal fun Config.loadItem(item: Item<*>, path: Path, source: Source): Boolean
 }
 
 internal fun load(config: Config, source: Source): Source {
-    val substitutedSource = if (!config.isEnabled(Feature.SUBSTITUTE_SOURCE_BEFORE_LOADED) ||
-        !source.isEnabled(Feature.SUBSTITUTE_SOURCE_BEFORE_LOADED)
-    ) {
-        source
-    } else {
-        source.substituted()
-    }
+    var currentSource = source
+    currentSource = currentSource.substituted(
+        disabled = !config.isEnabled(Feature.SUBSTITUTE_SOURCE_BEFORE_LOADED)
+    )
+    currentSource = currentSource.transformed(
+        lowercased = config.isEnabled(Feature.LOAD_KEYS_CASE_INSENSITIVELY)
+    )
     config.lock {
         for (item in config) {
-            config.loadItem(item, config.pathOf(item), substitutedSource)
+            config.loadItem(item, config.pathOf(item), currentSource)
         }
-        if (substitutedSource.isEnabled(Feature.FAIL_ON_UNKNOWN_PATH) ||
+        if (currentSource.isEnabled(Feature.FAIL_ON_UNKNOWN_PATH) ||
             config.isEnabled(Feature.FAIL_ON_UNKNOWN_PATH)
         ) {
-            val treeFromSource = substitutedSource.tree
+            val treeFromSource = currentSource.tree
             val treeFromConfig = config.toTree()
             val diffTree = treeFromSource - treeFromConfig
             if (diffTree != EmptyNode) {
                 val unknownPaths = diffTree.paths
-                throw UnknownPathsException(substitutedSource, unknownPaths)
+                throw UnknownPathsException(currentSource, unknownPaths)
             }
         }
     }
-    return substitutedSource
+    return currentSource
 }
 
 private inline fun <reified T> TreeNode.cast(source: Source): T {

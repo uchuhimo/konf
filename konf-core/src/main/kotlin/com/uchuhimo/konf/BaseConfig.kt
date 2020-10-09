@@ -590,12 +590,13 @@ open class BaseConfig(
         return BaseConfig(name, this, mapper)
     }
 
-    override fun withSource(source: Source): Config =
-        withLayer("source: ${source.description}").also { config ->
+    override fun withSource(source: Source): Config {
+        return withLayer("source: ${source.description}").also { config ->
             config.lock.write {
                 config._source.value = load(config, source)
             }
         }
+    }
 
     override fun withLoadTrigger(
         description: String,
