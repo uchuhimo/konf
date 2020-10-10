@@ -30,11 +30,10 @@ class MergedSource(val facade: Source, val fallback: Source) : Source {
 
     override val tree: TreeNode = facade.tree.withFallback(fallback.tree)
 
-    override val features: Map<Feature, Boolean>
-        get() = MergedMap(
-            Collections.unmodifiableMap(fallback.features),
-            Collections.unmodifiableMap(facade.features)
-        )
+    override val features: Map<Feature, Boolean> = MergedMap(
+        Collections.unmodifiableMap(fallback.features),
+        Collections.unmodifiableMap(facade.features)
+    )
 
     override fun substituted(root: Source, enabled: Boolean, errorWhenUndefined: Boolean): Source {
         val substitutedFacade = facade.substituted(root, enabled, errorWhenUndefined)

@@ -22,6 +22,7 @@ import com.fasterxml.jackson.databind.SerializationFeature
 import com.fasterxml.jackson.databind.module.SimpleModule
 import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule
 import com.fasterxml.jackson.module.kotlin.jacksonObjectMapper
+import com.uchuhimo.konf.source.MultiSource
 import com.uchuhimo.konf.source.Source
 import com.uchuhimo.konf.source.base.EmptyMapSource
 import com.uchuhimo.konf.source.deserializer.DurationDeserializer
@@ -543,7 +544,7 @@ open class BaseConfig(
                 )
                 tree[name] = node
                 nodeByItem[item] = node
-                sources.firstOrNull { loadItem(item, path, it) }
+                loadItem(item, path, MultiSource(sources))
             } else {
                 throw RepeatedItemException(name)
             }
@@ -555,7 +556,7 @@ open class BaseConfig(
             if (hasChildren.value) {
                 throw LayerFrozenException(this)
             }
-            val sources = this.sources
+            val sources = MultiSource(this.sources)
             spec.items.forEach { item ->
                 val name = spec.qualify(item)
                 if (item !in this) {
@@ -573,7 +574,7 @@ open class BaseConfig(
                     )
                     tree[name] = node
                     nodeByItem[item] = node
-                    sources.firstOrNull { loadItem(item, path, it) }
+                    loadItem(item, path, sources)
                 } else {
                     throw RepeatedItemException(name)
                 }

@@ -43,7 +43,7 @@ object AdHocConfigItemSpec : Spek({
             assertThat(networkBuffer.offset, equalTo(0))
         }
     }
-    val configForCast = Config().from.map.hierarchical(
+    val source = Source.from.map.hierarchical(
         mapOf(
             "size" to 1,
             "maxSize" to 2,
@@ -53,7 +53,7 @@ object AdHocConfigItemSpec : Spek({
         )
     )
     on("cast config to config class property") {
-        val networkBufferForCast: NetworkBufferForCast by configForCast.cast()
+        val networkBufferForCast: NetworkBufferForCast by Config().withSource(source).cast()
         it("should load correct values") {
             assertThat(networkBufferForCast.size, equalTo(1))
             assertThat(networkBufferForCast.maxSize, equalTo(2))
@@ -63,7 +63,27 @@ object AdHocConfigItemSpec : Spek({
         }
     }
     on("cast config to config class") {
-        val networkBufferForCast = configForCast.toValue<NetworkBufferForCast>()
+        val networkBufferForCast = Config().withSource(source).toValue<NetworkBufferForCast>()
+        it("should load correct values") {
+            assertThat(networkBufferForCast.size, equalTo(1))
+            assertThat(networkBufferForCast.maxSize, equalTo(2))
+            assertThat(networkBufferForCast.name, equalTo("buffer"))
+            assertThat(networkBufferForCast.type, equalTo(NetworkBufferForCast.Type.ON_HEAP))
+            assertNull(networkBufferForCast.offset)
+        }
+    }
+    on("cast multi-layer config to config class") {
+        val networkBufferForCast = Config().withSource(source).from.json.string("").toValue<NetworkBufferForCast>()
+        it("should load correct values") {
+            assertThat(networkBufferForCast.size, equalTo(1))
+            assertThat(networkBufferForCast.maxSize, equalTo(2))
+            assertThat(networkBufferForCast.name, equalTo("buffer"))
+            assertThat(networkBufferForCast.type, equalTo(NetworkBufferForCast.Type.ON_HEAP))
+            assertNull(networkBufferForCast.offset)
+        }
+    }
+    on("cast config with merged source to config class") {
+        val networkBufferForCast = Config().withSource(source + Source.from.json.string("")).toValue<NetworkBufferForCast>()
         it("should load correct values") {
             assertThat(networkBufferForCast.size, equalTo(1))
             assertThat(networkBufferForCast.maxSize, equalTo(2))
@@ -73,15 +93,7 @@ object AdHocConfigItemSpec : Spek({
         }
     }
     on("cast source to config class") {
-        val networkBufferForCast = Source.from.map.hierarchical(
-            mapOf(
-                "size" to 1,
-                "maxSize" to 2,
-                "name" to "buffer",
-                "type" to "ON_HEAP",
-                "offset" to "null"
-            )
-        ).toValue<NetworkBufferForCast>()
+        val networkBufferForCast = source.toValue<NetworkBufferForCast>()
         it("should load correct values") {
             assertThat(networkBufferForCast.size, equalTo(1))
             assertThat(networkBufferForCast.maxSize, equalTo(2))
