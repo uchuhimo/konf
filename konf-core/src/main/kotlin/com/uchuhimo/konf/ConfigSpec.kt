@@ -38,18 +38,7 @@ open class ConfigSpec @JvmOverloads constructor(
                 if (name == null || name.contains('$')) {
                     ""
                 } else {
-                    if (name.all { it.isUpperCase() }) {
-                        name.toLowerCase()
-                    } else {
-                        val firstLowerCaseIndex = name.indexOfFirst { it.isLowerCase() }
-                        when (firstLowerCaseIndex) {
-                            0 -> name
-                            1 -> name[0].toLowerCase() + name.drop(1)
-                            else ->
-                                name.substring(0, firstLowerCaseIndex - 1).toLowerCase() +
-                                    name.substring(firstLowerCaseIndex - 1)
-                        }
-                    }
+                    name.toLittleCase()
                 }
             }.let { name ->
                 if (name.endsWith("Spec")) {

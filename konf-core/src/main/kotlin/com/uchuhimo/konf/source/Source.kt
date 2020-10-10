@@ -55,6 +55,7 @@ import com.uchuhimo.konf.ValueNode
 import com.uchuhimo.konf.annotation.JavaApi
 import com.uchuhimo.konf.source.base.ListStringNode
 import com.uchuhimo.konf.source.base.toHierarchical
+import com.uchuhimo.konf.toLittleCamelCase
 import com.uchuhimo.konf.toPath
 import com.uchuhimo.konf.toTree
 import com.uchuhimo.konf.toValue
@@ -156,22 +157,25 @@ interface Source {
         if (path.isEmpty()) {
             return this
         } else {
-            return transformed().tree.getOrNull(transformedPath(path, lowercased = false))?.let {
+            return normalized().tree.getOrNull(normalizedPath(path))?.let {
                 Source(info = info, tree = it, features = features)
             }
         }
     }
 
-    private fun transformedPath(path: Path, lowercased: Boolean): Path {
+    private fun normalizedPath(path: Path, lowercased: Boolean = false, littleCamelCased: Boolean = true): Path {
         var currentPath = path
         if (lowercased || isEnabled(Feature.LOAD_KEYS_CASE_INSENSITIVELY)) {
             currentPath = currentPath.map { it.toLowerCase() }
         }
+        if (littleCamelCased && isEnabled(Feature.LOAD_KEYS_AS_LITTLE_CAMEL_CASE)) {
+            currentPath = currentPath.map { it.toLittleCamelCase() }
+        }
         return currentPath
     }
 
-    fun getNodeOrNull(path: Path, lowercased: Boolean): TreeNode? {
-        return tree.getOrNull(transformedPath(path, lowercased))
+    fun getNodeOrNull(path: Path, lowercased: Boolean = false, littleCamelCased: Boolean = true): TreeNode? {
+        return tree.getOrNull(normalizedPath(path, lowercased, littleCamelCased))
     }
 
     /**
@@ -274,13 +278,13 @@ interface Source {
      * the whole node will be replace by a reference to the sub-tree in the specified path.
      *
      * @param root the root source for substitution
-     * @param disabled whether disabled or let the source decide by itself
+     * @param enabled whether enabled or let the source decide by itself
      * @param errorWhenUndefined whether throw exception when this source contains undefined path variables
      * @return a source that substitutes path variables within all strings by values
      * @throws UndefinedPathVariableException
      */
-    fun substituted(root: Source = this, disabled: Boolean = false, errorWhenUndefined: Boolean = true): Source {
-        return if (disabled || !this.isEnabled(Feature.SUBSTITUTE_SOURCE_BEFORE_LOADED)) {
+    fun substituted(root: Source = this, enabled: Boolean = true, errorWhenUndefined: Boolean = true): Source {
+        return if (!enabled || !this.isEnabled(Feature.SUBSTITUTE_SOURCE_BEFORE_LOADED)) {
             this
         } else {
             Source(info, tree.substituted(root, errorWhenUndefined), features)
@@ -295,9 +299,18 @@ interface Source {
         }
     }
 
-    fun transformed(lowercased: Boolean = false): Source {
+    fun littleCamelCased(enabled: Boolean = true): Source {
+        return if (!enabled || !this.isEnabled(Feature.LOAD_KEYS_AS_LITTLE_CAMEL_CASE)) {
+            this
+        } else {
+            Source(info, tree.littleCamelCased(), features)
+        }
+    }
+
+    fun normalized(lowercased: Boolean = false, littleCamelCased: Boolean = true): Source {
         var currentSource = this
         currentSource = currentSource.lowercased(lowercased)
+        currentSource = currentSource.littleCamelCased(littleCamelCased)
         return currentSource
     }
 
@@ -425,6 +438,20 @@ private fun TreeNode.lowercased(): TreeNode {
                 key.toLowerCase()
             }.mapValues { (_, child) ->
                 child.lowercased()
+            }
+        )
+    } else {
+        return this
+    }
+}
+
+private fun TreeNode.littleCamelCased(): TreeNode {
+    if (this is ContainerNode) {
+        return withMap(
+            children.mapKeys { (key, _) ->
+                key.toLittleCamelCase()
+            }.mapValues { (_, child) ->
+                child.littleCamelCased()
             }
         )
     } else {
@@ -561,7 +588,8 @@ internal fun Config.loadItem(item: Item<*>, path: Path, source: Source): Boolean
     try {
         val itemNode = source.getNodeOrNull(
             path,
-            lowercased = this.isEnabled(Feature.LOAD_KEYS_CASE_INSENSITIVELY)
+            lowercased = this.isEnabled(Feature.LOAD_KEYS_CASE_INSENSITIVELY),
+            littleCamelCased = this.isEnabled(Feature.LOAD_KEYS_AS_LITTLE_CAMEL_CASE)
         )
         if (itemNode != null && !itemNode.isPlaceHolderNode()) {
             if (item.nullable &&
@@ -586,10 +614,11 @@ internal fun Config.loadItem(item: Item<*>, path: Path, source: Source): Boolean
 internal fun load(config: Config, source: Source): Source {
     var currentSource = source
     currentSource = currentSource.substituted(
-        disabled = !config.isEnabled(Feature.SUBSTITUTE_SOURCE_BEFORE_LOADED)
+        enabled = config.isEnabled(Feature.SUBSTITUTE_SOURCE_BEFORE_LOADED)
     )
-    currentSource = currentSource.transformed(
-        lowercased = config.isEnabled(Feature.LOAD_KEYS_CASE_INSENSITIVELY)
+    currentSource = currentSource.normalized(
+        lowercased = config.isEnabled(Feature.LOAD_KEYS_CASE_INSENSITIVELY),
+        littleCamelCased = config.isEnabled(Feature.LOAD_KEYS_AS_LITTLE_CAMEL_CASE)
     )
     config.lock {
         for (item in config) {

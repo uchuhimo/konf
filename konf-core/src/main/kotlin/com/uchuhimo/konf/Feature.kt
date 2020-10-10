@@ -35,6 +35,12 @@ enum class Feature(val enabledByDefault: Boolean) {
      */
     LOAD_KEYS_CASE_INSENSITIVELY(false),
     /**
+     * Feature that determines whether loading keys from sources as little camel case.
+     *
+     * Feature is enabled by default.
+     */
+    LOAD_KEYS_AS_LITTLE_CAMEL_CASE(true),
+    /**
      * Feature that determines whether sources are optional by default.
      *
      * Feature is disabled by default.

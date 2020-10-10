@@ -36,9 +36,9 @@ class MergedSource(val facade: Source, val fallback: Source) : Source {
             Collections.unmodifiableMap(facade.features)
         )
 
-    override fun substituted(root: Source, disabled: Boolean, errorWhenUndefined: Boolean): Source {
-        val substitutedFacade = facade.substituted(root, disabled, errorWhenUndefined)
-        val substitutedFallback = fallback.substituted(root, disabled, errorWhenUndefined)
+    override fun substituted(root: Source, enabled: Boolean, errorWhenUndefined: Boolean): Source {
+        val substitutedFacade = facade.substituted(root, enabled, errorWhenUndefined)
+        val substitutedFallback = fallback.substituted(root, enabled, errorWhenUndefined)
         if (substitutedFacade === facade && substitutedFallback === fallback) {
             return this
         } else {
@@ -56,9 +56,19 @@ class MergedSource(val facade: Source, val fallback: Source) : Source {
         }
     }
 
-    override fun getNodeOrNull(path: Path, lowercased: Boolean): TreeNode? {
-        val facadeNode = facade.getNodeOrNull(path, lowercased)
-        val fallbackNode = fallback.getNodeOrNull(path, lowercased)
+    override fun littleCamelCased(enabled: Boolean): Source {
+        val littleCamelCasedFacade = facade.littleCamelCased(enabled)
+        val littleCamelCasedFallback = fallback.littleCamelCased(enabled)
+        if (littleCamelCasedFacade === facade && littleCamelCasedFallback === fallback) {
+            return this
+        } else {
+            return MergedSource(littleCamelCasedFacade, littleCamelCasedFallback)
+        }
+    }
+
+    override fun getNodeOrNull(path: Path, lowercased: Boolean, littleCamelCased: Boolean): TreeNode? {
+        val facadeNode = facade.getNodeOrNull(path, lowercased, littleCamelCased)
+        val fallbackNode = fallback.getNodeOrNull(path, lowercased, littleCamelCased)
         return if (facadeNode != null) {
             if (fallbackNode != null) {
                 facadeNode.withFallback(fallbackNode)

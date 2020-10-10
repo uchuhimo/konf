@@ -41,3 +41,79 @@ internal fun getUnits(s: String): String {
  * Returns default value if string is empty, original string otherwise.
  */
 fun String.notEmptyOr(default: String): String = if (isEmpty()) default else this
+
+fun String.toLittleCase(): String {
+    return if (this.all { it.isUpperCase() }) {
+        this.toLowerCase()
+    } else {
+        when (val firstLowerCaseIndex = this.indexOfFirst { it.isLowerCase() }) {
+            -1, 0 -> this
+            1 -> this[0].toLowerCase() + this.drop(1)
+            else ->
+                this.substring(0, firstLowerCaseIndex - 1).toLowerCase() +
+                    this.substring(firstLowerCaseIndex - 1)
+        }
+    }
+}
+
+/**
+ * Modified implementation from [org.apache.commons.text.CaseUtils.toCamelCase].
+ */
+fun String.toCamelCase(): String {
+    if (isEmpty()) {
+        return this
+    }
+    val strLen = this.length
+    val newCodePoints = IntArray(strLen)
+    var outOffset = 0
+    val delimiterSet = setOf(" ".codePointAt(0), "_".codePointAt(0))
+    var capitalizeNext = Character.isUpperCase(this.codePointAt(0))
+    var lowercaseNext = false
+    var previousIsUppercase = false
+    var index = 0
+    while (index < strLen) {
+        val codePoint: Int = this.codePointAt(index)
+        when {
+            delimiterSet.contains(codePoint) -> {
+                capitalizeNext = outOffset != 0
+                lowercaseNext = false
+                previousIsUppercase = false
+                index += Character.charCount(codePoint)
+            }
+            capitalizeNext -> {
+                val upperCaseCodePoint = Character.toUpperCase(codePoint)
+                newCodePoints[outOffset++] = upperCaseCodePoint
+                index += Character.charCount(upperCaseCodePoint)
+                capitalizeNext = false
+                lowercaseNext = true
+            }
+            lowercaseNext -> {
+                val lowerCaseCodePoint = Character.toLowerCase(codePoint)
+                newCodePoints[outOffset++] = lowerCaseCodePoint
+                index += Character.charCount(lowerCaseCodePoint)
+                if (Character.isLowerCase(codePoint)) {
+                    lowercaseNext = false
+                    if (previousIsUppercase) {
+                        previousIsUppercase = false
+                        val previousCodePoint = newCodePoints[outOffset - 2]
+                        val upperCaseCodePoint = Character.toUpperCase(previousCodePoint)
+                        newCodePoints[outOffset - 2] = upperCaseCodePoint
+                    }
+                } else {
+                    previousIsUppercase = true
+                }
+            }
+            else -> {
+                newCodePoints[outOffset++] = codePoint
+                index += Character.charCount(codePoint)
+            }
+        }
+    }
+    return if (outOffset != 0) {
+        String(newCodePoints, 0, outOffset)
+    } else this
+}
+
+fun String.toLittleCamelCase(): String {
+    return this.toCamelCase().toLittleCase()
+}
