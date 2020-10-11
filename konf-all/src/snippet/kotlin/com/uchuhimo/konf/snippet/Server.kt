@@ -19,14 +19,14 @@ package com.uchuhimo.konf.snippet
 import com.uchuhimo.konf.Config
 import com.uchuhimo.konf.ConfigSpec
 
-data class Server(val host: String, val port: Int) {
-    constructor(config: Config) : this(config[Server.host], config[Server.port])
+data class Server(val host: String, val tcpPort: Int) {
+    constructor(config: Config) : this(config[Server.host], config[Server.tcpPort])
 
     fun start() {}
 
     companion object : ConfigSpec("server") {
         val host by optional("0.0.0.0", description = "host IP of server")
-        val port by required<Int>(description = "port of server")
-        val nextPort by lazy { config -> config[port] + 1 }
+        val tcpPort by required<Int>(description = "port of server")
+        val nextPort by lazy { config -> config[tcpPort] + 1 }
     }
 }

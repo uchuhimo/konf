@@ -119,6 +119,9 @@ class DefaultLoaders(
     @JvmOverloads
     fun env(nested: Boolean = true): Config = config.withSource(EnvProvider.env(nested).orMapped())
 
+    @JvmOverloads
+    fun envMap(map: Map<String, String>, nested: Boolean = true): Config = config.withSource(EnvProvider.envMap(map, nested).orMapped())
+
     /**
      * Returns a child config containing values from system properties.
      *

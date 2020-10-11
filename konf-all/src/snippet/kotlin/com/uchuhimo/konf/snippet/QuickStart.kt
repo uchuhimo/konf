@@ -26,7 +26,7 @@ import java.io.File
 
 object ServerSpec : ConfigSpec() {
     val host by optional("0.0.0.0")
-    val port by required<Int>()
+    val tcpPort by required<Int>()
 }
 
 fun main(args: Array<String>) {
@@ -36,7 +36,7 @@ fun main(args: Array<String>) {
         """
         server:
             host: 127.0.0.1
-            port: 8080
+            tcp_port: 8080
         """.trimIndent()
     )
     file.deleteOnExit()
@@ -60,7 +60,7 @@ fun main(args: Array<String>) {
             .from.env()
             .from.systemProperties()
     }
-    val server = Server(config[ServerSpec.host], config[ServerSpec.port])
+    val server = Server(config[ServerSpec.host], config[ServerSpec.tcpPort])
     server.start()
     run {
         val server = Config()

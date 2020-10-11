@@ -20,17 +20,17 @@ import com.uchuhimo.konf.Config
 
 fun main(args: Array<String>) {
     val config = Config { addSpec(Server) }
-    config[Server.port] = 1000
+    config[Server.tcpPort] = 1000
     // fork from parent config
     val childConfig = config.withLayer("child")
     // child config inherit values from parent config
-    check(childConfig[Server.port] == 1000)
+    check(childConfig[Server.tcpPort] == 1000)
     // modifications in parent config affect values in child config
-    config[Server.port] = 2000
-    check(config[Server.port] == 2000)
-    check(childConfig[Server.port] == 2000)
+    config[Server.tcpPort] = 2000
+    check(config[Server.tcpPort] == 2000)
+    check(childConfig[Server.tcpPort] == 2000)
     // modifications in child config don't affect values in parent config
-    childConfig[Server.port] = 3000
-    check(config[Server.port] == 2000)
-    check(childConfig[Server.port] == 3000)
+    childConfig[Server.tcpPort] = 3000
+    check(config[Server.tcpPort] == 2000)
+    check(childConfig[Server.tcpPort] == 3000)
 }

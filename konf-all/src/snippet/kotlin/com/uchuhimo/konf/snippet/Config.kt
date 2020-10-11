@@ -37,22 +37,22 @@ fun main(args: Array<String>) {
     config.contains("server.host")
     // or
     "server.host" in config
-    config[Server.port] = 80
-    config["server.port"] = 80
+    config[Server.tcpPort] = 80
+    config["server.tcpPort"] = 80
     config.containsRequired()
     config.validateRequired()
-    config.unset(Server.port)
-    config.unset("server.port")
+    config.unset(Server.tcpPort)
+    config.unset("server.tcpPort")
     val basePort by ConfigSpec("server").required<Int>()
-    config.lazySet(Server.port) { it[basePort] + 1 }
-    config.lazySet("server.port") { it[basePort] + 1 }
+    config.lazySet(Server.tcpPort) { it[basePort] + 1 }
+    config.lazySet("server.tcpPort") { it[basePort] + 1 }
     run {
-        var port by config.property(Server.port)
+        var port by config.property(Server.tcpPort)
         port = 9090
         check(port == 9090)
     }
     run {
-        val port by config.property(Server.port)
+        val port by config.property(Server.tcpPort)
         check(port == 9090)
     }
 }

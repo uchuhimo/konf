@@ -48,6 +48,12 @@ object DefaultLoadersSpec : SubjectSpek<DefaultLoaders>({
     val item = DefaultLoadersConfig.type
 
     given("a loader") {
+        on("load from environment-like map") {
+            val config = subject.envMap(mapOf("SOURCE_TEST_TYPE" to "env"))
+            it("should return a config which contains value from environment-like map") {
+                assertThat(config[item], equalTo("env"))
+            }
+        }
         on("load from system environment") {
             val config = subject.env()
             it("should return a config which contains value from system environment") {

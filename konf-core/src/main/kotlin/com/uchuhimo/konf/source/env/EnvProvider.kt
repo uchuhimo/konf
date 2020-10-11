@@ -34,9 +34,12 @@ object EnvProvider {
      * @return a new source from system environment
      */
     @JvmOverloads
-    fun env(nested: Boolean = true): Source {
+    fun env(nested: Boolean = true): Source = envMap(System.getenv(), nested)
+
+    @JvmOverloads
+    fun envMap(map: Map<String, String>, nested: Boolean = true): Source {
         return FlatSource(
-            System.getenv().mapKeys { (key, _) ->
+            map.mapKeys { (key, _) ->
                 if (nested) key.replace('_', '.') else key
             }.filter { (key, _) ->
                 key.matches(validEnv)

@@ -48,6 +48,10 @@ class MultiSource(val sources: Collection<Source>) : Source {
         throw NotImplementedError()
     }
 
+    override fun normalized(lowercased: Boolean, littleCamelCased: Boolean): Source {
+        throw NotImplementedError()
+    }
+
     override fun getNodeOrNull(path: Path, lowercased: Boolean, littleCamelCased: Boolean): TreeNode? {
         val nodes = sources.map {
             it.getNodeOrNull(path, lowercased, littleCamelCased)

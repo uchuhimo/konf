@@ -154,22 +154,50 @@ interface Source {
      * `null` otherwise
      */
     fun getOrNull(path: Path): Source? {
-        if (path.isEmpty()) {
-            return this
+        return if (path.isEmpty()) {
+            this
         } else {
-            return normalized().tree.getOrNull(normalizedPath(path))?.let {
+            getTreeOrNull(tree, normalizedPath(path))?.let {
                 Source(info = info, tree = it, features = features)
             }
         }
     }
 
+    private fun getTreeOrNull(tree: TreeNode, path: Path): TreeNode? {
+        return if (path.isEmpty()) {
+            tree
+        } else {
+            val key = normalizedKey(path.first())
+            val rest = path.drop(1)
+            var result: TreeNode? = null
+            for ((childKey, child) in tree.children) {
+                if (key == normalizedKey(childKey)) {
+                    result = child
+                    break
+                }
+            }
+            result?.let { getTreeOrNull(it, rest) }
+        }
+    }
+
+    private fun normalizedKey(key: String): String {
+        var currentKey = key
+        if (isEnabled(Feature.LOAD_KEYS_AS_LITTLE_CAMEL_CASE)) {
+            currentKey = currentKey.toLittleCamelCase()
+        }
+        if (isEnabled(Feature.LOAD_KEYS_CASE_INSENSITIVELY)) {
+            currentKey = currentKey.toLowerCase()
+        }
+        return currentKey
+    }
+
     private fun normalizedPath(path: Path, lowercased: Boolean = false, littleCamelCased: Boolean = true): Path {
         var currentPath = path
-        if (lowercased || isEnabled(Feature.LOAD_KEYS_CASE_INSENSITIVELY)) {
-            currentPath = currentPath.map { it.toLowerCase() }
-        }
         if (littleCamelCased && isEnabled(Feature.LOAD_KEYS_AS_LITTLE_CAMEL_CASE)) {
             currentPath = currentPath.map { it.toLittleCamelCase() }
+        }
+        if (lowercased || isEnabled(Feature.LOAD_KEYS_CASE_INSENSITIVELY)) {
+            currentPath = currentPath.map { it.toLowerCase() }
         }
         return currentPath
     }
@@ -309,8 +337,8 @@ interface Source {
 
     fun normalized(lowercased: Boolean = false, littleCamelCased: Boolean = true): Source {
         var currentSource = this
-        currentSource = currentSource.lowercased(lowercased)
         currentSource = currentSource.littleCamelCased(littleCamelCased)
+        currentSource = currentSource.lowercased(lowercased)
         return currentSource
     }
 
@@ -613,12 +641,12 @@ internal fun Config.loadItem(item: Item<*>, path: Path, source: Source): Boolean
 
 internal fun load(config: Config, source: Source): Source {
     var currentSource = source
-    currentSource = currentSource.substituted(
-        enabled = config.isEnabled(Feature.SUBSTITUTE_SOURCE_BEFORE_LOADED)
-    )
     currentSource = currentSource.normalized(
         lowercased = config.isEnabled(Feature.LOAD_KEYS_CASE_INSENSITIVELY),
         littleCamelCased = config.isEnabled(Feature.LOAD_KEYS_AS_LITTLE_CAMEL_CASE)
+    )
+    currentSource = currentSource.substituted(
+        enabled = config.isEnabled(Feature.SUBSTITUTE_SOURCE_BEFORE_LOADED)
     )
     config.lock {
         for (item in config) {

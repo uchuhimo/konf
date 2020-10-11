@@ -39,7 +39,7 @@ object QuickStartSpec : Spek({
         it("should load all values") {
             assertThat(
                 config.toMap(),
-                equalTo(mapOf("server.host" to "127.0.0.1", "server.port" to 8080))
+                equalTo(mapOf("server.host" to "127.0.0.1", "server.tcpPort" to 8080))
             )
         }
     }
@@ -55,7 +55,7 @@ object QuickStartSpec : Spek({
         it("should load all values") {
             assertThat(
                 config.toMap(),
-                equalTo(mapOf("server.host" to "127.0.0.1", "server.port" to 8080))
+                equalTo(mapOf("server.host" to "127.0.0.1", "server.tcpPort" to 8080))
             )
         }
     }
@@ -70,7 +70,7 @@ object QuickStartSpec : Spek({
         it("should load all values") {
             assertThat(
                 config.toMap(),
-                equalTo(mapOf("server.host" to "127.0.0.1", "server.port" to 8080))
+                equalTo(mapOf("server.host" to "127.0.0.1", "server.tcpPort" to 8080))
             )
         }
     }
@@ -85,7 +85,7 @@ object QuickStartSpec : Spek({
         }
         val server = config.toValue<Server>()
         it("should load all values") {
-            assertThat(server, equalTo(Server(host = "127.0.0.1", port = 8080)))
+            assertThat(server, equalTo(Server(host = "127.0.0.1", tcpPort = 8080)))
         }
     }
     on("cast source to value") {
@@ -99,7 +99,7 @@ object QuickStartSpec : Spek({
         }
         val server = source.toValue<Server>()
         it("should load all values") {
-            assertThat(server, equalTo(Server(host = "127.0.0.1", port = 8080)))
+            assertThat(server, equalTo(Server(host = "127.0.0.1", tcpPort = 8080)))
         }
     }
 })
@@ -111,7 +111,7 @@ private fun <T> useFile(block: () -> T): T {
         """
         server:
             host: 127.0.0.1
-            port: 8080
+            tcp_port: 8080
         """.trimIndent()
     )
     try {

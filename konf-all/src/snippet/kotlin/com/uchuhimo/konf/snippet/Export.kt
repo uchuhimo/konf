@@ -23,7 +23,7 @@ import com.uchuhimo.konf.source.json.toJson
 
 fun main(args: Array<String>) {
     val config = Config { addSpec(Server) }
-    config[Server.port] = 1000
+    config[Server.tcpPort] = 1000
     run {
         val map = config.toMap()
     }
@@ -38,5 +38,5 @@ fun main(args: Array<String>) {
     val newConfig = Config {
         addSpec(Server)
     }.from.json.file(file)
-    check(config == newConfig)
+    check(config.toMap() == newConfig.toMap())
 }

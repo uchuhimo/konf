@@ -159,7 +159,7 @@ compile(group = "com.github.uchuhimo.konf", name = "konf", version = "master-SNA
     ```kotlin
     object ServerSpec : ConfigSpec() {
         val host by optional("0.0.0.0")
-        val port by required<Int>()
+        val tcpPort by required<Int>()
     }
     ```
 
@@ -201,34 +201,34 @@ compile(group = "com.github.uchuhimo.konf", name = "konf", version = "master-SNA
         ```yaml
         server:
             host: 0.0.0.0
-            port: 8080
+            tcp_port: 8080
         ```
     - in `server.json`:
         ```json
         {
             "server": {
                 "host": "0.0.0.0",
-                "port": 8080
+                "tcp_port": 8080
             }
         }
         ```
     - in system environment:
         ```bash
         SERVER_HOST=0.0.0.0
-        SERVER_PORT=8080
+        SERVER_TCPPORT=8080
         ```
     - in command line for system properties:
         ```bash
-        -Dserver.host=0.0.0.0 -Dserver.port=8080
+        -Dserver.host=0.0.0.0 -Dserver.tcp_port=8080
         ```
 
 4. Retrieve values from config with type-safe APIs:
     ```kotlin
-    data class Server(val host: String, val port: Int) {
+    data class Server(val host: String, val tcpPort: Int) {
         fun start() {}
     }
     
-    val server = Server(config[ServerSpec.host], config[ServerSpec.port])
+    val server = Server(config[ServerSpec.host], config[ServerSpec.tcpPort])
     server.start()
     ```
 
@@ -260,7 +260,7 @@ If the config spec is binding with single class, you can declare config spec as 
 class Server {
     companion object : ConfigSpec("server") {
         val host by optional("0.0.0.0")
-        val port by required<Int>()
+        val tcpPort by required<Int>()
     }
 }
 ```
@@ -299,11 +299,11 @@ There are three kinds of item:
 
 - Required item. Required item doesn't have default value, thus must be set with value before retrieved in config. Define a required item with description:
     ```kotlin
-    val port by required<Int>(description = "port of server")
+    val tcpPort by required<Int>(description = "port of server")
     ```
     Or omit the description:
     ```kotlin
-    val port by required<Int>()
+    val tcpPort by required<Int>()
     ```
 - Optional item. Optional item has default value, thus can be safely retrieved before setting. Define an optional item:
     ```kotlin
@@ -312,7 +312,7 @@ There are three kinds of item:
     Description can be omitted.
 - Lazy item. Lazy item also has default value, however, the default value is not a constant, it is evaluated from thunk every time when retrieved. Define a lazy item:
     ```kotlin
-    val nextPort by lazy { config -> config[port] + 1 }
+    val nextPort by lazy { config -> config[tcpPort] + 1 }
     ```
 
 You can also define config spec in Java, with a more verbose API (compared to Kotlin version in "quick start"):
@@ -324,7 +324,7 @@ public class ServerSpec {
   public static final OptionalItem<String> host =
       new OptionalItem<String>(spec, "host", "0.0.0.0") {};
 
-  public static final RequiredItem<Integer> port = new RequiredItem<Integer>(spec, "port") {};
+  public static final RequiredItem<Integer> tcpPort = new RequiredItem<Integer>(spec, "tcpPort") {};
 }
 ```
 
@@ -418,37 +418,37 @@ config.validateRequired()
 Associate item with value (type-safe API):
 
 ```kotlin
-config[Server.port] = 80
+config[Server.tcpPort] = 80
 ```
 
 Find item with specified name, and associate it with value (unsafe API):
 
 ```kotlin
-config["server.port"] = 80
+config["server.tcpPort"] = 80
 ```
 
 Discard associated value of item:
 
 ```kotlin
-config.unset(Server.port)
+config.unset(Server.tcpPort)
 ```
 
 Discard associated value of item with specified name:
 
 ```kotlin
-config.unset("server.port")
+config.unset("server.tcpPort")
 ```
 
 Associate item with lazy thunk (type-safe API):
 
 ```kotlin
-config.lazySet(Server.port) { it[basePort] + 1 }
+config.lazySet(Server.tcpPort) { it[basePort] + 1 }
 ```
 
 Find item with specified name, and associate it with lazy thunk (unsafe API):
 
 ```kotlin
-config.lazySet("server.port") { it[basePort] + 1 }
+config.lazySet("server.tcpPort") { it[basePort] + 1 }
 ```
 
 ### Export value in config as property
@@ -456,7 +456,7 @@ config.lazySet("server.port") { it[basePort] + 1 }
 Export a read-write property from value in config:
 
 ```kotlin
-var port by config.property(Server.port)
+var port by config.property(Server.tcpPort)
 port = 9090
 check(port == 9090)
 ```
@@ -464,7 +464,7 @@ check(port == 9090)
 Export a read-only property from value in config:
 
 ```kotlin
-val port by config.property(Server.port)
+val port by config.property(Server.tcpPort)
 check(port == 9090)
 ```
 
@@ -472,19 +472,19 @@ check(port == 9090)
 
 ```kotlin
 val config = Config { addSpec(Server) }
-config[Server.port] = 1000
+config[Server.tcpPort] = 1000
 // fork from parent config
 val childConfig = config.withLayer("child")
 // child config inherit values from parent config
-check(childConfig[Server.port] == 1000)
+check(childConfig[Server.tcpPort] == 1000)
 // modifications in parent config affect values in child config
-config[Server.port] = 2000
-check(config[Server.port] == 2000)
-check(childConfig[Server.port] == 2000)
+config[Server.tcpPort] = 2000
+check(config[Server.tcpPort] == 2000)
+check(childConfig[Server.tcpPort] == 2000)
 // modifications in child config don't affect values in parent config
-childConfig[Server.port] = 3000
-check(config[Server.port] == 2000)
-check(childConfig[Server.port] == 3000)
+childConfig[Server.tcpPort] = 3000
+check(config[Server.tcpPort] == 2000)
+check(childConfig[Server.tcpPort] == 3000)
 ```
 
 ## Load values from source
@@ -752,6 +752,7 @@ These features include:
 
 - `FAIL_ON_UNKNOWN_PATH`: feature that determines what happens when unknown paths appear in the source. If enabled, an exception is thrown when loading from the source to indicate it contains unknown paths. This feature is disabled by default.
 - `LOAD_KEYS_CASE_INSENSITIVELY`: feature that determines whether loading keys from sources case-insensitively. This feature is disabled by default except for system environment.
+- `LOAD_KEYS_AS_LITTLE_CAMEL_CASE`: feature that determines whether loading keys from sources as little camel case. This feature is enabled by default.
 - `OPTIONAL_SOURCE_BY_DEFAULT`: feature that determines whether sources are optional by default. This feature is disabled by default.
 - `SUBSTITUTE_SOURCE_BEFORE_LOADED`: feature that determines whether sources should be substituted before loaded into config. This feature is enabled by default.
 

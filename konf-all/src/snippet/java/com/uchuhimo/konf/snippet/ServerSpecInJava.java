@@ -26,5 +26,5 @@ public class ServerSpecInJava {
   public static final OptionalItem<String> host =
       new OptionalItem<String>(spec, "host", "0.0.0.0") {};
 
-  public static final RequiredItem<Integer> port = new RequiredItem<Integer>(spec, "port") {};
+  public static final RequiredItem<Integer> tcpPort = new RequiredItem<Integer>(spec, "tcpPort") {};
 }

@@ -20,22 +20,22 @@ import com.uchuhimo.konf.Config;
 
 public class ServerInJava {
   private String host;
-  private Integer port;
+  private Integer tcpPort;
 
-  public ServerInJava(String host, Integer port) {
+  public ServerInJava(String host, Integer tcpPort) {
     this.host = host;
-    this.port = port;
+    this.tcpPort = tcpPort;
   }
 
   public ServerInJava(Config config) {
-    this(config.get(ServerSpecInJava.host), config.get(ServerSpecInJava.port));
+    this(config.get(ServerSpecInJava.host), config.get(ServerSpecInJava.tcpPort));
   }
 
   public String getHost() {
     return host;
   }
 
-  public Integer getPort() {
-    return port;
+  public Integer getTcpPort() {
+    return tcpPort;
   }
 }

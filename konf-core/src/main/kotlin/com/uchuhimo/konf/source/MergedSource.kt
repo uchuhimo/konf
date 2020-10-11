@@ -35,6 +35,10 @@ class MergedSource(val facade: Source, val fallback: Source) : Source {
         Collections.unmodifiableMap(facade.features)
     )
 
+    override fun disabled(feature: Feature): Source = MergedSource(facade.disabled(feature), fallback)
+
+    override fun enabled(feature: Feature): Source = MergedSource(facade.enabled(feature), fallback)
+
     override fun substituted(root: Source, enabled: Boolean, errorWhenUndefined: Boolean): Source {
         val substitutedFacade = facade.substituted(root, enabled, errorWhenUndefined)
         val substitutedFallback = fallback.substituted(root, enabled, errorWhenUndefined)
@@ -65,6 +69,16 @@ class MergedSource(val facade: Source, val fallback: Source) : Source {
         }
     }
 
+    override fun normalized(lowercased: Boolean, littleCamelCased: Boolean): Source {
+        val normalizedFacade = facade.normalized(lowercased, littleCamelCased)
+        val normalizedFallback = fallback.normalized(lowercased, littleCamelCased)
+        if (normalizedFacade === facade && normalizedFallback === fallback) {
+            return this
+        } else {
+            return MergedSource(normalizedFacade, normalizedFallback)
+        }
+    }
+
     override fun getNodeOrNull(path: Path, lowercased: Boolean, littleCamelCased: Boolean): TreeNode? {
         val facadeNode = facade.getNodeOrNull(path, lowercased, littleCamelCased)
         val fallbackNode = fallback.getNodeOrNull(path, lowercased, littleCamelCased)
@@ -76,6 +90,32 @@ class MergedSource(val facade: Source, val fallback: Source) : Source {
             }
         } else {
             fallbackNode
+        }
+    }
+
+    override fun getOrNull(path: Path): Source? {
+        return if (path.isEmpty()) {
+            this
+        } else {
+            val subFacade = facade.getOrNull(path)
+            val subFallback = fallback.getOrNull(path)
+            if (subFacade != null) {
+                if (subFallback != null) {
+                    MergedSource(subFacade, subFallback)
+                } else {
+                    subFacade
+                }
+            } else {
+                subFallback
+            }
+        }
+    }
+
+    override fun withPrefix(prefix: Path): Source {
+        return if (prefix.isEmpty()) {
+            this
+        } else {
+            MergedSource(facade.withPrefix(prefix), fallback.withPrefix(prefix))
         }
     }
 }
