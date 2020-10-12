@@ -16,6 +16,7 @@
 
 package com.uchuhimo.konf.source.hocon
 
+import com.typesafe.config.Config
 import com.typesafe.config.ConfigList
 import com.typesafe.config.ConfigObject
 import com.typesafe.config.ConfigValue
@@ -53,9 +54,9 @@ private fun ConfigValue.toTree(): TreeNode {
  * Source from a HOCON value.
  */
 class HoconSource(
-    val value: ConfigValue
+    val value: Config
 ) : Source {
     override val info: SourceInfo = SourceInfo("type" to "HOCON")
 
-    override val tree: TreeNode = value.toTree()
+    override val tree: TreeNode = value.root().toTree()
 }

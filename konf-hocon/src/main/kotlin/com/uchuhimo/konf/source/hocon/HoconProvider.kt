@@ -30,7 +30,7 @@ import java.io.Reader
 @RegisterExtension(["conf"])
 object HoconProvider : Provider {
     override fun reader(reader: Reader): Source =
-        HoconSource(ConfigFactory.parseReader(reader).resolve().root())
+        HoconSource(ConfigFactory.parseReader(reader).resolve())
 
     override fun inputStream(inputStream: InputStream): Source {
         inputStream.reader().use {

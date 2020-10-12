@@ -18,7 +18,6 @@ package com.uchuhimo.konf.source.hocon
 
 import com.natpryce.hamkrest.assertion.assertThat
 import com.natpryce.hamkrest.equalTo
-import com.typesafe.config.ConfigObject
 import com.uchuhimo.konf.source.asSource
 import com.uchuhimo.konf.source.asValue
 import com.uchuhimo.konf.toPath
@@ -35,7 +34,7 @@ object HoconSourceSpec : SubjectSpek<HoconSource>({
     given("a HOCON source") {
         on("get underlying config") {
             it("should return corresponding config") {
-                val config = (subject.value as ConfigObject).toConfig()
+                val config = subject.value
                 assertThat(config.getInt("key"), equalTo(1))
             }
         }

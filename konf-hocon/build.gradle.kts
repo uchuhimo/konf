@@ -1,12 +1,6 @@
-dependencyManagement {
-    dependencies {
-        dependency("com.typesafe:config:${Versions.hocon}")
-    }
-}
-
 dependencies {
     api(project(":konf-core"))
-    implementation("com.typesafe:config")
+    implementation("com.typesafe", "config", Versions.hocon)
 
     testImplementation(testFixtures(project(":konf-core")))
 }

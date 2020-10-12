@@ -1,6 +1,5 @@
 import com.github.benmanes.gradle.versions.updates.DependencyUpdatesTask
 import com.jfrog.bintray.gradle.BintrayExtension
-import org.jetbrains.dokka.gradle.DokkaTask
 import org.jetbrains.kotlin.gradle.tasks.KotlinCompile
 import java.net.URL
 import java.util.Properties
@@ -25,7 +24,6 @@ buildscript {
         } else {
             jcenter()
         }
-        maven(url = "https://dl.bintray.com/kotlin/kotlin-eap")
     }
     dependencies {
         classpath("com.jfrog.bintray.gradle:gradle-bintray-plugin:${Versions.bintrayPlugin}")
@@ -42,7 +40,6 @@ plugins {
     id("com.dorongold.task-tree") version Versions.taskTree
     id("me.champeau.gradle.jmh") version Versions.jmhPlugin
     id("com.diffplug.spotless") version Versions.spotless
-    id("io.spring.dependency-management") version Versions.dependencyManagement
     id("com.github.ben-manes.versions") version Versions.dependencyUpdate
     id("org.jetbrains.dokka") version Versions.dokka
 }
@@ -57,7 +54,6 @@ allprojects {
     apply(plugin = "com.dorongold.task-tree")
     apply(plugin = "me.champeau.gradle.jmh")
     apply(plugin = "com.diffplug.spotless")
-    apply(plugin = "io.spring.dependency-management")
     apply(plugin = "com.github.ben-manes.versions")
     apply(plugin = "org.jetbrains.dokka")
     apply(plugin = "com.jfrog.bintray")
@@ -94,72 +90,34 @@ allprojects {
 }
 
 subprojects {
-    dependencyManagement {
-        dependencies {
-            dependency("org.jetbrains.kotlinx:kotlinx-coroutines-core:${Versions.coroutines}")
-            dependency("org.reflections:reflections:${Versions.reflections}")
-            dependency("org.apache.commons:commons-text:${Versions.commonsText}")
-
-            arrayOf("stdlib", "reflect", "stdlib-jdk8").forEach { name ->
-                dependency(kotlin(name, Versions.kotlin))
-            }
-
-            arrayOf("core", "annotations", "databind").forEach { name ->
-                dependency(jacksonCore(name, Versions.jackson))
-            }
-            dependency(jackson("module", "kotlin", Versions.jackson))
-            dependency(jackson("datatype", "jsr310", Versions.jackson))
-        }
-
-        configurations.testFixturesImplementation.get().withDependencies {
-            dependencies {
-                dependency(kotlin("test", Versions.kotlin))
-                dependency("com.natpryce:hamkrest:${Versions.hamkrest}")
-                dependency("org.hamcrest:hamcrest-all:${Versions.hamcrest}")
-
-                arrayOf("api", "data-driven-extension", "subject-extension", "junit-platform-engine").forEach { name ->
-                    dependency(spek(name, Versions.spek))
-                }
-            }
-        }
-        configurations.testImplementation.get().extendsFrom(configurations.testFixturesImplementation.get())
-        configurations.testImplementation.get().withDependencies {
-            dependencies {
-                dependency("com.sparkjava:spark-core:${Versions.spark}")
-                dependency("org.slf4j:slf4j-simple:${Versions.slf4j}")
-
-                dependency(junit("platform", "launcher", Versions.junitPlatform))
-                dependency(junit("jupiter", "api", Versions.junit))
-                dependency(junit("jupiter", "engine", Versions.junit))
-            }
-        }
-    }
+    configurations.testFixturesImplementation.get().extendsFrom(configurations.implementation.get())
+    configurations.testImplementation.get().extendsFrom(configurations.testFixturesImplementation.get())
 
     dependencies {
-        api(kotlin("stdlib-jdk8"))
-        api("org.jetbrains.kotlinx:kotlinx-coroutines-core")
-        implementation(kotlin("reflect"))
-        implementation("org.reflections:reflections")
-        implementation("org.apache.commons:commons-text")
+        api(kotlin("stdlib-jdk8", Versions.kotlin))
+        api("org.jetbrains.kotlinx", "kotlinx-coroutines-core", Versions.coroutines)
+        implementation(kotlin("reflect", Versions.kotlin))
+        implementation("org.reflections", "reflections", Versions.reflections)
+        implementation("org.apache.commons", "commons-text", Versions.commonsText)
         arrayOf("core", "annotations", "databind").forEach { name ->
-            api(jacksonCore(name))
+            api(jacksonCore(name, Versions.jackson))
         }
-        implementation(jackson("module", "kotlin"))
-        implementation(jackson("datatype", "jsr310"))
+        implementation(jackson("module", "kotlin", Versions.jackson))
+        implementation(jackson("datatype", "jsr310", Versions.jackson))
 
-        testFixturesImplementation(kotlin("test"))
-        testFixturesImplementation("com.natpryce:hamkrest")
-        testFixturesImplementation("org.hamcrest:hamcrest-all")
-        testImplementation(junit("jupiter", "api"))
-        testImplementation("com.sparkjava:spark-core")
+        testFixturesImplementation(kotlin("test", Versions.kotlin))
+        testFixturesImplementation("com.natpryce", "hamkrest", Versions.hamkrest)
+        testFixturesImplementation("org.hamcrest", "hamcrest-all", Versions.hamcrest)
+        testImplementation(junit("jupiter", "api", Versions.junit))
+        testImplementation("com.sparkjava", "spark-core", Versions.spark)
         arrayOf("api", "data-driven-extension", "subject-extension").forEach { name ->
-            testFixturesImplementation(spek(name))
+            testFixturesImplementation(spek(name, Versions.spek))
         }
 
-        testRuntimeOnly(junit("platform", "launcher"))
-        testRuntimeOnly(junit("jupiter", "engine"))
-        testRuntimeOnly(spek("junit-platform-engine"))
-        testRuntimeOnly("org.slf4j:slf4j-simple")
+        testRuntimeOnly(junit("platform", "launcher", Versions.junitPlatform))
+        testRuntimeOnly(junit("jupiter", "engine", Versions.junit))
+        testRuntimeOnly(spek("junit-platform-engine", Versions.spek))
+        testRuntimeOnly("org.slf4j", "slf4j-simple", Versions.slf4j)
     }
 
     java {

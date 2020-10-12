@@ -1,3 +1,3 @@
 dependencies {
-    jmhImplementation(kotlin("stdlib"))
+    jmhImplementation(kotlin("stdlib", Versions.kotlin))
 }
