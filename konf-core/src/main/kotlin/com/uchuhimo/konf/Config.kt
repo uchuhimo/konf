@@ -23,7 +23,6 @@ import com.uchuhimo.konf.annotation.JavaApi
 import com.uchuhimo.konf.source.DefaultLoaders
 import com.uchuhimo.konf.source.Source
 import com.uchuhimo.konf.source.base.kvToTree
-import java.util.Deque
 import kotlin.properties.ReadWriteProperty
 import kotlin.reflect.KProperty
 
@@ -169,7 +168,7 @@ interface Config : ItemContainer {
     /**
      * List of sources from all layers of this config.
      */
-    val sources: Deque<Source>
+    val sources: List<Source>
 
     /**
      * Returns a config overlapped by the specified facade config.

@@ -23,17 +23,21 @@ import com.uchuhimo.konf.TreeNode
 import java.util.Collections
 
 class MergedSource(val facade: Source, val fallback: Source) : Source {
-    override val info: SourceInfo = SourceInfo(
-        "facade" to facade.description,
-        "fallback" to fallback.description
-    )
+    override val info: SourceInfo by lazy {
+        SourceInfo(
+            "facade" to facade.description,
+            "fallback" to fallback.description
+        )
+    }
 
-    override val tree: TreeNode = facade.tree.withFallback(fallback.tree)
+    override val tree: TreeNode by lazy { facade.tree.withFallback(fallback.tree) }
 
-    override val features: Map<Feature, Boolean> = MergedMap(
-        Collections.unmodifiableMap(fallback.features),
-        Collections.unmodifiableMap(facade.features)
-    )
+    override val features: Map<Feature, Boolean> by lazy {
+        MergedMap(
+            Collections.unmodifiableMap(fallback.features),
+            Collections.unmodifiableMap(facade.features)
+        )
+    }
 
     override fun disabled(feature: Feature): Source = MergedSource(facade.disabled(feature), fallback)
 

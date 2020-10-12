@@ -22,7 +22,7 @@ import com.fasterxml.jackson.databind.SerializationFeature
 import com.fasterxml.jackson.databind.module.SimpleModule
 import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule
 import com.fasterxml.jackson.module.kotlin.jacksonObjectMapper
-import com.uchuhimo.konf.source.MultiSource
+import com.uchuhimo.konf.source.MergedSource
 import com.uchuhimo.konf.source.Source
 import com.uchuhimo.konf.source.base.EmptyMapSource
 import com.uchuhimo.konf.source.deserializer.DurationDeserializer
@@ -36,8 +36,6 @@ import com.uchuhimo.konf.source.toCompatibleValue
 import java.time.Duration
 import java.time.OffsetDateTime
 import java.time.ZonedDateTime
-import java.util.ArrayDeque
-import java.util.Deque
 import java.util.WeakHashMap
 import java.util.concurrent.locks.ReentrantReadWriteLock
 import kotlin.concurrent.read
@@ -492,11 +490,11 @@ open class BaseConfig(
 
     override val specs: List<Spec> get() = lock.read { specsInLayer + (parent?.specs ?: listOf()) }
 
-    override val sources: Deque<Source>
+    override val sources: List<Source>
         get() {
-            return lock.read { ArrayDeque(listOf(source)) }.apply {
-                for (source in parent?.sources ?: ArrayDeque()) {
-                    addLast(source)
+            return lock.read { mutableListOf(source) }.apply {
+                for (source in parent?.sources ?: listOf()) {
+                    add(source)
                 }
             }
         }
@@ -544,7 +542,13 @@ open class BaseConfig(
                 )
                 tree[name] = node
                 nodeByItem[item] = node
-                loadItem(item, path, MultiSource(sources))
+                val sources = this.sources
+                val mergedSource = if (sources.isNotEmpty()) {
+                    sources.reduceRight { source, acc -> MergedSource(source, acc) }
+                } else {
+                    null
+                }
+                mergedSource?.let { loadItem(item, path, it) }
             } else {
                 throw RepeatedItemException(name)
             }
@@ -556,7 +560,12 @@ open class BaseConfig(
             if (hasChildren.value) {
                 throw LayerFrozenException(this)
             }
-            val sources = MultiSource(this.sources)
+            val sources = this.sources
+            val mergedSource = if (sources.isNotEmpty()) {
+                sources.reduceRight { source, acc -> MergedSource(source, acc) }
+            } else {
+                null
+            }
             spec.items.forEach { item ->
                 val name = spec.qualify(item)
                 if (item !in this) {
@@ -574,7 +583,7 @@ open class BaseConfig(
                     )
                     tree[name] = node
                     nodeByItem[item] = node
-                    loadItem(item, path, sources)
+                    mergedSource?.let { loadItem(item, path, it) }
                 } else {
                     throw RepeatedItemException(name)
                 }

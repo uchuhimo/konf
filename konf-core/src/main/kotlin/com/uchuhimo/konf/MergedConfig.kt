@@ -17,8 +17,6 @@
 package com.uchuhimo.konf
 
 import com.uchuhimo.konf.source.Source
-import java.util.ArrayDeque
-import java.util.Deque
 
 /**
  * Config that merge [fallback] and [facade].
@@ -64,10 +62,10 @@ open class MergedConfig(val fallback: BaseConfig, val facade: BaseConfig) :
     override val specs: List<Spec>
         get() = facade.specs + fallback.specs
 
-    override val sources: Deque<Source>
-        get() = ArrayDeque(facade.sources).apply {
+    override val sources: List<Source>
+        get() = facade.sources.toMutableList().apply {
             for (source in fallback.sources) {
-                addLast(source)
+                add(source)
             }
         }
 
