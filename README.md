@@ -1,9 +1,9 @@
 # Konf
 
 [![Java 8+](https://img.shields.io/badge/Java-8+-4c7e9f.svg)](http://java.oracle.com)
-[![Maven metadata URL](https://img.shields.io/maven-metadata/v/http/central.maven.org/maven2/com/uchuhimo/konf/maven-metadata.xml.svg)](https://search.maven.org/artifact/com.uchuhimo/konf)
-[![Bintray](https://api.bintray.com/packages/uchuhimo/maven/konf/images/download.svg)](https://bintray.com/uchuhimo/maven/konf/_latestVersion)
-[![JitPack](https://jitpack.io/v/uchuhimo/konf.svg)](https://jitpack.io/#uchuhimo/konf)
+[![Maven metadata URL](https://img.shields.io/maven-central/v/com.uchuhimo/konf)](https://search.maven.org/artifact/com.uchuhimo/konf)
+[![Bintray](https://img.shields.io/bintray/v/uchuhimo/maven/konf)](https://bintray.com/uchuhimo/maven/konf/_latestVersion)
+[![JitPack](https://img.shields.io/jitpack/v/github/uchuhimo/konf)](https://jitpack.io/#uchuhimo/konf)
 [![Build Status](https://travis-ci.org/uchuhimo/konf.svg?branch=master)](https://travis-ci.org/uchuhimo/konf)
 [![codecov](https://codecov.io/gh/uchuhimo/konf/branch/master/graph/badge.svg)](https://codecov.io/gh/uchuhimo/konf)
 [![codebeat badge](https://codebeat.co/badges/f69a1574-9d4c-4da5-be73-56fa7b180d2d)](https://codebeat.co/projects/github-com-uchuhimo-konf-master)
