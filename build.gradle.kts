@@ -12,7 +12,7 @@ val gpgPassphrase by extra { getPrivateProperty("gpgPassphrase") }
 val useAliyun by extra { shouldUseAliyun() }
 
 tasks.named<Wrapper>("wrapper") {
-    gradleVersion = "6.6"
+    gradleVersion = "6.8.1"
     distributionType = Wrapper.DistributionType.ALL
 }
 

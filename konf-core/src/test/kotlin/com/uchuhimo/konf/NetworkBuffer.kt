@@ -27,7 +27,7 @@ class NetworkBuffer {
         val type by optional(
             Type.OFF_HEAP,
             description =
-                """
+            """
                 | type of network buffer.
                 | two type:
                 | - on-heap

@@ -184,3 +184,4 @@ private.properties
 .vscode
 .java-version
 act
+*.log

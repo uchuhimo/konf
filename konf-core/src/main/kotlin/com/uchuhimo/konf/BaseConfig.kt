@@ -19,6 +19,8 @@ package com.uchuhimo.konf
 import com.fasterxml.jackson.databind.DeserializationFeature
 import com.fasterxml.jackson.databind.ObjectMapper
 import com.fasterxml.jackson.databind.SerializationFeature
+import com.fasterxml.jackson.databind.cfg.CoercionAction
+import com.fasterxml.jackson.databind.cfg.CoercionInputShape
 import com.fasterxml.jackson.databind.module.SimpleModule
 import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule
 import com.fasterxml.jackson.module.kotlin.jacksonObjectMapper
@@ -647,6 +649,10 @@ fun createDefaultMapper(): ObjectMapper = jacksonObjectMapper()
     .disable(SerializationFeature.WRITE_DURATIONS_AS_TIMESTAMPS)
     .enable(SerializationFeature.WRITE_DATES_WITH_ZONE_ID)
     .enable(DeserializationFeature.ACCEPT_SINGLE_VALUE_AS_ARRAY)
+    .enable(DeserializationFeature.ACCEPT_EMPTY_STRING_AS_NULL_OBJECT)
+    .apply {
+        coercionConfigDefaults().setCoercion(CoercionInputShape.EmptyString, CoercionAction.AsEmpty)
+    }
     .registerModules(
         SimpleModule()
             .addDeserializer(String::class.java, StringDeserializer)

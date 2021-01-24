@@ -29,7 +29,7 @@ class AdHocNetworkBuffer(config: Config) {
         Type.OFF_HEAP,
         prefix = "heap",
         description =
-            """
+        """
             | type of network buffer.
             | two type:
             | - on-heap
