@@ -39,6 +39,7 @@ A type-safe cascading configuration library for Kotlin/Java/Android, supporting 
     - [Create config](#create-config)
     - [Add config spec](#add-config-spec)
     - [Retrieve value from config](#retrieve-value-from-config)
+    - [Cast config to value](#cast-config-to-value)
     - [Check whether an item exists in config or not](#check-whether-an-item-exists-in-config-or-not)
     - [Modify value in config](#modify-value-in-config)
     - [Export value in config as property](#export-value-in-config-as-property)
@@ -84,20 +85,20 @@ Konf is modular, you can use different modules for different sources:
 <dependency>
   <groupId>com.uchuhimo</groupId>
   <artifactId>konf</artifactId>
-  <version>0.23.0</version>
+  <version>1.0.0</version>
 </dependency>
 ```
 
 ### Gradle
 
 ```groovy
-compile 'com.uchuhimo:konf:0.23.0'
+compile 'com.uchuhimo:konf:1.0.0'
 ```
 
 ### Gradle Kotlin DSL
 
 ```kotlin
-compile(group = "com.uchuhimo", name = "konf", version = "0.23.0")
+compile(group = "com.uchuhimo", name = "konf", version = "1.0.0")
 ```
 
 ### Maven (master snapshot)

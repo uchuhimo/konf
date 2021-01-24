@@ -59,7 +59,7 @@ allprojects {
     apply(plugin = "com.jfrog.bintray")
 
     group = "com.uchuhimo"
-    version = "0.23.0"
+    version = "1.0.0"
 
     repositories {
         if (useAliyun) {
@@ -255,6 +255,9 @@ subprojects {
                 groupId = projectGroup
                 artifactId = projectName
                 version = projectVersion
+
+                suppressPomMetadataWarningsFor("testFixturesApiElements")
+                suppressPomMetadataWarningsFor("testFixturesRuntimeElements")
                 pom {
                     name.set(rootProject.name)
                     description.set(projectDescription)
