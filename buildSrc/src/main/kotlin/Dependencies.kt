@@ -33,7 +33,8 @@ object Versions {
     const val toml4j = "0.7.2"
     const val yaml = "1.27"
 
-    const val googleJavaFormat = "1.9"
+    // Since 1.8, the minimum supported runtime version is JDK 11.
+    const val googleJavaFormat = "1.7"
     const val ktlint = "0.40.0"
 }
 
