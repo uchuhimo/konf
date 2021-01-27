@@ -977,7 +977,7 @@ private fun TreeNode.toValue(source: Source, type: JavaType, mapper: ObjectMappe
             }
         }
         is CollectionLikeType -> {
-            if (type.isTrueCollectionType) {
+            if (MutableCollection::class.java.isAssignableFrom(type.rawClass)) {
                 @Suppress("UNCHECKED_CAST")
                 return (implOf(type.rawClass).getDeclaredConstructor().newInstance() as MutableCollection<Any>).apply {
                     addAll(toListValue(source, type.contentType, mapper) as List<Any>)
@@ -987,28 +987,32 @@ private fun TreeNode.toValue(source: Source, type: JavaType, mapper: ObjectMappe
             }
         }
         is MapLikeType -> {
-            if (type.isTrueMapType) {
-                if (type.keyType.rawClass == String::class.java) {
-                    @Suppress("UNCHECKED_CAST")
-                    return (implOf(type.rawClass).getDeclaredConstructor().newInstance() as MutableMap<String, Any>).apply {
-                        putAll(
-                            this@toValue.toMap(source).mapValues { (_, value) ->
-                                value.toValue(source, type.contentType, mapper)
-                            }
-                        )
+            if (MutableMap::class.java.isAssignableFrom(type.rawClass)) {
+                when {
+                    type.keyType.rawClass == String::class.java -> {
+                        @Suppress("UNCHECKED_CAST")
+                        return (implOf(type.rawClass).getDeclaredConstructor().newInstance() as MutableMap<String, Any>).apply {
+                            putAll(
+                                this@toValue.toMap(source).mapValues { (_, value) ->
+                                    value.toValue(source, type.contentType, mapper)
+                                }
+                            )
+                        }
                     }
-                } else if (type.keyType.rawClass.kotlin in promotedFromStringTypes) {
-                    val promoteFunc = promotedFromStringMap.getValue(type.keyType.rawClass.kotlin)
-                    @Suppress("UNCHECKED_CAST")
-                    return (implOf(type.rawClass).getDeclaredConstructor().newInstance() as MutableMap<Any, Any>).apply {
-                        putAll(
-                            this@toValue.toMap(source).map { (key, value) ->
-                                promoteFunc(key, source)!! to value.toValue(source, type.contentType, mapper)
-                            }
-                        )
+                    type.keyType.rawClass.kotlin in promotedFromStringTypes -> {
+                        val promoteFunc = promotedFromStringMap.getValue(type.keyType.rawClass.kotlin)
+                        @Suppress("UNCHECKED_CAST")
+                        return (implOf(type.rawClass).getDeclaredConstructor().newInstance() as MutableMap<Any, Any>).apply {
+                            putAll(
+                                this@toValue.toMap(source).map { (key, value) ->
+                                    promoteFunc(key, source)!! to value.toValue(source, type.contentType, mapper)
+                                }
+                            )
+                        }
                     }
-                } else {
-                    throw UnsupportedMapKeyException(type.keyType.rawClass)
+                    else -> {
+                        throw UnsupportedMapKeyException(type.keyType.rawClass)
+                    }
                 }
             } else {
                 throw UnsupportedTypeException(source, type.rawClass)

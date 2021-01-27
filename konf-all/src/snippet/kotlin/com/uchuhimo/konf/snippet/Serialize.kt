@@ -17,6 +17,7 @@
 package com.uchuhimo.konf.snippet
 
 import com.uchuhimo.konf.Config
+import com.uchuhimo.konf.tempFile
 import java.io.ObjectInputStream
 import java.io.ObjectOutputStream
 
@@ -24,7 +25,7 @@ fun main(args: Array<String>) {
     val config = Config { addSpec(Server) }
     config[Server.tcpPort] = 1000
     val map = config.toMap()
-    val newMap = createTempFile().run {
+    val newMap = tempFile().run {
         ObjectOutputStream(outputStream()).use {
             it.writeObject(map)
         }

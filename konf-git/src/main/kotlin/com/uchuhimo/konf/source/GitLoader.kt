@@ -17,6 +17,7 @@
 package com.uchuhimo.konf.source
 
 import com.uchuhimo.konf.Config
+import com.uchuhimo.konf.tempDirectory
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.GlobalScope
 import kotlinx.coroutines.delay
@@ -73,7 +74,7 @@ fun Loader.watchGit(
     optional: Boolean = this.optional,
     action: TransportCommand<*, *>.() -> Unit = {}
 ): Config {
-    return (dir ?: createTempDir(prefix = "local_git_repo").path).let { directory ->
+    return (dir ?: tempDirectory(prefix = "local_git_repo").path).let { directory ->
         provider.git(repo, file, directory, branch, optional, action).let { source ->
             config.withLoadTrigger("watch ${source.description}") { newConfig, load ->
                 load(source)

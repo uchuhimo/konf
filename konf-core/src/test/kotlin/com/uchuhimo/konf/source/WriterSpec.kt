@@ -21,6 +21,7 @@ import com.natpryce.hamkrest.equalTo
 import com.uchuhimo.konf.Config
 import com.uchuhimo.konf.ConfigSpec
 import com.uchuhimo.konf.source.properties.toProperties
+import com.uchuhimo.konf.tempFile
 import org.jetbrains.spek.api.dsl.given
 import org.jetbrains.spek.api.dsl.it
 import org.jetbrains.spek.api.dsl.on
@@ -71,7 +72,7 @@ object WriterSpec : SubjectSpek<Writer>({
             }
         }
         on("save to file") {
-            val file = createTempFile()
+            val file = tempFile()
             subject.toFile(file)
             it("should return a file which contains content from config") {
                 assertThat(file.readText(), equalTo(expectedString))
@@ -81,7 +82,7 @@ object WriterSpec : SubjectSpek<Writer>({
             }
         }
         on("save to file by path") {
-            val file = createTempFile()
+            val file = tempFile()
             val path = file.toString()
             subject.toFile(path)
             it("should return a file which contains content from config") {

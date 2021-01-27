@@ -39,9 +39,9 @@ abstract class JSR310Deserializer<T>(clazz: Class<T>) : StdDeserializer<T>(clazz
     abstract fun parse(string: String): T
 
     final override fun deserialize(parser: JsonParser, context: DeserializationContext): T? {
-        when (parser.currentTokenId) {
+        when (parser.currentTokenId()) {
             JsonTokenId.ID_STRING -> {
-                val string = parser.text.trim({ it <= ' ' })
+                val string = parser.text.trim { it <= ' ' }
                 if (string.isEmpty()) {
                     return null
                 }

@@ -20,6 +20,7 @@ import com.natpryce.hamkrest.assertion.assertThat
 import com.natpryce.hamkrest.equalTo
 import com.natpryce.hamkrest.throws
 import com.uchuhimo.konf.source.properties.PropertiesProvider
+import com.uchuhimo.konf.tempDirectory
 import org.eclipse.jgit.api.Git
 import org.eclipse.jgit.lib.Constants
 import org.jetbrains.spek.api.dsl.given
@@ -34,7 +35,7 @@ object GitProviderSpec : SubjectSpek<Provider>({
 
     given("a provider") {
         on("create source from git repository") {
-            createTempDir().let { dir ->
+            tempDirectory().let { dir ->
                 Git.init().apply {
                     setDirectory(dir)
                 }.call().use { git ->
@@ -59,7 +60,7 @@ object GitProviderSpec : SubjectSpek<Provider>({
             }
         }
         on("create source from invalid git repository") {
-            createTempDir().let { dir ->
+            tempDirectory().let { dir ->
                 Git.init().apply {
                     setDirectory(dir)
                 }.call().use { git ->
@@ -73,13 +74,13 @@ object GitProviderSpec : SubjectSpek<Provider>({
                 }
                 it("should throw InvalidRemoteRepoException") {
                     assertThat(
-                        { subject.git(createTempDir().path, "test", dir = dir.path) },
+                        { subject.git(tempDirectory().path, "test", dir = dir.path) },
                         throws<InvalidRemoteRepoException>()
                     )
                 }
                 it("should return an empty source if optional") {
                     assertTrue {
-                        subject.git(createTempDir().path, "test", dir = dir.path, optional = true).tree.children.isEmpty()
+                        subject.git(tempDirectory().path, "test", dir = dir.path, optional = true).tree.children.isEmpty()
                     }
                 }
             }

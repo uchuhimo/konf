@@ -19,6 +19,7 @@ package com.uchuhimo.konf.source
 import com.natpryce.hamkrest.assertion.assertThat
 import com.natpryce.hamkrest.equalTo
 import com.uchuhimo.konf.Config
+import com.uchuhimo.konf.tempDirectory
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.runBlocking
@@ -42,7 +43,7 @@ object DefaultGitLoaderSpec : SubjectSpek<DefaultLoaders>({
 
     given("a loader") {
         on("load from git repository") {
-            createTempDir().let { dir ->
+            tempDirectory().let { dir ->
                 Git.init().apply {
                     setDirectory(dir)
                 }.call().use { git ->
@@ -75,7 +76,7 @@ object DefaultGitLoaderSpec : SubjectSpek<DefaultLoaders>({
                 loader.watchGit(
                     repo,
                     "source.properties",
-                    dir = createTempDir(prefix = "local_git_repo").path,
+                    dir = tempDirectory(prefix = "local_git_repo").path,
                     branch = Constants.HEAD,
                     unit = TimeUnit.SECONDS,
                     context = Dispatchers.Sequential,
@@ -84,7 +85,7 @@ object DefaultGitLoaderSpec : SubjectSpek<DefaultLoaders>({
             }
         ).forEach { (description, func) ->
             on(description) {
-                createTempDir(prefix = "remote_git_repo", suffix = ".git").let { dir ->
+                tempDirectory(prefix = "remote_git_repo", suffix = ".git").let { dir ->
                     val file = Paths.get(dir.path, "source.properties").toFile()
                     Git.init().apply {
                         setDirectory(dir)

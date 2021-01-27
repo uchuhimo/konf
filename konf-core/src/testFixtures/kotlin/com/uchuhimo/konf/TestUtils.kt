@@ -19,7 +19,7 @@ package com.uchuhimo.konf
 import java.io.File
 
 fun tempFileOf(content: String, prefix: String = "tmp", suffix: String = ".tmp"): File {
-    return createTempFile(prefix, suffix).apply {
+    return tempFile(prefix, suffix).apply {
         writeText(content)
     }
 }

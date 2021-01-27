@@ -18,6 +18,7 @@ package com.uchuhimo.konf.source
 
 import com.natpryce.hamkrest.assertion.assertThat
 import com.natpryce.hamkrest.equalTo
+import com.uchuhimo.konf.tempDirectory
 import org.eclipse.jgit.api.Git
 import org.jetbrains.spek.api.dsl.given
 import org.jetbrains.spek.api.dsl.it
@@ -32,7 +33,7 @@ object DefaultGitProviderSpec : SubjectSpek<DefaultProviders>({
 
     given("a provider") {
         on("provider source from git repository") {
-            createTempDir().let { dir ->
+            tempDirectory().let { dir ->
                 Git.init().apply {
                     setDirectory(dir)
                 }.call().use { git ->

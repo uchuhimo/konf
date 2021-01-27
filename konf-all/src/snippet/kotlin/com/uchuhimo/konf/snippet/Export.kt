@@ -20,6 +20,7 @@ import com.uchuhimo.konf.Config
 import com.uchuhimo.konf.source.base.toFlatMap
 import com.uchuhimo.konf.source.base.toHierarchicalMap
 import com.uchuhimo.konf.source.json.toJson
+import com.uchuhimo.konf.tempFile
 
 fun main(args: Array<String>) {
     val config = Config { addSpec(Server) }
@@ -33,7 +34,7 @@ fun main(args: Array<String>) {
     run {
         val map = config.toFlatMap()
     }
-    val file = createTempFile(suffix = ".json")
+    val file = tempFile(suffix = ".json")
     config.toJson.toFile(file)
     val newConfig = Config {
         addSpec(Server)

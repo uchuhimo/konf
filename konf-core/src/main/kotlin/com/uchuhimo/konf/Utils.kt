@@ -16,6 +16,8 @@
 
 package com.uchuhimo.konf
 
+import java.io.File
+
 /**
  * Throws [UnsupportedOperationException].
  *
@@ -116,4 +118,16 @@ fun String.toCamelCase(): String {
 
 fun String.toLittleCamelCase(): String {
     return this.toCamelCase().toLittleCase()
+}
+
+fun tempDirectory(
+    prefix: String = "tmp",
+    suffix: String? = null,
+    directory: File? = null
+): File {
+    return createTempDir(prefix, suffix, directory)
+}
+
+fun tempFile(prefix: String = "tmp", suffix: String? = null, directory: File? = null): File {
+    return createTempFile(prefix, suffix, directory)
 }

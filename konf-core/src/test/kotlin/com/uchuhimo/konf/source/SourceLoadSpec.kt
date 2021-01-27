@@ -17,6 +17,7 @@
 package com.uchuhimo.konf.source
 
 import com.uchuhimo.konf.Config
+import com.uchuhimo.konf.tempFile
 import com.uchuhimo.konf.toSizeInBytes
 import org.jetbrains.spek.api.dsl.it
 import org.jetbrains.spek.subject.SubjectSpek
@@ -68,7 +69,7 @@ object SourceReloadFromDiskSpec : SubjectSpek<Config>({
             addSpec(ConfigForLoad)
         }.from.map.kv(loadContent)
         val map = config.toMap()
-        val newMap = createTempFile().run {
+        val newMap = tempFile().run {
             ObjectOutputStream(outputStream()).use {
                 it.writeObject(map)
             }

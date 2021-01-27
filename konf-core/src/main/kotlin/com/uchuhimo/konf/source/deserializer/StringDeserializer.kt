@@ -25,23 +25,25 @@ import com.fasterxml.jackson.databind.deser.std.StringDeserializer as JacksonStr
 object StringDeserializer : JacksonStringDeserializer() {
     override fun _deserializeFromArray(p: JsonParser, ctxt: DeserializationContext): String? {
         val t = p.nextToken()
-        if (ctxt.hasSomeOfFeatures(F_MASK_ACCEPT_ARRAYS)) {
-            if (t == JsonToken.END_ARRAY && ctxt.isEnabled(DeserializationFeature.ACCEPT_EMPTY_ARRAY_AS_NULL_OBJECT)) {
-                return getNullValue(ctxt)
+        if (t == JsonToken.END_ARRAY && ctxt.isEnabled(DeserializationFeature.ACCEPT_EMPTY_ARRAY_AS_NULL_OBJECT)) {
+            return getNullValue(ctxt)
+        }
+        if (ctxt.isEnabled(DeserializationFeature.UNWRAP_SINGLE_VALUE_ARRAYS)) {
+            val parsed = deserialize(p, ctxt)
+            val token = p.nextToken()
+            if (token != JsonToken.END_ARRAY) {
+                return parsed + "," + deserializeFromRestOfArray(token, p, ctxt)
             }
-            if (ctxt.isEnabled(DeserializationFeature.UNWRAP_SINGLE_VALUE_ARRAYS)) {
-                val parsed = deserialize(p, ctxt)
-                val token = p.nextToken()
-                if (token != JsonToken.END_ARRAY) {
-                    return parsed + "," + deserializeFromRestOfArray(token, p, ctxt)
-                }
-                return parsed
-            }
+            return parsed
         }
         return deserializeFromRestOfArray(t, p, ctxt)
     }
 
-    private fun deserializeFromRestOfArray(token: JsonToken, p: JsonParser, ctxt: DeserializationContext): String {
+    private fun deserializeFromRestOfArray(
+        token: JsonToken,
+        p: JsonParser,
+        ctxt: DeserializationContext
+    ): String {
         var t = token
         val sb = StringBuilder(64)
         while (t != JsonToken.END_ARRAY) {

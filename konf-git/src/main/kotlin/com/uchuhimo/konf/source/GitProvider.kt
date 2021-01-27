@@ -17,6 +17,7 @@
 package com.uchuhimo.konf.source
 
 import com.uchuhimo.konf.source.base.EmptyMapSource
+import com.uchuhimo.konf.tempDirectory
 import org.eclipse.jgit.api.Git
 import org.eclipse.jgit.api.TransportCommand
 import org.eclipse.jgit.api.errors.GitAPIException
@@ -45,7 +46,7 @@ fun Provider.git(
     optional: Boolean = false,
     action: TransportCommand<*, *>.() -> Unit = {}
 ): Source {
-    return (dir?.let(::File) ?: createTempDir(prefix = "local_git_repo")).let { directory ->
+    return (dir?.let(::File) ?: tempDirectory(prefix = "local_git_repo")).let { directory ->
         val extendContext: Source.() -> Unit = {
             info["repo"] = repo
             info["file"] = file
