@@ -42,6 +42,7 @@ A type-safe cascading configuration library for Kotlin/Java/Android, supporting 
     - [Cast config to value](#cast-config-to-value)
     - [Check whether an item exists in config or not](#check-whether-an-item-exists-in-config-or-not)
     - [Modify value in config](#modify-value-in-config)
+    - [Subscribe the update event of an item](#subscribe-the-update-event-of-an-item)
     - [Export value in config as property](#export-value-in-config-as-property)
     - [Fork from another config](#fork-from-another-config)
   - [Load values from source](#load-values-from-source)
@@ -451,6 +452,18 @@ Find item with specified name, and associate it with lazy thunk (unsafe API):
 
 ```kotlin
 config.lazySet("server.tcpPort") { it[basePort] + 1 }
+```
+
+### Subscribe the update event of an item
+
+```kotlin
+val handler = Server.host.onSet { value -> println("the host has changed to $value") }
+```
+
+Cancel the subscription:
+
+```kotlin
+handler.cancel()
 ```
 
 ### Export value in config as property

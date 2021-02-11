@@ -100,6 +100,12 @@ sealed class Item<T>(
 
     private val onSetFunctions: MutableList<Item<T>.(T) -> Unit> = mutableListOf()
 
+    /**
+     * Subscribe the update event of this item.
+     *
+     * @param onSetFunction the subscription function
+     * @return the handler to cancel this subscription
+     */
     fun onSet(onSetFunction: Item<T>.(T) -> Unit): Handler {
         onSetFunctions += onSetFunction
         return object : Handler {
