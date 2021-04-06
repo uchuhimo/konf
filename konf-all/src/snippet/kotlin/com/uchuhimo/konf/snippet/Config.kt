@@ -51,7 +51,15 @@ fun main(args: Array<String>) {
         handler.cancel()
     }
     run {
+        val handler = Server.host.beforeSet { config, value -> println("the host will change to $value") }
+        handler.cancel()
+    }
+    run {
         val handler = config.beforeSet { item, value -> println("${item.name} will change to $value") }
+        handler.cancel()
+    }
+    run {
+        val handler = Server.host.afterSet { config, value -> println("the host has changed to $value") }
         handler.cancel()
     }
     run {

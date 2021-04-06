@@ -556,21 +556,41 @@ fun SubjectProviderDsl<Config>.configTestSpec(prefix: String = "network.buffer")
                 var counter = 0
                 val handler1 = childConfig.beforeSet { item, value ->
                     counter += 1
-                    assertThat(item, equalTo(size))
-                    assertThat(value, equalTo(2))
-                    assertThat(childConfig[size], equalTo(1))
+                    it("should contain the old value") {
+                        assertThat(item, equalTo(size))
+                        assertThat(value, equalTo(2))
+                        assertThat(childConfig[size], equalTo(1))
+                    }
                 }
                 val handler2 = childConfig.beforeSet { item, value ->
                     counter += 1
-                    assertThat(item, equalTo(size))
-                    assertThat(value, equalTo(2))
-                    assertThat(childConfig[size], equalTo(1))
+                    it("should contain the old value") {
+                        assertThat(item, equalTo(size))
+                        assertThat(value, equalTo(2))
+                        assertThat(childConfig[size], equalTo(1))
+                    }
+                }
+                val handler3 = size.beforeSet { config, value ->
+                    counter += 1
+                    it("should contain the old value") {
+                        assertThat(value, equalTo(2))
+                        assertThat(childConfig[size], equalTo(1))
+                    }
+                }
+                val handler4 = size.beforeSet { config, value ->
+                    counter += 1
+                    it("should contain the old value") {
+                        assertThat(value, equalTo(2))
+                        assertThat(childConfig[size], equalTo(1))
+                    }
                 }
                 subject[size] = 2
                 handler1.close()
                 handler2.close()
+                handler3.close()
+                handler4.close()
                 it("should notify subscriber") {
-                    assertThat(counter, equalTo(2))
+                    assertThat(counter, equalTo(4))
                 }
             }
             on("set when afterSet subscriber is defined") {
@@ -579,21 +599,41 @@ fun SubjectProviderDsl<Config>.configTestSpec(prefix: String = "network.buffer")
                 var counter = 0
                 val handler1 = childConfig.afterSet { item, value ->
                     counter += 1
-                    assertThat(item, equalTo(size))
-                    assertThat(value, equalTo(2))
-                    assertThat(childConfig[size], equalTo(2))
+                    it("should contain the new value") {
+                        assertThat(item, equalTo(size))
+                        assertThat(value, equalTo(2))
+                        assertThat(childConfig[size], equalTo(2))
+                    }
                 }
                 val handler2 = childConfig.afterSet { item, value ->
                     counter += 1
-                    assertThat(item, equalTo(size))
-                    assertThat(value, equalTo(2))
-                    assertThat(childConfig[size], equalTo(2))
+                    it("should contain the new value") {
+                        assertThat(item, equalTo(size))
+                        assertThat(value, equalTo(2))
+                        assertThat(childConfig[size], equalTo(2))
+                    }
+                }
+                val handler3 = size.afterSet { config, value ->
+                    counter += 1
+                    it("should contain the new value") {
+                        assertThat(value, equalTo(2))
+                        assertThat(childConfig[size], equalTo(2))
+                    }
+                }
+                val handler4 = size.afterSet { config, value ->
+                    counter += 1
+                    it("should contain the new value") {
+                        assertThat(value, equalTo(2))
+                        assertThat(childConfig[size], equalTo(2))
+                    }
                 }
                 subject[size] = 2
                 handler1.close()
                 handler2.close()
+                handler3.close()
+                handler4.close()
                 it("should notify subscriber") {
-                    assertThat(counter, equalTo(2))
+                    assertThat(counter, equalTo(4))
                 }
             }
             on("set when onSet subscriber is defined") {

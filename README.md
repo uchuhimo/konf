@@ -465,10 +465,22 @@ val handler = Server.host.onSet { value -> println("the host has changed to $val
 Subscribe the update event before every set operation:
 
 ```kotlin
+val handler = Server.host.beforeSet { config, value -> println("the host will change to $value") }
+```
+
+or
+
+```kotlin
 val handler = config.beforeSet { item, value -> println("${item.name} will change to $value") }
 ```
 
 Subscribe the update event after every set operation:
+
+```kotlin
+val handler = Server.host.afterSet { config, value -> println("the host has changed to $value") }
+```
+
+or
 
 ```kotlin
 val handler = config.afterSet { item, value -> println("${item.name} has changed to $value") }

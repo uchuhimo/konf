@@ -405,11 +405,13 @@ open class BaseConfig(
             if (value == null) {
                 if (item.nullable) {
                     item.notifySet(null)
+                    item.notifyBeforeSet(this, value)
                     notifyBeforeSet(item, value)
                     lock.write {
                         setState(item, ValueState.Null)
                     }
                     notifyAfterSet(item, value)
+                    item.notifyAfterSet(this, value)
                 } else {
                     throw ClassCastException(
                         "fail to cast null to ${item.type.rawClass}" +
@@ -419,11 +421,13 @@ open class BaseConfig(
             } else {
                 if (item.type.rawClass.isInstance(value)) {
                     item.notifySet(value)
+                    item.notifyBeforeSet(this, value)
                     notifyBeforeSet(item, value)
                     lock.write {
                         setState(item, ValueState.Value(value))
                     }
                     notifyAfterSet(item, value)
+                    item.notifyAfterSet(this, value)
                 } else {
                     throw ClassCastException(
                         "fail to cast $value with ${value::class} to ${item.type.rawClass}" +

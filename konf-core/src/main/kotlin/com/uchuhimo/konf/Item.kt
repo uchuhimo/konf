@@ -98,7 +98,9 @@ sealed class Item<T>(
      */
     val asLazyItem: LazyItem<T> get() = this as LazyItem<T>
 
-    private val onSetFunctions: MutableList<Item<T>.(value: T) -> Unit> = mutableListOf()
+    private val onSetFunctions: MutableList<(value: T) -> Unit> = mutableListOf()
+    private val beforeSetFunctions: MutableList<(config: Config, value: T) -> Unit> = mutableListOf()
+    private val afterSetFunctions: MutableList<(config: Config, value: T) -> Unit> = mutableListOf()
 
     /**
      * Subscribe the update event of this item.
@@ -106,7 +108,7 @@ sealed class Item<T>(
      * @param onSetFunction the subscription function
      * @return the handler to cancel this subscription
      */
-    fun onSet(onSetFunction: Item<T>.(value: T) -> Unit): Handler {
+    fun onSet(onSetFunction: (value: T) -> Unit): Handler {
         onSetFunctions += onSetFunction
         return object : Handler {
             override fun cancel() {
@@ -115,10 +117,54 @@ sealed class Item<T>(
         }
     }
 
+    /**
+     * Subscribe the update event of this item before every set operation.
+     *
+     * @param beforeSetFunction the subscription function
+     * @return the handler to cancel this subscription
+     */
+    fun beforeSet(beforeSetFunction: (config: Config, value: T) -> Unit): Handler {
+        beforeSetFunctions += beforeSetFunction
+        return object : Handler {
+            override fun cancel() {
+                beforeSetFunctions.remove(beforeSetFunction)
+            }
+        }
+    }
+
+    /**
+     * Subscribe the update event of this item after every set operation.
+     *
+     * @param afterSetFunction the subscription function
+     * @return the handler to cancel this subscription
+     */
+    fun afterSet(afterSetFunction: (config: Config, value: T) -> Unit): Handler {
+        afterSetFunctions += afterSetFunction
+        return object : Handler {
+            override fun cancel() {
+                afterSetFunctions.remove(afterSetFunction)
+            }
+        }
+    }
+
     fun notifySet(value: Any?) {
         for (onSetFunction in onSetFunctions) {
             @Suppress("UNCHECKED_CAST")
-            onSetFunction(this, value as T)
+            onSetFunction(value as T)
+        }
+    }
+
+    fun notifyBeforeSet(config: Config, value: Any?) {
+        for (beforeSetFunction in beforeSetFunctions) {
+            @Suppress("UNCHECKED_CAST")
+            beforeSetFunction(config, value as T)
+        }
+    }
+
+    fun notifyAfterSet(config: Config, value: Any?) {
+        for (afterSetFunction in afterSetFunctions) {
+            @Suppress("UNCHECKED_CAST")
+            afterSetFunction(config, value as T)
         }
     }
 }
