@@ -550,6 +550,52 @@ fun SubjectProviderDsl<Config>.configTestSpec(prefix: String = "network.buffer")
                     assertThat({ subject[qualify(size.name)] = null }, throws<ClassCastException>())
                 }
             }
+            on("set when beforeSet subscriber is defined") {
+                val childConfig = subject.withLayer()
+                subject[size] = 1
+                var counter = 0
+                val handler1 = childConfig.beforeSet { item, value ->
+                    counter += 1
+                    assertThat(item, equalTo(size))
+                    assertThat(value, equalTo(2))
+                    assertThat(childConfig[size], equalTo(1))
+                }
+                val handler2 = childConfig.beforeSet { item, value ->
+                    counter += 1
+                    assertThat(item, equalTo(size))
+                    assertThat(value, equalTo(2))
+                    assertThat(childConfig[size], equalTo(1))
+                }
+                subject[size] = 2
+                handler1.close()
+                handler2.close()
+                it("should notify subscriber") {
+                    assertThat(counter, equalTo(2))
+                }
+            }
+            on("set when afterSet subscriber is defined") {
+                val childConfig = subject.withLayer()
+                subject[size] = 1
+                var counter = 0
+                val handler1 = childConfig.afterSet { item, value ->
+                    counter += 1
+                    assertThat(item, equalTo(size))
+                    assertThat(value, equalTo(2))
+                    assertThat(childConfig[size], equalTo(2))
+                }
+                val handler2 = childConfig.afterSet { item, value ->
+                    counter += 1
+                    assertThat(item, equalTo(size))
+                    assertThat(value, equalTo(2))
+                    assertThat(childConfig[size], equalTo(2))
+                }
+                subject[size] = 2
+                handler1.close()
+                handler2.close()
+                it("should notify subscriber") {
+                    assertThat(counter, equalTo(2))
+                }
+            }
             on("set when onSet subscriber is defined") {
                 var counter = 0
                 size.onSet { counter += 1 }.use {

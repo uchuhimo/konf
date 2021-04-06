@@ -46,8 +46,18 @@ fun main(args: Array<String>) {
     val basePort by ConfigSpec("server").required<Int>()
     config.lazySet(Server.tcpPort) { it[basePort] + 1 }
     config.lazySet("server.tcpPort") { it[basePort] + 1 }
-    val handler = Server.host.onSet { value -> println("the host has changed to $value") }
-    handler.cancel()
+    run {
+        val handler = Server.host.onSet { value -> println("the host has changed to $value") }
+        handler.cancel()
+    }
+    run {
+        val handler = config.beforeSet { item, value -> println("${item.name} will change to $value") }
+        handler.cancel()
+    }
+    run {
+        val handler = config.afterSet { item, value -> println("${item.name} has changed to $value") }
+        handler.cancel()
+    }
     run {
         var port by config.property(Server.tcpPort)
         port = 9090

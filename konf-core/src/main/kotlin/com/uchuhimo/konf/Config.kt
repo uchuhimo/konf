@@ -115,6 +115,22 @@ interface Config : ItemContainer {
     fun unset(name: String)
 
     /**
+     * Subscribe the update event before every set operation.
+     *
+     * @param beforeSetFunction the subscription function
+     * @return the handler to cancel this subscription
+     */
+    fun beforeSet(beforeSetFunction: (item: Item<*>, value: Any?) -> Unit): Handler
+
+    /**
+     * Subscribe the update event after every set operation.
+     *
+     * @param afterSetFunction the subscription function
+     * @return the handler to cancel this subscription
+     */
+    fun afterSet(afterSetFunction: (item: Item<*>, value: Any?) -> Unit): Handler
+
+    /**
      * Remove all values from the facade layer of this config.
      */
     fun clear()

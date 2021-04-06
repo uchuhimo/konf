@@ -54,6 +54,26 @@ open class MergedConfig(val fallback: BaseConfig, val facade: BaseConfig) :
         }
     }
 
+    override fun addBeforeSetFunction(beforeSetFunction: (item: Item<*>, value: Any?) -> Unit) {
+        facade.addBeforeSetFunction(beforeSetFunction)
+        fallback.addBeforeSetFunction(beforeSetFunction)
+    }
+
+    override fun removeBeforeSetFunction(beforeSetFunction: (item: Item<*>, value: Any?) -> Unit) {
+        facade.removeBeforeSetFunction(beforeSetFunction)
+        fallback.removeBeforeSetFunction(beforeSetFunction)
+    }
+
+    override fun addAfterSetFunction(afterSetFunction: (item: Item<*>, value: Any?) -> Unit) {
+        facade.addAfterSetFunction(afterSetFunction)
+        fallback.addAfterSetFunction(afterSetFunction)
+    }
+
+    override fun removeAfterSetFunction(afterSetFunction: (item: Item<*>, value: Any?) -> Unit) {
+        facade.removeAfterSetFunction(afterSetFunction)
+        fallback.removeAfterSetFunction(afterSetFunction)
+    }
+
     override fun clear() {
         facade.clear()
         fallback.clear()

@@ -42,7 +42,7 @@ A type-safe cascading configuration library for Kotlin/Java/Android, supporting 
     - [Cast config to value](#cast-config-to-value)
     - [Check whether an item exists in config or not](#check-whether-an-item-exists-in-config-or-not)
     - [Modify value in config](#modify-value-in-config)
-    - [Subscribe the update event of an item](#subscribe-the-update-event-of-an-item)
+    - [Subscribe the update event](#subscribe-the-update-event)
     - [Export value in config as property](#export-value-in-config-as-property)
     - [Fork from another config](#fork-from-another-config)
   - [Load values from source](#load-values-from-source)
@@ -454,10 +454,24 @@ Find item with specified name, and associate it with lazy thunk (unsafe API):
 config.lazySet("server.tcpPort") { it[basePort] + 1 }
 ```
 
-### Subscribe the update event of an item
+### Subscribe the update event
+
+Subscribe the update event of an item:
 
 ```kotlin
 val handler = Server.host.onSet { value -> println("the host has changed to $value") }
+```
+
+Subscribe the update event before every set operation:
+
+```kotlin
+val handler = config.beforeSet { item, value -> println("${item.name} will change to $value") }
+```
+
+Subscribe the update event after every set operation:
+
+```kotlin
+val handler = config.afterSet { item, value -> println("${item.name} has changed to $value") }
 ```
 
 Cancel the subscription:
@@ -558,9 +572,11 @@ HOCON/JSON/properties/TOML/XML/YAML/JavaScript source can be loaded from a varie
 
 - From file: `config.from.properties.file("/path/to/file")`
 - From watched file: `config.from.properties.watchFile("/path/to/file", 100, TimeUnit.MILLISECONDS)`
+  - You can re-trigger the setup process every time the updated file is loaded by `watchFile("/path/to/file") { config -> setup(config) }`
 - From string: `config.from.properties.string("server.port = 8080")`
 - From URL: `config.from.properties.url("http://localhost:8080/source.properties")`
 - From watched URL: `config.from.properties.watchUrl("http://localhost:8080/source.properties", 1, TimeUnit.MINUTES)`
+  - You can re-trigger the setup process every time the URL is loaded by `watchUrl("http://localhost:8080/source.properties") { config -> setup(config) }`
 - From Git repository: `config.from.properties.git("https://github.com/uchuhimo/konf.git", "/path/to/source.properties", branch = "dev")`
 - From watched Git repository: `config.from.properties.watchGit("https://github.com/uchuhimo/konf.git", "/path/to/source.properties", period = 1, unit = TimeUnit.MINUTES)`
 - From resource: `config.from.properties.resource("source.properties")`

@@ -57,6 +57,8 @@ open class BaseConfig(
     private val nodeByItem: MutableMap<Item<*>, ItemNode> = mutableMapOf(),
     private val tree: TreeNode = ContainerNode.placeHolder(),
     private val hasChildren: Value<Boolean> = Value(false),
+    private val beforeSetFunctions: MutableList<(item: Item<*>, value: Any?) -> Unit> = mutableListOf(),
+    private val afterSetFunctions: MutableList<(item: Item<*>, value: Any?) -> Unit> = mutableListOf(),
     private val lock: ReentrantReadWriteLock = ReentrantReadWriteLock()
 ) : Config {
     private val _source: Value<Source> = Value(EmptyMapSource())
@@ -81,6 +83,8 @@ open class BaseConfig(
                     lock.write { tree[path] = it }
                 },
                 hasChildren = hasChildren,
+                beforeSetFunctions = beforeSetFunctions,
+                afterSetFunctions = afterSetFunctions,
                 lock = lock
             ) {
                 override val source: Source
@@ -111,6 +115,8 @@ open class BaseConfig(
                     set(prefix, tree)
                 },
                 hasChildren = hasChildren,
+                beforeSetFunctions = beforeSetFunctions,
+                afterSetFunctions = afterSetFunctions,
                 lock = lock
             ) {
                 override val source: Source get() = originalConfig.source.withPrefix(prefix)
@@ -344,14 +350,66 @@ open class BaseConfig(
         }()
     }
 
+    open fun addBeforeSetFunction(beforeSetFunction: (item: Item<*>, value: Any?) -> Unit) {
+        beforeSetFunctions += beforeSetFunction
+        parent?.addBeforeSetFunction(beforeSetFunction)
+    }
+
+    open fun removeBeforeSetFunction(beforeSetFunction: (item: Item<*>, value: Any?) -> Unit) {
+        beforeSetFunctions.remove(beforeSetFunction)
+        parent?.removeBeforeSetFunction(beforeSetFunction)
+    }
+
+    override fun beforeSet(beforeSetFunction: (item: Item<*>, value: Any?) -> Unit): Handler {
+        addBeforeSetFunction(beforeSetFunction)
+        return object : Handler {
+            override fun cancel() {
+                removeBeforeSetFunction(beforeSetFunction)
+            }
+        }
+    }
+
+    private fun notifyBeforeSet(item: Item<*>, value: Any?) {
+        for (beforeSetFunction in beforeSetFunctions) {
+            beforeSetFunction(item, value)
+        }
+    }
+
+    open fun addAfterSetFunction(afterSetFunction: (item: Item<*>, value: Any?) -> Unit) {
+        afterSetFunctions += afterSetFunction
+        parent?.addAfterSetFunction(afterSetFunction)
+    }
+
+    open fun removeAfterSetFunction(afterSetFunction: (item: Item<*>, value: Any?) -> Unit) {
+        afterSetFunctions.remove(afterSetFunction)
+        parent?.removeAfterSetFunction(afterSetFunction)
+    }
+
+    override fun afterSet(afterSetFunction: (item: Item<*>, value: Any?) -> Unit): Handler {
+        addAfterSetFunction(afterSetFunction)
+        return object : Handler {
+            override fun cancel() {
+                removeAfterSetFunction(afterSetFunction)
+            }
+        }
+    }
+
+    private fun notifyAfterSet(item: Item<*>, value: Any?) {
+        for (afterSetFunction in afterSetFunctions) {
+            afterSetFunction(item, value)
+        }
+    }
+
     override fun rawSet(item: Item<*>, value: Any?) {
         if (item in this) {
             if (value == null) {
                 if (item.nullable) {
                     item.notifySet(null)
+                    notifyBeforeSet(item, value)
                     lock.write {
                         setState(item, ValueState.Null)
                     }
+                    notifyAfterSet(item, value)
                 } else {
                     throw ClassCastException(
                         "fail to cast null to ${item.type.rawClass}" +
@@ -361,9 +419,11 @@ open class BaseConfig(
             } else {
                 if (item.type.rawClass.isInstance(value)) {
                     item.notifySet(value)
+                    notifyBeforeSet(item, value)
                     lock.write {
                         setState(item, ValueState.Value(value))
                     }
+                    notifyAfterSet(item, value)
                 } else {
                     throw ClassCastException(
                         "fail to cast $value with ${value::class} to ${item.type.rawClass}" +

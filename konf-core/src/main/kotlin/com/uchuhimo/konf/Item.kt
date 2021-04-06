@@ -98,7 +98,7 @@ sealed class Item<T>(
      */
     val asLazyItem: LazyItem<T> get() = this as LazyItem<T>
 
-    private val onSetFunctions: MutableList<Item<T>.(T) -> Unit> = mutableListOf()
+    private val onSetFunctions: MutableList<Item<T>.(value: T) -> Unit> = mutableListOf()
 
     /**
      * Subscribe the update event of this item.
@@ -106,7 +106,7 @@ sealed class Item<T>(
      * @param onSetFunction the subscription function
      * @return the handler to cancel this subscription
      */
-    fun onSet(onSetFunction: Item<T>.(T) -> Unit): Handler {
+    fun onSet(onSetFunction: Item<T>.(value: T) -> Unit): Handler {
         onSetFunctions += onSetFunction
         return object : Handler {
             override fun cancel() {
