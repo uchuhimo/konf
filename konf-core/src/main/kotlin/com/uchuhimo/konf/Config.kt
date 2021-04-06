@@ -23,6 +23,7 @@ import com.uchuhimo.konf.annotation.JavaApi
 import com.uchuhimo.konf.source.DefaultLoaders
 import com.uchuhimo.konf.source.Source
 import com.uchuhimo.konf.source.base.kvToTree
+import kotlin.properties.PropertyDelegateProvider
 import kotlin.properties.ReadWriteProperty
 import kotlin.reflect.KProperty
 
@@ -387,12 +388,11 @@ open class RequiredConfigProperty<T>(
     private val name: String? = null,
     private val description: String = "",
     private val nullable: Boolean = false
-) {
-    @Suppress("LeakingThis")
-    private val type: JavaType = TypeFactory.defaultInstance().constructType(this::class.java)
-        .findSuperType(RequiredConfigProperty::class.java).bindings.typeParameters[0]
-
-    operator fun provideDelegate(thisRef: Any?, property: KProperty<*>): ReadWriteProperty<Any?, T> {
+) : PropertyDelegateProvider<Any?, ReadWriteProperty<Any?, T>> {
+    override operator fun provideDelegate(thisRef: Any?, property: KProperty<*>):
+        ReadWriteProperty<Any?, T> {
+        val type: JavaType = TypeFactory.defaultInstance().constructType(this::class.java)
+            .findSuperType(RequiredConfigProperty::class.java).bindings.typeParameters[0]
         val item = object : RequiredItem<T>(
             Spec.dummy,
             name
@@ -430,25 +430,23 @@ open class OptionalConfigProperty<T>(
     private val name: String? = null,
     private val description: String = "",
     private val nullable: Boolean = false
-) {
-    @Suppress("LeakingThis")
-    private val type: JavaType = TypeFactory.defaultInstance().constructType(this::class.java)
-        .findSuperType(OptionalConfigProperty::class.java).bindings.typeParameters[0]
-
-    operator fun provideDelegate(thisRef: Any?, property: KProperty<*>):
+) : PropertyDelegateProvider<Any?, ReadWriteProperty<Any?, T>> {
+    override operator fun provideDelegate(thisRef: Any?, property: KProperty<*>):
         ReadWriteProperty<Any?, T> {
-            val item = object : OptionalItem<T>(
-                Spec.dummy,
-                name
-                    ?: property.name,
-                default,
-                description,
-                type,
-                nullable
-            ) {}
-            config.addItem(item, prefix)
-            return config.property(item)
-        }
+        val type: JavaType = TypeFactory.defaultInstance().constructType(this::class.java)
+            .findSuperType(OptionalConfigProperty::class.java).bindings.typeParameters[0]
+        val item = object : OptionalItem<T>(
+            Spec.dummy,
+            name
+                ?: property.name,
+            default,
+            description,
+            type,
+            nullable
+        ) {}
+        config.addItem(item, prefix)
+        return config.property(item)
+    }
 }
 
 /**
@@ -475,25 +473,23 @@ open class LazyConfigProperty<T>(
     private val name: String? = null,
     private val description: String = "",
     private val nullable: Boolean = false
-) {
-    @Suppress("LeakingThis")
-    private val type: JavaType = TypeFactory.defaultInstance().constructType(this::class.java)
-        .findSuperType(LazyConfigProperty::class.java).bindings.typeParameters[0]
-
-    operator fun provideDelegate(thisRef: Any?, property: KProperty<*>):
+) : PropertyDelegateProvider<Any?, ReadWriteProperty<Any?, T>> {
+    override operator fun provideDelegate(thisRef: Any?, property: KProperty<*>):
         ReadWriteProperty<Any?, T> {
-            val item = object : LazyItem<T>(
-                Spec.dummy,
-                name
-                    ?: property.name,
-                thunk,
-                description,
-                type,
-                nullable
-            ) {}
-            config.addItem(item, prefix)
-            return config.property(item)
-        }
+        val type: JavaType = TypeFactory.defaultInstance().constructType(this::class.java)
+            .findSuperType(LazyConfigProperty::class.java).bindings.typeParameters[0]
+        val item = object : LazyItem<T>(
+            Spec.dummy,
+            name
+                ?: property.name,
+            thunk,
+            description,
+            type,
+            nullable
+        ) {}
+        config.addItem(item, prefix)
+        return config.property(item)
+    }
 }
 
 /**

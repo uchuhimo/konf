@@ -50,7 +50,7 @@ fun SubjectProviderDsl<Config>.configTestSpec(prefix: String = "network.buffer")
     fun qualify(name: String): String = if (prefix.isEmpty()) name else "$prefix.$name"
 
     given("a config") {
-        val invalidItem by ConfigSpec("invalid").run { required<Int>() }
+        val invalidItem by ConfigSpec("invalid").required<Int>()
         val invalidItemName = "invalid.invalidItem"
         group("feature operation") {
             on("enable feature") {

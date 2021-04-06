@@ -18,6 +18,7 @@ package com.uchuhimo.konf
 
 import com.fasterxml.jackson.databind.JavaType
 import com.fasterxml.jackson.databind.type.TypeFactory
+import kotlin.properties.PropertyDelegateProvider
 import kotlin.properties.ReadOnlyProperty
 import kotlin.reflect.KProperty
 
@@ -201,25 +202,21 @@ open class RequiredProperty<T>(
     private val name: String? = null,
     private val description: String = "",
     private val nullable: Boolean = false
-) {
-    @Suppress("LeakingThis")
-    private val type: JavaType = TypeFactory.defaultInstance().constructType(this::class.java)
-        .findSuperType(RequiredProperty::class.java).bindings.typeParameters[0]
-
-    operator fun provideDelegate(thisRef: Any?, property: KProperty<*>):
+) : PropertyDelegateProvider<Any?, ReadOnlyProperty<Any?, RequiredItem<T>>> {
+    override operator fun provideDelegate(thisRef: Any?, property: KProperty<*>):
         ReadOnlyProperty<Any?, RequiredItem<T>> {
-            val item = object : RequiredItem<T>(
-                spec,
-                name
-                    ?: property.name,
-                description,
-                type,
-                nullable
-            ) {}
-            return object : ReadOnlyProperty<Any?, RequiredItem<T>> {
-                override fun getValue(thisRef: Any?, property: KProperty<*>): RequiredItem<T> = item
-            }
-        }
+        val type: JavaType = TypeFactory.defaultInstance().constructType(this::class.java)
+            .findSuperType(RequiredProperty::class.java).bindings.typeParameters[0]
+        val item = object : RequiredItem<T>(
+            spec,
+            name
+                ?: property.name,
+            description,
+            type,
+            nullable
+        ) {}
+        return ReadOnlyProperty<Any?, RequiredItem<T>> { _, _ -> item }
+    }
 }
 
 /**
@@ -240,26 +237,22 @@ open class OptionalProperty<T>(
     private val name: String? = null,
     private val description: String = "",
     private val nullable: Boolean = false
-) {
-    @Suppress("LeakingThis")
-    private val type: JavaType = TypeFactory.defaultInstance().constructType(this::class.java)
-        .findSuperType(OptionalProperty::class.java).bindings.typeParameters[0]
-
-    operator fun provideDelegate(thisRef: Any?, property: KProperty<*>):
+) : PropertyDelegateProvider<Any?, ReadOnlyProperty<Any?, OptionalItem<T>>> {
+    override operator fun provideDelegate(thisRef: Any?, property: KProperty<*>):
         ReadOnlyProperty<Any?, OptionalItem<T>> {
-            val item = object : OptionalItem<T>(
-                spec,
-                name
-                    ?: property.name,
-                default,
-                description,
-                type,
-                nullable
-            ) {}
-            return object : ReadOnlyProperty<Any?, OptionalItem<T>> {
-                override fun getValue(thisRef: Any?, property: KProperty<*>): OptionalItem<T> = item
-            }
-        }
+        val type: JavaType = TypeFactory.defaultInstance().constructType(this::class.java)
+            .findSuperType(OptionalProperty::class.java).bindings.typeParameters[0]
+        val item = object : OptionalItem<T>(
+            spec,
+            name
+                ?: property.name,
+            default,
+            description,
+            type,
+            nullable
+        ) {}
+        return ReadOnlyProperty<Any?, OptionalItem<T>> { _, _ -> item }
+    }
 }
 
 /**
@@ -283,24 +276,20 @@ open class LazyProperty<T>(
     private val name: String? = null,
     private val description: String = "",
     private val nullable: Boolean = false
-) {
-    @Suppress("LeakingThis")
-    private val type: JavaType = TypeFactory.defaultInstance().constructType(this::class.java)
-        .findSuperType(LazyProperty::class.java).bindings.typeParameters[0]
-
-    operator fun provideDelegate(thisRef: Any?, property: KProperty<*>):
+) : PropertyDelegateProvider<Any?, ReadOnlyProperty<Any?, LazyItem<T>>> {
+    override operator fun provideDelegate(thisRef: Any?, property: KProperty<*>):
         ReadOnlyProperty<Any?, LazyItem<T>> {
-            val item = object : LazyItem<T>(
-                spec,
-                name
-                    ?: property.name,
-                thunk,
-                description,
-                type,
-                nullable
-            ) {}
-            return object : ReadOnlyProperty<Any?, LazyItem<T>> {
-                override fun getValue(thisRef: Any?, property: KProperty<*>): LazyItem<T> = item
-            }
-        }
+        val type: JavaType = TypeFactory.defaultInstance().constructType(this::class.java)
+            .findSuperType(LazyProperty::class.java).bindings.typeParameters[0]
+        val item = object : LazyItem<T>(
+            spec,
+            name
+                ?: property.name,
+            thunk,
+            description,
+            type,
+            nullable
+        ) {}
+        return ReadOnlyProperty<Any?, LazyItem<T>> { _, _ -> item }
+    }
 }

@@ -153,7 +153,7 @@ subprojects {
         kotlinOptions {
             jvmTarget = Versions.java.toString()
             apiVersion = Versions.kotlinApi
-            languageVersion = Versions.kotlinApi
+            languageVersion = Versions.kotlinLanguage
         }
     }
 

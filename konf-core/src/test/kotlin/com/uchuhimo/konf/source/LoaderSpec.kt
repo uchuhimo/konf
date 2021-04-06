@@ -121,6 +121,25 @@ object LoaderSpec : SubjectSpek<Loader>({
                 assertThat(newValue, equalTo("newValue"))
             }
         }
+        on("load from watched file with listener") {
+            val file = tempFileOf("type = originalValue")
+            var newValue = ""
+            subject.watchFile(
+                file,
+                delayTime = 1,
+                unit = TimeUnit.SECONDS,
+                context = Dispatchers.Sequential
+            ) {
+                newValue = it[SourceType.type]
+            }
+            file.writeText("type = newValue")
+            runBlocking(Dispatchers.Sequential) {
+                delay(TimeUnit.SECONDS.toMillis(1))
+            }
+            it("should load new value when file has been changed") {
+                assertThat(newValue, equalTo("newValue"))
+            }
+        }
         on("load from watched file path") {
             val file = tempFileOf("type = originalValue")
             val config = subject.watchFile(file.toString(), delayTime = 1, unit = TimeUnit.SECONDS, context = Dispatchers.Sequential)
@@ -242,6 +261,29 @@ object LoaderSpec : SubjectSpek<Loader>({
                 delay(TimeUnit.SECONDS.toMillis(5))
             }
             val newValue = config[SourceType.type]
+            it("should return a config which contains value in URL") {
+                assertThat(originalValue, equalTo("originalValue"))
+            }
+            it("should load new value after URL content has been changed") {
+                assertThat(newValue, equalTo("newValue"))
+            }
+        }
+        on("load from watched file URL with listener") {
+            val file = tempFileOf("type = originalValue")
+            var newValue = ""
+            val config = subject.watchUrl(
+                file.toURI().toURL(),
+                period = 1,
+                unit = TimeUnit.SECONDS,
+                context = Dispatchers.Sequential
+            ) { config ->
+                newValue = config[SourceType.type]
+            }
+            val originalValue = config[SourceType.type]
+            file.writeText("type = newValue")
+            runBlocking(Dispatchers.Sequential) {
+                delay(TimeUnit.SECONDS.toMillis(1))
+            }
             it("should return a config which contains value in URL") {
                 assertThat(originalValue, equalTo("originalValue"))
             }

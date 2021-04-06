@@ -106,6 +106,7 @@ class Loader(
      * @param unit time unit of delay. The default value is [TimeUnit.SECONDS].
      * @param context context of the coroutine. The default value is [Dispatchers.Default].
      * @param optional whether the source is optional
+     * @param onLoad function invoked after the updated file is loaded
      * @return a child config containing values from watched file
      */
     fun watchFile(
@@ -113,12 +114,16 @@ class Loader(
         delayTime: Long = 5,
         unit: TimeUnit = TimeUnit.SECONDS,
         context: CoroutineContext = Dispatchers.Default,
-        optional: Boolean = this.optional
+        optional: Boolean = this.optional,
+        onLoad: (Source.(Config) -> Unit)? = null
     ): Config {
         val absoluteFile = file.absoluteFile
         return provider.file(absoluteFile, optional).let { source ->
             config.withLoadTrigger("watch ${source.description}") { newConfig, load ->
-                load(source)
+                newConfig.lock {
+                    load(source)
+                }
+                onLoad?.invoke(source, newConfig)
                 val path = absoluteFile.toPath().parent
                 val isMac = "mac" in System.getProperty("os.name").toLowerCase()
                 val watcher = FileSystems.getDefault().newWatchService()
@@ -135,10 +140,12 @@ class Loader(
                             val newDigest = absoluteFile.digest
                             if (!newDigest.contentEquals(digest)) {
                                 digest = newDigest
+                                val newSource = provider.file(file, optional)
                                 newConfig.lock {
                                     newConfig.clear()
-                                    load(provider.file(file, optional))
+                                    load(newSource)
                                 }
+                                onLoad?.invoke(newSource, newConfig)
                             }
                         } else {
                             val key = watcher.poll()
@@ -154,10 +161,12 @@ class Loader(
                                         } else if (kind == StandardWatchEventKinds.ENTRY_MODIFY ||
                                             kind == StandardWatchEventKinds.ENTRY_CREATE
                                         ) {
+                                            val newSource = provider.file(file, optional)
                                             newConfig.lock {
                                                 newConfig.clear()
-                                                load(provider.file(file, optional))
+                                                load(newSource)
                                             }
+                                            onLoad?.invoke(newSource, newConfig)
                                         }
                                     }
                                     val valid = key.reset()
@@ -183,6 +192,7 @@ class Loader(
      * @param unit time unit of delay. The default value is [TimeUnit.SECONDS].
      * @param context context of the coroutine. The default value is [Dispatchers.Default].
      * @param optional whether the source is optional
+     * @param onLoad function invoked after the updated file is loaded
      * @return a child config containing values from watched file
      */
     fun watchFile(
@@ -190,9 +200,10 @@ class Loader(
         delayTime: Long = 5,
         unit: TimeUnit = TimeUnit.SECONDS,
         context: CoroutineContext = Dispatchers.Default,
-        optional: Boolean = this.optional
+        optional: Boolean = this.optional,
+        onLoad: (Source.(Config) -> Unit)? = null
     ): Config =
-        watchFile(File(file), delayTime, unit, context, optional)
+        watchFile(File(file), delayTime, unit, context, optional, onLoad)
 
     /**
      * Returns a child config containing values from specified string.
@@ -252,6 +263,7 @@ class Loader(
      * @param unit time unit of reload period. The default value is [TimeUnit.SECONDS].
      * @param context context of the coroutine. The default value is [Dispatchers.Default].
      * @param optional whether the source is optional
+     * @param onLoad function invoked after the updated URL is loaded
      * @return a child config containing values from specified url
      */
     fun watchUrl(
@@ -259,18 +271,24 @@ class Loader(
         period: Long = 5,
         unit: TimeUnit = TimeUnit.SECONDS,
         context: CoroutineContext = Dispatchers.Default,
-        optional: Boolean = this.optional
+        optional: Boolean = this.optional,
+        onLoad: (Source.(Config) -> Unit)? = null
     ): Config {
         return provider.url(url, optional).let { source ->
             config.withLoadTrigger("watch ${source.description}") { newConfig, load ->
-                load(source)
+                newConfig.lock {
+                    load(source)
+                }
+                onLoad?.invoke(source, newConfig)
                 GlobalScope.launch(context) {
                     while (true) {
                         delay(unit.toMillis(period))
+                        val newSource = provider.url(url, optional)
                         newConfig.lock {
                             newConfig.clear()
-                            load(provider.url(url, optional))
+                            load(newSource)
                         }
+                        onLoad?.invoke(newSource, newConfig)
                     }
                 }
             }.withLayer()
@@ -286,6 +304,7 @@ class Loader(
      * @param unit time unit of reload period. The default value is [TimeUnit.SECONDS].
      * @param context context of the coroutine. The default value is [Dispatchers.Default].
      * @param optional whether the source is optional
+     * @param onLoad function invoked after the updated URL is loaded
      * @return a child config containing values from specified url string
      */
     fun watchUrl(
@@ -293,9 +312,10 @@ class Loader(
         period: Long = 5,
         unit: TimeUnit = TimeUnit.SECONDS,
         context: CoroutineContext = Dispatchers.Default,
-        optional: Boolean = this.optional
+        optional: Boolean = this.optional,
+        onLoad: (Source.(Config) -> Unit)? = null
     ): Config =
-        watchUrl(URL(url), period, unit, context, optional)
+        watchUrl(URL(url), period, unit, context, optional, onLoad)
 
     /**
      * Returns a child config containing values from specified resource.

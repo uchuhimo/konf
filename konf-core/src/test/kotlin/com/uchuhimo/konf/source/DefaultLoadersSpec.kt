@@ -154,6 +154,25 @@ object DefaultLoadersSpec : SubjectSpek<DefaultLoaders>({
                 assertThat(newValue, equalTo("newValue"))
             }
         }
+        on("load from watched file with listener") {
+            val file = tempFileOf(propertiesContent, suffix = ".properties")
+            var newValue = ""
+            subject.watchFile(
+                file,
+                1,
+                unit = TimeUnit.SECONDS,
+                context = Dispatchers.Sequential
+            ) { config ->
+                newValue = config[item]
+            }
+            file.writeText(propertiesContent.replace("properties", "newValue"))
+            runBlocking(Dispatchers.Sequential) {
+                delay(TimeUnit.SECONDS.toMillis(1))
+            }
+            it("should load new value when file has been changed") {
+                assertThat(newValue, equalTo("newValue"))
+            }
+        }
         on("load from watched file path") {
             val file = tempFileOf(propertiesContent, suffix = ".properties")
             val config = subject.watchFile(file.path, 1, unit = TimeUnit.SECONDS, context = Dispatchers.Sequential)
@@ -263,6 +282,34 @@ object DefaultLoadersSpec : SubjectSpek<DefaultLoaders>({
                 delay(TimeUnit.SECONDS.toMillis(5))
             }
             val newValue = config[item]
+            it("should load as auto-detected URL format") {
+                assertThat(originalValue, equalTo("properties"))
+            }
+            it("should load new value after URL content has been changed") {
+                assertThat(newValue, equalTo("newValue"))
+            }
+        }
+        on("load from watched URL string with listener") {
+            var content = propertiesContent
+            val service = Service.ignite()
+            service.port(0)
+            service.get("/source.properties") { _, _ -> content }
+            service.awaitInitialization()
+            val url = "http://localhost:${service.port()}/source.properties"
+            var newValue = ""
+            val config = subject.watchUrl(
+                url,
+                period = 1,
+                unit = TimeUnit.SECONDS,
+                context = Dispatchers.Sequential
+            ) { config ->
+                newValue = config[item]
+            }
+            val originalValue = config[item]
+            content = propertiesContent.replace("properties", "newValue")
+            runBlocking(Dispatchers.Sequential) {
+                delay(TimeUnit.SECONDS.toMillis(1))
+            }
             it("should load as auto-detected URL format") {
                 assertThat(originalValue, equalTo("properties"))
             }

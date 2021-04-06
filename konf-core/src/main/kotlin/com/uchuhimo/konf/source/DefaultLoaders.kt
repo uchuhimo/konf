@@ -205,6 +205,7 @@ class DefaultLoaders(
      * @param unit time unit of delay. The default value is [TimeUnit.SECONDS].
      * @param context context of the coroutine. The default value is [Dispatchers.Default].
      * @param optional whether the source is optional
+     * @param onLoad function invoked after the updated file is loaded
      * @return a child config containing values from watched file
      * @throws UnsupportedExtensionException
      */
@@ -213,9 +214,10 @@ class DefaultLoaders(
         delayTime: Long = 5,
         unit: TimeUnit = TimeUnit.SECONDS,
         context: CoroutineContext = Dispatchers.Default,
-        optional: Boolean = this.optional
+        optional: Boolean = this.optional,
+        onLoad: (Source.(Config) -> Unit)? = null
     ): Config = dispatchExtension(file.extension, file.name)
-        .watchFile(file, delayTime, unit, context, optional)
+        .watchFile(file, delayTime, unit, context, optional, onLoad)
 
     /**
      * Returns a child config containing values from specified file path,
@@ -237,6 +239,7 @@ class DefaultLoaders(
      * @param unit time unit of delay. The default value is [TimeUnit.SECONDS].
      * @param context context of the coroutine. The default value is [Dispatchers.Default].
      * @param optional whether the source is optional
+     * @param onLoad function invoked after the updated file is loaded
      * @return a child config containing values from watched file
      * @throws UnsupportedExtensionException
      */
@@ -245,8 +248,9 @@ class DefaultLoaders(
         delayTime: Long = 5,
         unit: TimeUnit = TimeUnit.SECONDS,
         context: CoroutineContext = Dispatchers.Default,
-        optional: Boolean = this.optional
-    ): Config = watchFile(File(file), delayTime, unit, context, optional)
+        optional: Boolean = this.optional,
+        onLoad: (Source.(Config) -> Unit)? = null
+    ): Config = watchFile(File(file), delayTime, unit, context, optional, onLoad)
 
     /**
      * Returns a child config containing values from specified url.
@@ -310,6 +314,7 @@ class DefaultLoaders(
      * @param unit time unit of delay. The default value is [TimeUnit.SECONDS].
      * @param context context of the coroutine. The default value is [Dispatchers.Default].
      * @param optional whether the source is optional
+     * @param onLoad function invoked after the updated URL is loaded
      * @return a child config containing values from specified url
      * @throws UnsupportedExtensionException
      */
@@ -318,9 +323,10 @@ class DefaultLoaders(
         period: Long = 5,
         unit: TimeUnit = TimeUnit.SECONDS,
         context: CoroutineContext = Dispatchers.Default,
-        optional: Boolean = this.optional
+        optional: Boolean = this.optional,
+        onLoad: (Source.(Config) -> Unit)? = null
     ): Config = dispatchExtension(File(url.path).extension, url.toString())
-        .watchUrl(url, period, unit, context, optional)
+        .watchUrl(url, period, unit, context, optional, onLoad)
 
     /**
      * Returns a child config containing values from specified url string,
@@ -342,6 +348,7 @@ class DefaultLoaders(
      * @param unit time unit of delay. The default value is [TimeUnit.SECONDS].
      * @param context context of the coroutine. The default value is [Dispatchers.Default].
      * @param optional whether the source is optional
+     * @param onLoad function invoked after the updated URL is loaded
      * @return a child config containing values from specified url string
      * @throws UnsupportedExtensionException
      */
@@ -350,8 +357,9 @@ class DefaultLoaders(
         period: Long = 5,
         unit: TimeUnit = TimeUnit.SECONDS,
         context: CoroutineContext = Dispatchers.Default,
-        optional: Boolean = this.optional
-    ): Config = watchUrl(URL(url), period, unit, context, optional)
+        optional: Boolean = this.optional,
+        onLoad: (Source.(Config) -> Unit)? = null
+    ): Config = watchUrl(URL(url), period, unit, context, optional, onLoad)
 }
 
 /**

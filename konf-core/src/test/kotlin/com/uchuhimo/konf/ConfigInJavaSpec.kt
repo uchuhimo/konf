@@ -46,7 +46,7 @@ object ConfigInJavaSpec : SubjectSpek<Config>({
     subject { Config { addSpec(spec) } }
 
     given("a config") {
-        val invalidItem by ConfigSpec("invalid").run { required<Int>() }
+        val invalidItem by ConfigSpec("invalid").required<Int>()
         val invalidItemName = "invalid.invalidItem"
         group("addSpec operation") {
             on("add orthogonal spec") {
