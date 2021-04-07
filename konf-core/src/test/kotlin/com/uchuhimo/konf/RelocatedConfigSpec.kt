@@ -42,6 +42,20 @@ object RollUpConfigSpec : SubjectSpek<Config>({
     }
 })
 
+object MultiLayerRollUpConfigSpec : SubjectSpek<Config>({
+
+    subject { (Prefix("prefix") + Config { addSpec(NetworkBuffer) }).withLayer("multi-layer") }
+
+    configTestSpec("prefix.network.buffer")
+})
+
+object RollUpMultiLayerConfigSpec : SubjectSpek<Config>({
+
+    subject { Prefix("prefix") + Config { addSpec(NetworkBuffer) }.withLayer("multi-layer") }
+
+    configTestSpec("prefix.network.buffer")
+})
+
 object DrillDownConfigSpec : SubjectSpek<Config>({
 
     subject { Config { addSpec(NetworkBuffer) }.at("network") }
@@ -53,4 +67,46 @@ object DrillDownConfigSpec : SubjectSpek<Config>({
             assertThat(subject.at(""), sameInstance(subject))
         }
     }
+})
+
+object MultiLayerDrillDownConfigSpec : SubjectSpek<Config>({
+
+    subject { Config { addSpec(NetworkBuffer) }.at("network").withLayer("multi-layer") }
+
+    configTestSpec("buffer")
+})
+
+object DrillDownMultiLayerConfigSpec : SubjectSpek<Config>({
+
+    subject { Config { addSpec(NetworkBuffer) }.withLayer("multi-layer").at("network") }
+
+    configTestSpec("buffer")
+})
+
+object MultiLayerFacadeDrillDownConfigSpec : SubjectSpek<Config>({
+    subject {
+        (
+            Config() + Config {
+                addSpec(NetworkBuffer)
+            }.withLayer("layer1")
+                .at("network")
+                .withLayer("layer2")
+            ).withLayer("layer3")
+    }
+
+    configTestSpec("buffer")
+})
+
+object MultiLayerRollUpFallbackConfigSpec : SubjectSpek<Config>({
+    subject {
+        (
+            (
+                Prefix("prefix") +
+                    Config { addSpec(NetworkBuffer) }.withLayer("layer1")
+                ).withLayer("layer2") +
+                Config()
+            ).withLayer("layer3")
+    }
+
+    configTestSpec("prefix.network.buffer")
 })

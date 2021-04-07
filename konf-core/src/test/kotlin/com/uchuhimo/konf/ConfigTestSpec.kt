@@ -22,6 +22,7 @@ import com.natpryce.hamkrest.equalTo
 import com.natpryce.hamkrest.has
 import com.natpryce.hamkrest.sameInstance
 import com.natpryce.hamkrest.throws
+import com.uchuhimo.konf.source.Source
 import com.uchuhimo.konf.source.base.asKVSource
 import com.uchuhimo.konf.source.base.toHierarchicalMap
 import org.jetbrains.spek.api.dsl.given
@@ -74,6 +75,52 @@ fun SubjectProviderDsl<Config>.configTestSpec(prefix: String = "network.buffer")
                 }
             }
         }
+        group("subscribe operation") {
+            on("load source when subscriber is defined") {
+                var loadFunction: (source: Source) -> Unit = {}
+                var counter = 0
+                val config = subject.withLoadTrigger("") { newConfig, load ->
+                    loadFunction = load
+                }.withLayer()
+                val source = mapOf(qualify(type.name) to NetworkBuffer.Type.ON_HEAP).asKVSource()
+                val handler1 = config.beforeLoad {
+                    counter += 1
+                    it("should contain the old value") {
+                        assertThat(it, equalTo(source))
+                        assertThat(config[type], equalTo(NetworkBuffer.Type.OFF_HEAP))
+                    }
+                }
+                val handler2 = config.beforeLoad {
+                    counter += 1
+                    it("should contain the old value") {
+                        assertThat(it, equalTo(source))
+                        assertThat(config[type], equalTo(NetworkBuffer.Type.OFF_HEAP))
+                    }
+                }
+                val handler3 = config.afterLoad {
+                    counter += 1
+                    it("should contain the new value") {
+                        assertThat(it, equalTo(source))
+                        assertThat(config[type], equalTo(NetworkBuffer.Type.ON_HEAP))
+                    }
+                }
+                val handler4 = config.afterLoad {
+                    counter += 1
+                    it("should contain the new value") {
+                        assertThat(it, equalTo(source))
+                        assertThat(config[type], equalTo(NetworkBuffer.Type.ON_HEAP))
+                    }
+                }
+                loadFunction(source)
+                handler1.close()
+                handler2.close()
+                handler3.close()
+                handler4.close()
+                it("should notify subscriber") {
+                    assertThat(counter, equalTo(4))
+                }
+            }
+        }
         group("addSpec operation") {
             on("add orthogonal spec") {
                 val newSpec = object : ConfigSpec(spec.prefix) {
@@ -83,8 +130,8 @@ fun SubjectProviderDsl<Config>.configTestSpec(prefix: String = "network.buffer")
                 config.addSpec(newSpec)
                 it("should contain items in new spec") {
                     assertTrue { newSpec.minSize in config }
-                    assertTrue { spec.qualify(newSpec.minSize) in config }
-                    assertThat(config.nameOf(newSpec.minSize), equalTo(spec.qualify(newSpec.minSize)))
+                    assertTrue { newSpec.qualify(newSpec.minSize) in config }
+                    assertThat(config.nameOf(newSpec.minSize), equalTo(newSpec.qualify(newSpec.minSize)))
                 }
                 it("should contain new spec") {
                     assertThat(newSpec in config.specs, equalTo(true))
@@ -194,12 +241,12 @@ fun SubjectProviderDsl<Config>.configTestSpec(prefix: String = "network.buffer")
         group("addItem operation") {
             on("add orthogonal item") {
                 val minSize by Spec.dummy.optional(1)
-                val config = subject.withSource(mapOf(spec.qualify(minSize) to 2).asKVSource())
-                config.addItem(minSize, spec.prefix)
+                val config = subject.withSource(mapOf(qualify(minSize.name) to 2).asKVSource())
+                config.addItem(minSize, prefix)
                 it("should contain item") {
                     assertTrue { minSize in config }
-                    assertTrue { spec.qualify(minSize) in config }
-                    assertThat(config.nameOf(minSize), equalTo(spec.qualify(minSize)))
+                    assertTrue { qualify(minSize.name) in config }
+                    assertThat(config.nameOf(minSize), equalTo(qualify(minSize.name)))
                 }
                 it("should load values from the existed sources for item") {
                     assertThat(config[minSize], equalTo(2))
@@ -208,11 +255,11 @@ fun SubjectProviderDsl<Config>.configTestSpec(prefix: String = "network.buffer")
             on("add repeated item") {
                 it("should throw RepeatedItemException") {
                     assertThat(
-                        { subject.addItem(size, spec.prefix) },
+                        { subject.addItem(size, prefix) },
                         throws(
                             has(
                                 RepeatedItemException::name,
-                                equalTo(spec.qualify(size))
+                                equalTo(qualify(size.name))
                             )
                         )
                     )
@@ -424,18 +471,18 @@ fun SubjectProviderDsl<Config>.configTestSpec(prefix: String = "network.buffer")
             on("get with invalid name") {
                 it("should throw NoSuchItemException when using `get`") {
                     assertThat(
-                        { subject<String>(spec.qualify(invalidItem)) },
+                        { subject<String>(qualify(invalidItem.name)) },
                         throws(
                             has(
                                 NoSuchItemException::name,
-                                equalTo(spec.qualify(invalidItem))
+                                equalTo(qualify(invalidItem.name))
                             )
                         )
                     )
                 }
                 it("should return null when using `getOrNull`") {
-                    assertThat(subject.getOrNull<String>(spec.qualify(invalidItem)), absent())
-                    assertTrue { spec.qualify(invalidItem) !in subject }
+                    assertThat(subject.getOrNull<String>(qualify(invalidItem.name)), absent())
+                    assertTrue { qualify(invalidItem.name) !in subject }
                 }
             }
             on("get unset item") {
@@ -735,15 +782,21 @@ fun SubjectProviderDsl<Config>.configTestSpec(prefix: String = "network.buffer")
             }
         }
         on("clear operation") {
+            subject[size] = 1
+            subject[maxSize] = 4
             it("should contain no value") {
-                val config = if (subject.name == "multi-layer") {
-                    subject.parent!!
-                } else {
-                    subject
-                }
-                assertTrue { name in config && type in config }
-                config.clear()
-                assertTrue { name !in config && type !in config }
+                assertThat(subject[size], equalTo(1))
+                assertThat(subject[maxSize], equalTo(4))
+                subject.clear()
+                assertNull(subject.getOrNull(size))
+                assertNull(subject.getOrNull(maxSize))
+            }
+        }
+        on("clear all operation") {
+            it("should contain no value") {
+                assertTrue { name in subject && type in subject }
+                subject.clearAll()
+                assertTrue { name !in subject && type !in subject }
             }
         }
         on("check whether all required items have values or not") {

@@ -54,6 +54,26 @@ open class MergedConfig(val fallback: BaseConfig, val facade: BaseConfig) :
         }
     }
 
+    override fun addBeforeLoadFunction(beforeLoadFunction: (source: Source) -> Unit) {
+        facade.addBeforeLoadFunction(beforeLoadFunction)
+        fallback.addBeforeLoadFunction(beforeLoadFunction)
+    }
+
+    override fun removeBeforeLoadFunction(beforeLoadFunction: (source: Source) -> Unit) {
+        facade.removeBeforeLoadFunction(beforeLoadFunction)
+        fallback.removeBeforeLoadFunction(beforeLoadFunction)
+    }
+
+    override fun addAfterLoadFunction(afterLoadFunction: (source: Source) -> Unit) {
+        facade.addAfterLoadFunction(afterLoadFunction)
+        fallback.addAfterLoadFunction(afterLoadFunction)
+    }
+
+    override fun removeAfterLoadFunction(afterLoadFunction: (source: Source) -> Unit) {
+        facade.removeAfterLoadFunction(afterLoadFunction)
+        fallback.removeAfterLoadFunction(afterLoadFunction)
+    }
+
     override fun addBeforeSetFunction(beforeSetFunction: (item: Item<*>, value: Any?) -> Unit) {
         facade.addBeforeSetFunction(beforeSetFunction)
         fallback.addBeforeSetFunction(beforeSetFunction)
@@ -77,6 +97,11 @@ open class MergedConfig(val fallback: BaseConfig, val facade: BaseConfig) :
     override fun clear() {
         facade.clear()
         fallback.clear()
+    }
+
+    override fun clearAll() {
+        facade.clearAll()
+        fallback.clearAll()
     }
 
     override val specs: List<Spec>
@@ -165,6 +190,8 @@ open class MergedConfig(val fallback: BaseConfig, val facade: BaseConfig) :
     override fun contains(item: Item<*>): Boolean = item in facade || item in fallback
 
     override fun contains(name: String): Boolean = name in facade || name in fallback
+
+    override fun contains(path: Path): Boolean = path in facade || path in fallback
 
     override fun nameOf(item: Item<*>): String {
         return if (item in facade) {

@@ -215,7 +215,7 @@ class DefaultLoaders(
         unit: TimeUnit = TimeUnit.SECONDS,
         context: CoroutineContext = Dispatchers.Default,
         optional: Boolean = this.optional,
-        onLoad: (Source.(Config) -> Unit)? = null
+        onLoad: ((config: Config, source: Source) -> Unit)? = null
     ): Config = dispatchExtension(file.extension, file.name)
         .watchFile(file, delayTime, unit, context, optional, onLoad)
 
@@ -249,7 +249,7 @@ class DefaultLoaders(
         unit: TimeUnit = TimeUnit.SECONDS,
         context: CoroutineContext = Dispatchers.Default,
         optional: Boolean = this.optional,
-        onLoad: (Source.(Config) -> Unit)? = null
+        onLoad: ((config: Config, source: Source) -> Unit)? = null
     ): Config = watchFile(File(file), delayTime, unit, context, optional, onLoad)
 
     /**
@@ -324,7 +324,7 @@ class DefaultLoaders(
         unit: TimeUnit = TimeUnit.SECONDS,
         context: CoroutineContext = Dispatchers.Default,
         optional: Boolean = this.optional,
-        onLoad: (Source.(Config) -> Unit)? = null
+        onLoad: ((config: Config, source: Source) -> Unit)? = null
     ): Config = dispatchExtension(File(url.path).extension, url.toString())
         .watchUrl(url, period, unit, context, optional, onLoad)
 
@@ -358,7 +358,7 @@ class DefaultLoaders(
         unit: TimeUnit = TimeUnit.SECONDS,
         context: CoroutineContext = Dispatchers.Default,
         optional: Boolean = this.optional,
-        onLoad: (Source.(Config) -> Unit)? = null
+        onLoad: ((config: Config, source: Source) -> Unit)? = null
     ): Config = watchUrl(URL(url), period, unit, context, optional, onLoad)
 }
 

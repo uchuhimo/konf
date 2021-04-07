@@ -136,6 +136,11 @@ interface Config : ItemContainer {
     fun clear()
 
     /**
+     * Remove all values from all layers of this config.
+     */
+    fun clearAll()
+
+    /**
      * Whether all required items have values or not.
      *
      * @return `true` if all required items have values, `false` otherwise
@@ -291,21 +296,21 @@ interface Config : ItemContainer {
         ) -> Unit
     ): Config
 
-//    /**
-//     * Subscribe the update event before every set operation.
-//     *
-//     * @param beforeLoadFunction the subscription function
-//     * @return the handler to cancel this subscription
-//     */
-//    fun beforeLoad(beforeLoadFunction: (source: Source) -> Unit): Handler
-//
-//    /**
-//     * Subscribe the update event after every set operation.
-//     *
-//     * @param afterLoadFunction the subscription function
-//     * @return the handler to cancel this subscription
-//     */
-//    fun afterLoad(afterLoadFunction: (source: Source) -> Unit): Handler
+    /**
+     * Subscribe the update event before every load operation.
+     *
+     * @param beforeLoadFunction the subscription function
+     * @return the handler to cancel this subscription
+     */
+    fun beforeLoad(beforeLoadFunction: (source: Source) -> Unit): Handler
+
+    /**
+     * Subscribe the update event after every load operation.
+     *
+     * @param afterLoadFunction the subscription function
+     * @return the handler to cancel this subscription
+     */
+    fun afterLoad(afterLoadFunction: (source: Source) -> Unit): Handler
 
     /**
      * Returns default loaders for this config.

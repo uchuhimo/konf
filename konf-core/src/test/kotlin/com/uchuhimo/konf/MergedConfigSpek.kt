@@ -29,6 +29,18 @@ object FacadeConfigSpec : SubjectSpek<Config>({
     configTestSpec()
 })
 
+object MultiLayerFacadeConfigSpec : SubjectSpek<Config>({
+    subject { (Config() + Config { addSpec(NetworkBuffer) }).withLayer("multi-layer") }
+
+    configTestSpec()
+})
+
+object FacadeMultiLayerConfigSpec : SubjectSpek<Config>({
+    subject { Config() + Config { addSpec(NetworkBuffer) }.withLayer("multi-layer") }
+
+    configTestSpec()
+})
+
 object FacadeConfigUsingWithFallbackSpec : SubjectSpek<Config>({
     subject { Config { addSpec(NetworkBuffer) }.withFallback(Config()) }
 
@@ -37,6 +49,18 @@ object FacadeConfigUsingWithFallbackSpec : SubjectSpek<Config>({
 
 object FallbackConfigSpec : SubjectSpek<Config>({
     subject { Config { addSpec(NetworkBuffer) } + Config() }
+
+    configTestSpec()
+})
+
+object MultiLayerFallbackConfigSpec : SubjectSpek<Config>({
+    subject { (Config { addSpec(NetworkBuffer) } + Config()).withLayer("multi-layer") }
+
+    configTestSpec()
+})
+
+object FallbackMultiLayerConfigSpec : SubjectSpek<Config>({
+    subject { Config { addSpec(NetworkBuffer) }.withLayer("multi-layer") + Config() }
 
     configTestSpec()
 })

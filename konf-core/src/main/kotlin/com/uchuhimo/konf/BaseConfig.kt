@@ -59,6 +59,8 @@ open class BaseConfig(
     private val hasChildren: Value<Boolean> = Value(false),
     private val beforeSetFunctions: MutableList<(item: Item<*>, value: Any?) -> Unit> = mutableListOf(),
     private val afterSetFunctions: MutableList<(item: Item<*>, value: Any?) -> Unit> = mutableListOf(),
+    private val beforeLoadFunctions: MutableList<(source: Source) -> Unit> = mutableListOf(),
+    private val afterLoadFunctions: MutableList<(source: Source) -> Unit> = mutableListOf(),
     private val lock: ReentrantReadWriteLock = ReentrantReadWriteLock()
 ) : Config {
     private val _source: Value<Source> = Value(EmptyMapSource())
@@ -85,6 +87,8 @@ open class BaseConfig(
                 hasChildren = hasChildren,
                 beforeSetFunctions = beforeSetFunctions,
                 afterSetFunctions = afterSetFunctions,
+                beforeLoadFunctions = beforeLoadFunctions,
+                afterLoadFunctions = afterLoadFunctions,
                 lock = lock
             ) {
                 override val source: Source
@@ -117,6 +121,8 @@ open class BaseConfig(
                 hasChildren = hasChildren,
                 beforeSetFunctions = beforeSetFunctions,
                 afterSetFunctions = afterSetFunctions,
+                beforeLoadFunctions = beforeLoadFunctions,
+                afterLoadFunctions = afterLoadFunctions,
                 lock = lock
             ) {
                 override val source: Source get() = originalConfig.source.withPrefix(prefix)
@@ -124,34 +130,12 @@ open class BaseConfig(
         }
     }
 
-    override fun iterator(): Iterator<Item<*>> = object : Iterator<Item<*>> {
-        private var currentConfig = this@BaseConfig
-        private var current = currentConfig.nodeByItem.keys.iterator()
-        private var lock = currentConfig.lock
-
-        init {
-            lock.readLock().lock()
+    override fun iterator(): Iterator<Item<*>> {
+        return if (parent != null) {
+            (nodeByItem.keys.iterator().asSequence() + parent!!.iterator().asSequence()).iterator()
+        } else {
+            nodeByItem.keys.iterator()
         }
-
-        override tailrec fun hasNext(): Boolean {
-            return if (current.hasNext()) {
-                true
-            } else {
-                lock.readLock().unlock()
-                val parent = currentConfig.parent
-                if (parent != null) {
-                    currentConfig = parent
-                    current = currentConfig.nodeByItem.keys.iterator()
-                    lock = currentConfig.lock
-                    lock.readLock().lock()
-                    hasNext()
-                } else {
-                    false
-                }
-            }
-        }
-
-        override fun next(): Item<*> = current.next()
     }
 
     override val itemWithNames: List<Pair<Item<*>, String>>
@@ -503,6 +487,11 @@ open class BaseConfig(
         }
     }
 
+    override fun clearAll() {
+        clear()
+        parent?.clearAll()
+    }
+
     override fun containsRequired(): Boolean = try {
         validateRequired()
         true
@@ -567,7 +556,7 @@ open class BaseConfig(
 
     override fun enable(feature: Feature): Config {
         return apply {
-            lock {
+            lock.write {
                 featuresInLayer[feature] = true
             }
         }
@@ -575,14 +564,14 @@ open class BaseConfig(
 
     override fun disable(feature: Feature): Config {
         return apply {
-            lock {
+            lock.write {
                 featuresInLayer[feature] = false
             }
         }
     }
 
     override fun isEnabled(feature: Feature): Boolean {
-        return lock {
+        return lock.read {
             featuresInLayer[feature] ?: parent?.isEnabled(feature) ?: feature.enabledByDefault
         }
     }
@@ -666,6 +655,56 @@ open class BaseConfig(
         return BaseConfig(name, this, mapper)
     }
 
+    open fun addBeforeLoadFunction(beforeLoadFunction: (source: Source) -> Unit) {
+        beforeLoadFunctions += beforeLoadFunction
+        parent?.addBeforeLoadFunction(beforeLoadFunction)
+    }
+
+    open fun removeBeforeLoadFunction(beforeLoadFunction: (source: Source) -> Unit) {
+        beforeLoadFunctions.remove(beforeLoadFunction)
+        parent?.removeBeforeLoadFunction(beforeLoadFunction)
+    }
+
+    override fun beforeLoad(beforeLoadFunction: (source: Source) -> Unit): Handler {
+        addBeforeLoadFunction(beforeLoadFunction)
+        return object : Handler {
+            override fun cancel() {
+                removeBeforeLoadFunction(beforeLoadFunction)
+            }
+        }
+    }
+
+    private fun notifyBeforeLoad(source: Source) {
+        for (beforeLoadFunction in beforeLoadFunctions) {
+            beforeLoadFunction(source)
+        }
+    }
+
+    open fun addAfterLoadFunction(afterLoadFunction: (source: Source) -> Unit) {
+        afterLoadFunctions += afterLoadFunction
+        parent?.addAfterLoadFunction(afterLoadFunction)
+    }
+
+    open fun removeAfterLoadFunction(afterLoadFunction: (source: Source) -> Unit) {
+        afterLoadFunctions.remove(afterLoadFunction)
+        parent?.removeAfterLoadFunction(afterLoadFunction)
+    }
+
+    override fun afterLoad(afterLoadFunction: (source: Source) -> Unit): Handler {
+        addAfterLoadFunction(afterLoadFunction)
+        return object : Handler {
+            override fun cancel() {
+                removeAfterLoadFunction(afterLoadFunction)
+            }
+        }
+    }
+
+    private fun notifyAfterLoad(source: Source) {
+        for (afterLoadFunction in afterLoadFunctions) {
+            afterLoadFunction(source)
+        }
+    }
+
     override fun withSource(source: Source): Config {
         return withLayer("source: ${source.description}").also { config ->
             config.lock.write {
@@ -683,7 +722,11 @@ open class BaseConfig(
     ): Config {
         return withLayer("trigger: $description").apply {
             trigger(this) { source ->
-                this._source.value = load(this, source)
+                notifyBeforeLoad(source)
+                lock.write {
+                    this._source.value = load(this, source)
+                }
+                notifyAfterLoad(source)
             }
         }
     }

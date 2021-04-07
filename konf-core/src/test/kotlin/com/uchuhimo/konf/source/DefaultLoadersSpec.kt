@@ -162,7 +162,7 @@ object DefaultLoadersSpec : SubjectSpek<DefaultLoaders>({
                 1,
                 unit = TimeUnit.SECONDS,
                 context = Dispatchers.Sequential
-            ) { config ->
+            ) { config, source ->
                 newValue = config[item]
             }
             file.writeText(propertiesContent.replace("properties", "newValue"))
@@ -302,7 +302,7 @@ object DefaultLoadersSpec : SubjectSpek<DefaultLoaders>({
                 period = 1,
                 unit = TimeUnit.SECONDS,
                 context = Dispatchers.Sequential
-            ) { config ->
+            ) { config, source ->
                 newValue = config[item]
             }
             val originalValue = config[item]

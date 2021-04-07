@@ -115,7 +115,7 @@ class Loader(
         unit: TimeUnit = TimeUnit.SECONDS,
         context: CoroutineContext = Dispatchers.Default,
         optional: Boolean = this.optional,
-        onLoad: (Source.(Config) -> Unit)? = null
+        onLoad: ((config: Config, source: Source) -> Unit)? = null
     ): Config {
         val absoluteFile = file.absoluteFile
         return provider.file(absoluteFile, optional).let { source ->
@@ -123,7 +123,7 @@ class Loader(
                 newConfig.lock {
                     load(source)
                 }
-                onLoad?.invoke(source, newConfig)
+                onLoad?.invoke(newConfig, source)
                 val path = absoluteFile.toPath().parent
                 val isMac = "mac" in System.getProperty("os.name").toLowerCase()
                 val watcher = FileSystems.getDefault().newWatchService()
@@ -145,7 +145,7 @@ class Loader(
                                     newConfig.clear()
                                     load(newSource)
                                 }
-                                onLoad?.invoke(newSource, newConfig)
+                                onLoad?.invoke(newConfig, newSource)
                             }
                         } else {
                             val key = watcher.poll()
@@ -166,7 +166,7 @@ class Loader(
                                                 newConfig.clear()
                                                 load(newSource)
                                             }
-                                            onLoad?.invoke(newSource, newConfig)
+                                            onLoad?.invoke(newConfig, newSource)
                                         }
                                     }
                                     val valid = key.reset()
@@ -201,7 +201,7 @@ class Loader(
         unit: TimeUnit = TimeUnit.SECONDS,
         context: CoroutineContext = Dispatchers.Default,
         optional: Boolean = this.optional,
-        onLoad: (Source.(Config) -> Unit)? = null
+        onLoad: ((config: Config, source: Source) -> Unit)? = null
     ): Config =
         watchFile(File(file), delayTime, unit, context, optional, onLoad)
 
@@ -272,14 +272,14 @@ class Loader(
         unit: TimeUnit = TimeUnit.SECONDS,
         context: CoroutineContext = Dispatchers.Default,
         optional: Boolean = this.optional,
-        onLoad: (Source.(Config) -> Unit)? = null
+        onLoad: ((config: Config, source: Source) -> Unit)? = null
     ): Config {
         return provider.url(url, optional).let { source ->
             config.withLoadTrigger("watch ${source.description}") { newConfig, load ->
                 newConfig.lock {
                     load(source)
                 }
-                onLoad?.invoke(source, newConfig)
+                onLoad?.invoke(newConfig, source)
                 GlobalScope.launch(context) {
                     while (true) {
                         delay(unit.toMillis(period))
@@ -288,7 +288,7 @@ class Loader(
                             newConfig.clear()
                             load(newSource)
                         }
-                        onLoad?.invoke(newSource, newConfig)
+                        onLoad?.invoke(newConfig, newSource)
                     }
                 }
             }.withLayer()
@@ -313,7 +313,7 @@ class Loader(
         unit: TimeUnit = TimeUnit.SECONDS,
         context: CoroutineContext = Dispatchers.Default,
         optional: Boolean = this.optional,
-        onLoad: (Source.(Config) -> Unit)? = null
+        onLoad: ((config: Config, source: Source) -> Unit)? = null
     ): Config =
         watchUrl(URL(url), period, unit, context, optional, onLoad)
 

@@ -46,6 +46,7 @@ A type-safe cascading configuration library for Kotlin/Java/Android, supporting 
     - [Export value in config as property](#export-value-in-config-as-property)
     - [Fork from another config](#fork-from-another-config)
   - [Load values from source](#load-values-from-source)
+    - [Subscribe the update event for load operation](#subscribe-the-update-event-for-load-operation)
     - [Strict parsing when loading](#strict-parsing-when-loading)
     - [Path substitution](#path-substitution)
   - [Prefix/Merge operations for source/config/config spec](#prefixmerge-operations-for-sourceconfigconfig-spec)
@@ -584,11 +585,11 @@ HOCON/JSON/properties/TOML/XML/YAML/JavaScript source can be loaded from a varie
 
 - From file: `config.from.properties.file("/path/to/file")`
 - From watched file: `config.from.properties.watchFile("/path/to/file", 100, TimeUnit.MILLISECONDS)`
-  - You can re-trigger the setup process every time the updated file is loaded by `watchFile("/path/to/file") { config -> setup(config) }`
+  - You can re-trigger the setup process every time the updated file is loaded by `watchFile("/path/to/file") { config, source -> setup(config) }`
 - From string: `config.from.properties.string("server.port = 8080")`
 - From URL: `config.from.properties.url("http://localhost:8080/source.properties")`
 - From watched URL: `config.from.properties.watchUrl("http://localhost:8080/source.properties", 1, TimeUnit.MINUTES)`
-  - You can re-trigger the setup process every time the URL is loaded by `watchUrl("http://localhost:8080/source.properties") { config -> setup(config) }`
+  - You can re-trigger the setup process every time the URL is loaded by `watchUrl("http://localhost:8080/source.properties") { config, source -> setup(config) }`
 - From Git repository: `config.from.properties.git("https://github.com/uchuhimo/konf.git", "/path/to/source.properties", branch = "dev")`
 - From watched Git repository: `config.from.properties.watchGit("https://github.com/uchuhimo/konf.git", "/path/to/source.properties", period = 1, unit = TimeUnit.MINUTES)`
 - From resource: `config.from.properties.resource("source.properties")`
@@ -610,6 +611,26 @@ If source is from file, file extension can be auto detected. Thus, you can use `
 | JavaScript | js         |
 
 You can also implement [`Source`](https://github.com/uchuhimo/konf/blob/master/konf-core/src/main/kotlin/com/uchuhimo/konf/source/Source.kt) to customize your new source, which can be loaded into config by `config.withSource(source)`.
+
+### Subscribe the update event for load operation
+
+Subscribe the update event before every load operation:
+
+```kotlin
+val handler = config.beforeLoad { source -> println("$source will be loaded") }
+```
+
+You can re-trigger the setup process by subscribing the update event after every load operation:
+
+```kotlin
+val handler = config.afterLoad { source -> setup(config) }
+```
+
+Cancel the subscription:
+
+```kotlin
+handler.cancel()
+```
 
 ### Strict parsing when loading
 
