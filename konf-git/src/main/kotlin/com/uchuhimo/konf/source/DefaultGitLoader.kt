@@ -18,7 +18,6 @@ package com.uchuhimo.konf.source
 
 import com.uchuhimo.konf.Config
 import kotlinx.coroutines.Dispatchers
-import org.eclipse.jgit.api.TransportCommand
 import org.eclipse.jgit.lib.Constants
 import java.io.File
 import java.util.concurrent.TimeUnit
@@ -52,10 +51,9 @@ fun DefaultLoaders.git(
     file: String,
     dir: String? = null,
     branch: String = Constants.HEAD,
-    optional: Boolean = this.optional,
-    action: TransportCommand<*, *>.() -> Unit = {}
+    optional: Boolean = this.optional
 ): Config = dispatchExtension(File(file).extension, "{repo: $repo, file: $file}")
-    .git(repo, file, dir, branch, optional, action)
+    .git(repo, file, dir, branch, optional)
 
 /**
  * Returns a child config containing values from a specified git repository,
@@ -80,7 +78,7 @@ fun DefaultLoaders.git(
  * @param unit time unit of reload period. The default value is [TimeUnit.MINUTES].
  * @param context context of the coroutine. The default value is [Dispatchers.Default].
  * @param optional whether the source is optional
- * @param action additional action when cloning/pulling
+ * @param onLoad function invoked after the updated git file is loaded
  * @return a child config containing values from a specified git repository
  * @throws UnsupportedExtensionException
  */
@@ -93,6 +91,6 @@ fun DefaultLoaders.watchGit(
     unit: TimeUnit = TimeUnit.MINUTES,
     context: CoroutineContext = Dispatchers.Default,
     optional: Boolean = this.optional,
-    action: TransportCommand<*, *>.() -> Unit = {}
+    onLoad: ((config: Config, source: Source) -> Unit)? = null
 ): Config = dispatchExtension(File(file).extension, "{repo: $repo, file: $file}")
-    .watchGit(repo, file, dir, branch, period, unit, context, optional, action)
+    .watchGit(repo, file, dir, branch, period, unit, context, optional, onLoad)

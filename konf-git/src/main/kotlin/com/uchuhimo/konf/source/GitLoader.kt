@@ -22,7 +22,6 @@ import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.GlobalScope
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
-import org.eclipse.jgit.api.TransportCommand
 import org.eclipse.jgit.lib.Constants
 import java.util.concurrent.TimeUnit
 import kotlin.coroutines.CoroutineContext
@@ -35,7 +34,6 @@ import kotlin.coroutines.CoroutineContext
  * @param dir local directory of the git repository
  * @param branch the initial branch
  * @param optional whether the source is optional
- * @param action additional action when cloning/pulling
  * @return a child config containing values from a specified git repository
  */
 fun Loader.git(
@@ -43,10 +41,9 @@ fun Loader.git(
     file: String,
     dir: String? = null,
     branch: String = Constants.HEAD,
-    optional: Boolean = this.optional,
-    action: TransportCommand<*, *>.() -> Unit = {}
+    optional: Boolean = this.optional
 ): Config =
-    config.withSource(provider.git(repo, file, dir, branch, optional, action))
+    config.withSource(provider.git(repo, file, dir, branch, optional))
 
 /**
  * Returns a child config containing values from a specified git repository,
@@ -60,7 +57,7 @@ fun Loader.git(
  * @param unit time unit of reload period. The default value is [TimeUnit.MINUTES].
  * @param context context of the coroutine. The default value is [Dispatchers.Default].
  * @param optional whether the source is optional
- * @param action additional action when cloning/pulling
+ * @param onLoad function invoked after the updated git file is loaded
  * @return a child config containing values from a specified git repository
  */
 fun Loader.watchGit(
@@ -72,19 +69,24 @@ fun Loader.watchGit(
     unit: TimeUnit = TimeUnit.MINUTES,
     context: CoroutineContext = Dispatchers.Default,
     optional: Boolean = this.optional,
-    action: TransportCommand<*, *>.() -> Unit = {}
+    onLoad: ((config: Config, source: Source) -> Unit)? = null
 ): Config {
     return (dir ?: tempDirectory(prefix = "local_git_repo").path).let { directory ->
-        provider.git(repo, file, directory, branch, optional, action).let { source ->
+        provider.git(repo, file, directory, branch, optional).let { source ->
             config.withLoadTrigger("watch ${source.description}") { newConfig, load ->
-                load(source)
+                newConfig.lock {
+                    load(source)
+                }
+                onLoad?.invoke(newConfig, source)
                 GlobalScope.launch(context) {
                     while (true) {
                         delay(unit.toMillis(period))
+                        val newSource = provider.git(repo, file, directory, branch, optional)
                         newConfig.lock {
                             newConfig.clear()
-                            load(provider.git(repo, file, directory, branch, optional, action))
+                            load(newSource)
                         }
+                        onLoad?.invoke(newConfig, newSource)
                     }
                 }
             }.withLayer()

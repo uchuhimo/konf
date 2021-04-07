@@ -16,7 +16,6 @@
 
 package com.uchuhimo.konf.source
 
-import org.eclipse.jgit.api.TransportCommand
 import org.eclipse.jgit.lib.Constants
 import java.io.File
 
@@ -39,7 +38,6 @@ import java.io.File
  * @param dir local directory of the git repository
  * @param branch the initial branch
  * @param optional whether the source is optional
- * @param action additional action when cloning/pulling
  * @return a source from a specified git repository
  * @throws UnsupportedExtensionException
  */
@@ -48,7 +46,6 @@ fun DefaultProviders.git(
     file: String,
     dir: String? = null,
     branch: String = Constants.HEAD,
-    optional: Boolean = false,
-    action: TransportCommand<*, *>.() -> Unit = {}
+    optional: Boolean = false
 ): Source = dispatchExtension(File(file).extension, "{repo: $repo, file: $file}")
-    .git(repo, file, dir, branch, optional, action)
+    .git(repo, file, dir, branch, optional)

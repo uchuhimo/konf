@@ -592,6 +592,7 @@ HOCON/JSON/properties/TOML/XML/YAML/JavaScript source can be loaded from a varie
   - You can re-trigger the setup process every time the URL is loaded by `watchUrl("http://localhost:8080/source.properties") { config, source -> setup(config) }`
 - From Git repository: `config.from.properties.git("https://github.com/uchuhimo/konf.git", "/path/to/source.properties", branch = "dev")`
 - From watched Git repository: `config.from.properties.watchGit("https://github.com/uchuhimo/konf.git", "/path/to/source.properties", period = 1, unit = TimeUnit.MINUTES)`
+  - You can re-trigger the setup process every time the Git file is loaded by `watchGit("https://github.com/uchuhimo/konf.git", "/path/to/source.properties") { config, source -> setup(config) }`
 - From resource: `config.from.properties.resource("source.properties")`
 - From reader: `config.from.properties.reader(reader)`
 - From input stream: `config.from.properties.inputStream(inputStream)`

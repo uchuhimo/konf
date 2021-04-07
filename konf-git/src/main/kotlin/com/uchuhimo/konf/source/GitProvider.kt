@@ -19,7 +19,6 @@ package com.uchuhimo.konf.source
 import com.uchuhimo.konf.source.base.EmptyMapSource
 import com.uchuhimo.konf.tempDirectory
 import org.eclipse.jgit.api.Git
-import org.eclipse.jgit.api.TransportCommand
 import org.eclipse.jgit.api.errors.GitAPIException
 import org.eclipse.jgit.lib.Constants
 import org.eclipse.jgit.transport.URIish
@@ -35,7 +34,6 @@ import java.nio.file.Paths
  * @param dir local directory of the git repository
  * @param branch the initial branch
  * @param optional whether this source is optional
- * @param action additional action when cloning/pulling
  * @return a new source from a specified git repository
  */
 fun Provider.git(
@@ -43,8 +41,7 @@ fun Provider.git(
     file: String,
     dir: String? = null,
     branch: String = Constants.HEAD,
-    optional: Boolean = false,
-    action: TransportCommand<*, *>.() -> Unit = {}
+    optional: Boolean = false
 ): Source {
     return (dir?.let(::File) ?: tempDirectory(prefix = "local_git_repo")).let { directory ->
         val extendContext: Source.() -> Unit = {
@@ -59,7 +56,6 @@ fun Provider.git(
                     setURI(repo)
                     setDirectory(directory)
                     setBranch(branch)
-                    this.action()
                 }.call().close()
             } else {
                 Git.open(directory).use { git ->
@@ -69,7 +65,6 @@ fun Provider.git(
                     git.pull().apply {
                         remote = remoteName
                         remoteBranchName = branch
-                        this.action()
                     }.call()
                 }
             }

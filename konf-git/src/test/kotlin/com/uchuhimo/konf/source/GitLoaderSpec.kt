@@ -124,6 +124,52 @@ object GitLoaderSpec : SubjectSpek<Loader>({
                 }
             }
         }
+        on("load from watched git repository with listener") {
+            tempDirectory(prefix = "remote_git_repo", suffix = ".git").let { dir ->
+                val file = Paths.get(dir.path, "test").toFile()
+                Git.init().apply {
+                    setDirectory(dir)
+                }.call().use { git ->
+                    file.writeText("type = originalValue")
+                    git.add().apply {
+                        addFilepattern("test")
+                    }.call()
+                    git.commit().apply {
+                        message = "init commit"
+                    }.call()
+                }
+                val repo = dir.toURI()
+                var newValue = ""
+                val config = subject.watchGit(
+                    repo.toString(),
+                    "test",
+                    period = 1,
+                    unit = TimeUnit.SECONDS,
+                    context = Dispatchers.Sequential
+                ) { config, source ->
+                    newValue = config[SourceType.type]
+                }
+                val originalValue = config[SourceType.type]
+                file.writeText("type = newValue")
+                Git.open(dir).use { git ->
+                    git.add().apply {
+                        addFilepattern("test")
+                    }.call()
+                    git.commit().apply {
+                        message = "update value"
+                    }.call()
+                }
+                runBlocking(Dispatchers.Sequential) {
+                    delay(TimeUnit.SECONDS.toMillis(1))
+                }
+                it("should return a config which contains value in git repository") {
+                    assertThat(originalValue, equalTo("originalValue"))
+                }
+                it("should load new value when content of git repository has been changed") {
+                    assertThat(newValue, equalTo("newValue"))
+                }
+            }
+        }
     }
 })
 

@@ -123,5 +123,51 @@ object DefaultGitLoaderSpec : SubjectSpek<DefaultLoaders>({
                 }
             }
         }
+        on("load from watched git repository with listener") {
+            tempDirectory(prefix = "remote_git_repo", suffix = ".git").let { dir ->
+                val file = Paths.get(dir.path, "source.properties").toFile()
+                Git.init().apply {
+                    setDirectory(dir)
+                }.call().use { git ->
+                    file.writeText(propertiesContent)
+                    git.add().apply {
+                        addFilepattern("source.properties")
+                    }.call()
+                    git.commit().apply {
+                        message = "init commit"
+                    }.call()
+                }
+                val repo = dir.toURI()
+                var newValue = ""
+                val config = subject.watchGit(
+                    repo.toString(),
+                    "source.properties",
+                    period = 1,
+                    unit = TimeUnit.SECONDS,
+                    context = Dispatchers.Sequential
+                ) { config, source ->
+                    newValue = config[item]
+                }
+                val originalValue = config[item]
+                file.writeText(propertiesContent.replace("properties", "newValue"))
+                Git.open(dir).use { git ->
+                    git.add().apply {
+                        addFilepattern("source.properties")
+                    }.call()
+                    git.commit().apply {
+                        message = "update value"
+                    }.call()
+                }
+                runBlocking(Dispatchers.Sequential) {
+                    delay(TimeUnit.SECONDS.toMillis(1))
+                }
+                it("should load as auto-detected file format") {
+                    assertThat(originalValue, equalTo("properties"))
+                }
+                it("should load new value after file content in git repository has been changed") {
+                    assertThat(newValue, equalTo("newValue"))
+                }
+            }
+        }
     }
 })
