@@ -53,7 +53,7 @@ allprojects {
     apply(plugin = "org.jetbrains.dokka")
 
     group = "com.uchuhimo"
-    version = "1.1.1"
+    version = "1.1.2"
 
     repositories {
         if (useAliyun) {
