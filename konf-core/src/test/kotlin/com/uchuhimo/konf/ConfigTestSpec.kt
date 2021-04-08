@@ -79,7 +79,7 @@ fun SubjectProviderDsl<Config>.configTestSpec(prefix: String = "network.buffer")
             on("load source when subscriber is defined") {
                 var loadFunction: (source: Source) -> Unit = {}
                 var counter = 0
-                val config = subject.withLoadTrigger("") { newConfig, load ->
+                val config = subject.withLoadTrigger("") { _, load ->
                     loadFunction = load
                 }.withLayer()
                 val source = mapOf(qualify(type.name) to NetworkBuffer.Type.ON_HEAP).asKVSource()
@@ -617,14 +617,14 @@ fun SubjectProviderDsl<Config>.configTestSpec(prefix: String = "network.buffer")
                         assertThat(childConfig[size], equalTo(1))
                     }
                 }
-                val handler3 = size.beforeSet { config, value ->
+                val handler3 = size.beforeSet { _, value ->
                     counter += 1
                     it("should contain the old value") {
                         assertThat(value, equalTo(2))
                         assertThat(childConfig[size], equalTo(1))
                     }
                 }
-                val handler4 = size.beforeSet { config, value ->
+                val handler4 = size.beforeSet { _, value ->
                     counter += 1
                     it("should contain the old value") {
                         assertThat(value, equalTo(2))
@@ -660,14 +660,14 @@ fun SubjectProviderDsl<Config>.configTestSpec(prefix: String = "network.buffer")
                         assertThat(childConfig[size], equalTo(2))
                     }
                 }
-                val handler3 = size.afterSet { config, value ->
+                val handler3 = size.afterSet { _, value ->
                     counter += 1
                     it("should contain the new value") {
                         assertThat(value, equalTo(2))
                         assertThat(childConfig[size], equalTo(2))
                     }
                 }
-                val handler4 = size.afterSet { config, value ->
+                val handler4 = size.afterSet { _, value ->
                     counter += 1
                     it("should contain the new value") {
                         assertThat(value, equalTo(2))

@@ -129,7 +129,7 @@ object LoaderSpec : SubjectSpek<Loader>({
                 delayTime = 1,
                 unit = TimeUnit.SECONDS,
                 context = Dispatchers.Sequential
-            ) { config, source ->
+            ) { config, _ ->
                 newValue = config[SourceType.type]
             }
             file.writeText("type = newValue")
@@ -276,7 +276,7 @@ object LoaderSpec : SubjectSpek<Loader>({
                 period = 1,
                 unit = TimeUnit.SECONDS,
                 context = Dispatchers.Sequential
-            ) { config, source ->
+            ) { config, _ ->
                 newValue = config[SourceType.type]
             }
             val originalValue = config[SourceType.type]

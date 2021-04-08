@@ -3,11 +3,8 @@ import org.jetbrains.kotlin.gradle.tasks.KotlinCompile
 import java.net.URL
 import java.util.Properties
 
-val bintrayUserProperty by extra { getPrivateProperty("bintrayUser") }
-val bintrayKeyProperty by extra { getPrivateProperty("bintrayKey") }
 val ossUserToken by extra { getPrivateProperty("ossUserToken") }
 val ossUserPassword by extra { getPrivateProperty("ossUserPassword") }
-val gpgPassphrase by extra { getPrivateProperty("gpgPassphrase") }
 val useAliyun by extra { shouldUseAliyun() }
 
 tasks.named<Wrapper>("wrapper") {
@@ -30,7 +27,6 @@ plugins {
     `java-test-fixtures`
     jacoco
     `maven-publish`
-    signing
     kotlin("jvm") version Versions.kotlin
     kotlin("plugin.allopen") version Versions.kotlin
     id("com.dorongold.task-tree") version Versions.taskTree
@@ -45,7 +41,6 @@ allprojects {
     apply(plugin = "java-test-fixtures")
     apply(plugin = "jacoco")
     apply(plugin = "maven-publish")
-    apply(plugin = "signing")
     apply(plugin = "org.jetbrains.kotlin.jvm")
     apply(plugin = "kotlin-allopen")
     apply(plugin = "com.dorongold.task-tree")
@@ -289,10 +284,6 @@ subprojects {
             }
         }
     }
-
-//    signing {
-//        sign(publishing.publications["maven"])
-//    }
 
     tasks {
         val install by registering
