@@ -27,6 +27,7 @@ plugins {
     `java-test-fixtures`
     jacoco
     `maven-publish`
+    signing
     kotlin("jvm") version Versions.kotlin
     kotlin("plugin.allopen") version Versions.kotlin
     id("com.dorongold.task-tree") version Versions.taskTree
@@ -41,6 +42,7 @@ allprojects {
     apply(plugin = "java-test-fixtures")
     apply(plugin = "jacoco")
     apply(plugin = "maven-publish")
+    apply(plugin = "signing")
     apply(plugin = "org.jetbrains.kotlin.jvm")
     apply(plugin = "kotlin-allopen")
     apply(plugin = "com.dorongold.task-tree")
@@ -283,6 +285,10 @@ subprojects {
                 }
             }
         }
+    }
+
+    signing {
+        sign(publishing.publications["maven"])
     }
 
     tasks {

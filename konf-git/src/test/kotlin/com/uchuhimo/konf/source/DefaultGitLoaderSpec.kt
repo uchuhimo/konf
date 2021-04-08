@@ -145,7 +145,7 @@ object DefaultGitLoaderSpec : SubjectSpek<DefaultLoaders>({
                     period = 1,
                     unit = TimeUnit.SECONDS,
                     context = Dispatchers.Sequential
-                ) { config, source ->
+                ) { config, _ ->
                     newValue = config[item]
                 }
                 val originalValue = config[item]
