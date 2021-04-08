@@ -2,9 +2,8 @@ import org.gradle.api.JavaVersion
 
 object Versions {
     val java = JavaVersion.VERSION_1_8
-    const val bintrayPlugin = "1.8.5"
     const val commonsText = "1.9"
-    const val coroutines = "1.4.2"
+    const val coroutines = "1.4.3"
     const val dependencyUpdate = "0.38.0"
     const val dokka = "1.4.30"
     const val dom4j = "2.1.3"
@@ -27,7 +26,7 @@ object Versions {
     const val reflections = "0.9.12"
     const val slf4j = "1.7.30"
     const val spark = "2.9.3"
-    const val spek = "1.2.1"
+    const val spek = "1.1.5"
     const val spotless = "5.11.1"
     const val taskTree = "1.5"
     const val toml4j = "0.7.2"

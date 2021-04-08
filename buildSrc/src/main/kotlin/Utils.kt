@@ -24,8 +24,6 @@ fun Project.shouldUseAliyun(): Boolean = if (file("private.properties").exists()
 
 fun RepositoryHandler.aliyunMaven() = maven(url = "https://maven.aliyun.com/repository/central")
 
-fun RepositoryHandler.aliyunJCenter() = maven(url = "https://maven.aliyun.com/repository/jcenter")
-
 fun RepositoryHandler.aliyunGradlePluginPortal() = maven(url = "https://maven.aliyun.com/repository/gradle-plugin")
 
 fun Element.appendNode(key: String, action: Element.() -> Unit): Element {

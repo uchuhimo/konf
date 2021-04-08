@@ -1,5 +1,4 @@
 import com.github.benmanes.gradle.versions.updates.DependencyUpdatesTask
-import com.jfrog.bintray.gradle.BintrayExtension
 import org.jetbrains.kotlin.gradle.tasks.KotlinCompile
 import java.net.URL
 import java.util.Properties
@@ -19,14 +18,10 @@ tasks.named<Wrapper>("wrapper") {
 buildscript {
     repositories {
         if (shouldUseAliyun()) {
-            aliyunJCenter()
             aliyunMaven()
         } else {
-            jcenter()
+            mavenCentral()
         }
-    }
-    dependencies {
-        classpath("com.jfrog.bintray.gradle:gradle-bintray-plugin:${Versions.bintrayPlugin}")
     }
 }
 
@@ -35,6 +30,7 @@ plugins {
     `java-test-fixtures`
     jacoco
     `maven-publish`
+    signing
     kotlin("jvm") version Versions.kotlin
     kotlin("plugin.allopen") version Versions.kotlin
     id("com.dorongold.task-tree") version Versions.taskTree
@@ -49,6 +45,7 @@ allprojects {
     apply(plugin = "java-test-fixtures")
     apply(plugin = "jacoco")
     apply(plugin = "maven-publish")
+    apply(plugin = "signing")
     apply(plugin = "org.jetbrains.kotlin.jvm")
     apply(plugin = "kotlin-allopen")
     apply(plugin = "com.dorongold.task-tree")
@@ -56,17 +53,18 @@ allprojects {
     apply(plugin = "com.diffplug.spotless")
     apply(plugin = "com.github.ben-manes.versions")
     apply(plugin = "org.jetbrains.dokka")
-    apply(plugin = "com.jfrog.bintray")
 
     group = "com.uchuhimo"
     version = "1.1.0"
 
     repositories {
         if (useAliyun) {
-            aliyunJCenter()
             aliyunMaven()
         } else {
-            jcenter()
+            mavenCentral()
+        }
+        maven {
+            url=uri("https://kotlin.bintray.com/kotlinx")
         }
     }
 
@@ -281,55 +279,28 @@ subprojects {
                 }
             }
         }
-    }
-
-    configure<BintrayExtension> {
-        user = bintrayUserProperty
-        key = bintrayKeyProperty
-        publish = true
-        dryRun = false
-        override = true
-        setPublications("maven")
-
-        pkg.apply {
-            setLabels("kotlin", "config")
-            publicDownloadNumbers = true
-            repo = "maven"
-            userOrg = "uchuhimo"
-            name = projectName
-            desc = projectDescription
-            websiteUrl = projectUrl
-            issueTrackerUrl = "$projectUrl/issues"
-            vcsUrl = "$projectUrl.git"
-            setLicenses("Apache-2.0")
-
-            //Optional version descriptor
-            version.apply {
-                name = projectVersion
-                vcsTag = "v$projectVersion"
-                //Optional configuration for GPG signing
-                gpg.apply {
-                    sign = true //Determines whether to GPG sign the files. The default is false
-                    passphrase = gpgPassphrase //Optional. The passphrase for GPG signing'
-                }
-                //Optional configuration for Maven Central sync of the version
-                mavenCentralSync.apply {
-                    sync = true //[Default: true] Determines whether to sync the version to Maven Central.
-                    user = ossUserToken //OSS user token: mandatory
-                    password = ossUserPassword //OSS user password: mandatory
-                    close = "1" //Optional property. By default the staging repository is closed and artifacts are released to Maven Central. You can optionally turn this behaviour off (by puting 0 as value) and release the version manually.
+        repositories {
+            maven {
+                url = uri("https://oss.sonatype.org/service/local/staging/deploy/maven2")
+                credentials {
+                    username = ossUserToken
+                    password = ossUserPassword
                 }
             }
         }
     }
 
+//    signing {
+//        sign(publishing.publications["maven"])
+//    }
+
     tasks {
         val install by registering
         afterEvaluate {
             val publishToMavenLocal by existing
-            val bintrayUpload by existing
+            val publish by existing
             install.configure { dependsOn(publishToMavenLocal) }
-            bintrayUpload { dependsOn(check, install) }
+            publish { dependsOn(check, install) }
         }
     }
 }
