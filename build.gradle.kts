@@ -5,6 +5,7 @@ import java.util.Properties
 
 val ossUserToken by extra { getPrivateProperty("ossUserToken") }
 val ossUserPassword by extra { getPrivateProperty("ossUserPassword") }
+val signPublications by extra { getPrivateProperty("signPublications") }
 val useAliyun by extra { shouldUseAliyun() }
 
 tasks.named<Wrapper>("wrapper") {
@@ -288,6 +289,7 @@ subprojects {
     }
 
     signing {
+        setRequired({ signPublications == "true" })
         sign(publishing.publications["maven"])
     }
 
