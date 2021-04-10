@@ -9,7 +9,7 @@ val signPublications by extra { getPrivateProperty("signPublications") }
 val useAliyun by extra { shouldUseAliyun() }
 
 tasks.named<Wrapper>("wrapper") {
-    gradleVersion = "6.8.1"
+    gradleVersion = "7.0"
     distributionType = Wrapper.DistributionType.ALL
 }
 
