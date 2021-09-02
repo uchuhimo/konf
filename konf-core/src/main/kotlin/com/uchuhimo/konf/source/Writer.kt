@@ -42,9 +42,11 @@ interface Writer {
      * Save to specified file.
      *
      * @param file specified file
+     * @param mkdirs create all parent folders before writing
      * @return a new source from specified file
      */
-    fun toFile(file: File) {
+    fun toFile(file: File, mkdirs: Boolean = false) {
+        if (mkdirs) file.parentFile.mkdirs()
         file.outputStream().use {
             toOutputStream(it)
         }
@@ -54,8 +56,9 @@ interface Writer {
      * Save to specified file path.
      *
      * @param file specified file path
+     * @param mkdirs create all parent folders before writing
      */
-    fun toFile(file: String) = toFile(File(file))
+    fun toFile(file: String, mkdirs: Boolean = false) = toFile(File(file), mkdirs)
 
     /**
      * Save to string.
