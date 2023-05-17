@@ -30,7 +30,7 @@ object Versions {
     const val spotless = "5.11.1"
     const val taskTree = "1.5"
     const val toml4j = "0.7.2"
-    const val yaml = "1.28"
+    const val yaml = "2.0"
 
     // Since 1.8, the minimum supported runtime version is JDK 11.
     const val googleJavaFormat = "1.7"
